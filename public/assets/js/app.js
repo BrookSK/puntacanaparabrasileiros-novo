@@ -155,13 +155,13 @@
 
         let currentSlide = 0;
         const totalDots = dots.length;
+        const gap = 24;
 
         function goToSlide(index) {
             currentSlide = index;
             if (!track.children[0]) return;
-            const cardStyle = getComputedStyle(track.children[0]);
-            const cardWidth = track.children[0].offsetWidth + parseInt(cardStyle.marginRight || 0) + 24;
-            track.style.transform = `translateX(-${index * cardWidth}px)`;
+            const cardWidth = track.children[0].offsetWidth;
+            track.style.transform = `translateX(-${index * (cardWidth + gap)}px)`;
             dots.forEach((d, i) => d.classList.toggle('active', i === index));
         }
 

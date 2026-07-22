@@ -947,7 +947,8 @@ img { max-width: 100%; height: auto; }
     transition: transform .4s ease;
 }
 .depoimento-card {
-    min-width: calc(33.333% - 16px);
+    min-width: calc((100% - 48px) / 3);
+    max-width: calc((100% - 48px) / 3);
     flex-shrink: 0;
     background: var(--white);
     border: 1px solid #eee;
