@@ -421,6 +421,7 @@ img { max-width: 100%; height: auto; }
 .historia-label {
     font-family: 'Caveat', cursive;
     font-style: normal;
+    font-weight: 700;
     font-size: 20px;
     color: var(--accent);
     display: block;
@@ -503,6 +504,7 @@ img { max-width: 100%; height: auto; }
 .section-label {
     font-family: 'Caveat', cursive;
     font-style: normal;
+    font-weight: 700;
     font-size: 20px;
     color: var(--accent);
     display: block;
