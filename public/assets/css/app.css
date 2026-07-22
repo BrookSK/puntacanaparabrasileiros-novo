@@ -537,15 +537,15 @@ img { max-width: 100%; height: auto; }
     margin-top: 4px;
 }
 .wave-divider svg path {
-    stroke-dasharray: 60;
-    stroke-dashoffset: 60;
+    stroke-dasharray: 80;
+    stroke-dashoffset: 80;
     animation: waveWrite 2.5s ease-in-out infinite;
 }
 @keyframes waveWrite {
-    0% { stroke-dashoffset: 60; }
+    0% { stroke-dashoffset: 80; }
     40% { stroke-dashoffset: 0; }
     60% { stroke-dashoffset: 0; }
-    100% { stroke-dashoffset: -60; }
+    100% { stroke-dashoffset: -80; }
 }
 
 /* Featured Trips Grid */

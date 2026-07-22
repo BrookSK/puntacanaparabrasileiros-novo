@@ -148,8 +148,8 @@
             <h2 class="section-title">Perguntas Frequentes</h2>
             <p class="section-subtitle">Tire suas principais dúvidas sobre viagens para Punta Cana. Se não encontrar o que procura, entre em contato com nossa equipe.</p>
             <div class="wave-divider">
-                <svg width="50" height="12" viewBox="0 0 50 12" fill="none">
-                    <path d="M2 6C6 2 10 10 14 6C18 2 22 10 26 6C30 2 34 10 38 6C42 2 46 10 48 6" stroke="#3772C0" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+                    <path d="M2 10C7 2 12 18 17 10C22 2 27 18 32 10C37 2 42 18 47 10C52 2 57 18 58 10" stroke="#3772C0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                 </svg>
             </div>
         </div>

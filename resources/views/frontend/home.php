@@ -43,28 +43,6 @@
     </div>
 </section>
 
-<!-- Categorias -->
-<section class="section categories-section">
-    <div class="container">
-        <h2 class="section-title">Explore por Categoria</h2>
-        <div class="categories-grid">
-            <?php foreach ($categories as $cat): ?>
-            <?php if ((int)($cat['trip_count'] ?? 0) > 0): ?>
-            <a href="/passeios?categoria=<?= e($cat['slug']) ?>" class="category-card">
-                <?php if ($cat['image']): ?>
-                <img src="<?= e($cat['image']) ?>" alt="<?= e($cat['name']) ?>" class="category-img">
-                <?php endif; ?>
-                <div class="category-info">
-                    <h3><?= e($cat['name']) ?></h3>
-                    <span><?= (int)$cat['trip_count'] ?> passeio<?= (int)$cat['trip_count'] > 1 ? 's' : '' ?></span>
-                </div>
-            </a>
-            <?php endif; ?>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</section>
-
 <!-- Passeios em Destaque -->
 <section class="section section-featured-trips">
     <div class="container">
@@ -73,8 +51,8 @@
             <h2 class="section-title">Explore os favoritos de Punta Cana</h2>
             <p class="section-subtitle">Descubra os passeios mais amados por quem já viveu essa experiência paradisíaca.</p>
             <div class="wave-divider">
-                <svg width="50" height="12" viewBox="0 0 50 12" fill="none">
-                    <path d="M2 6C6 2 10 10 14 6C18 2 22 10 26 6C30 2 34 10 38 6C42 2 46 10 48 6" stroke="#3772C0" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+                    <path d="M2 10C7 2 12 18 17 10C22 2 27 18 32 10C37 2 42 18 47 10C52 2 57 18 58 10" stroke="#3772C0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                 </svg>
             </div>
         </div>
@@ -129,8 +107,8 @@
             <h2 class="section-title">O que nossos viajantes dizem</h2>
             <p class="section-subtitle">Histórias reais, experiências inesquecíveis e opiniões sinceras para ajudar você a escolher sua próxima aventura.</p>
             <div class="wave-divider">
-                <svg width="50" height="12" viewBox="0 0 50 12" fill="none">
-                    <path d="M2 6C6 2 10 10 14 6C18 2 22 10 26 6C30 2 34 10 38 6C42 2 46 10 48 6" stroke="#3772C0" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+                    <path d="M2 10C7 2 12 18 17 10C22 2 27 18 32 10C37 2 42 18 47 10C52 2 57 18 58 10" stroke="#3772C0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                 </svg>
             </div>
         </div>
@@ -246,8 +224,8 @@
             <h2 class="section-title">Busque seu Transfer e Reserve Agora!</h2>
             <p class="section-subtitle">Reserve seu transfer do aeroporto ou hotel e desfrute de uma viagem pontual, confortável e segura.</p>
             <div class="wave-divider">
-                <svg width="50" height="12" viewBox="0 0 50 12" fill="none">
-                    <path d="M2 6C6 2 10 10 14 6C18 2 22 10 26 6C30 2 34 10 38 6C42 2 46 10 48 6" stroke="#3772C0" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+                    <path d="M2 10C7 2 12 18 17 10C22 2 27 18 32 10C37 2 42 18 47 10C52 2 57 18 58 10" stroke="#3772C0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                 </svg>
             </div>
         </div>
@@ -327,8 +305,8 @@
             <h2 class="section-title">Blog de Viagem</h2>
             <p class="section-subtitle">Descubra roteiros imperdíveis, curiosidades locais, recomendações de restaurantes e dicas práticas para aproveitar cada momento em Punta Cana.</p>
             <div class="wave-divider">
-                <svg width="50" height="12" viewBox="0 0 50 12" fill="none">
-                    <path d="M2 6C6 2 10 10 14 6C18 2 22 10 26 6C30 2 34 10 38 6C42 2 46 10 48 6" stroke="#3772C0" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+                    <path d="M2 10C7 2 12 18 17 10C22 2 27 18 32 10C37 2 42 18 47 10C52 2 57 18 58 10" stroke="#3772C0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                 </svg>
             </div>
         </div>
@@ -387,8 +365,8 @@
             <h2 class="section-title">Siga nosso Instagram</h2>
             <p class="section-subtitle">Compartilhe suas fotos usando <strong>#PuntaCanaBR</strong> e acompanhe nossas publicações no <strong>@<?= e($instagramUsername ?? 'puntacanaparabrasileiros') ?></strong></p>
             <div class="wave-divider">
-                <svg width="50" height="12" viewBox="0 0 50 12" fill="none">
-                    <path d="M2 6C6 2 10 10 14 6C18 2 22 10 26 6C30 2 34 10 38 6C42 2 46 10 48 6" stroke="#3772C0" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+                    <path d="M2 10C7 2 12 18 17 10C22 2 27 18 32 10C37 2 42 18 47 10C52 2 57 18 58 10" stroke="#3772C0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                 </svg>
             </div>
         </div>
@@ -453,8 +431,8 @@
             <h2 class="section-title">Perguntas Frequentes</h2>
             <p class="section-subtitle">Tire suas principais dúvidas sobre viagens para Punta Cana. Se não encontrar o que procura, entre em contato com nossa equipe.</p>
             <div class="wave-divider">
-                <svg width="50" height="12" viewBox="0 0 50 12" fill="none">
-                    <path d="M2 6C6 2 10 10 14 6C18 2 22 10 26 6C30 2 34 10 38 6C42 2 46 10 48 6" stroke="#3772C0" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <svg width="60" height="20" viewBox="0 0 60 20" fill="none">
+                    <path d="M2 10C7 2 12 18 17 10C22 2 27 18 32 10C37 2 42 18 47 10C52 2 57 18 58 10" stroke="#3772C0" stroke-width="2.5" stroke-linecap="round" fill="none"/>
                 </svg>
             </div>
         </div>
