@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Fundo circular verde -->
+  <circle cx="16" cy="16" r="15" fill="#1B6F00"/>
+  <!-- Palmeira dourada -->
+  <g fill="#E4B505">
+    <!-- Tronco -->
+    <path d="M15 28 Q16 20 17 28 Z" fill="#c9a004"/>
+    <rect x="15.2" y="14" width="1.6" height="14" rx="0.8" fill="#c9a004"/>
+    <!-- Folhas -->
+    <path d="M16 14 Q10 10 6 12 Q10 8 16 11 Z"/>
+    <path d="M16 14 Q22 10 26 12 Q22 8 16 11 Z"/>
+    <path d="M16 14 Q12 6 8 5 Q12 4 16 10 Z"/>
+    <path d="M16 14 Q20 6 24 5 Q20 4 16 10 Z"/>
+    <path d="M16 14 Q16 4 16 3 Q17 4 16.5 10 Z"/>
+  </g>
+  <!-- Sol dourado pequeno -->
+  <circle cx="7" cy="7" r="3" fill="#E4B505" opacity="0.8"/>
+</svg>
