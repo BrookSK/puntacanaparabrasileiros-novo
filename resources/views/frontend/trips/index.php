@@ -45,7 +45,7 @@
                 <a href="/passeios/buggies-cenote-domitai" class="destaque-trip-image">
                     <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg" alt="Buggies + Cenote Domitai" loading="lazy">
                     <span class="ft-card-featured-badge" title="Destaque">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
                     </span>
                 </a>
                 <div class="destaque-trip-body">
@@ -73,7 +73,7 @@
                 <a href="/passeios/quadriciclos-cenote" class="destaque-trip-image">
                     <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg" alt="Quadriciclos + Cenote" loading="lazy">
                     <span class="ft-card-featured-badge" title="Destaque">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
                     </span>
                 </a>
                 <div class="destaque-trip-body">
@@ -101,7 +101,7 @@
                 <a href="/passeios/nado-e-interacao-com-golfinho" class="destaque-trip-image">
                     <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg" alt="Nado e interação com 1 Golfinho" loading="lazy">
                     <span class="ft-card-featured-badge" title="Destaque">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
                     </span>
                 </a>
                 <div class="destaque-trip-body">
