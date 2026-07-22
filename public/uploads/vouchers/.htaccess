@@ -1,0 +1,3 @@
+# Negar acesso direto a arquivos de voucher
+# Downloads são feitos via controller autenticado
+Deny from all

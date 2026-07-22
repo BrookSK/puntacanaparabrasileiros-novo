@@ -1,0 +1,13 @@
+RewriteEngine On
+
+# Redirecionar para HTTPS (descomente em produção)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Se o arquivo ou diretório existir, entrega direto (assets, imagens, etc.)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Enviar tudo para o front controller
+RewriteRule ^ index.php [L]
