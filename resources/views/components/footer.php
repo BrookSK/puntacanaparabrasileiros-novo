@@ -33,10 +33,10 @@
                     <ul>
                         <li><a href="/">Home</a></li>
                         <li><a href="/passeios">Experiências</a></li>
-                        <li><a href="/pagina/afiliados">Afiliados</a></li>
-                        <li><a href="/pagina/blog">Blog</a></li>
-                        <li><a href="/pagina/sobre">Sobre Nós</a></li>
-                        <li><a href="/pagina/contato">Contato</a></li>
+                        <li><a href="/programa-de-afiliados">Afiliados</a></li>
+                        <li><a href="/blog">Blog</a></li>
+                        <li><a href="/sobre-nos">Sobre Nós</a></li>
+                        <li><a href="/contato">Contato</a></li>
                     </ul>
                 </div>
 
@@ -45,11 +45,11 @@
                     <h4>Sobre Punta Cana</h4>
                     <ul>
                         <li><a href="/passeios">Passeios</a></li>
-                        <li><a href="/passeios?busca=">Busca</a></li>
+                        <li><a href="/pesquisa">Busca</a></li>
                         <li><a href="/minha-conta">Minha Conta</a></li>
-                        <li><a href="/pagina/afiliados">Conta de Afiliado</a></li>
+                        <li><a href="/painel-afiliado">Conta de Afiliado</a></li>
                         <li><a href="/minha-conta/wishlist">Lista de Desejos</a></li>
-                        <li><a href="/pagina/catalogo">Baixe Nosso Catálogo</a></li>
+                        <li><a href="#">Baixe Nosso Catálogo</a></li>
                     </ul>
                 </div>
 
@@ -57,11 +57,11 @@
                 <div class="footer-col">
                     <h4>Termos & Políticas</h4>
                     <ul>
-                        <li><a href="/pagina/privacidade">Políticas de Privacidade</a></li>
-                        <li><a href="/pagina/cancelamento">Políticas de Cancelamento</a></li>
-                        <li><a href="/pagina/politicas-afiliados">Políticas de Afiliados</a></li>
-                        <li><a href="/pagina/termos">Termos e Condições</a></li>
-                        <li><a href="/pagina/cancelamentos">Cancelamentos</a></li>
+                        <li><a href="/politicas-de-privacidade">Políticas de Privacidade</a></li>
+                        <li><a href="/politicas-de-cancelamento">Políticas de Cancelamento</a></li>
+                        <li><a href="/termos-afiliados">Políticas de Afiliados</a></li>
+                        <li><a href="/termos-e-condicoes">Termos e Condições</a></li>
+                        <li><a href="/minha-conta/cancelamentos">Cancelamentos</a></li>
                     </ul>
                 </div>
             </div>
