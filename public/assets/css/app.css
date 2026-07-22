@@ -589,16 +589,17 @@ img { max-width: 100%; height: auto; }
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(0,0,0,0.3);
+    background: rgba(228, 181, 5, 0.85);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: background .2s;
+    color: #fff;
 }
 .ft-card-fav:hover {
-    background: var(--accent);
+    background: var(--gold-dark);
 }
 .ft-card-discount {
     position: absolute;
