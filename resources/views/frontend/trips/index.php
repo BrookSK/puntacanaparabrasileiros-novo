@@ -206,7 +206,7 @@
         <?php if ($trips['total_pages'] > 1): ?>
         <nav class="pagination">
             <?php for ($i = 1; $i <= $trips['total_pages']; $i++): ?>
-            <a href="?page=<?= $i ?>&categoria=<?= e($currentCategory ?? '') ?>&busca=<?= e($currentSearch ?? '') ?>&ordenar=<?= e($currentOrder ?? '') ?>"
+            <a href="?page=<?= $i ?>&categoria=<?= e($currentCategory ?? '') ?>&busca=<?= e($currentSearch ?? '') ?>&ordenar=<?= e($currentOrder ?? '') ?>#passeios-grid"
                class="page-link <?= $i === $trips['current_page'] ? 'active' : '' ?>">
                 <?= $i ?>
             </a>
