@@ -20,8 +20,27 @@
             <div class="header-actions">
                 <!-- Bandeiras idioma -->
                 <div class="header-flags">
-                    <button class="flag-btn" title="English"><img src="<?= asset('images/layout/flag-us.png') ?>" alt="EN" width="22" height="15"></button>
-                    <button class="flag-btn" title="Português"><img src="<?= asset('images/layout/flag-br.png') ?>" alt="BR" width="22" height="15"></button>
+                    <a href="?lang=en" class="flag-btn" title="English">
+                        <svg width="24" height="16" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="24" height="16" fill="#002868"/>
+                            <rect y="1.23" width="24" height="1.23" fill="white"/><rect y="3.69" width="24" height="1.23" fill="white"/><rect y="6.15" width="24" height="1.23" fill="white"/><rect y="8.62" width="24" height="1.23" fill="white"/><rect y="11.08" width="24" height="1.23" fill="white"/><rect y="13.54" width="24" height="1.23" fill="white"/>
+                            <rect y="2.46" width="24" height="1.23" fill="#BF0A30"/><rect y="4.92" width="24" height="1.23" fill="#BF0A30"/><rect y="7.38" width="24" height="1.23" fill="#BF0A30"/><rect y="9.85" width="24" height="1.23" fill="#BF0A30"/><rect y="12.31" width="24" height="1.23" fill="#BF0A30"/><rect y="14.77" width="24" height="1.23" fill="#BF0A30"/>
+                            <rect width="10" height="8.62" fill="#002868"/>
+                        </svg>
+                    </a>
+                    <a href="?lang=pt" class="flag-btn" title="Português">
+                        <svg width="24" height="16" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="24" height="16" fill="#009739"/>
+                            <path d="M12 2L22 8L12 14L2 8Z" fill="#FEDD00"/>
+                            <circle cx="12" cy="8" r="3.5" fill="#002776"/>
+                            <path d="M9 8.5C9 8.5 10.5 7 12 7.5C13.5 8 15 8.5 15 8.5" stroke="white" stroke-width="0.5" fill="none"/>
+                        </svg>
+                    </a>
+                    <a href="?lang=es" class="flag-btn" title="Español">
+                        <svg width="24" height="16" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="24" height="4" fill="#AA151B"/><rect y="4" width="24" height="8" fill="#F1BF00"/><rect y="12" width="24" height="4" fill="#AA151B"/>
+                        </svg>
+                    </a>
                 </div>
 
                 <!-- Ícones -->

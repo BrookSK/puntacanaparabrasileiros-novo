@@ -90,7 +90,7 @@ img { max-width: 100%; height: auto; }
     flex-shrink: 0;
 }
 .site-logo img {
-    height: 48px;
+    height: 56px;
     width: auto;
 }
 
@@ -109,7 +109,10 @@ img { max-width: 100%; height: auto; }
 }
 .nav-link:hover,
 .nav-link.active {
-    color: var(--dark);
+    color: var(--text-green);
+}
+.nav-link.active {
+    font-weight: 700;
 }
 .nav-link.active::after {
     content: '';
@@ -118,7 +121,7 @@ img { max-width: 100%; height: auto; }
     left: 0;
     right: 0;
     height: 2px;
-    background: var(--dark);
+    background: var(--text-green);
 }
 
 /* Header Actions (direita) */
@@ -136,16 +139,20 @@ img { max-width: 100%; height: auto; }
     margin-right: 8px;
 }
 .flag-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 2px;
     display: flex;
     align-items: center;
-    border-radius: 2px;
+    justify-content: center;
+    padding: 2px;
+    border-radius: 3px;
     overflow: hidden;
+    border: 1px solid #ddd;
+    transition: border-color .2s;
+    text-decoration: none;
 }
-.flag-btn img {
+.flag-btn:hover {
+    border-color: var(--text-green);
+}
+.flag-btn svg {
     display: block;
     border-radius: 2px;
 }
@@ -208,7 +215,7 @@ img { max-width: 100%; height: auto; }
     color: var(--dark);
     font-weight: 600;
     font-size: 13px;
-    border-radius: 20px;
+    border-radius: 6px;
     border: 2px solid var(--secondary);
     transition: all .2s;
     margin-left: 8px;
