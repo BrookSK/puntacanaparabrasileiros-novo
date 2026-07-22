@@ -7,7 +7,7 @@ declare(strict_types=1);
 return [
     'name' => 'Punta Cana para Brasileiros',
     'debug' => true, // Alterar para false em produção
-    'url' => 'http://localhost',
+    'url' => 'https://puntacananovo.lrvweb.com.br',
     'timezone' => 'America/Santo_Domingo',
     'locale' => 'pt_BR',
 
