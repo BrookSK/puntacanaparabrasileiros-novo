@@ -2019,7 +2019,7 @@ img { max-width: 100%; height: auto; }
     position: relative;
     display: block;
     width: 100%;
-    height: 80px;
+    height: 100px;
     overflow: hidden;
     background: transparent;
     margin-bottom: -2px;
@@ -2031,12 +2031,11 @@ img { max-width: 100%; height: auto; }
     position: absolute;
     bottom: 0;
     left: 0;
-    color: #2dd4a8;
 }
 
 .footer-bg {
-    background: linear-gradient(180deg, #2dd4a8 0%, #5de85c 40%, #a8f534 70%, #d4ff1a 100%);
-    padding: 50px 0 30px;
+    background: linear-gradient(180deg, #d4ff1a 0%, #b8f23a 15%, #8ae85a 35%, #5edb7a 55%, #3dd4a0 75%, #26c99e 100%);
+    padding: 60px 0 0;
 }
 .footer-top {
     display: grid;
@@ -2104,9 +2103,10 @@ img { max-width: 100%; height: auto; }
 
 /* Footer Bottom */
 .footer-bottom {
-    background: #e8e8e8;
-    padding: 18px 0;
-    border-top: none;
+    background: transparent;
+    padding: 24px 0 28px;
+    margin-top: 40px;
+    border-top: 1px solid rgba(0,0,0,0.1);
 }
 .footer-bottom-inner {
     display: flex;

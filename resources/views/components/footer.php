@@ -2,7 +2,7 @@
     <!-- Wave Shape Divider -->
     <div class="footer-wave">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0,100 L0,60 C120,80 240,90 360,85 C480,80 600,50 720,40 C840,30 960,50 1080,60 C1200,70 1320,65 1440,55 L1440,100 Z" fill="#2dd4a8"></path>
+            <path d="M0,100 L0,60 C120,80 240,90 360,85 C480,80 600,50 720,40 C840,30 960,50 1080,60 C1200,70 1320,65 1440,55 L1440,100 Z" fill="#c8f542"></path>
         </svg>
     </div>
     <div class="footer-bg">
@@ -65,23 +65,21 @@
                     </ul>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Footer Bottom -->
-    <div class="footer-bottom">
-        <div class="container">
-            <div class="footer-bottom-inner">
-                <div class="footer-copyright">
-                    <p>&copy; Copyright <?= date('Y') ?> | Desenvolvido por <a href="https://lrvweb.com.br" target="_blank">LRV Web</a></p>
-                    <p>Punta Cana para Brasileiros Oliveira & Ramos SRL</p>
-                    <p>RNC: 133287765</p>
-                </div>
-                <div class="footer-secure">
-                    <span class="secure-badge">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
-                        Pagamento seguro
-                    </span>
+            <!-- Footer Bottom (dentro do gradiente) -->
+            <div class="footer-bottom">
+                <div class="footer-bottom-inner">
+                    <div class="footer-copyright">
+                        <p>&copy; Copyright <?= date('Y') ?> | Desenvolvido por <a href="https://lrvweb.com.br" target="_blank">LRV Web</a></p>
+                        <p>Punta Cana para Brasileiros Oliveira & Ramos SRL</p>
+                        <p>RNC: 133287765</p>
+                    </div>
+                    <div class="footer-secure">
+                        <span class="secure-badge">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+                            Pagamento seguro
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
