@@ -33,6 +33,9 @@
                 <a href="/admin/passeios" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/passeios') ? 'active' : '' ?>">
                     <span class="nav-icon">&#9992;</span> Passeios
                 </a>
+                <a href="/admin/categorias" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/categorias') ? 'active' : '' ?>">
+                    <span class="nav-icon">&#128193;</span> Categorias
+                </a>
                 <a href="/admin/transfers/veiculos" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/transfers') ? 'active' : '' ?>">
                     <span class="nav-icon">&#128663;</span> Transfers
                 </a>

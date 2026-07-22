@@ -13,6 +13,7 @@ use App\Controllers\Auth\LoginController;
 use App\Controllers\Auth\RegisterController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\TripsController as AdminTripsController;
+use App\Controllers\Admin\CategoriesController as AdminCategoriesController;
 use App\Controllers\Admin\TransfersController as AdminTransfersController;
 use App\Controllers\Admin\BookingsController as AdminBookingsController;
 use App\Controllers\Admin\VouchersController as AdminVouchersController;
@@ -145,6 +146,14 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/passeios/{id}/excluir', [AdminTripsController::class, 'destroy'], [CsrfMiddleware::class], 'admin.trips.destroy');
     $router->get('/passeios/{id}/precos', [AdminTripsController::class, 'pricing'], [], 'admin.trips.pricing');
     $router->post('/passeios/{id}/precos', [AdminTripsController::class, 'savePricing'], [CsrfMiddleware::class], 'admin.trips.pricing.save');
+
+    // Categorias de Passeios
+    $router->get('/categorias', [AdminCategoriesController::class, 'index'], [], 'admin.categories.index');
+    $router->get('/categorias/criar', [AdminCategoriesController::class, 'create'], [], 'admin.categories.create');
+    $router->post('/categorias/criar', [AdminCategoriesController::class, 'store'], [CsrfMiddleware::class], 'admin.categories.store');
+    $router->get('/categorias/{id}/editar', [AdminCategoriesController::class, 'edit'], [], 'admin.categories.edit');
+    $router->post('/categorias/{id}/editar', [AdminCategoriesController::class, 'update'], [CsrfMiddleware::class], 'admin.categories.update');
+    $router->post('/categorias/{id}/excluir', [AdminCategoriesController::class, 'destroy'], [CsrfMiddleware::class], 'admin.categories.destroy');
 
     // Transfers
     $router->get('/transfers', [AdminTransfersController::class, 'index'], [], 'admin.transfers.index');
