@@ -154,14 +154,14 @@
         if (!track || !dots.length) return;
 
         let currentSlide = 0;
-        const cardsPerView = window.innerWidth <= 576 ? 1 : window.innerWidth <= 992 ? 2 : 3;
-        const totalSlides = Math.max(1, Math.ceil(track.children.length / cardsPerView));
+        const totalDots = dots.length;
 
         function goToSlide(index) {
             currentSlide = index;
             if (!track.children[0]) return;
-            const cardWidth = track.children[0].offsetWidth + 24;
-            track.style.transform = `translateX(-${index * cardsPerView * cardWidth}px)`;
+            const cardStyle = getComputedStyle(track.children[0]);
+            const cardWidth = track.children[0].offsetWidth + parseInt(cardStyle.marginRight || 0) + 24;
+            track.style.transform = `translateX(-${index * cardWidth}px)`;
             dots.forEach((d, i) => d.classList.toggle('active', i === index));
         }
 
@@ -170,7 +170,7 @@
         });
 
         setInterval(() => {
-            currentSlide = (currentSlide + 1) % totalSlides;
+            currentSlide = (currentSlide + 1) % totalDots;
             goToSlide(currentSlide);
         }, 5000);
     });

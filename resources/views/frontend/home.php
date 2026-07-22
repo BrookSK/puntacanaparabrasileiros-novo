@@ -122,6 +122,21 @@
                             <svg width="36" height="36" viewBox="0 0 24 24" fill="#ddd"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                         </div>
                         <div class="depoimento-info">
+                            <strong>Carlos Eduardo</strong>
+                            <span>Rio de Janeiro, RJ</span>
+                        </div>
+                    </div>
+                    <div class="depoimento-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                    <p class="depoimento-text">"Segunda vez que viajo com a PuntaCanaBR e mais uma vez superou as expectativas. Recomendo para quem busca tranquilidade e bom preço."</p>
+                </div>
+
+                <!-- Slide 2 -->
+                <div class="depoimento-card">
+                    <div class="depoimento-header">
+                        <div class="depoimento-avatar">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="#ddd"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                        </div>
+                        <div class="depoimento-info">
                             <strong>Mariana Silva</strong>
                             <span>Belo Horizonte, MG</span>
                         </div>
@@ -130,7 +145,7 @@
                     <p class="depoimento-text">"Amei a experiência, principalmente os passeios exclusivos. O único ponto a melhorar seria o tempo de transfer do aeroporto ao hotel."</p>
                 </div>
 
-                <!-- Slide 2 -->
+                <!-- Slide 3 -->
                 <div class="depoimento-card">
                     <div class="depoimento-header">
                         <div class="depoimento-avatar">
@@ -143,21 +158,6 @@
                     </div>
                     <div class="depoimento-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                     <p class="depoimento-text">"Viagem perfeita! Atendimento em português do início ao fim, hotel excelente e passeios bem organizados. Já estou planejando voltar no próximo ano."</p>
-                </div>
-
-                <!-- Slide 3 -->
-                <div class="depoimento-card">
-                    <div class="depoimento-header">
-                        <div class="depoimento-avatar">
-                            <svg width="36" height="36" viewBox="0 0 24 24" fill="#ddd"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                        </div>
-                        <div class="depoimento-info">
-                            <strong>Carlos Eduardo</strong>
-                            <span>Rio de Janeiro, RJ</span>
-                        </div>
-                    </div>
-                    <div class="depoimento-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <p class="depoimento-text">"Segunda vez que viajo com a PuntaCanaBR e mais uma vez superou as expectativas. Recomendo para quem busca tranquilidade e bom preço."</p>
                 </div>
 
                 <!-- Slide 4 -->
@@ -189,21 +189,6 @@
                     <div class="depoimento-stars">&#9733;&#9733;&#9733;&#9733;&#9734;</div>
                     <p class="depoimento-text">"Ótimo custo-benefício. O transfer foi pontual e o motorista muito simpático. Voltarei com certeza."</p>
                 </div>
-
-                <!-- Slide 6 -->
-                <div class="depoimento-card">
-                    <div class="depoimento-header">
-                        <div class="depoimento-avatar">
-                            <svg width="36" height="36" viewBox="0 0 24 24" fill="#ddd"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                        </div>
-                        <div class="depoimento-info">
-                            <strong>Juliana Costa</strong>
-                            <span>Salvador, BA</span>
-                        </div>
-                    </div>
-                    <div class="depoimento-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                    <p class="depoimento-text">"Melhor decisão que tomei foi reservar por aqui. Comunicação rápida pelo WhatsApp e sem surpresas desagradáveis."</p>
-                </div>
             </div>
 
             <!-- Dots -->
@@ -211,7 +196,6 @@
                 <span class="dot active" data-slide="0"></span>
                 <span class="dot" data-slide="1"></span>
                 <span class="dot" data-slide="2"></span>
-                <span class="dot" data-slide="3"></span>
             </div>
         </div>
     </div>
