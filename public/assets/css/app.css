@@ -504,8 +504,8 @@ img { max-width: 100%; height: auto; }
 .section-label {
     font-family: 'Caveat', cursive;
     font-style: normal;
-    font-weight: 700;
-    font-size: 20px;
+    font-weight: 600;
+    font-size: 26px;
     color: var(--accent);
     display: block;
     margin-bottom: 10px;
