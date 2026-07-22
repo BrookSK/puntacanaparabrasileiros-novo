@@ -13,20 +13,24 @@
     <div class="container">
         <h2 class="section-title">Todos os Tipos de Experiências</h2>
         <div class="categorias-cards-grid">
-            <?php foreach ($categories as $cat): ?>
-            <a href="/passeios?categoria=<?= e($cat['slug']) ?>" class="categoria-card-lg">
-                <?php if ($cat['image'] ?? null): ?>
-                <img src="<?= e($cat['image']) ?>" alt="<?= e($cat['name']) ?>" loading="lazy">
-                <?php else: ?>
-                <div class="categoria-card-placeholder">
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                </div>
-                <?php endif; ?>
+            <a href="/passeios?categoria=passeios-de-barco" class="categoria-card-lg">
+                <img src="/uploads/categoria-praia-barco.png" alt="Praia e Barco" loading="lazy">
                 <div class="categoria-card-overlay">
-                    <span class="categoria-card-name"><?= e($cat['name']) ?> &rarr;</span>
+                    <span class="categoria-card-name">Praia e Barco &rarr;</span>
                 </div>
             </a>
-            <?php endforeach; ?>
+            <a href="/passeios?categoria=familia" class="categoria-card-lg">
+                <img src="/uploads/categoria-criancas.png" alt="Adequado para crianças" loading="lazy">
+                <div class="categoria-card-overlay">
+                    <span class="categoria-card-name">Adequado para crianças &rarr;</span>
+                </div>
+            </a>
+            <a href="/passeios?categoria=cultural" class="categoria-card-lg">
+                <img src="/uploads/categoria-cidade.jpg" alt="Passeio pela cidade" loading="lazy">
+                <div class="categoria-card-overlay">
+                    <span class="categoria-card-name">Passeio pela cidade &rarr;</span>
+                </div>
+            </a>
         </div>
     </div>
 </section>
