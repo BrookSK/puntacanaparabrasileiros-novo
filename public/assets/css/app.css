@@ -2010,7 +2010,7 @@ img { max-width: 100%; height: auto; }
    FOOTER — Layout conforme Figma aprovado
    ============================================================ */
 .site-footer {
-    margin-top: 30px;
+    margin-top: 0;
     position: relative;
 }
 
@@ -2019,7 +2019,7 @@ img { max-width: 100%; height: auto; }
     position: relative;
     display: block;
     width: 100%;
-    height: 120px;
+    height: 150px;
     overflow: hidden;
     background: transparent;
     margin-bottom: -2px;
@@ -2035,7 +2035,7 @@ img { max-width: 100%; height: auto; }
 
 .footer-bg {
     background: linear-gradient(180deg, #d4ff1a 0%, #b8f23a 15%, #8ae85a 35%, #5edb7a 55%, #3dd4a0 75%, #26c99e 100%);
-    padding: 70px 0 0;
+    padding: 80px 0 0;
 }
 .footer-top {
     display: grid;
