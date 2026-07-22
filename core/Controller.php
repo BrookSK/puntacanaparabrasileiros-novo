@@ -79,7 +79,7 @@ abstract class Controller
     /**
      * Define uma mensagem flash na sessão.
      */
-    protected function flash(string $type, string $message): void
+    protected function flash(string $type, mixed $message): void
     {
         $this->session->flash($type, $message);
     }
