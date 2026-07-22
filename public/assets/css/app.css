@@ -32,7 +32,7 @@ a:hover { color: var(--primary-dark); }
 img { max-width: 100%; height: auto; }
 
 /* Container */
-.container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 0 30px; }
 
 /* Buttons */
 .btn { display: inline-block; padding: 10px 24px; border-radius: var(--radius); font-weight: 500; font-size: 14px; cursor: pointer; border: none; transition: all .2s; text-align: center; }
@@ -81,8 +81,8 @@ img { max-width: 100%; height: auto; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 72px;
-    gap: 20px;
+    height: 76px;
+    gap: 24px;
 }
 
 /* Logo */
@@ -98,14 +98,15 @@ img { max-width: 100%; height: auto; }
 .main-nav {
     display: flex;
     align-items: center;
-    gap: 32px;
+    gap: 36px;
 }
 .nav-link {
     color: var(--dark);
     font-weight: 500;
-    font-size: 14px;
+    font-size: 15px;
     position: relative;
     transition: color .2s;
+    white-space: nowrap;
 }
 .nav-link:hover,
 .nav-link.active {
@@ -128,15 +129,15 @@ img { max-width: 100%; height: auto; }
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
 }
 
 /* Bandeiras */
 .header-flags {
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-right: 8px;
+    gap: 5px;
+    margin-right: 10px;
 }
 .flag-btn {
     display: flex;
@@ -161,7 +162,7 @@ img { max-width: 100%; height: auto; }
 .header-icons {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
 }
 .header-icon-btn {
     display: flex;
