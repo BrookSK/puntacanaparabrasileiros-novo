@@ -419,14 +419,15 @@ img { max-width: 100%; height: auto; }
     align-items: center;
 }
 .historia-label {
-    font-family: 'Georgia', serif;
-    font-style: italic;
-    font-size: 15px;
+    font-family: 'Caveat', cursive;
+    font-style: normal;
+    font-size: 20px;
     color: var(--accent);
     display: block;
     margin-bottom: 12px;
 }
 .historia-title {
+    font-family: 'Poppins', sans-serif;
     font-size: 32px;
     font-weight: 700;
     color: var(--dark);
@@ -451,7 +452,7 @@ img { max-width: 100%; height: auto; }
 }
 .historia-img-top img {
     width: 100%;
-    height: 280px;
+    height: 380px;
     object-fit: cover;
     display: block;
 }
@@ -463,7 +464,7 @@ img { max-width: 100%; height: auto; }
 }
 .historia-img-bottom img {
     width: 100%;
-    height: 320px;
+    height: 380px;
     object-fit: cover;
     display: block;
 }
@@ -500,9 +501,9 @@ img { max-width: 100%; height: auto; }
     margin-bottom: 40px;
 }
 .section-label {
-    font-family: 'Georgia', serif;
-    font-style: italic;
-    font-size: 15px;
+    font-family: 'Caveat', cursive;
+    font-style: normal;
+    font-size: 20px;
     color: var(--accent);
     display: block;
     margin-bottom: 10px;
