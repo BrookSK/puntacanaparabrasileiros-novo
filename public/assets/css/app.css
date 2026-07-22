@@ -2019,20 +2019,23 @@ img { max-width: 100%; height: auto; }
     position: relative;
     display: block;
     width: 100%;
-    height: 74px;
-    color: #2dd4a8;
+    height: 80px;
     overflow: hidden;
+    background: transparent;
+    margin-bottom: -2px;
 }
 .footer-wave svg {
     display: block;
     width: 100%;
     height: 100%;
-    position: relative;
-    transform: translateY(-50%);
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    color: #2dd4a8;
 }
 
 .footer-bg {
-    background: linear-gradient(160deg, #2dd4a8 0%, #7ee856 30%, #c8f542 60%, #e8ff3a 100%);
+    background: linear-gradient(180deg, #2dd4a8 0%, #5de85c 40%, #a8f534 70%, #d4ff1a 100%);
     padding: 50px 0 30px;
 }
 .footer-top {
@@ -2101,9 +2104,9 @@ img { max-width: 100%; height: auto; }
 
 /* Footer Bottom */
 .footer-bottom {
-    background: #f0f0f0;
+    background: #e8e8e8;
     padding: 18px 0;
-    border-top: 1px solid #ddd;
+    border-top: none;
 }
 .footer-bottom-inner {
     display: flex;

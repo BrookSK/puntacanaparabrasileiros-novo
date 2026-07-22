@@ -1,8 +1,8 @@
 <footer class="site-footer">
     <!-- Wave Shape Divider -->
     <div class="footer-wave">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0,100 C0,100 0,50 0,50 C83.3,68.8 166.7,87.5 275,80 C383.3,72.5 416.7,30 525,25 C633.3,20 666.7,55 775,60 C883.3,65 916.7,35 975,30 C1000,28 1000,50 1000,50 L1000,100 Z" fill="currentColor"></path>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 100" preserveAspectRatio="none" aria-hidden="true">
+            <path d="M0,100 L0,60 C120,80 240,90 360,85 C480,80 600,50 720,40 C840,30 960,50 1080,60 C1200,70 1320,65 1440,55 L1440,100 Z" fill="#2dd4a8"></path>
         </svg>
     </div>
     <div class="footer-bg">
