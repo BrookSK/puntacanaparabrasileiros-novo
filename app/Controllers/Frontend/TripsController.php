@@ -69,8 +69,22 @@ class TripsController extends Controller
 
         $categories = $this->categoryModel->getWithTripCount();
 
+        // Buscar passeios em destaque (featured)
+        $featuredTrips = $this->tripModel->getFeatured(6);
+        foreach ($featuredTrips as &$ft) {
+            $packages = $this->packageModel->getByTrip((int) $ft['id']);
+            $ft['min_price'] = 0;
+            $ft['regular_price'] = 0;
+            if (!empty($packages)) {
+                $ft['min_price'] = $this->packageModel->getBasePrice((int) $packages[0]['id']);
+                $ft['regular_price'] = $this->packageModel->getRegularPrice((int) $packages[0]['id']);
+            }
+            $ft['rating'] = $this->tripModel->getAverageRating((int) $ft['id']);
+        }
+
         $this->view('frontend/trips/index', [
             'trips' => $trips,
+            'featuredTrips' => $featuredTrips,
             'categories' => $categories,
             'currentCategory' => $category,
             'currentSearch' => $search,

@@ -14,14 +14,18 @@
         <h2 class="section-title">Todos os Tipos de Experiências</h2>
         <div class="categorias-cards-grid">
             <?php foreach ($categories as $cat): ?>
-            <?php if ($cat['image'] ?? null): ?>
             <a href="/passeios?categoria=<?= e($cat['slug']) ?>" class="categoria-card-lg">
+                <?php if ($cat['image'] ?? null): ?>
                 <img src="<?= e($cat['image']) ?>" alt="<?= e($cat['name']) ?>" loading="lazy">
+                <?php else: ?>
+                <div class="categoria-card-placeholder">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
+                <?php endif; ?>
                 <div class="categoria-card-overlay">
                     <span class="categoria-card-name"><?= e($cat['name']) ?> &rarr;</span>
                 </div>
             </a>
-            <?php endif; ?>
             <?php endforeach; ?>
         </div>
     </div>
@@ -32,18 +36,19 @@
     <div class="container">
         <h2 class="section-title">Experiências em Destaque</h2>
 
+        <?php if (!empty($featuredTrips)): ?>
         <div class="destaque-trips-grid">
-            <?php
-            // Pegar apenas os 3 primeiros (ou os featured)
-            $destaqueTrips = array_slice($trips['items'], 0, 3);
-            ?>
-            <?php foreach ($destaqueTrips as $trip): ?>
+            <?php foreach ($featuredTrips as $trip): ?>
             <div class="destaque-trip-card">
                 <a href="/passeios/<?= e($trip['slug']) ?>" class="destaque-trip-image">
                     <img src="<?= e($trip['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($trip['title']) ?>" loading="lazy">
                     <button class="ft-card-fav" title="Favoritar">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
                     </button>
+                    <?php if (isset($trip['regular_price']) && $trip['regular_price'] > $trip['min_price'] && $trip['min_price'] > 0): ?>
+                    <?php $discount = round(100 - ($trip['min_price'] / $trip['regular_price'] * 100)); ?>
+                    <span class="ft-card-discount"><?= $discount ?>% Off</span>
+                    <?php endif; ?>
                 </a>
                 <div class="destaque-trip-body">
                     <h3 class="destaque-trip-title">
@@ -67,6 +72,9 @@
             </div>
             <?php endforeach; ?>
         </div>
+        <?php else: ?>
+        <p class="empty-state-text">Em breve teremos experiências em destaque para você!</p>
+        <?php endif; ?>
 
         <div class="section-cta">
             <a href="#passeios-grid" class="btn-ver-todos">Ver Todos os Passeios &rarr;</a>
@@ -77,7 +85,7 @@
 <!-- Listagem Completa de Passeios -->
 <section class="section section-todos-passeios" id="passeios-grid">
     <div class="container">
-        <h2 class="section-title">Todos os Tipos de Experiências</h2>
+        <h2 class="section-title">Todas as Experiências</h2>
 
         <!-- Filtros inline -->
         <div class="passeios-filtros-bar">

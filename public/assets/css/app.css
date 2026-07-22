@@ -731,6 +731,15 @@ img { max-width: 100%; height: auto; }
 .categoria-card-lg:hover img {
     transform: scale(1.06);
 }
+.categoria-card-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #1B6F00 0%, #2a9d00 100%);
+    color: rgba(255,255,255,0.7);
+}
 .categoria-card-overlay {
     position: absolute;
     inset: 0;
@@ -2280,6 +2289,7 @@ img { max-width: 100%; height: auto; }
 .empty-state { text-align: center; padding: 60px 20px; }
 .empty-state h3 { margin-bottom: 10px; }
 .empty-state p { color: var(--gray); margin-bottom: 20px; }
+.empty-state-text { text-align: center; color: var(--gray); font-size: 15px; padding: 40px 20px; }
 
 /* ============================================================
    CANCELAMENTOS — Layout conforme Figma
