@@ -42,8 +42,8 @@ img { max-width: 100%; height: auto; }
 .btn-secondary:hover { background: var(--gold-dark); color: var(--dark); }
 .btn-accent { background: var(--accent); color: var(--white); }
 .btn-accent:hover { background: var(--accent-dark); color: var(--white); }
-.btn-outline { border: 2px solid var(--text-green); color: var(--text-green); background: transparent; }
-.btn-outline:hover { background: var(--text-green); color: var(--white); }
+.btn-outline { border: 2px solid var(--accent); color: var(--accent); background: transparent; }
+.btn-outline:hover { background: rgba(55, 114, 192, 0.08); color: var(--accent); }
 .btn-outline-white { border: 2px solid var(--white); color: var(--white); background: transparent; }
 .btn-outline-white:hover { background: var(--white); color: var(--dark); }
 .btn-danger { background: var(--danger); color: var(--white); }
@@ -672,16 +672,16 @@ img { max-width: 100%; height: auto; }
 .btn-ver-todos {
     display: inline-block;
     padding: 12px 28px;
-    border: 2px solid var(--dark);
+    border: 2px solid var(--accent);
     border-radius: 6px;
-    color: var(--dark);
+    color: var(--accent);
     font-size: 14px;
     font-weight: 500;
     transition: all .2s;
 }
 .btn-ver-todos:hover {
-    background: var(--dark);
-    color: var(--white);
+    background: rgba(55, 114, 192, 0.08);
+    color: var(--accent);
 }
 
 @media (max-width: 992px) {
