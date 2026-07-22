@@ -601,6 +601,19 @@ img { max-width: 100%; height: auto; }
 .ft-card-fav:hover {
     background: var(--gold-dark);
 }
+.ft-card-featured-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(228, 181, 5, 0.9);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 .ft-card-discount {
     position: absolute;
     top: 12px;

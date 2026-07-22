@@ -44,9 +44,9 @@
             <div class="destaque-trip-card">
                 <a href="/passeios/buggies-cenote-domitai" class="destaque-trip-image">
                     <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg" alt="Buggies + Cenote Domitai" loading="lazy">
-                    <button class="ft-card-fav" title="Favoritar">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                    </button>
+                    <span class="ft-card-featured-badge" title="Destaque">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+                    </span>
                 </a>
                 <div class="destaque-trip-body">
                     <h3 class="destaque-trip-title">
@@ -72,9 +72,9 @@
             <div class="destaque-trip-card">
                 <a href="/passeios/quadriciclos-cenote" class="destaque-trip-image">
                     <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg" alt="Quadriciclos + Cenote" loading="lazy">
-                    <button class="ft-card-fav" title="Favoritar">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                    </button>
+                    <span class="ft-card-featured-badge" title="Destaque">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+                    </span>
                 </a>
                 <div class="destaque-trip-body">
                     <h3 class="destaque-trip-title">
@@ -100,9 +100,9 @@
             <div class="destaque-trip-card">
                 <a href="/passeios/nado-e-interacao-com-golfinho" class="destaque-trip-image">
                     <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg" alt="Nado e interação com 1 Golfinho" loading="lazy">
-                    <button class="ft-card-fav" title="Favoritar">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                    </button>
+                    <span class="ft-card-featured-badge" title="Destaque">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+                    </span>
                 </a>
                 <div class="destaque-trip-body">
                     <h3 class="destaque-trip-title">
