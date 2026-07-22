@@ -14,19 +14,19 @@
         <h2 class="section-title">Todos os Tipos de Experiências</h2>
         <div class="categorias-cards-grid">
             <a href="/passeios?categoria=passeios-de-barco" class="categoria-card-lg">
-                <img src="/uploads/categoria-praia-barco.png" alt="Praia e Barco" loading="lazy">
+                <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png" alt="Praia e Barco" loading="lazy">
                 <div class="categoria-card-overlay">
                     <span class="categoria-card-name">Praia e Barco &rarr;</span>
                 </div>
             </a>
             <a href="/passeios?categoria=familia" class="categoria-card-lg">
-                <img src="/uploads/categoria-criancas.png" alt="Adequado para crianças" loading="lazy">
+                <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/4.png" alt="Adequado para crianças" loading="lazy">
                 <div class="categoria-card-overlay">
                     <span class="categoria-card-name">Adequado para crianças &rarr;</span>
                 </div>
             </a>
             <a href="/passeios?categoria=cultural" class="categoria-card-lg">
-                <img src="/uploads/categoria-cidade.jpg" alt="Passeio pela cidade" loading="lazy">
+                <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0044-990x490.jpg" alt="Passeio pela cidade" loading="lazy">
                 <div class="categoria-card-overlay">
                     <span class="categoria-card-name">Passeio pela cidade &rarr;</span>
                 </div>
