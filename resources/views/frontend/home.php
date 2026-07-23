@@ -396,7 +396,7 @@
                         <div class="instagram-item-header">
                             <div class="instagram-user">
                                 <div class="instagram-avatar">
-                                    <img src="<?= asset('images/layout/PUNTA-CANA-1.png') ?>" alt="" width="24" height="24">
+                                    <img src="<?= asset('images/instagram-avatar.png') ?>" alt="" width="24" height="24">
                                 </div>
                                 <div class="instagram-user-info">
                                     <span class="instagram-username">puntacanaparabr...</span>
