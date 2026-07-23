@@ -382,28 +382,29 @@
                 </a>
                 <?php endforeach; ?>
             <?php else: ?>
-                <!-- Fallback: embed estático via iframe do Instagram -->
-                <div class="instagram-fallback">
-                    <p>Siga <a href="https://instagram.com/<?= e($instagramUsername ?? 'puntacanaparabrasileiros') ?>" target="_blank">@<?= e($instagramUsername ?? 'puntacanaparabrasileiros') ?></a> no Instagram</p>
-                    <div class="instagram-placeholder-grid">
-                        <?php for ($i = 0; $i < 5; $i++): ?>
-                        <div class="instagram-placeholder-item">
-                            <div class="instagram-item-header">
-                                <div class="instagram-user">
-                                    <div class="instagram-avatar"><img src="<?= asset('images/layout/PUNTA-CANA-1.png') ?>" alt="" width="24" height="24"></div>
-                                    <div class="instagram-user-info">
-                                        <span class="instagram-username">puntacanaparabr...</span>
-                                        <span class="instagram-date">Jul <?= 19 - ($i * 3) ?></span>
-                                    </div>
-                                </div>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-                            </div>
-                            <div class="instagram-item-media instagram-item-placeholder">
-                                <span class="instagram-play">&#9654;</span>
-                            </div>
-                        </div>
-                        <?php endfor; ?>
-                    </div>
+                <!-- Placeholder: fotos do Instagram (atualizar quando integrar token) -->
+                <div class="instagram-grid-static">
+                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/70edfaca-8405-44a3-be02-2ae5c68249d6-300x199.jpeg" alt="Instagram" loading="lazy">
+                    </a>
+                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-300x200.jpg" alt="Instagram" loading="lazy">
+                    </a>
+                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1-300x199.jpeg" alt="Instagram" loading="lazy">
+                    </a>
+                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101-300x199.jpg" alt="Instagram" loading="lazy">
+                    </a>
+                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/21f72a17-03d9-43a8-99f7-39c03d664ff2-300x225.jpeg" alt="Instagram" loading="lazy">
+                    </a>
+                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG_0948-300x200.jpeg" alt="Instagram" loading="lazy">
+                    </a>
+                </div>
+                <div class="instagram-follow-btn">
+                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="btn btn-outline">Seguir @puntacanaparabrasileiros</a>
                 </div>
             <?php endif; ?>
         </div>
