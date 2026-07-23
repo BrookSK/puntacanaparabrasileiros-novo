@@ -744,59 +744,57 @@
 
 
 // ==================== CUSTOM DROPDOWN (para filtros CTA) ====================
-document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.filtro-field .filtro-select').forEach(function(select) {
-        // Criar wrapper
+(function() {
+    var selects = document.querySelectorAll('.filtro-field .filtro-select');
+    if (!selects.length) return;
+
+    selects.forEach(function(select) {
         var wrapper = document.createElement('div');
         wrapper.className = 'custom-dropdown';
         wrapper.style.cssText = 'position:relative; flex:1;';
 
-        // Botão que mostra valor selecionado
         var btn = document.createElement('div');
         btn.className = 'custom-dropdown-btn';
-        btn.textContent = select.options[select.selectedIndex]?.text || '';
+        btn.textContent = select.options[select.selectedIndex] ? select.options[select.selectedIndex].text : '';
         btn.style.cssText = 'cursor:pointer; font-size:15px; font-family:inherit; color:#1C2011; padding-right:18px; background-image:url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'12\' height=\'12\' fill=\'%23666\'%3E%3Cpath d=\'M6 8L1 3h10z\'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 0 center;';
 
-        // Lista de opções
         var list = document.createElement('div');
         list.className = 'custom-dropdown-list';
         list.style.cssText = 'display:none; position:absolute; top:calc(100% + 12px); left:-20px; right:-20px; background:#fff; border:1px solid #e0e0e0; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,0.1); z-index:100; max-height:280px; overflow-y:auto;';
 
-        Array.from(select.options).forEach(function(opt, i) {
-            if (i === 0 && opt.value === '') return; // Pular placeholder
+        for (var i = 0; i < select.options.length; i++) {
+            var opt = select.options[i];
+            if (i === 0 && opt.value === '') continue;
             var item = document.createElement('div');
             item.className = 'custom-dropdown-item';
             item.textContent = opt.text;
-            item.dataset.value = opt.value;
+            item.setAttribute('data-value', opt.value);
             item.style.cssText = 'padding:16px 24px; font-size:15px; cursor:pointer; transition:background .15s;';
-            item.addEventListener('mouseenter', function() { this.style.background = '#f7f8fa'; });
-            item.addEventListener('mouseleave', function() { this.style.background = ''; });
-            item.addEventListener('click', function() {
-                select.value = this.dataset.value;
-                btn.textContent = this.textContent;
-                list.style.display = 'none';
-                select.dispatchEvent(new Event('change'));
-            });
+            item.onmouseenter = function() { this.style.background = '#f7f8fa'; };
+            item.onmouseleave = function() { this.style.background = ''; };
+            item.onclick = (function(s, b, l, v, t) {
+                return function() {
+                    s.value = v;
+                    b.textContent = t;
+                    l.style.display = 'none';
+                };
+            })(select, btn, list, opt.value, opt.text);
             list.appendChild(item);
-        });
+        }
 
-        // Toggle
-        btn.addEventListener('click', function(e) {
+        btn.onclick = function(e) {
             e.stopPropagation();
             var isOpen = list.style.display === 'block';
-            document.querySelectorAll('.custom-dropdown-list').forEach(function(l) { l.style.display = 'none'; });
+            var allLists = document.querySelectorAll('.custom-dropdown-list');
+            for (var j = 0; j < allLists.length; j++) allLists[j].style.display = 'none';
             if (!isOpen) list.style.display = 'block';
-        });
+        };
 
-        // Fechar ao clicar fora
         document.addEventListener('click', function() { list.style.display = 'none'; });
 
-        // Esconder select original
         select.style.display = 'none';
-
-        // Montar
         wrapper.appendChild(btn);
         wrapper.appendChild(list);
         select.parentNode.insertBefore(wrapper, select.nextSibling);
     });
-});
+})();
