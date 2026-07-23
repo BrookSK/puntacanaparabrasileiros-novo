@@ -1525,26 +1525,28 @@ img { max-width: 100%; height: auto; }
 .instagram-feed {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 16px;
+    gap: 20px;
+    max-width: 100%;
+    margin: 0 auto;
 }
 .instagram-item,
 .instagram-placeholder-item {
     display: block;
-    border-radius: 8px;
+    border-radius: 10px;
     overflow: hidden;
     background: var(--white);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     transition: transform .2s, box-shadow .2s;
 }
 .instagram-item:hover {
-    transform: translateY(-3px);
-    box-shadow: var(--shadow);
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
 }
 .instagram-item-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 10px;
+    padding: 10px 12px;
 }
 .instagram-user {
     display: flex;
@@ -1552,8 +1554,8 @@ img { max-width: 100%; height: auto; }
     gap: 8px;
 }
 .instagram-avatar {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
     overflow: hidden;
     background: #eee;
