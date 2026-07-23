@@ -11,7 +11,7 @@
                 <a href="/" class="nav-link <?= ($_SERVER['REQUEST_URI'] ?? '') === '/' ? 'active' : '' ?>">Home</a>
                 <a href="/passeios" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/passeios') ? 'active' : '' ?>">Passeios</a>
                 <a href="/transfers" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/transfers') ? 'active' : '' ?>">Transfer</a>
-                <a href="/pagina/blog" class="nav-link">Blog</a>
+                <a href="/blog" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/blog') ? 'active' : '' ?>">Blog</a>
                 <a href="/sobre-nos" class="nav-link">Sobre Nós</a>
                 <a href="/contato" class="nav-link">Contato</a>
             </nav>
