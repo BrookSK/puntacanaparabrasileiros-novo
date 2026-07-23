@@ -26,7 +26,8 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: var(--font); color: var(--dark); line-height: 1.6; background: var(--white); }
+body { font-family: var(--font); color: var(--dark); line-height: 1.6; background: #fff; }
+.main-content { background: #fff; }
 a { color: var(--primary); text-decoration: none; }
 a:hover { color: var(--primary-dark); }
 img { max-width: 100%; height: auto; }
@@ -1520,7 +1521,7 @@ img { max-width: 100%; height: auto; }
    ============================================================ */
 .section-instagram {
     padding: 70px 0 80px;
-    background: #f7f8fa;
+    background: #fff;
 }
 .instagram-feed {
     display: grid;
