@@ -382,29 +382,36 @@
                 </a>
                 <?php endforeach; ?>
             <?php else: ?>
-                <!-- Placeholder: fotos do Instagram (atualizar quando integrar token) -->
-                <div class="instagram-grid-static">
-                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/70edfaca-8405-44a3-be02-2ae5c68249d6-300x199.jpeg" alt="Instagram" loading="lazy">
+                <!-- Placeholder: fotos do Instagram com header de usuário (layout igual site antigo) -->
+                <div class="instagram-feed">
+                    <?php
+                    $instaPosts = [
+                        ['img' => 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/70edfaca-8405-44a3-be02-2ae5c68249d6-300x199.jpeg', 'date' => 'Jul 19'],
+                        ['img' => 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-300x200.jpg', 'date' => 'Jul 16'],
+                        ['img' => 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1-300x199.jpeg', 'date' => 'Jul 12'],
+                        ['img' => 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101-300x199.jpg', 'date' => 'Jul 10'],
+                        ['img' => 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/21f72a17-03d9-43a8-99f7-39c03d664ff2-300x225.jpeg', 'date' => 'Jul 8'],
+                    ];
+                    foreach ($instaPosts as $instaPost): ?>
+                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-item">
+                        <div class="instagram-item-header">
+                            <div class="instagram-user">
+                                <div class="instagram-avatar">
+                                    <img src="<?= asset('images/layout/PUNTA-CANA-1.png') ?>" alt="" width="24" height="24">
+                                </div>
+                                <div class="instagram-user-info">
+                                    <span class="instagram-username">puntacanaparabr...</span>
+                                    <span class="instagram-date"><?= $instaPost['date'] ?></span>
+                                </div>
+                            </div>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+                        </div>
+                        <div class="instagram-item-media">
+                            <img src="<?= $instaPost['img'] ?>" alt="" loading="lazy">
+                            <span class="instagram-play">&#9654;</span>
+                        </div>
                     </a>
-                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-300x200.jpg" alt="Instagram" loading="lazy">
-                    </a>
-                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1-300x199.jpeg" alt="Instagram" loading="lazy">
-                    </a>
-                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101-300x199.jpg" alt="Instagram" loading="lazy">
-                    </a>
-                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/21f72a17-03d9-43a8-99f7-39c03d664ff2-300x225.jpeg" alt="Instagram" loading="lazy">
-                    </a>
-                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="instagram-static-item">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG_0948-300x200.jpeg" alt="Instagram" loading="lazy">
-                    </a>
-                </div>
-                <div class="instagram-follow-btn">
-                    <a href="https://instagram.com/puntacanaparabrasileiros" target="_blank" class="btn btn-outline">Seguir @puntacanaparabrasileiros</a>
+                    <?php endforeach; ?>
                 </div>
             <?php endif; ?>
         </div>
