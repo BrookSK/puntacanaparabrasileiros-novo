@@ -1790,12 +1790,13 @@ img { max-width: 100%; height: auto; }
     padding: 24px;
 }
 .cta-filtros-image-overlay h3 {
-    font-size: 36px;
+    font-size: 46px;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
+    line-height: 1.1;
 }
 .cta-filtros-image-overlay p {
-    font-size: 18px;
+    font-size: 22px;
     opacity: 0.9;
 }
 .cta-filtros-sun {
