@@ -357,7 +357,7 @@
             </div>
         </div>
 
-        <div class="instagram-feed">
+        <div class="instagram-feed" style="display:grid; grid-template-columns:repeat(5,1fr); gap:20px; width:100%;">
             <?php if (!empty($instagramPosts)): ?>
                 <?php foreach ($instagramPosts as $post): ?>
                 <a href="<?= e($post['permalink']) ?>" target="_blank" class="instagram-item">
@@ -383,7 +383,6 @@
                 <?php endforeach; ?>
             <?php else: ?>
                 <!-- Placeholder: fotos do Instagram com header de usuário (layout igual site antigo) -->
-                <div class="instagram-feed">
                     <?php
                     $instaPosts = [
                         ['img' => 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/70edfaca-8405-44a3-be02-2ae5c68249d6-300x199.jpeg', 'date' => 'Jul 19'],
@@ -412,7 +411,6 @@
                         </div>
                     </a>
                     <?php endforeach; ?>
-                </div>
             <?php endif; ?>
         </div>
     </div>
