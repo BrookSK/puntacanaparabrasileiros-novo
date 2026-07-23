@@ -1120,7 +1120,7 @@ img { max-width: 100%; height: auto; }
    ============================================================ */
 .section-stats {
     position: relative;
-    background: url('/assets/images/layout/praia-pessoas.jpeg') center/cover no-repeat fixed;
+    background: url('/assets/images/layout/praia-pessoas.jpeg') center center / cover no-repeat scroll;
     padding: 60px 0;
 }
 .stats-overlay {
