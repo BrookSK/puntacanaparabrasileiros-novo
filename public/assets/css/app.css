@@ -1858,21 +1858,22 @@ img { max-width: 100%; height: auto; }
     color: var(--dark);
     background: transparent;
     cursor: pointer;
-    appearance: none;
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666'%3E%3Cpath d='M6 8L1 3h10z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 0 center;
     padding-right: 18px;
 }
-.filtro-select option {
-    padding: 14px 20px;
-    font-size: 15px;
-    line-height: 2.2;
-    min-height: 44px;
-}
 .filtro-select:focus {
     font-size: 15px;
+}
+.filtro-select option {
+    padding: 16px 20px;
+    font-size: 15px;
+    min-height: 48px;
+    line-height: 48px;
 }
 .btn-pesquisar {
     width: 100%;
