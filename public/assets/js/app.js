@@ -744,7 +744,7 @@
 
 
 // ==================== CUSTOM DROPDOWN (para filtros CTA) ====================
-(function() {
+document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.filtro-field .filtro-select').forEach(function(select) {
         // Criar wrapper
         var wrapper = document.createElement('div');
@@ -763,11 +763,12 @@
         list.style.cssText = 'display:none; position:absolute; top:calc(100% + 12px); left:-20px; right:-20px; background:#fff; border:1px solid #e0e0e0; border-radius:10px; box-shadow:0 4px 16px rgba(0,0,0,0.1); z-index:100; max-height:280px; overflow-y:auto;';
 
         Array.from(select.options).forEach(function(opt, i) {
+            if (i === 0 && opt.value === '') return; // Pular placeholder
             var item = document.createElement('div');
             item.className = 'custom-dropdown-item';
             item.textContent = opt.text;
             item.dataset.value = opt.value;
-            item.style.cssText = 'padding:14px 20px; font-size:15px; cursor:pointer; border-bottom:1px solid #f5f5f5; transition:background .15s;';
+            item.style.cssText = 'padding:16px 24px; font-size:15px; cursor:pointer; transition:background .15s;';
             item.addEventListener('mouseenter', function() { this.style.background = '#f7f8fa'; });
             item.addEventListener('mouseleave', function() { this.style.background = ''; });
             item.addEventListener('click', function() {
@@ -783,7 +784,6 @@
         btn.addEventListener('click', function(e) {
             e.stopPropagation();
             var isOpen = list.style.display === 'block';
-            // Fechar todos
             document.querySelectorAll('.custom-dropdown-list').forEach(function(l) { l.style.display = 'none'; });
             if (!isOpen) list.style.display = 'block';
         });
@@ -799,4 +799,4 @@
         wrapper.appendChild(list);
         select.parentNode.insertBefore(wrapper, select.nextSibling);
     });
-})();
+});
