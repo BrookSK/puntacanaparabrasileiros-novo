@@ -1829,16 +1829,16 @@ img { max-width: 100%; height: auto; }
 .filtros-form {
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    margin-bottom: 20px;
+    gap: 18px;
+    margin-bottom: 24px;
 }
 .filtro-field {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 14px;
     border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 14px 16px;
+    border-radius: 10px;
+    padding: 18px 20px;
     transition: border-color .2s;
 }
 .filtro-field:hover,
@@ -1853,7 +1853,7 @@ img { max-width: 100%; height: auto; }
     flex: 1;
     border: none;
     outline: none;
-    font-size: 14px;
+    font-size: 15px;
     font-family: var(--font);
     color: var(--dark);
     background: transparent;
@@ -1864,6 +1864,11 @@ img { max-width: 100%; height: auto; }
     background-repeat: no-repeat;
     background-position: right 0 center;
     padding-right: 18px;
+}
+.filtro-select option {
+    padding: 12px 16px;
+    font-size: 15px;
+    line-height: 2;
 }
 .btn-pesquisar {
     width: 100%;
