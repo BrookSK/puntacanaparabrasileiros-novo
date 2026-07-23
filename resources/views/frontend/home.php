@@ -62,9 +62,11 @@
             <div class="ft-card">
                 <a href="/passeios/<?= e($trip['slug']) ?>" class="ft-card-image">
                     <img src="<?= e($trip['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($trip['title']) ?>" loading="lazy">
-                    <button class="ft-card-fav" title="Favoritar">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="white" stroke="white" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-                    </button>
+                    <?php if (!empty($trip['featured'])): ?>
+                    <span class="ft-card-featured-badge" title="Destaque">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
+                    </span>
+                    <?php endif; ?>
                     <?php if (isset($trip['regular_price']) && $trip['regular_price'] > $trip['min_price'] && $trip['min_price'] > 0): ?>
                     <?php $discount = round(100 - ($trip['min_price'] / $trip['regular_price'] * 100)); ?>
                     <span class="ft-card-discount"><?= $discount ?>% Off</span>
