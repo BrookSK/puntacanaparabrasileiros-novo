@@ -301,7 +301,7 @@
             <?php if (!empty($latestPosts)): ?>
                 <?php foreach ($latestPosts as $post): ?>
                 <div class="blog-card">
-                    <a href="/pagina/blog/<?= e($post['slug']) ?>" class="blog-card-image">
+                    <a href="/blog/<?= e($post['slug']) ?>" class="blog-card-image">
                         <img src="<?= e($post['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($post['title']) ?>" loading="lazy">
                         <?php if ($post['category_name'] ?? null): ?>
                         <span class="blog-card-category" style="background: <?= e($post['category_color'] ?? '#3772C0') ?>">
@@ -311,9 +311,9 @@
                     </a>
                     <div class="blog-card-body">
                         <h3 class="blog-card-title">
-                            <a href="/pagina/blog/<?= e($post['slug']) ?>"><?= e($post['title']) ?></a>
+                            <a href="/blog/<?= e($post['slug']) ?>"><?= e($post['title']) ?></a>
                         </h3>
-                        <a href="/pagina/blog/<?= e($post['slug']) ?>" class="blog-card-readmore">LER MAIS &raquo;</a>
+                        <a href="/blog/<?= e($post['slug']) ?>" class="blog-card-readmore">LER MAIS &raquo;</a>
                         <div class="blog-card-meta">
                             <span><?= e(($post['author_first_name'] ?? 'Admin') . ' ' . ($post['author_last_name'] ?? '')) ?></span>
                             <span>&middot;</span>
@@ -339,7 +339,7 @@
         </div>
 
         <div class="section-cta">
-            <a href="/pagina/blog" class="btn-ver-todos">Leia nosso Blog &rarr;</a>
+            <a href="/blog" class="btn-ver-todos">Leia nosso Blog &rarr;</a>
         </div>
     </div>
 </section>
