@@ -483,7 +483,7 @@
 
         <div class="faq-footer">
             <p>Não encontrou o que procurava?</p>
-            <a href="/pagina/contato" class="btn btn-accent">Entre em contato conosco &rarr;</a>
+            <a href="/contato" class="btn btn-accent">Entre em contato conosco &rarr;</a>
         </div>
     </div>
 </section>
