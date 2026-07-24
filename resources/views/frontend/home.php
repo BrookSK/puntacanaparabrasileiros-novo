@@ -324,15 +324,15 @@
                 <?php endforeach; ?>
             <?php else: ?>
                 <div class="blog-card">
-                    <div class="blog-card-image"><img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/70edfaca-8405-44a3-be02-2ae5c68249d6-990x490.jpeg" alt="" loading="lazy"><span class="blog-card-category">SEM CATEGORIA</span></div>
+                    <a href="/blog" class="blog-card-image"><img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/70edfaca-8405-44a3-be02-2ae5c68249d6-990x490.jpeg" alt="" loading="lazy"><span class="blog-card-category">SEM CATEGORIA</span></a>
                     <div class="blog-card-body"><h3 class="blog-card-title">O que fazer em Punta Cana em 2026 – Guia para Brasileiros</h3><a href="/blog" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Punta Cana para Brasileiros</span><span>&middot;</span><span>15/03/2026</span></div></div>
                 </div>
                 <div class="blog-card">
-                    <div class="blog-card-image"><img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101-1024x678.jpg" alt="" loading="lazy"><span class="blog-card-category" style="background:#3772C0">GERAL</span></div>
+                    <a href="/blog" class="blog-card-image"><img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101-1024x678.jpg" alt="" loading="lazy"><span class="blog-card-category" style="background:#3772C0">GERAL</span></a>
                     <div class="blog-card-body"><h3 class="blog-card-title">"Buggies em Macao: Aventura, lama e cenote em Punta Cana"</h3><a href="/blog" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Lucas Vacari</span><span>&middot;</span><span>02/06/2025</span></div></div>
                 </div>
                 <div class="blog-card">
-                    <div class="blog-card-image"><img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG_5378-1024x785.jpeg" alt="" loading="lazy"><span class="blog-card-category" style="background:#E4B505">PASSEIO</span></div>
+                    <a href="/blog" class="blog-card-image"><img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG_5378-1024x785.jpeg" alt="" loading="lazy"><span class="blog-card-category" style="background:#E4B505">PASSEIO</span></a>
                     <div class="blog-card-body"><h3 class="blog-card-title">"Coco Bongo: a balada mais incrível de Punta Cana!"</h3><a href="/blog" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Lucas Vacari</span><span>&middot;</span><span>02/06/2025</span></div></div>
                 </div>
             <?php endif; ?>
