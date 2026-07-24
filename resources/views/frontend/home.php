@@ -325,15 +325,15 @@
             <?php else: ?>
                 <div class="blog-card">
                     <div class="blog-card-image"><img src="<?= asset('images/placeholder.jpg') ?>" alt="" loading="lazy"><span class="blog-card-category">SEM CATEGORIA</span></div>
-                    <div class="blog-card-body"><h3 class="blog-card-title">O que fazer em Punta Cana em 2026 – Guia para Brasileiros</h3><a href="#" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Punta Cana para Brasileiros</span><span>&middot;</span><span>15/03/2026</span></div></div>
+                    <div class="blog-card-body"><h3 class="blog-card-title">O que fazer em Punta Cana em 2026 – Guia para Brasileiros</h3><a href="/blog" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Punta Cana para Brasileiros</span><span>&middot;</span><span>15/03/2026</span></div></div>
                 </div>
                 <div class="blog-card">
                     <div class="blog-card-image"><img src="<?= asset('images/placeholder.jpg') ?>" alt="" loading="lazy"><span class="blog-card-category" style="background:#3772C0">GERAL</span></div>
-                    <div class="blog-card-body"><h3 class="blog-card-title">"Buggies em Macao: Aventura, lama e cenote em Punta Cana"</h3><a href="#" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Lucas Vacari</span><span>&middot;</span><span>02/06/2025</span></div></div>
+                    <div class="blog-card-body"><h3 class="blog-card-title">"Buggies em Macao: Aventura, lama e cenote em Punta Cana"</h3><a href="/blog" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Lucas Vacari</span><span>&middot;</span><span>02/06/2025</span></div></div>
                 </div>
                 <div class="blog-card">
                     <div class="blog-card-image"><img src="<?= asset('images/placeholder.jpg') ?>" alt="" loading="lazy"><span class="blog-card-category" style="background:#E4B505">PASSEIO</span></div>
-                    <div class="blog-card-body"><h3 class="blog-card-title">"Coco Bongo: a balada mais incrível de Punta Cana!"</h3><a href="#" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Lucas Vacari</span><span>&middot;</span><span>02/06/2025</span></div></div>
+                    <div class="blog-card-body"><h3 class="blog-card-title">"Coco Bongo: a balada mais incrível de Punta Cana!"</h3><a href="/blog" class="blog-card-readmore">LER MAIS &raquo;</a><div class="blog-card-meta"><span>Lucas Vacari</span><span>&middot;</span><span>02/06/2025</span></div></div>
                 </div>
             <?php endif; ?>
         </div>
