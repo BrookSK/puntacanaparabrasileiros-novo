@@ -92,8 +92,6 @@
                     <span>Total :</span>
                     <span id="bmSidebarTotal">$0</span>
                 </div>
-
-                <button type="button" class="bm-btn-checkout" id="bmCheckout">IR DIRETO AO CHECKOUT</button>
             </div>
         </div>
     </div>
