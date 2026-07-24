@@ -4,7 +4,7 @@
 </div>
 
 <div class="admin-card">
-    <form method="POST" action="/admin/reservas/salvar" class="admin-form">
+    <form method="POST" action="/admin/reservas/criar" class="admin-form">
         <?= csrf_field() ?>
 
         <fieldset class="form-section">

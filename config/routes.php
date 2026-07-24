@@ -169,10 +169,10 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
 
     // Bookings
     $router->get('/reservas', [AdminBookingsController::class, 'index'], [], 'admin.bookings.index');
-    $router->get('/reservas/{id}', [AdminBookingsController::class, 'show'], [], 'admin.bookings.show');
-    $router->post('/reservas/{id}/status', [AdminBookingsController::class, 'updateStatus'], [CsrfMiddleware::class], 'admin.bookings.status');
     $router->get('/reservas/criar', [AdminBookingsController::class, 'create'], [], 'admin.bookings.create');
     $router->post('/reservas/criar', [AdminBookingsController::class, 'store'], [CsrfMiddleware::class], 'admin.bookings.store');
+    $router->get('/reservas/{id}', [AdminBookingsController::class, 'show'], [], 'admin.bookings.show');
+    $router->post('/reservas/{id}/status', [AdminBookingsController::class, 'updateStatus'], [CsrfMiddleware::class], 'admin.bookings.status');
 
     // Vouchers
     $router->get('/vouchers', [AdminVouchersController::class, 'index'], [], 'admin.vouchers.index');
