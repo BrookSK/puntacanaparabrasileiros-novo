@@ -248,7 +248,7 @@
         <div class="cta-planejar-content">
             <h2>Vamos Planejar sua Viagem Juntos?</h2>
             <p>Proporcionar experiências autênticas e memoráveis para brasileiros em Punta Cana, combinando nosso conhecimento local com um atendimento personalizado e carinhoso, como se estivéssemos recebendo amigos em nossa própria casa.</p>
-            <a href="/pagina/contato" class="btn btn-accent">Fale Conosco</a>
+            <a href="/contato" class="btn btn-accent">Fale Conosco</a>
         </div>
     </div>
 </section>

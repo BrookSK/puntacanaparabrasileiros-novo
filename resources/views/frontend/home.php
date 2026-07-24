@@ -572,7 +572,7 @@
                     <button type="submit" class="btn-pesquisar">Pesquisar os Passeios</button>
                 </form>
 
-                <p class="cta-filtros-link">Sem compromisso. <a href="/pagina/contato">Tire suas dúvidas &rarr;</a></p>
+                <p class="cta-filtros-link">Sem compromisso. <a href="/contato">Tire suas dúvidas &rarr;</a></p>
             </div>
         </div>
     </div>
