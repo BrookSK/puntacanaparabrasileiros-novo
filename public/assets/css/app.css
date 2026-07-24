@@ -1511,7 +1511,7 @@ img { max-width: 100%; height: auto; }
 }
 
 /* CTA Section */
-.cta-section { background: var(--light); }
+.cta-section { background: #ffffff; }
 .cta-card { background: linear-gradient(135deg, var(--primary), var(--secondary)); border-radius: 12px; padding: 50px; text-align: center; color: white; }
 .cta-card h2 { font-size: 28px; margin-bottom: 10px; }
 .cta-card p { font-size: 16px; opacity: 0.9; margin-bottom: 25px; }
