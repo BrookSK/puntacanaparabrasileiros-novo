@@ -1754,7 +1754,7 @@ img { max-width: 100%; height: auto; }
    SEÇÃO CTA FILTROS — Última dobra home conforme Figma
    ============================================================ */
 .section-cta-filtros {
-    padding: 80px 0;
+    padding: 80px 0 0;
     background: var(--white);
 }
 .cta-filtros-grid {
