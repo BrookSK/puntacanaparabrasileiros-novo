@@ -191,14 +191,14 @@
                 </div>
                 <div class="transfer-home-card">
                     <div class="transfer-home-img">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/comprar-byd-seal_6268af8e89.png" alt="Van Privativa" loading="lazy">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/BB461A77-985A-4E39-8468-1C9D5F051C03-1024x683.png" alt="Van Privativa" loading="lazy">
                     </div>
                     <h3 class="transfer-home-title">Transfer Privativo em Van</h3>
                     <p class="transfer-home-desc">Tenha <strong>mais conforto e privacidade</strong> com nosso transfer exclusivo em van. Perfeito para famílias ou pequenos grupos, com ar-condicionado e horários flexíveis.</p>
                 </div>
                 <div class="transfer-home-card">
                     <div class="transfer-home-img">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/CFE7DB75-A99F-4417-A313-5E5AA2A4B0BF-1024x683.png" alt="Van Adaptada" loading="lazy">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/C8EC6F30-8ED0-4C0C-A377-C8317B5673A7-1024x683.png" alt="Van Adaptada" loading="lazy">
                     </div>
                     <h3 class="transfer-home-title">Transfer Acessível com Van Adaptada</h3>
                     <p class="transfer-home-desc">Viaje com <strong>segurança e acessibilidade</strong> em nossa van adaptada com rampa para cadeirantes. Espaço amplo e motorista preparado para um trajeto tranquilo.</p>
