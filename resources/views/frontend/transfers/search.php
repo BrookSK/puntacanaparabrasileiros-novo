@@ -27,7 +27,7 @@
                 </button>
             </div>
 
-            <!-- Form Ida e Volta -->
+            <!-- Form Ida e Volta / Somente Ida -->
             <div class="transfer-form-content" id="tabRoundtrip">
                 <div class="transfer-form-row">
                     <div class="tf-field">
@@ -110,6 +110,139 @@
                     </div>
                 </div>
                 <button type="button" id="searchTransfersBtn" class="btn-buscar-transfer">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    BUSCAR
+                </button>
+            </div>
+
+            <!-- Form Múltiplos Transfers -->
+            <div class="transfer-form-content" id="tabMultiple" style="display:none;">
+                <div class="multiple-routes-container" id="multipleRoutesContainer">
+                    <!-- Rota 1 -->
+                    <div class="multiple-route-item" data-route="1">
+                        <div class="multiple-route-header">
+                            <span class="route-number">Rota 1</span>
+                        </div>
+                        <div class="transfer-form-row">
+                            <div class="tf-field">
+                                <label>ORIGEM</label>
+                                <select name="multi_origin_1" class="tf-input multi-origin">
+                                    <option value="">Digite para buscar...</option>
+                                    <?php foreach ($locations as $loc): ?>
+                                    <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="tf-field">
+                                <label>DESTINO</label>
+                                <select name="multi_destination_1" class="tf-input multi-destination">
+                                    <option value="">Digite para buscar...</option>
+                                    <?php foreach ($locations as $loc): ?>
+                                    <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="tf-field">
+                                <label>DATA</label>
+                                <input type="date" name="multi_date_1" class="tf-input multi-date" min="<?= date('Y-m-d') ?>">
+                            </div>
+                            <div class="tf-field tf-field-sm">
+                                <label>HORA</label>
+                                <input type="time" name="multi_time_1" class="tf-input multi-time">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rota 2 -->
+                    <div class="multiple-route-item" data-route="2">
+                        <div class="multiple-route-header">
+                            <span class="route-number">Rota 2</span>
+                            <button type="button" class="btn-remove-route" onclick="removeRoute(this)" title="Remover rota">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            </button>
+                        </div>
+                        <div class="transfer-form-row">
+                            <div class="tf-field">
+                                <label>ORIGEM</label>
+                                <select name="multi_origin_2" class="tf-input multi-origin">
+                                    <option value="">Digite para buscar...</option>
+                                    <?php foreach ($locations as $loc): ?>
+                                    <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="tf-field">
+                                <label>DESTINO</label>
+                                <select name="multi_destination_2" class="tf-input multi-destination">
+                                    <option value="">Digite para buscar...</option>
+                                    <?php foreach ($locations as $loc): ?>
+                                    <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="tf-field">
+                                <label>DATA</label>
+                                <input type="date" name="multi_date_2" class="tf-input multi-date" min="<?= date('Y-m-d') ?>">
+                            </div>
+                            <div class="tf-field tf-field-sm">
+                                <label>HORA</label>
+                                <input type="time" name="multi_time_2" class="tf-input multi-time">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="button" class="btn-add-route" id="btnAddRoute" onclick="addRoute()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    ADICIONAR ROTA
+                </button>
+
+                <div class="transfer-form-row transfer-form-row-bottom">
+                    <div class="tf-field tf-field-pax">
+                        <label>PASSAGEIROS</label>
+                        <div class="pax-dropdown-wrapper">
+                            <button type="button" class="tf-input pax-dropdown-btn" id="paxDropdownBtnMulti">
+                                <span id="paxTotalMulti">1</span>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+                            </button>
+                            <div class="pax-dropdown" id="paxDropdownMulti">
+                                <div class="pax-dropdown-row">
+                                    <div><strong>ADULTOS</strong><span>(+12 ANOS)</span></div>
+                                    <div class="pax-counter">
+                                        <button type="button" class="pax-btn" onclick="changePaxMulti('adults', -1)">-</button>
+                                        <input type="number" name="multi_adults" id="multiAdults" value="1" min="1" max="50" class="pax-input-sm">
+                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxMulti('adults', 1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="pax-dropdown-row">
+                                    <div><strong>CRIANÇAS</strong><span>(2-11 ANOS)</span></div>
+                                    <div class="pax-counter">
+                                        <button type="button" class="pax-btn" onclick="changePaxMulti('children', -1)">-</button>
+                                        <input type="number" name="multi_children" id="multiChildren" value="0" min="0" max="20" class="pax-input-sm">
+                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxMulti('children', 1)">+</button>
+                                    </div>
+                                </div>
+                                <div class="pax-dropdown-row">
+                                    <div><strong>BEBÊS</strong><span>(0-1 ANO)</span></div>
+                                    <div class="pax-counter">
+                                        <button type="button" class="pax-btn" onclick="changePaxMulti('infants', -1)">-</button>
+                                        <input type="number" name="multi_infants" id="multiInfants" value="0" min="0" max="10" class="pax-input-sm">
+                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxMulti('infants', 1)">+</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tf-field">
+                        <label>TIPO DE SERVIÇO</label>
+                        <select name="multi_service_type" id="multiServiceType" class="tf-input">
+                            <option value="private">Privado</option>
+                            <option value="shared">Compartilhado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="button" id="searchMultiTransfersBtn" class="btn-buscar-transfer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     BUSCAR
                 </button>

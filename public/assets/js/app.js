@@ -308,14 +308,32 @@
                 document.querySelectorAll('.transfer-tab').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 const tab = btn.dataset.tab;
+                const tabRoundtrip = document.getElementById('tabRoundtrip');
+                const tabMultiple = document.getElementById('tabMultiple');
                 const depFields = document.querySelectorAll('.departure-field');
-                if (tab === 'oneway') {
-                    depFields.forEach(f => f.classList.add('hidden'));
+
+                if (tab === 'multiple') {
+                    if (tabRoundtrip) tabRoundtrip.style.display = 'none';
+                    if (tabMultiple) tabMultiple.style.display = 'block';
                 } else {
-                    depFields.forEach(f => f.classList.remove('hidden'));
+                    if (tabRoundtrip) tabRoundtrip.style.display = 'block';
+                    if (tabMultiple) tabMultiple.style.display = 'none';
+                    if (tab === 'oneway') {
+                        depFields.forEach(f => f.classList.add('hidden'));
+                    } else {
+                        depFields.forEach(f => f.classList.remove('hidden'));
+                    }
                 }
             });
         });
+
+        // Pax dropdown for multiple transfers
+        const paxBtnMulti = document.getElementById('paxDropdownBtnMulti');
+        const paxDropMulti = document.getElementById('paxDropdownMulti');
+        if (paxBtnMulti && paxDropMulti) {
+            paxBtnMulti.addEventListener('click', (e) => { e.stopPropagation(); paxDropMulti.classList.toggle('active'); });
+            document.addEventListener('click', (e) => { if (!paxDropMulti.contains(e.target) && e.target !== paxBtnMulti) paxDropMulti.classList.remove('active'); });
+        }
     }
 
     window.changePaxTransfer = function(field, delta) {
@@ -332,6 +350,184 @@
             if (totalEl) totalEl.textContent = adults + children + infants;
         }
     };
+
+    // Pax counter for multiple transfers tab
+    window.changePaxMulti = function(field, delta) {
+        const fieldMap = { adults: 'multiAdults', children: 'multiChildren', infants: 'multiInfants' };
+        const input = document.getElementById(fieldMap[field]);
+        if (input) {
+            let v = parseInt(input.value) + delta;
+            if (v < parseInt(input.min)) v = parseInt(input.min);
+            input.value = v;
+            const adults = parseInt(document.getElementById('multiAdults')?.value || 1);
+            const children = parseInt(document.getElementById('multiChildren')?.value || 0);
+            const infants = parseInt(document.getElementById('multiInfants')?.value || 0);
+            const totalEl = document.getElementById('paxTotalMulti');
+            if (totalEl) totalEl.textContent = adults + children + infants;
+        }
+    };
+
+    // Multiple transfers - add route
+    window.addRoute = function() {
+        const container = document.getElementById('multipleRoutesContainer');
+        if (!container) return;
+        const routes = container.querySelectorAll('.multiple-route-item');
+        const newIndex = routes.length + 1;
+        if (newIndex > 10) { alert('Máximo de 10 rotas.'); return; }
+
+        // Get locations options from first route select
+        const firstSelect = container.querySelector('.multi-origin');
+        const optionsHtml = firstSelect ? firstSelect.innerHTML : '<option value="">Digite para buscar...</option>';
+
+        const routeHtml = `
+        <div class="multiple-route-item" data-route="${newIndex}">
+            <div class="multiple-route-header">
+                <span class="route-number">Rota ${newIndex}</span>
+                <button type="button" class="btn-remove-route" onclick="removeRoute(this)" title="Remover rota">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <div class="transfer-form-row">
+                <div class="tf-field">
+                    <label>ORIGEM</label>
+                    <select name="multi_origin_${newIndex}" class="tf-input multi-origin">${optionsHtml}</select>
+                </div>
+                <div class="tf-field">
+                    <label>DESTINO</label>
+                    <select name="multi_destination_${newIndex}" class="tf-input multi-destination">${optionsHtml}</select>
+                </div>
+                <div class="tf-field">
+                    <label>DATA</label>
+                    <input type="date" name="multi_date_${newIndex}" class="tf-input multi-date" min="${new Date().toISOString().split('T')[0]}">
+                </div>
+                <div class="tf-field tf-field-sm">
+                    <label>HORA</label>
+                    <input type="time" name="multi_time_${newIndex}" class="tf-input multi-time">
+                </div>
+            </div>
+        </div>`;
+        container.insertAdjacentHTML('beforeend', routeHtml);
+    };
+
+    // Multiple transfers - remove route
+    window.removeRoute = function(btn) {
+        const container = document.getElementById('multipleRoutesContainer');
+        const routes = container.querySelectorAll('.multiple-route-item');
+        if (routes.length <= 2) { alert('Mínimo de 2 rotas.'); return; }
+        const routeItem = btn.closest('.multiple-route-item');
+        routeItem.remove();
+        // Renumber routes
+        container.querySelectorAll('.multiple-route-item').forEach((item, idx) => {
+            item.dataset.route = idx + 1;
+            item.querySelector('.route-number').textContent = 'Rota ' + (idx + 1);
+        });
+    };
+
+    // Multiple transfers - search
+    document.getElementById('searchMultiTransfersBtn')?.addEventListener('click', searchMultipleTransfers);
+
+    function searchMultipleTransfers() {
+        const container = document.getElementById('multipleRoutesContainer');
+        const routes = container.querySelectorAll('.multiple-route-item');
+        const adults = document.getElementById('multiAdults')?.value || '1';
+        const children = document.getElementById('multiChildren')?.value || '0';
+        const infants = document.getElementById('multiInfants')?.value || '0';
+        const serviceType = document.getElementById('multiServiceType')?.value || 'private';
+
+        const routesData = [];
+        let hasError = false;
+
+        routes.forEach((route, idx) => {
+            const origin = route.querySelector('.multi-origin')?.value;
+            const destination = route.querySelector('.multi-destination')?.value;
+            const date = route.querySelector('.multi-date')?.value;
+            const time = route.querySelector('.multi-time')?.value;
+
+            if (!origin || !destination) {
+                hasError = true;
+                alert('Selecione origem e destino para a Rota ' + (idx + 1) + '.');
+            }
+            routesData.push({ origin_id: origin, destination_id: destination, date, time });
+        });
+
+        if (hasError) return;
+
+        document.getElementById('transferLoading').style.display = 'block';
+        document.getElementById('transferResults').style.display = 'none';
+        document.getElementById('transferEmptyState').style.display = 'none';
+
+        // Search for all routes in parallel
+        const promises = routesData.map(route =>
+            ajax('/api/transfers/buscar', {
+                body: JSON.stringify({
+                    origin_id: route.origin_id,
+                    destination_id: route.destination_id,
+                    adults, children, infants,
+                    service_type: serviceType
+                })
+            })
+        );
+
+        Promise.all(promises).then(results => {
+            document.getElementById('transferLoading').style.display = 'none';
+
+            // Check if all routes have results
+            const allHaveResults = results.every(r => r.success && r.results && r.results.length > 0);
+            if (!allHaveResults) {
+                document.getElementById('transferEmptyState').style.display = 'block';
+                return;
+            }
+
+            renderMultipleResults(results, routesData);
+        }).catch(() => {
+            document.getElementById('transferLoading').style.display = 'none';
+            alert('Erro de conexão.');
+        });
+    }
+
+    function renderMultipleResults(results, routesData) {
+        const container = document.getElementById('resultsList');
+        const resultsDiv = document.getElementById('transferResults');
+        const totalBar = document.getElementById('transferTotalBar');
+        container.innerHTML = '';
+        let totalPrice = 0;
+
+        results.forEach((data, idx) => {
+            const route = routesData[idx];
+            const v = data.results[0]; // Use the first (cheapest/best) vehicle
+            totalPrice += v.price;
+
+            container.innerHTML += `
+            <div class="transfer-result-item">
+                <div class="transfer-result-route">
+                    <strong>Rota ${idx + 1}:</strong> ${data.origin} → ${data.destination} (${formatDateBR(route.date)})
+                </div>
+                <div class="transfer-vehicle-card">
+                    <div class="transfer-vehicle-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
+                    <div class="transfer-vehicle-info">
+                        <h4>${v.title}</h4>
+                        <p>${v.description || ''}</p>
+                        <div class="transfer-vehicle-meta">
+                            <span>🌐 ${v.max_passengers} passageiros</span>
+                            <span>🧳 ${v.max_luggage || 0} malas</span>
+                            <span>⏱ ${v.duration || 0} min</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="transfer-vehicle-price">$${v.price.toFixed(2)}</span>
+                        <span class="transfer-vehicle-currency">USD</span>
+                    </div>
+                </div>
+            </div>`;
+        });
+
+        document.getElementById('transferTotalValue').textContent = '$' + totalPrice.toFixed(2) + ' USD';
+        totalBar.style.display = 'block';
+        resultsDiv.style.display = 'block';
+
+        window._transferSearchResults = { results: results.map(r => r.results[0]), routes: routesData };
+        window._transferTotalPrice = totalPrice;
+    }
 
     function searchTransfers() {
         const origin = document.getElementById('originSelect')?.value;
