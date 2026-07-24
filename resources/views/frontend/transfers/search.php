@@ -184,7 +184,7 @@
             <?php else: ?>
                 <div class="transfer-home-card">
                     <div class="transfer-home-img">
-                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/inspecao-veicular-para-onibus-fretado-1024x683.jpg" alt="Ônibus Compartilhado" loading="lazy">
+                        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/10/CFE7DB75-A99F-4417-A313-5E5AA2A4B0BF-1024x683.png" alt="Ônibus Compartilhado" loading="lazy">
                     </div>
                     <h3 class="transfer-home-title">Transfer em Ônibus Compartilhado</h3>
                     <p class="transfer-home-desc">Viaje com conforto e economia em um <strong>ônibus climatizado</strong>, com embarques regulares e motoristas experientes. Ideal para quem busca praticidade em Punta Cana.</p>
