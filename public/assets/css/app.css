@@ -2233,9 +2233,10 @@ img { max-width: 100%; height: auto; }
 .table th { font-weight: 600; color: var(--gray); font-size: 12px; text-transform: uppercase; }
 
 /* Pagination */
-.pagination { display: flex; gap: 6px; justify-content: center; margin-top: 30px; }
-.page-link { padding: 8px 14px; border: 1px solid #ddd; border-radius: var(--radius); font-size: 13px; color: var(--dark); }
-.page-link.active { background: var(--primary); color: white; border-color: var(--primary); }
+.pagination { display: flex; gap: 8px; justify-content: center; margin-top: 30px; }
+.page-link { padding: 10px 16px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px; color: var(--dark); font-weight: 500; transition: all .2s; }
+.page-link:hover { border-color: var(--secondary); color: var(--secondary); }
+.page-link.active { background: var(--secondary); color: var(--dark); border-color: var(--secondary); font-weight: 600; }
 
 /* Account */
 .account-layout { display: grid; grid-template-columns: 260px 1fr; gap: 30px; padding: 40px 0; max-width: 1200px; margin: 0 auto; padding-left: 20px; padding-right: 20px; }
