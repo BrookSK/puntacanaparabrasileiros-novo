@@ -2,7 +2,7 @@
     <!-- Wave Shape Divider -->
     <div class="footer-wave">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120" preserveAspectRatio="none" aria-hidden="true">
-            <path d="M0,120 L0,80 C180,110 360,120 540,100 C720,80 900,40 1080,50 C1260,60 1380,90 1440,80 L1440,120 Z" fill="#c8f542"></path>
+            <path d="M0,120 L0,80 C180,110 360,120 540,100 C720,80 900,40 1080,50 C1260,60 1380,90 1440,80 L1440,120 Z" fill="#d4ff1a"></path>
         </svg>
     </div>
     <div class="footer-bg">
