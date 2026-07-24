@@ -26,8 +26,8 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: var(--font); color: var(--dark); line-height: 1.6; background: #fff; }
-.main-content { background: #fff; }
+body { font-family: var(--font); color: var(--dark); line-height: 1.6; background: #ffffff; }
+.main-content { background: #ffffff; padding-bottom: 0; margin-bottom: 0; }
 a { color: var(--primary); text-decoration: none; }
 a:hover { color: var(--primary-dark); }
 img { max-width: 100%; height: auto; }
@@ -1768,6 +1768,8 @@ img { max-width: 100%; height: auto; }
     border-radius: 12px;
     overflow: hidden;
     aspect-ratio: 3/4;
+    border: none;
+    box-shadow: none;
 }
 .cta-filtros-image img {
     width: 100%;
@@ -2082,7 +2084,7 @@ img { max-width: 100%; height: auto; }
    FOOTER — Layout conforme Figma aprovado
    ============================================================ */
 .site-footer {
-    margin-top: 0;
+    margin-top: -1px;
     position: relative;
 }
 
