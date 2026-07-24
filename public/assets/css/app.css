@@ -2095,7 +2095,7 @@ img { max-width: 100%; height: auto; }
     width: 100%;
     height: 150px;
     overflow: hidden;
-    background: transparent;
+    background: #ffffff;
     margin-bottom: -2px;
 }
 .footer-wave svg {
