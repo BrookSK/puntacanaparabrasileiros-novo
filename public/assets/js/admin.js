@@ -17,10 +17,10 @@
     }
 
     // Settings tabs
-    document.querySelectorAll('.settings-tabs .tab-btn').forEach(btn => {
+    document.querySelectorAll('.settings-tabs .tab-btn, .settings-tab').forEach(btn => {
         btn.addEventListener('click', () => {
-            document.querySelectorAll('.settings-tabs .tab-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.settings-tabs .tab-btn, .settings-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content, .settings-panel').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             const target = document.getElementById('tab-' + btn.dataset.tab);
             if (target) target.classList.add('active');
