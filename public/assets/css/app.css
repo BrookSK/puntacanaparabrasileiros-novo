@@ -2308,14 +2308,21 @@ img { max-width: 100%; height: auto; }
 .account-user-info {
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 .account-user-info strong {
     font-size: 14px;
     color: var(--dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .account-user-info span {
     font-size: 11px;
     color: var(--gray);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .account-nav {
     display: flex;
