@@ -322,7 +322,6 @@ class AccountController extends Controller
         $voucherModel->incrementDownload((int) $voucher['id']);
         $response->download($filePath, 'voucher-' . $reference . '.html');
     }
-}
 
     // ==================== PAINEL DO AFILIADO ====================
 
@@ -451,3 +450,4 @@ class AccountController extends Controller
 
         $this->view('frontend/affiliate/landing', ['affiliate' => $affiliate, 'pageTitle' => 'Crie sua Landing Page'], 'app');
     }
+}
