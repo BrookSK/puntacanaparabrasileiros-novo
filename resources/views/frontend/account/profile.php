@@ -43,12 +43,32 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Endereço</label>
-                    <input type="text" name="address" class="form-control" value="<?= e($user['address'] ?? '') ?>" placeholder="Rua, número, complemento">
+                    <label>Rua / Avenida</label>
+                    <input type="text" name="address" class="form-control" value="<?= e($user['address'] ?? '') ?>" placeholder="Ex: Rua das Flores, 123">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Complemento</label>
+                        <input type="text" name="address_complement" class="form-control" value="<?= e($user['address_complement'] ?? '') ?>" placeholder="Apto, bloco, sala...">
+                    </div>
+                    <div class="form-group">
+                        <label>Bairro</label>
+                        <input type="text" name="address_neighborhood" class="form-control" value="<?= e($user['address_neighborhood'] ?? '') ?>" placeholder="Seu bairro">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Cidade</label>
+                        <input type="text" name="city" class="form-control" value="<?= e($user['city'] ?? '') ?>" placeholder="Sua cidade">
+                    </div>
+                    <div class="form-group">
+                        <label>Estado</label>
+                        <input type="text" name="state" class="form-control" value="<?= e($user['state'] ?? '') ?>" placeholder="Ex: São Paulo">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>Cidade</label>
-                    <input type="text" name="city" class="form-control" value="<?= e($user['city'] ?? '') ?>">
+                    <label>CEP / Código Postal</label>
+                    <input type="text" name="zip_code" class="form-control" value="<?= e($user['zip_code'] ?? '') ?>" placeholder="Ex: 01001-000">
                 </div>
                 <button type="submit" class="btn btn-primary">Salvar Alterações</button>
             </form>

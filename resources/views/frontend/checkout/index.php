@@ -67,8 +67,18 @@
                     <div class="checkout-section" id="addressSection">
                         <h3>Endereço</h3>
                         <div class="form-group">
-                            <label>Endereço <span class="address-required-label"></span></label>
-                            <input type="text" name="address" class="form-control address-field" placeholder="Rua, número, complemento">
+                            <label>Rua / Avenida <span class="address-required-label"></span></label>
+                            <input type="text" name="address_street" class="form-control address-field" placeholder="Ex: Rua das Flores, 123">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Complemento <span class="address-required-label"></span></label>
+                                <input type="text" name="address_complement" class="form-control" placeholder="Apto, bloco, sala...">
+                            </div>
+                            <div class="form-group">
+                                <label>Bairro <span class="address-required-label"></span></label>
+                                <input type="text" name="address_neighborhood" class="form-control address-field" placeholder="Seu bairro">
+                            </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
