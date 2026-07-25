@@ -1,5 +1,10 @@
-<section class="page-header">
-    <div class="container"><h1>Checkout</h1></div>
+<section class="passeios-hero">
+    <div class="container">
+        <div class="passeios-hero-content">
+            <h1>Checkout</h1>
+            <p>Preencha seus dados para finalizar a reserva.</p>
+        </div>
+    </div>
 </section>
 
 <section class="section">
@@ -10,23 +15,23 @@
                 <form id="checkoutForm">
                     <input type="hidden" name="_token" value="<?= e(csrf_token()) ?>">
 
-                    <!-- Dados de Cobrança -->
+                    <!-- Dados Pessoais -->
                     <div class="checkout-section">
                         <h3>Dados Pessoais</h3>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Nome *</label>
-                                <input type="text" name="first_name" class="form-control" required>
+                                <input type="text" name="first_name" class="form-control" required placeholder="Seu nome">
                             </div>
                             <div class="form-group">
                                 <label>Sobrenome *</label>
-                                <input type="text" name="last_name" class="form-control" required>
+                                <input type="text" name="last_name" class="form-control" required placeholder="Seu sobrenome">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Email *</label>
-                                <input type="email" name="email" class="form-control" required>
+                                <input type="email" name="email" class="form-control" required placeholder="seuemail@exemplo.com">
                             </div>
                             <div class="form-group">
                                 <label>Telefone/WhatsApp *</label>
@@ -36,20 +41,50 @@
                         <div class="form-row">
                             <div class="form-group">
                                 <label>País *</label>
-                                <input type="text" name="country" class="form-control" value="BR" list="countryList" required>
-                                <datalist id="countryList">
-                                    <option value="BR">Brasil</option>
+                                <select name="country" class="form-control" required>
+                                    <option value="BR" selected>Brasil</option>
                                     <option value="US">Estados Unidos</option>
                                     <option value="AR">Argentina</option>
                                     <option value="CO">Colômbia</option>
                                     <option value="CL">Chile</option>
                                     <option value="PT">Portugal</option>
-                                </datalist>
+                                    <option value="DO">República Dominicana</option>
+                                    <option value="OTHER">Outro</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label>Cidade</label>
-                                <input type="text" name="city" class="form-control">
+                                <input type="text" name="city" class="form-control" placeholder="Sua cidade">
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Dados da Viagem -->
+                    <div class="checkout-section">
+                        <h3>Dados da Viagem</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Hotel / Resort</label>
+                                <input type="text" name="hotel" class="form-control" placeholder="Nome do hotel que vai ficar">
+                            </div>
+                            <div class="form-group">
+                                <label>Número do Voo (chegada)</label>
+                                <input type="text" name="flight_number" class="form-control" placeholder="Ex: LA8170">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Data de Chegada</label>
+                                <input type="date" name="arrival_date" class="form-control">
+                            </div>
+                            <div class="form-group">
+                                <label>Data de Partida</label>
+                                <input type="date" name="departure_date" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Observações</label>
+                            <textarea name="notes" class="form-control" rows="3" placeholder="Informações adicionais, restrições alimentares, necessidades especiais..."></textarea>
                         </div>
                     </div>
 
@@ -80,7 +115,7 @@
                     <div class="checkout-section">
                         <label class="terms-checkbox">
                             <input type="checkbox" id="termsCheck" required>
-                            Li e aceito os <a href="/pagina/termos" target="_blank">termos e condições</a>
+                            Li e aceito os <a href="/termos-e-condicoes" target="_blank">termos e condições</a> e as <a href="/politicas-de-cancelamento" target="_blank">políticas de cancelamento</a>
                         </label>
                     </div>
 

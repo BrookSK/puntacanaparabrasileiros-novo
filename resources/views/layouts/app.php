@@ -36,28 +36,34 @@
     <!-- Header -->
     <?= partial('header') ?>
 
-    <!-- Flash Messages -->
-    <?php if (has_flash('success')): ?>
-    <div class="alert alert-success alert-dismissible">
-        <span><?= e(flash('success')) ?></span>
-        <button class="alert-close">&times;</button>
-    </div>
-    <?php endif; ?>
-    <?php if (has_flash('error')): ?>
-    <div class="alert alert-danger alert-dismissible">
-        <span><?= e(flash('error')) ?></span>
-        <button class="alert-close">&times;</button>
-    </div>
-    <?php endif; ?>
-    <?php if (has_flash('info')): ?>
-    <div class="alert alert-info alert-dismissible">
-        <span><?= e(flash('info')) ?></span>
-        <button class="alert-close">&times;</button>
-    </div>
-    <?php endif; ?>
-
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Flash Messages -->
+        <?php if (has_flash('success')): ?>
+        <div class="container">
+            <div class="alert alert-success alert-dismissible">
+                <span><?= e(flash('success')) ?></span>
+                <button class="alert-close">&times;</button>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?php if (has_flash('error')): ?>
+        <div class="container">
+            <div class="alert alert-danger alert-dismissible">
+                <span><?= e(flash('error')) ?></span>
+                <button class="alert-close">&times;</button>
+            </div>
+        </div>
+        <?php endif; ?>
+        <?php if (has_flash('info')): ?>
+        <div class="container">
+            <div class="alert alert-info alert-dismissible">
+                <span><?= e(flash('info')) ?></span>
+                <button class="alert-close">&times;</button>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <?= $content ?>
     </main>
 

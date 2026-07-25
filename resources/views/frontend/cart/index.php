@@ -1,6 +1,9 @@
-<section class="page-header">
+<section class="passeios-hero">
     <div class="container">
-        <h1>Carrinho</h1>
+        <div class="passeios-hero-content">
+            <h1>Carrinho</h1>
+            <p>Revise seus itens antes de finalizar a compra.</p>
+        </div>
     </div>
 </section>
 
@@ -10,15 +13,17 @@
         <div class="empty-state">
             <h3>Seu carrinho está vazio</h3>
             <p>Explore nossos passeios e transfers para começar a planejar sua viagem!</p>
-            <a href="/passeios" class="btn btn-primary">Ver Passeios</a>
-            <a href="/transfers" class="btn btn-outline">Ver Transfers</a>
+            <div class="empty-state-actions">
+                <a href="/passeios" class="btn btn-primary">Ver Passeios</a>
+                <a href="/transfers" class="btn btn-outline">Ver Transfers</a>
+            </div>
         </div>
         <?php else: ?>
         <div class="cart-layout">
             <div class="cart-items">
                 <!-- Trips -->
                 <?php if (!empty($cart['trips'])): ?>
-                <h3>Passeios</h3>
+                <h3 class="cart-section-title">Passeios</h3>
                 <?php foreach ($cart['trips'] as $item): ?>
                 <div class="cart-item">
                     <div class="cart-item-image">
@@ -50,7 +55,7 @@
 
                 <!-- Transfers -->
                 <?php if (!empty($cart['transfers'])): ?>
-                <h3>Transfers</h3>
+                <h3 class="cart-section-title">Transfers</h3>
                 <?php foreach ($cart['transfers'] as $transfer): ?>
                 <div class="cart-item">
                     <div class="cart-item-image">
@@ -91,8 +96,10 @@
                     <div class="summary-row"><span>Transfers:</span><span><?= money($cart['transfer_total']) ?></span></div>
                     <?php endif; ?>
                     <div class="summary-row summary-total"><span>Total:</span><span><?= money($cart['grand_total']) ?></span></div>
-                    <a href="/checkout" class="btn btn-primary btn-block btn-lg">Ir para Checkout</a>
-                    <a href="/passeios" class="btn btn-outline btn-block">Continuar Comprando</a>
+                    <div class="summary-actions">
+                        <a href="/checkout" class="btn btn-primary btn-block">Ir para Checkout</a>
+                        <a href="/passeios" class="btn btn-outline btn-block">Continuar Comprando</a>
+                    </div>
                 </div>
             </aside>
         </div>
