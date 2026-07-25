@@ -176,7 +176,7 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
 
     // Vouchers
     $router->get('/vouchers', [AdminVouchersController::class, 'index'], [], 'admin.vouchers.index');
-    $router->get('/vouchers/{id}/visualizar', [AdminVouchersController::class, 'view'], [], 'admin.vouchers.view');
+    $router->get('/vouchers/{id}/visualizar', [AdminVouchersController::class, 'show'], [], 'admin.vouchers.view');
     $router->get('/vouchers/{id}/download', [AdminVouchersController::class, 'download'], [], 'admin.vouchers.download');
     $router->post('/vouchers/{id}/enviar', [AdminVouchersController::class, 'send'], [CsrfMiddleware::class], 'admin.vouchers.send');
 

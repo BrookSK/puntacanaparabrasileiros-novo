@@ -31,7 +31,7 @@ class VouchersController extends Controller
         ], 'admin');
     }
 
-    public function view(Request $request, Response $response): void
+    public function show(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
         $voucher = $this->voucherModel->find($id);
