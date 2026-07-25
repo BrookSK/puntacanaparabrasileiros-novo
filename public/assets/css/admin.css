@@ -43,19 +43,19 @@ a { color: var(--primary); text-decoration: none; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 
 /* Summary Card */
-.summary-card { padding: 0; overflow: hidden; }
-.summary-card-header { display: flex; align-items: center; gap: 10px; padding: 22px 26px; background: #f8fafc; border-bottom: 1px solid #f1f5f9; }
-.summary-card-header h3 { font-size: 14px; font-weight: 600; color: #1e293b; margin: 0; }
-.summary-card-header svg { color: #64748b; }
-.summary-card-body { padding: 26px 26px 22px; }
-.summary-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1px solid #f1f5f9; }
-.summary-row:last-child { border-bottom: none; padding-bottom: 0; }
-.summary-row-label { font-size: 13px; color: #64748b; font-weight: 500; }
-.summary-row-value { font-size: 13px; color: #1e293b; font-weight: 500; }
-.summary-card-note { margin: 18px 26px 0; padding: 18px; background: #f0f9ff; border: 1px solid #e0f2fe; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start; }
+.summary-card { padding: 0 !important; overflow: hidden; }
+.summary-card-header { display: flex; align-items: center; gap: 10px; padding: 22px 26px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+.summary-card-header h3 { font-size: 15px; font-weight: 600; color: #1e293b; margin: 0; }
+.summary-card-header svg { color: #475569; }
+.summary-card-body { padding: 8px 26px 8px; }
+.summary-row { display: flex; justify-content: space-between; align-items: center; padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
+.summary-row:last-child { border-bottom: none; }
+.summary-row-label { font-size: 14px; color: #64748b; font-weight: 500; }
+.summary-row-value { font-size: 14px; color: #1e293b; font-weight: 600; }
+.summary-card-note { margin: 8px 26px 0; padding: 20px; background: #f0f9ff; border: 1px solid #e0f2fe; border-radius: 8px; display: flex; gap: 14px; align-items: flex-start; }
 .summary-card-note .summary-note-icon { color: #0284c7; flex-shrink: 0; margin-top: 2px; }
 .summary-card-note strong { font-size: 13px; color: #0c4a6e; display: block; margin-bottom: 8px; }
-.summary-card-note p { font-size: 12px; color: #475569; line-height: 1.7; margin: 0; }
+.summary-card-note p { font-size: 13px; color: #475569; line-height: 1.7; margin: 0; }
 .summary-card-actions { padding: 26px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #f1f5f9; margin-top: 22px; }
 
 /* Back Button */
