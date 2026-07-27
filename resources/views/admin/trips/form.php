@@ -28,7 +28,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/atualizar' : '/admin/pa
                 <div class="form-group"><label>Notas Importantes</label><textarea name="important_notes" class="form-control" rows="3" placeholder="Informações importantes..."><?= e($trip['important_notes'] ?? '') ?></textarea></div>
             </div>
 
-            <!-- Categorias - Multi-select com pesquisa -->
+            <!-- Categorias - Multi-select com pesquisa v2 -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></div><div><h3>Categorias</h3><p class="admin-card-subtitle">Selecione as categorias deste passeio</p></div></div>
                 <div class="multiselect-wrapper" id="categoriesSelect">
