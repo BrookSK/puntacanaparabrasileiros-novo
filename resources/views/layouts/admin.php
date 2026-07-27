@@ -13,7 +13,7 @@
     <?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=<?= time() ?>">
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 </head>
 <body class="admin-body">
@@ -101,6 +101,6 @@
         </div>
     </div>
 
-    <script src="<?= asset('js/admin.js') ?>"></script>
+    <script src="<?= asset('js/admin.js') ?>?v=<?= time() ?>"></script>
 </body>
 </html>
