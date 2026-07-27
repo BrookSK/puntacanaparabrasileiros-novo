@@ -4,34 +4,39 @@
     </div>
 </div>
 
-<table class="table">
-    <thead>
-        <tr><th>Imagem</th><th>Nome</th><th>Slug</th><th>Ordem</th><th>Ações</th></tr>
-    </thead>
-    <tbody>
+<div class="categories-grid">
     <?php if (empty($categories)): ?>
-    <tr><td colspan="5" class="text-center">Nenhuma categoria cadastrada.</td></tr>
+    <div class="admin-card" style="text-align:center;padding:40px;">
+        <p style="color:#94a3b8;font-size:15px;">Nenhuma categoria cadastrada.</p>
+        <a href="/admin/categorias/criar" class="btn btn-primary" style="margin-top:12px;">Criar Primeira Categoria</a>
+    </div>
     <?php endif; ?>
+
     <?php foreach ($categories as $cat): ?>
-    <tr>
-        <td>
-            <?php if ($cat['image']): ?>
-            <img src="<?= e($cat['image']) ?>" alt="<?= e($cat['name']) ?>" class="table-thumb">
+    <div class="category-card">
+        <div class="category-card-img">
+            <?php if (!empty($cat['image'])): ?>
+            <img src="<?= e($cat['image']) ?>" alt="<?= e($cat['name']) ?>">
             <?php else: ?>
-            <span class="text-muted">Sem imagem</span>
+            <div class="category-card-placeholder">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
             <?php endif; ?>
-        </td>
-        <td><strong><?= e($cat['name']) ?></strong></td>
-        <td><small class="text-muted"><?= e($cat['slug']) ?></small></td>
-        <td><?= (int) $cat['sort_order'] ?></td>
-        <td class="actions-cell">
+        </div>
+        <div class="category-card-body">
+            <h4 class="category-card-name"><?= e($cat['name']) ?></h4>
+            <span class="category-card-slug">/<?= e($cat['slug']) ?></span>
+            <div class="category-card-meta">
+                <span class="category-card-order">Ordem: <?= (int)$cat['sort_order'] ?></span>
+            </div>
+        </div>
+        <div class="category-card-actions">
             <a href="/admin/categorias/<?= (int)$cat['id'] ?>/editar" class="btn btn-sm btn-outline">Editar</a>
-            <form method="POST" action="/admin/categorias/<?= (int)$cat['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir esta categoria?')">
+            <form method="POST" action="/admin/categorias/<?= (int)$cat['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Tem certeza que deseja excluir a categoria <?= e($cat['name']) ?>?')">
                 <?= csrf_field() ?>
                 <button class="btn btn-sm btn-danger">Excluir</button>
             </form>
-        </td>
-    </tr>
+        </div>
+    </div>
     <?php endforeach; ?>
-    </tbody>
-</table>
+</div>
