@@ -12,8 +12,9 @@
     <link rel="icon" type="image/png" href="<?= asset('images/favicon.png') ?>">
     <?php endif; ?>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=<?= time() ?>">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=2.1">
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 </head>
 <body class="admin-body">
@@ -101,6 +102,6 @@
         </div>
     </div>
 
-    <script src="<?= asset('js/admin.js') ?>?v=<?= time() ?>"></script>
+    <script src="<?= asset('js/admin.js') ?>?v=2.1"></script>
 </body>
 </html>
