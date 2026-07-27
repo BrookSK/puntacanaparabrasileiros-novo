@@ -2,35 +2,38 @@
     <div class="header-actions">
         <a href="/admin/categorias/criar" class="btn btn-primary">+ Nova Categoria</a>
     </div>
+    <form method="GET" class="filter-form">
+        <input type="text" name="busca" value="<?= e($currentSearch ?? '') ?>" placeholder="Buscar por nome..." class="form-control">
+        <button type="submit" class="btn btn-outline">Filtrar</button>
+    </form>
 </div>
 
-<div class="categories-grid">
+<div class="trips-list">
     <?php if (empty($categories)): ?>
-    <div class="admin-card" style="text-align:center;padding:40px;">
-        <p style="color:#94a3b8;font-size:15px;">Nenhuma categoria cadastrada.</p>
-        <a href="/admin/categorias/criar" class="btn btn-primary" style="margin-top:12px;">Criar Primeira Categoria</a>
+    <div class="trip-list-item" style="justify-content:center;padding:40px;">
+        <p style="color:#94a3b8;font-size:15px;">Nenhuma categoria encontrada.</p>
     </div>
     <?php endif; ?>
 
     <?php foreach ($categories as $cat): ?>
-    <div class="category-card">
-        <div class="category-card-img">
+    <div class="trip-list-item">
+        <div class="trip-list-img">
             <?php if (!empty($cat['image'])): ?>
             <img src="<?= e($cat['image']) ?>" alt="<?= e($cat['name']) ?>">
             <?php else: ?>
-            <div class="category-card-placeholder">
-                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            <div style="width:100%;height:100%;background:#f1f5f9;display:flex;align-items:center;justify-content:center;">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
             </div>
             <?php endif; ?>
         </div>
-        <div class="category-card-body">
-            <h4 class="category-card-name"><?= e($cat['name']) ?></h4>
-            <span class="category-card-slug">/<?= e($cat['slug']) ?></span>
-            <div class="category-card-meta">
-                <span class="category-card-order">Ordem: <?= (int)$cat['sort_order'] ?></span>
-            </div>
+        <div class="trip-list-info">
+            <h4 class="trip-list-title"><?= e($cat['name']) ?></h4>
+            <span class="trip-list-slug">/<?= e($cat['slug']) ?></span>
         </div>
-        <div class="category-card-actions">
+        <div class="trip-list-status">
+            <span class="badge badge-info">Ordem: <?= (int)$cat['sort_order'] ?></span>
+        </div>
+        <div class="trip-list-actions">
             <a href="/admin/categorias/<?= (int)$cat['id'] ?>/editar" class="btn btn-sm btn-outline">Editar</a>
             <form method="POST" action="/admin/categorias/<?= (int)$cat['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Tem certeza que deseja excluir a categoria <?= e($cat['name']) ?>?')">
                 <?= csrf_field() ?>
