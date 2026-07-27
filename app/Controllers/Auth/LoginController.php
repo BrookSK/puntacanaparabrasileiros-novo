@@ -201,8 +201,8 @@ class LoginController extends Controller
         );
         if (!$record) return false;
         if ($record['blocked_until'] && strtotime($record['blocked_until']) > time()) return true;
-        if ((int) $record['attempts'] >= 5) {
-            $this->db->update('rate_limits', ['blocked_until' => date('Y-m-d H:i:s', strtotime('+15 minutes'))], 'id = ?', [(int) $record['id']]);
+        if ((int) $record['attempts'] >= 15) {
+            $this->db->update('rate_limits', ['blocked_until' => date('Y-m-d H:i:s', strtotime('+5 minutes'))], 'id = ?', [(int) $record['id']]);
             return true;
         }
         return false;
