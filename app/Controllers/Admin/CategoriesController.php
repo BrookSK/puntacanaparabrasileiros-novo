@@ -20,10 +20,22 @@ class CategoriesController extends Controller
 
     public function index(Request $request, Response $response): void
     {
-        $categories = $this->categoryModel->getAll();
+        $search = $request->query('busca');
+        $sortBy = $request->query('ordenar', 'sort_order');
+
+        if ($search) {
+            $categories = $this->db->fetchAll(
+                "SELECT * FROM trip_categories WHERE name LIKE ? ORDER BY sort_order ASC",
+                ['%' . $search . '%']
+            );
+        } else {
+            $categories = $this->categoryModel->getAll();
+        }
 
         $this->view('admin/categories/index', [
             'categories' => $categories,
+            'currentSearch' => $search,
+            'currentSort' => $sortBy,
             'pageTitle' => 'Categorias de Passeios',
         ], 'admin');
     }

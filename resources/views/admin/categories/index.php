@@ -4,6 +4,11 @@
     </div>
     <form method="GET" class="filter-form">
         <input type="text" name="busca" value="<?= e($currentSearch ?? '') ?>" placeholder="Buscar por nome..." class="form-control">
+        <select name="ordenar" class="form-control" onchange="this.form.submit()">
+            <option value="sort_order" <?= ($currentSort ?? 'sort_order') === 'sort_order' ? 'selected' : '' ?>>Ordenar por Ordem</option>
+            <option value="name" <?= ($currentSort ?? '') === 'name' ? 'selected' : '' ?>>Ordenar por Nome</option>
+            <option value="newest" <?= ($currentSort ?? '') === 'newest' ? 'selected' : '' ?>>Mais Recentes</option>
+        </select>
         <button type="submit" class="btn btn-outline">Filtrar</button>
     </form>
 </div>
