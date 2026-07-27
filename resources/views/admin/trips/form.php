@@ -27,23 +27,46 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/atualizar' : '/admin/pa
                 <div class="form-group"><label>Ponto de Encontro</label><input type="text" name="meeting_point" value="<?= e($trip['meeting_point'] ?? '') ?>" class="form-control" placeholder="Ex: Lobby do hotel"></div>
                 <div class="form-group"><label>Notas Importantes</label><textarea name="important_notes" class="form-control" rows="3" placeholder="Informações importantes..."><?= e($trip['important_notes'] ?? '') ?></textarea></div>
             </div>
-            <!-- Categorias -->
+
+            <!-- Categorias - Multi-select com pesquisa -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></div><div><h3>Categorias</h3><p class="admin-card-subtitle">Selecione as categorias deste passeio</p></div></div>
-                <div class="checkbox-grid"><?php foreach ($categories as $cat): ?><label class="checkbox-label"><input type="checkbox" name="categories[]" value="<?= (int)$cat['id'] ?>" <?= in_array($cat['id'], $tripCategories ?? []) ? 'checked' : '' ?>> <?= e($cat['name']) ?></label><?php endforeach; ?></div>
+                <div class="multiselect-wrapper" id="categoriesSelect">
+                    <div class="multiselect-selected" id="categoriesSelected">
+                        <?php
+                        $selectedCats = $tripCategories ?? [];
+                        foreach ($categories as $cat):
+                            if (in_array($cat['id'], $selectedCats)):
+                        ?>
+                        <span class="multiselect-tag" data-value="<?= (int)$cat['id'] ?>"><?= e($cat['name']) ?><button type="button" class="multiselect-tag-remove" onclick="removeCategory(this, <?= (int)$cat['id'] ?>)">&times;</button></span>
+                        <?php endif; endforeach; ?>
+                    </div>
+                    <input type="text" class="multiselect-search" id="categoriesSearch" placeholder="Buscar categorias..." autocomplete="off">
+                    <div class="multiselect-dropdown" id="categoriesDropdown">
+                        <?php foreach ($categories as $cat): ?>
+                        <label class="multiselect-option <?= in_array($cat['id'], $selectedCats) ? 'selected' : '' ?>" data-value="<?= (int)$cat['id'] ?>" data-name="<?= e(mb_strtolower($cat['name'])) ?>">
+                            <input type="checkbox" name="categories[]" value="<?= (int)$cat['id'] ?>" <?= in_array($cat['id'], $selectedCats) ? 'checked' : '' ?>>
+                            <span><?= e($cat['name']) ?></span>
+                        </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
+
             <!-- Inclui / Não Inclui -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div><h3>O que Inclui / Não Inclui</h3><p class="admin-card-subtitle">Itens inclusos e não inclusos</p></div></div>
                 <div class="form-group"><label>Inclui</label><div id="includes-list" class="repeater-list"><?php $includes = $isEdit && !empty($trip['includes']) ? json_decode($trip['includes'], true) : ['']; foreach ($includes as $inc): ?><div class="repeater-item"><input type="text" name="includes[]" value="<?= e($inc) ?>" class="form-control" placeholder="Ex: Almoço incluso"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div><?php endforeach; ?></div><button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('includes-list', 'includes[]', 'Ex: Almoço incluso')">+ Adicionar</button></div>
                 <div class="form-group"><label>Não Inclui</label><div id="excludes-list" class="repeater-list"><?php $excludes = $isEdit && !empty($trip['excludes']) ? json_decode($trip['excludes'], true) : ['']; foreach ($excludes as $exc): ?><div class="repeater-item"><input type="text" name="excludes[]" value="<?= e($exc) ?>" class="form-control" placeholder="Ex: Bebidas alcoólicas"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div><?php endforeach; ?></div><button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('excludes-list', 'excludes[]', 'Ex: Bebidas alcoólicas')">+ Adicionar</button></div>
             </div>
+
             <!-- Pacotes -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/></svg></div><div><h3>Pacotes</h3><p class="admin-card-subtitle">Pacotes de preço disponíveis</p></div></div>
                 <div id="packages-list"><?php $pkgs = $packages ?? [['title' => '', 'description' => '', 'categories' => []]]; foreach ($pkgs as $i => $pkg): ?><div class="package-item card-inner"><div class="form-row"><div class="form-group col-6"><label>Nome</label><input type="text" name="packages[<?= $i ?>][title]" value="<?= e($pkg['title'] ?? '') ?>" class="form-control"></div><div class="form-group col-6"><label>Descrição</label><input type="text" name="packages[<?= $i ?>][description]" value="<?= e($pkg['description'] ?? '') ?>" class="form-control"></div></div><div class="form-group"><label>Categorias de Viajante</label><div class="checkbox-grid"><?php foreach ($travelerCategories as $tc): ?><label class="checkbox-label"><input type="checkbox" name="packages[<?= $i ?>][categories][]" value="<?= (int)$tc['id'] ?>" <?= in_array($tc['id'], array_column($pkg['categories'] ?? [], 'traveler_category_id')) ? 'checked' : '' ?>> <?= e($tc['name']) ?></label><?php endforeach; ?></div></div></div><?php endforeach; ?></div>
                 <button type="button" class="btn btn-outline" id="addPackageBtn">+ Adicionar Pacote</button>
             </div>
+
             <!-- SEO -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><div><h3>SEO</h3><p class="admin-card-subtitle">Otimização para buscadores</p></div></div>
@@ -51,6 +74,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/atualizar' : '/admin/pa
                 <div class="form-group"><label>Meta Description</label><textarea name="meta_description" class="form-control" rows="2" placeholder="Descrição para Google"><?= e($trip['meta_description'] ?? '') ?></textarea></div>
             </div>
         </div>
+
         <!-- Coluna Direita -->
         <div>
             <div class="admin-card admin-card-sticky summary-card">
@@ -72,8 +96,55 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/atualizar' : '/admin/pa
         </div>
     </div>
 </form>
+
 <script>
 function addRepeater(listId, fieldName, placeholder) { const list = document.getElementById(listId); const div = document.createElement('div'); div.className = 'repeater-item'; div.innerHTML = `<input type="text" name="${fieldName}" value="" class="form-control" placeholder="${placeholder}"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button>`; list.appendChild(div); }
 document.addEventListener('click', function(e) { if (e.target.classList.contains('repeater-remove')) { e.target.closest('.repeater-item, .package-item').remove(); } });
 document.getElementById('addPackageBtn')?.addEventListener('click', function() { const list = document.getElementById('packages-list'), i = list.children.length; const cats = <?= json_encode($travelerCategories ?? []) ?>; let ch = ''; cats.forEach(tc => { ch += `<label class="checkbox-label"><input type="checkbox" name="packages[${i}][categories][]" value="${tc.id}"> ${tc.name}</label>`; }); const d = document.createElement('div'); d.className = 'package-item card-inner'; d.innerHTML = `<div class="form-row"><div class="form-group col-6"><label>Nome</label><input type="text" name="packages[${i}][title]" class="form-control"></div><div class="form-group col-6"><label>Descrição</label><input type="text" name="packages[${i}][description]" class="form-control"></div></div><div class="form-group"><label>Categorias</label><div class="checkbox-grid">${ch}</div></div><button type="button" class="btn btn-sm btn-danger repeater-remove">&times; Remover</button>`; list.appendChild(d); });
+
+// Categories Multi-select
+(function() {
+    const search = document.getElementById('categoriesSearch');
+    const dropdown = document.getElementById('categoriesDropdown');
+    const selected = document.getElementById('categoriesSelected');
+    if (!search || !dropdown) return;
+
+    search.addEventListener('focus', () => dropdown.classList.add('open'));
+    search.addEventListener('input', () => {
+        const q = search.value.toLowerCase();
+        dropdown.querySelectorAll('.multiselect-option').forEach(opt => {
+            opt.style.display = opt.dataset.name.includes(q) ? '' : 'none';
+        });
+        dropdown.classList.add('open');
+    });
+
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('#categoriesSelect')) dropdown.classList.remove('open');
+    });
+
+    dropdown.querySelectorAll('.multiselect-option').forEach(opt => {
+        opt.addEventListener('click', (e) => {
+            if (e.target.tagName === 'BUTTON') return;
+            const cb = opt.querySelector('input[type="checkbox"]');
+            cb.checked = !cb.checked;
+            opt.classList.toggle('selected', cb.checked);
+            updateTags();
+        });
+    });
+
+    window.removeCategory = function(btn, val) {
+        const opt = dropdown.querySelector(`.multiselect-option[data-value="${val}"]`);
+        if (opt) { opt.querySelector('input').checked = false; opt.classList.remove('selected'); }
+        btn.closest('.multiselect-tag').remove();
+    };
+
+    function updateTags() {
+        selected.innerHTML = '';
+        dropdown.querySelectorAll('.multiselect-option.selected').forEach(opt => {
+            const val = opt.dataset.value;
+            const name = opt.querySelector('span').textContent;
+            selected.innerHTML += `<span class="multiselect-tag" data-value="${val}">${name}<button type="button" class="multiselect-tag-remove" onclick="removeCategory(this, ${val})">&times;</button></span>`;
+        });
+    }
+})();
 </script>
