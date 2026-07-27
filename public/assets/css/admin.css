@@ -73,8 +73,8 @@ a { color: var(--primary); text-decoration: none; }
 
 /* Input Prefix */
 .input-prefix-wrapper { position: relative; display: flex; align-items: center; }
-.input-prefix { position: absolute; left: 12px; color: #64748b; font-weight: 600; font-size: 14px; pointer-events: none; }
-.input-with-prefix { padding-left: 28px; }
+.input-prefix { position: absolute; left: 14px; color: #64748b; font-weight: 600; font-size: 14px; pointer-events: none; z-index: 1; }
+.input-with-prefix { padding-left: 32px !important; }
 
 /* Form Hints */
 .form-hint { display: block; font-size: 11px; color: #94a3b8; margin-top: 6px; }
