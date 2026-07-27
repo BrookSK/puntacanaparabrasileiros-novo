@@ -23,13 +23,21 @@ class CategoriesController extends Controller
         $search = $request->query('busca');
         $sortBy = $request->query('ordenar', 'sort_order');
 
+        $orderClause = match ($sortBy) {
+            'name' => 'name ASC',
+            'newest' => 'id DESC',
+            default => 'sort_order ASC',
+        };
+
         if ($search) {
             $categories = $this->db->fetchAll(
-                "SELECT * FROM trip_categories WHERE name LIKE ? ORDER BY sort_order ASC",
+                "SELECT * FROM trip_categories WHERE name LIKE ? ORDER BY $orderClause",
                 ['%' . $search . '%']
             );
         } else {
-            $categories = $this->categoryModel->getAll();
+            $categories = $this->db->fetchAll(
+                "SELECT * FROM trip_categories ORDER BY $orderClause"
+            );
         }
 
         $this->view('admin/categories/index', [
