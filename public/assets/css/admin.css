@@ -97,6 +97,19 @@ a { color: var(--primary); text-decoration: none; }
 .tariffs-block { margin-top: 12px; padding-top: 16px; border-top: 1px solid #e2e8f0; }
 .tariffs-block-label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 12px; }
 
+/* Repeater */
+.repeater-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.repeater-item { display: flex; gap: 10px; align-items: center; }
+.repeater-item .form-control { flex: 1; }
+
+/* Card Inner */
+.card-inner { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 18px; margin-bottom: 14px; }
+
+/* Checkbox Grid */
+.checkbox-grid { display: flex; flex-wrap: wrap; gap: 14px; }
+.checkbox-label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #475569; cursor: pointer; }
+.checkbox-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary); }
+
 /* Table Info */
 .table-info { width: 100%; border-collapse: collapse; }
 .table-info td { padding: 8px 0; font-size: 13px; border-bottom: 1px solid #f8fafc; vertical-align: top; }
