@@ -10,9 +10,9 @@
             <div class="footer-top">
                 <!-- Coluna Logo + Descrição -->
                 <div class="footer-brand">
-                    <div class="footer-logo">
+                    <a href="/" class="footer-logo">
                         <img src="<?= asset('images/layout/PUNTA-CANA-1.png') ?>" alt="Punta Cana para Brasileiros">
-                    </div>
+                    </a>
                     <p class="footer-desc">A melhor agência especializada em viagens para Punta Cana com atendimento personalizado para brasileiros.</p>
                     <div class="footer-social">
                         <a href="https://www.instagram.com/puntacanaparabrasileiros" target="_blank" class="social-icon" title="Instagram">
