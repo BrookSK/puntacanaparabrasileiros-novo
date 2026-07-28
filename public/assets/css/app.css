@@ -2298,6 +2298,22 @@ img { max-width: 100%; height: auto; }
 .whatsapp-float { position: fixed; bottom: 25px; right: 25px; background: #25D366; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; transition: transform .2s; }
 .whatsapp-float:hover { transform: scale(1.1); color: white; }
 
+/* Toast Notifications */
+.app-toast { position: fixed; top: 24px; right: 24px; z-index: 99999; display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 12px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08); max-width: 400px; min-width: 280px; transform: translateX(120%); transition: transform .3s cubic-bezier(0.4,0,0.2,1); border-left: 4px solid #10b981; }
+.app-toast.show { transform: translateX(0); }
+.app-toast-icon { flex-shrink: 0; display: flex; align-items: center; }
+.app-toast-msg { flex: 1; font-size: 14px; font-weight: 500; color: #1f2937; line-height: 1.4; }
+.app-toast-close { background: none; border: none; font-size: 20px; color: #9ca3af; cursor: pointer; padding: 0 0 0 8px; line-height: 1; }
+.app-toast-close:hover { color: #374151; }
+.app-toast-success { border-left-color: #10b981; }
+.app-toast-success .app-toast-icon { color: #10b981; }
+.app-toast-error { border-left-color: #ef4444; }
+.app-toast-error .app-toast-icon { color: #ef4444; }
+.app-toast-warning { border-left-color: #f59e0b; }
+.app-toast-warning .app-toast-icon { color: #f59e0b; }
+.app-toast-info { border-left-color: #3b82f6; }
+.app-toast-info .app-toast-icon { color: #3b82f6; }
+
 /* Badges */
 .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
 .badge-success { background: #d4edda; color: #155724; }
