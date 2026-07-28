@@ -5716,3 +5716,22 @@ img { max-width: 100%; height: auto; }
         border-bottom: 1px solid #eee;
     }
 }
+
+/* Checkout Success */
+.success-card { max-width: 600px; margin: 0 auto; text-align: center; background: white; border-radius: 16px; padding: 48px 40px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.success-icon { margin-bottom: 24px; }
+.success-card h2 { font-size: 24px; font-weight: 700; color: #1f2937; margin-bottom: 8px; }
+.success-subtitle { font-size: 15px; color: #6b7280; margin-bottom: 32px; }
+.success-details { background: #f9fafb; border-radius: 10px; padding: 20px; margin-bottom: 24px; text-align: left; }
+.success-detail-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #f3f4f6; font-size: 14px; }
+.success-detail-row:last-child { border-bottom: none; }
+.success-detail-row span { color: #6b7280; }
+.success-items { text-align: left; margin-bottom: 24px; }
+.success-items h4 { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+.success-item { display: flex; justify-content: space-between; padding: 10px 14px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; font-size: 14px; }
+.success-item strong { color: #1f2937; }
+.success-item span { color: #6b7280; }
+.success-info { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 16px 20px; margin-bottom: 28px; text-align: left; }
+.success-info p { font-size: 13px; color: #166534; margin-bottom: 8px; line-height: 1.6; }
+.success-info p:last-child { margin-bottom: 0; }
+.success-actions { display: flex; gap: 12px; justify-content: center; }

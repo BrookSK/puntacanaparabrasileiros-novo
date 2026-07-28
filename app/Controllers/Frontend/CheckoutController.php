@@ -373,7 +373,7 @@ class CheckoutController extends Controller
                 $adminEmail, 'Admin',
                 'Nova Reserva: ' . $booking['booking_number'],
                 'admin-notification',
-                ['booking' => $booking, 'items' => $items, 'transfers' => $transfers]
+                ['booking' => $booking, 'items' => $items, 'transfers' => $transfers, 'siteUrl' => $this->setting('site_url', '')]
             );
         }
 
