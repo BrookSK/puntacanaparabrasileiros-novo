@@ -10,7 +10,7 @@
 <!-- Stepper de Progresso -->
 <section style="padding:30px 0 10px;">
     <div class="container">
-        <div style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:nowrap;">
+        <div id="checkoutStepper" style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:nowrap;">
             <div style="display:flex;align-items:center;gap:10px;">
                 <div style="width:36px;height:36px;border-radius:50%;border:2px solid #0077b6;display:flex;align-items:center;justify-content:center;background:#fff;color:#0077b6;flex-shrink:0;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
@@ -24,15 +24,15 @@
                 </div>
                 <span style="font-size:13px;font-weight:500;color:#6b7280;white-space:nowrap;">Viajantes</span>
             </div>
-            <div style="width:50px;height:2px;background:#0077b6;margin:0 12px;flex-shrink:0;"></div>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div style="width:36px;height:36px;border-radius:50%;border:2px solid #0077b6;display:flex;align-items:center;justify-content:center;background:#0077b6;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">3</div>
-                <span style="font-size:13px;font-weight:600;color:#1f2937;white-space:nowrap;">Detalhes De Cobrança</span>
+            <div id="stepperLine3" style="width:50px;height:2px;background:#0077b6;margin:0 12px;flex-shrink:0;"></div>
+            <div id="stepperStep3" style="display:flex;align-items:center;gap:10px;">
+                <div id="stepperCircle3" style="width:36px;height:36px;border-radius:50%;border:2px solid #0077b6;display:flex;align-items:center;justify-content:center;background:#0077b6;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">3</div>
+                <span id="stepperLabel3" style="font-size:13px;font-weight:600;color:#1f2937;white-space:nowrap;">Detalhes De Cobrança</span>
             </div>
-            <div style="width:50px;height:2px;background:#e5e7eb;margin:0 12px;flex-shrink:0;"></div>
-            <div style="display:flex;align-items:center;gap:10px;">
-                <div style="width:36px;height:36px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;background:#fff;color:#9ca3af;font-size:13px;font-weight:600;flex-shrink:0;">4</div>
-                <span style="font-size:13px;font-weight:500;color:#9ca3af;white-space:nowrap;">Pagamento</span>
+            <div id="stepperLine4" style="width:50px;height:2px;background:#e5e7eb;margin:0 12px;flex-shrink:0;"></div>
+            <div id="stepperStep4" style="display:flex;align-items:center;gap:10px;">
+                <div id="stepperCircle4" style="width:36px;height:36px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;background:#fff;color:#9ca3af;font-size:13px;font-weight:600;flex-shrink:0;">4</div>
+                <span id="stepperLabel4" style="font-size:13px;font-weight:500;color:#9ca3af;white-space:nowrap;">Pagamento</span>
             </div>
         </div>
     </div>
@@ -417,8 +417,30 @@ document.getElementById('goToPaymentBtn')?.addEventListener('click', function() 
     document.getElementById('checkoutTerms').style.display = 'block';
     document.getElementById('paymentContainer').style.display = 'block';
 
-    // Atualizar stepper visual (step 3 completed, step 4 active)
-    const stepperSteps = document.querySelectorAll('.booking-stepper-section .stepper-step, section > .container > div > div');
+    // Atualizar stepper: step 3 -> completed, step 4 -> active
+    const circle3 = document.getElementById('stepperCircle3');
+    const label3 = document.getElementById('stepperLabel3');
+    const line4 = document.getElementById('stepperLine4');
+    const circle4 = document.getElementById('stepperCircle4');
+    const label4 = document.getElementById('stepperLabel4');
+
+    // Step 3 completed
+    circle3.style.background = '#fff';
+    circle3.style.color = '#0077b6';
+    circle3.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+    label3.style.fontWeight = '500';
+    label3.style.color = '#6b7280';
+
+    // Line 4 active
+    line4.style.background = '#0077b6';
+
+    // Step 4 active
+    circle4.style.border = '2px solid #0077b6';
+    circle4.style.background = '#0077b6';
+    circle4.style.color = '#fff';
+    label4.style.fontWeight = '600';
+    label4.style.color = '#1f2937';
+
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
