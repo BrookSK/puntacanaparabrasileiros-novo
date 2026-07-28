@@ -74,7 +74,19 @@ class Request
      */
     public function input(string $key, mixed $default = null): mixed
     {
-        return $this->post[$key] ?? $this->query[$key] ?? $default;
+        // Check POST first, then JSON body, then GET
+        if (isset($this->post[$key])) return $this->post[$key];
+
+        // If POST is empty and content-type is JSON, parse body
+        if (empty($this->post) && str_contains($this->header('content-type', ''), 'json')) {
+            static $jsonBody = null;
+            if ($jsonBody === null) {
+                $jsonBody = json_decode($this->rawBody(), true) ?: [];
+            }
+            if (isset($jsonBody[$key])) return $jsonBody[$key];
+        }
+
+        return $this->query[$key] ?? $default;
     }
 
     /**
