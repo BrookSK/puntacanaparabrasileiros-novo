@@ -11,9 +11,9 @@
     <div class="container">
         <div class="success-card">
             <!-- Ícone de sucesso -->
-            <div class="success-icon">
-                <div class="success-icon-circle">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <div style="margin-bottom:32px;">
+                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:inline-flex;align-items:center;justify-content:center;box-shadow:0 10px 30px rgba(16,185,129,0.35);">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
             </div>
 
