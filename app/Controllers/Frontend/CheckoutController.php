@@ -197,7 +197,6 @@ class CheckoutController extends Controller
                     ]);
                     $responseData['stripe_client_secret'] = $intent['client_secret'];
                 } catch (\Throwable $stripeError) {
-                    $this->db->commit();
                     $this->json([
                         'success' => false,
                         'error' => 'Erro ao processar cartão. Verifique se o Stripe está configurado. Detalhes: ' . $stripeError->getMessage(),
@@ -213,7 +212,6 @@ class CheckoutController extends Controller
                     $order = $paypalService->createOrder($payAmount, 'USD', 'Reserva ' . $bookingNumber);
                     $responseData['paypal_order_id'] = $order['id'];
                 } catch (\Throwable $paypalError) {
-                    $this->db->commit();
                     $this->json([
                         'success' => false,
                         'error' => 'Erro ao processar PayPal. Verifique se o PayPal está configurado. Detalhes: ' . $paypalError->getMessage(),
@@ -245,7 +243,6 @@ class CheckoutController extends Controller
                     ], 'id = ?', [$paymentId]);
                 } catch (\Throwable $pixError) {
                     // Se falhar ao criar PIX, retornar erro amigável
-                    $this->db->commit();
                     $this->json([
                         'success' => false,
                         'error' => 'Erro ao gerar PIX. Verifique se o PagBank está configurado corretamente. Detalhes: ' . $pixError->getMessage(),
@@ -258,7 +255,6 @@ class CheckoutController extends Controller
             if ($gateway === 'simulate') {
                 $currentUser = $this->currentUser();
                 if (!$currentUser || ($currentUser['role'] ?? '') !== 'superadmin') {
-                    $this->db->commit();
                     $this->json(['success' => false, 'error' => 'Acesso negado.'], 403);
                     return;
                 }
@@ -276,7 +272,6 @@ class CheckoutController extends Controller
                 }
 
                 // Executar ações pós-pagamento (vouchers, emails, WhatsApp, comissões)
-                $this->db->commit();
                 try {
                     $this->postPaymentActions($bookingId);
                 } catch (\Throwable $e) {
@@ -292,7 +287,6 @@ class CheckoutController extends Controller
                 return;
             }
 
-            $this->db->commit();
             $this->json($responseData);
 
         } catch (\Throwable $e) {
