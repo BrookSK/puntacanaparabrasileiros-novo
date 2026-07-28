@@ -159,7 +159,7 @@
                                     <?php elseif ($gw['icon'] === 'card'): ?>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                                     <?php elseif ($gw['icon'] === 'pix'): ?>
-                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/120px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png" alt="PIX" width="24" height="24" style="object-fit:contain;">
+                                    <svg width="24" height="24" viewBox="0 0 512 512"><path d="M346.5 310.5l-61.8 61.8c-18.7 18.7-49.1 18.7-67.9 0l-62.7-62.7c-4.7-4.7-12.3-4.7-17 0l-44.3 44.3c-24.9 24.9-24.9 65.2 0 90.1l44.3 44.3c24.9 24.9 65.2 24.9 90.1 0l31.3-31.3c4.7-4.7 12.3-4.7 17 0l31.3 31.3c24.9 24.9 65.2 24.9 90.1 0l44.3-44.3c24.9-24.9 24.9-65.2 0-90.1l-44.3-44.3c-4.7-4.7-12.3-4.7-17 0l-15.6 15.6c-18.7 18.7-49.1 18.7-67.9 0z" fill="#32BCAD"/><path d="M346.5 201.5l61.8-61.8c4.7-4.7 12.3-4.7 17 0l44.3 44.3c24.9 24.9 24.9 65.2 0 90.1l-44.3 44.3c-4.7 4.7-12.3 4.7-17 0l-15.6-15.6c-18.7-18.7-49.1-18.7-67.9 0l-61.8 61.8c-18.7 18.7-49.1 18.7-67.9 0l-61.8-61.8c-18.7-18.7-49.1-18.7-67.9 0L50.8 318.4c-4.7 4.7-12.3 4.7-17 0l-44.3-44.3c-24.9-24.9-24.9-65.2 0-90.1l44.3-44.3c4.7-4.7 12.3-4.7 17 0l44.3 44.3c18.7 18.7 49.1 18.7 67.9 0l62.7-62.7c18.7-18.7 49.1-18.7 67.9 0z" fill="#4BB8A9"/></svg>
                                     <?php endif; ?>
                                 </div>
                                 <div class="payment-option-info">
