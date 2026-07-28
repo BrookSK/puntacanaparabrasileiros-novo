@@ -199,7 +199,7 @@
                                     <?= format_date($item['date']) ?>
                                     <?php if (!empty($item['time'])): ?> às <?= e($item['time']) ?><?php endif; ?>
                                 </span>
-                                <span class="summary-product-code">Código Da Viagem: WTE-<?= 8000 + (int)$item['trip_id'] ?></span>
+                                <span class="summary-product-code">Código Da Viagem: <span>WTE-<?= 8000 + (int)$item['trip_id'] ?></span></span>
                                 <?php if (!empty($item['package_title'])): ?>
                                 <span class="summary-product-meta">Pacote: <?= e($item['package_title']) ?></span>
                                 <?php endif; ?>
