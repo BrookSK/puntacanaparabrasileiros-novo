@@ -76,10 +76,8 @@
                 <div class="form-row">
                     <div class="form-group col-6">
                         <label>Valor Total (USD) <span class="required">*</span></label>
-                        <div class="input-prefix-wrapper">
-                            <span class="input-prefix">$</span>
-                            <input type="number" step="0.01" name="total" class="form-control input-with-prefix" required min="0" placeholder="0.00">
-                        </div>
+                        <input type="number" step="0.01" name="total" class="form-control" required min="0" placeholder="0.00">
+                        <small class="form-hint">Valor em dólares americanos (USD).</small>
                     </div>
                 </div>
 
