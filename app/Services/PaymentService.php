@@ -141,7 +141,7 @@ class PaymentService
             $gateways[] = [
                 'id' => 'paypal',
                 'name' => 'PayPal',
-                'description' => 'Pague com PayPal ou cartão de crédito internacional',
+                'description' => 'Cartão de crédito e débito via PayPal',
                 'icon' => 'paypal',
             ];
         }
@@ -149,8 +149,8 @@ class PaymentService
         if ($app->setting('stripe_enabled', '0') === '1') {
             $gateways[] = [
                 'id' => 'stripe',
-                'name' => 'Cartão de Crédito',
-                'description' => 'Visa, Mastercard, Amex via Stripe',
+                'name' => 'Cartão de Crédito e Débito',
+                'description' => 'Visa, Mastercard, Elo, Amex via Stripe',
                 'icon' => 'card',
             ];
         }
@@ -169,7 +169,7 @@ class PaymentService
             $gateways[] = [
                 'id' => 'paypal',
                 'name' => 'PayPal',
-                'description' => 'Pague com PayPal ou cartão de crédito internacional',
+                'description' => 'Cartão de crédito e débito via PayPal',
                 'icon' => 'paypal',
             ];
         }

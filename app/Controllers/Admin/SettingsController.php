@@ -65,7 +65,7 @@ class SettingsController extends Controller
 
         // Processar checkboxes (booleans) — se não vem no POST, é "0"
         $booleanFields = [
-            'paypal_enabled', 'stripe_enabled', 'partial_payment_enabled',
+            'paypal_enabled', 'stripe_enabled', 'pagbank_enabled', 'partial_payment_enabled',
             'whatsapp_enabled', 'affiliate_enabled', 'affiliate_auto_approve',
         ];
         foreach ($booleanFields as $field) {
