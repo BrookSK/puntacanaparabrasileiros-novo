@@ -199,24 +199,34 @@ class CheckoutController extends Controller
 
             // Se PIX (PagBank), criar cobrança
             if ($gateway === 'pix') {
-                $pagBankService = new \App\Services\PagBankService();
-                $customer = [
-                    'name' => ($billing['first_name'] ?? '') . ' ' . ($billing['last_name'] ?? ''),
-                    'email' => $billing['email'] ?? '',
-                    'cpf' => preg_replace('/\D/', '', $request->input('cpf', '')),
-                ];
-                $pixCharge = $pagBankService->createPixCharge(
-                    $payAmount,
-                    'Reserva ' . $bookingNumber,
-                    $customer,
-                    $bookingNumber
-                );
-                $responseData['pix'] = $pixCharge;
+                try {
+                    $pagBankService = new \App\Services\PagBankService();
+                    $customer = [
+                        'name' => ($billing['first_name'] ?? '') . ' ' . ($billing['last_name'] ?? ''),
+                        'email' => $billing['email'] ?? '',
+                        'cpf' => preg_replace('/\D/', '', $request->input('cpf', '')),
+                    ];
+                    $pixCharge = $pagBankService->createPixCharge(
+                        $payAmount,
+                        'Reserva ' . $bookingNumber,
+                        $customer,
+                        $bookingNumber
+                    );
+                    $responseData['pix'] = $pixCharge;
 
-                // Salvar charge_id no pagamento para consulta posterior
-                $this->db->update('payments', [
-                    'gateway_transaction_id' => $pixCharge['charge_id'],
-                ], 'id = ?', [$paymentId]);
+                    // Salvar charge_id no pagamento para consulta posterior
+                    $this->db->update('payments', [
+                        'transaction_id' => $pixCharge['charge_id'],
+                    ], 'id = ?', [$paymentId]);
+                } catch (\Throwable $pixError) {
+                    // Se falhar ao criar PIX, retornar erro amigável
+                    $this->db->commit();
+                    $this->json([
+                        'success' => false,
+                        'error' => 'Erro ao gerar PIX. Verifique se o PagBank está configurado corretamente. Detalhes: ' . $pixError->getMessage(),
+                    ], 400);
+                    return;
+                }
             }
 
             $this->json($responseData);

@@ -154,7 +154,7 @@ class WebhookController extends Controller
         }
 
         // Consultar PagBank
-        $chargeId = $payment['gateway_transaction_id'] ?? '';
+        $chargeId = $payment['transaction_id'] ?? '';
         if (!$chargeId) {
             $this->json(['paid' => false, 'status' => 'waiting']);
             return;
@@ -194,7 +194,7 @@ class WebhookController extends Controller
         if ($status === 'PAID' && $chargeId) {
             // Buscar payment pelo charge_id
             $payment = $this->db->fetchOne(
-                "SELECT * FROM payments WHERE gateway_transaction_id = ? AND status = 'pending'",
+                "SELECT * FROM payments WHERE transaction_id = ? AND status = 'pending'",
                 [$chargeId]
             );
 

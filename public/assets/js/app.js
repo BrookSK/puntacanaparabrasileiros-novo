@@ -688,7 +688,6 @@
                 .then(response => {
                     if (response.success) {
                         if (response.gateway === 'paypal' && response.paypal_order_id) {
-                            // PayPal flow handled by SDK
                             capturePayPal(response);
                         } else if (response.gateway === 'stripe' && response.stripe_client_secret) {
                             handleStripePayment(response);
@@ -701,7 +700,7 @@
                         document.getElementById('checkoutLoading').style.display = 'none';
                         alert(response.error || 'Erro ao processar.');
                     }
-                }).catch(() => { document.getElementById('checkoutLoading').style.display = 'none'; alert('Erro de conexão.'); });
+                }).catch(err => { document.getElementById('checkoutLoading').style.display = 'none'; alert('Erro de conexão. Tente novamente.'); });
         });
     }
 
