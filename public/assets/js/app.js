@@ -716,7 +716,10 @@
             ajax('/checkout/processar', { body: JSON.stringify(data) })
                 .then(response => {
                     if (response.success) {
-                        if (response.gateway === 'paypal' && response.paypal_order_id) {
+                        if (response.gateway === 'simulate' && response.redirect) {
+                            // Simulação aprovada — redirecionar direto
+                            window.location = response.redirect;
+                        } else if (response.gateway === 'paypal' && response.paypal_order_id) {
                             capturePayPal(response);
                         } else if (response.gateway === 'stripe' && response.stripe_client_secret) {
                             handleStripePayment(response);

@@ -174,6 +174,18 @@ class PaymentService
             ];
         }
 
+        // Simulação de pagamento — APENAS para SuperAdmin
+        $session = $app->getSession();
+        $user = $session->get('user');
+        if ($user && ($user['role'] ?? '') === 'superadmin') {
+            $gateways[] = [
+                'id' => 'simulate',
+                'name' => 'Simular Pagamento',
+                'description' => 'Aprovação instantânea (apenas SuperAdmin)',
+                'icon' => 'simulate',
+            ];
+        }
+
         return $gateways;
     }
 }

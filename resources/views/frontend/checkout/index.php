@@ -160,6 +160,8 @@
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                                     <?php elseif ($gw['icon'] === 'pix'): ?>
                                     <img src="<?= asset('images/pix-logo.png') ?>" alt="PIX" width="24" height="24" style="object-fit:contain;">
+                                    <?php elseif ($gw['icon'] === 'simulate'): ?>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
                                     <?php endif; ?>
                                 </div>
                                 <div class="payment-option-info">

@@ -254,6 +254,36 @@ class CheckoutController extends Controller
                 }
             }
 
+            // Se Simulação (apenas SuperAdmin), aprovar instantaneamente
+            if ($gateway === 'simulate') {
+                $currentUser = $this->currentUser();
+                if (!$currentUser || ($currentUser['role'] ?? '') !== 'superadmin') {
+                    $this->db->commit();
+                    $this->json(['success' => false, 'error' => 'Acesso negado.'], 403);
+                    return;
+                }
+
+                // Confirmar pagamento imediatamente
+                $this->paymentService->confirmPayment(
+                    $paymentId,
+                    'SIM-' . strtoupper(bin2hex(random_bytes(8))),
+                    json_encode(['gateway' => 'simulate', 'approved_by' => $currentUser['email'], 'approved_at' => date('c')])
+                );
+
+                // Executar ações pós-pagamento (vouchers, emails, WhatsApp, comissões)
+                $this->db->commit();
+                $this->postPaymentActions($bookingId);
+
+                // Limpar carrinho
+                $this->cartService->clearAll();
+
+                $responseData['gateway'] = 'simulate';
+                $responseData['redirect'] = '/checkout/sucesso/' . $bookingNumber;
+                $this->json($responseData);
+                return;
+            }
+
+            $this->db->commit();
             $this->json($responseData);
 
         } catch (\Throwable $e) {
