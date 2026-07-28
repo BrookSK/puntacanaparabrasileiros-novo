@@ -197,6 +197,28 @@ class CheckoutController extends Controller
                 $responseData['paypal_order_id'] = $order['id'];
             }
 
+            // Se PIX (PagBank), criar cobrança
+            if ($gateway === 'pix') {
+                $pagBankService = new \App\Services\PagBankService();
+                $customer = [
+                    'name' => ($billing['first_name'] ?? '') . ' ' . ($billing['last_name'] ?? ''),
+                    'email' => $billing['email'] ?? '',
+                    'cpf' => preg_replace('/\D/', '', $request->input('cpf', '')),
+                ];
+                $pixCharge = $pagBankService->createPixCharge(
+                    $payAmount,
+                    'Reserva ' . $bookingNumber,
+                    $customer,
+                    $bookingNumber
+                );
+                $responseData['pix'] = $pixCharge;
+
+                // Salvar charge_id no pagamento para consulta posterior
+                $this->db->update('payments', [
+                    'gateway_transaction_id' => $pixCharge['charge_id'],
+                ], 'id = ?', [$paymentId]);
+            }
+
             $this->json($responseData);
 
         } catch (\Throwable $e) {

@@ -134,6 +134,16 @@
                 <div class="form-group col-6"><label>Secret Key</label><input type="password" name="stripe_secret_key" class="form-control" value="<?= e($settings['payments']['stripe_secret_key']['setting_value'] ?? '') ?>"></div>
             </div>
 
+            <h4 class="settings-section-title">PIX (PagBank)</h4>
+            <div class="form-group"><label><input type="checkbox" name="pagbank_enabled" value="1" <?= ($settings['payments']['pagbank_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar PIX via PagBank</label></div>
+            <div class="form-row">
+                <div class="form-group col-6"><label>Token da API</label><input type="password" name="pagbank_token" class="form-control" value="<?= e($settings['payments']['pagbank_token']['setting_value'] ?? '') ?>"></div>
+                <div class="form-group col-6"><label>Modo</label><select name="pagbank_mode" class="form-control"><option value="sandbox" <?= ($settings['payments']['pagbank_mode']['setting_value'] ?? '') === 'sandbox' ? 'selected' : '' ?>>Sandbox</option><option value="production" <?= ($settings['payments']['pagbank_mode']['setting_value'] ?? '') === 'production' ? 'selected' : '' ?>>Produção</option></select></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-6"><label>Taxa USD → BRL</label><input type="number" step="0.01" name="pagbank_usd_brl_rate" class="form-control" value="<?= e($settings['payments']['pagbank_usd_brl_rate']['setting_value'] ?? '5.50') ?>" style="max-width:120px;"></div>
+            </div>
+
             <h4 class="settings-section-title">Pagamento Parcial</h4>
             <div class="form-group"><label><input type="checkbox" name="partial_payment_enabled" value="1" <?= ($settings['payments']['partial_payment_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar Pagamento Parcial</label></div>
             <div class="form-group"><label>Percentual de Depósito (%)</label><input type="number" name="partial_payment_percent" class="form-control" value="<?= e($settings['payments']['partial_payment_percent']['setting_value'] ?? '50') ?>" min="1" max="99" style="max-width:120px;"></div>

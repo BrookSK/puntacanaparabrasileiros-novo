@@ -141,7 +141,8 @@ class PaymentService
             $gateways[] = [
                 'id' => 'paypal',
                 'name' => 'PayPal',
-                'description' => 'Pague com PayPal ou cartão de crédito',
+                'description' => 'Pague com PayPal ou cartão de crédito internacional',
+                'icon' => 'paypal',
             ];
         }
 
@@ -149,7 +150,27 @@ class PaymentService
             $gateways[] = [
                 'id' => 'stripe',
                 'name' => 'Cartão de Crédito',
-                'description' => 'Pague com cartão via Stripe',
+                'description' => 'Visa, Mastercard, Amex via Stripe',
+                'icon' => 'card',
+            ];
+        }
+
+        if ($app->setting('pagbank_enabled', '0') === '1') {
+            $gateways[] = [
+                'id' => 'pix',
+                'name' => 'PIX',
+                'description' => 'Pagamento instantâneo via PIX (PagBank)',
+                'icon' => 'pix',
+            ];
+        }
+
+        // Se nenhum gateway está habilitado, mostrar PayPal como padrão
+        if (empty($gateways)) {
+            $gateways[] = [
+                'id' => 'paypal',
+                'name' => 'PayPal',
+                'description' => 'Pague com PayPal ou cartão de crédito internacional',
+                'icon' => 'paypal',
             ];
         }
 

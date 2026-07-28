@@ -2105,9 +2105,31 @@ img { max-width: 100%; height: auto; }
 .partial-note { font-size: 12px; color: var(--gray); margin-top: 6px; margin-left: 26px; }
 .address-required-label { font-size: 12px; color: var(--gray); font-weight: 400; }
 .checkout-layout { display: grid; grid-template-columns: 1fr 380px; gap: 40px; align-items: start; }
-.payment-option { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid #eee; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: border-color .2s; }
-.payment-option:hover { border-color: var(--accent); }
-.payment-option input[type="radio"]:checked ~ .payment-label strong { color: var(--accent); }
+.payment-methods { display: flex; flex-direction: column; gap: 12px; }
+.payment-option { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border: 2px solid #e5e7eb; border-radius: 12px; cursor: pointer; transition: all .2s; position: relative; }
+.payment-option:hover { border-color: #d1d5db; background: #f9fafb; }
+.payment-option.active { border-color: var(--primary); background: #f0f9ff; }
+.payment-option input[type="radio"] { position: absolute; opacity: 0; width: 0; height: 0; }
+.payment-option-icon { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: #f3f4f6; border-radius: 10px; flex-shrink: 0; }
+.payment-option.active .payment-option-icon { background: #dbeafe; }
+.payment-option-info { flex: 1; }
+.payment-option-info strong { display: block; font-size: 15px; color: #1f2937; margin-bottom: 2px; }
+.payment-option-info small { font-size: 13px; color: #6b7280; }
+.payment-option-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; }
+.payment-option-check svg { opacity: 0; stroke: #fff; }
+.payment-option.active .payment-option-check { background: var(--primary); border-color: var(--primary); }
+.payment-option.active .payment-option-check svg { opacity: 1; }
+.pix-cpf-field { margin-top: 16px; padding: 16px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; }
+.pix-qr-card { text-align: center; padding: 30px; background: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; }
+.pix-qr-card h4 { font-size: 16px; margin-bottom: 20px; color: #1f2937; }
+.pix-qr-image { margin: 0 auto 20px; }
+.pix-qr-image img { max-width: 200px; border-radius: 8px; }
+.pix-copy-paste { margin-top: 16px; }
+.pix-copy-paste label { display: block; font-size: 13px; color: #6b7280; margin-bottom: 8px; }
+.pix-code-wrapper { display: flex; gap: 8px; }
+.pix-code-wrapper .form-control { font-size: 12px; background: white; }
+.pix-expiration { margin-top: 16px; font-size: 13px; color: #f59e0b; font-weight: 500; }
+.pix-status { font-size: 14px; color: #6b7280; margin-top: 8px; }
 .payment-label strong { display: block; font-size: 14px; }
 .payment-label small { color: var(--gray); font-size: 12px; }
 .terms-checkbox { display: flex; align-items: flex-start; gap: 10px; font-size: 14px; line-height: 1.5; }

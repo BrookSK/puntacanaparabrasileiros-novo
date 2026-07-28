@@ -103,15 +103,37 @@
                     <!-- Método de Pagamento -->
                     <div class="checkout-section">
                         <h3>Forma de Pagamento</h3>
-                        <?php foreach ($gateways as $gw): ?>
-                        <label class="payment-option">
-                            <input type="radio" name="gateway" value="<?= e($gw['id']) ?>" <?= $gw['id'] === 'paypal' ? 'checked' : '' ?>>
-                            <span class="payment-label">
-                                <strong><?= e($gw['name']) ?></strong>
-                                <small><?= e($gw['description']) ?></small>
-                            </span>
-                        </label>
-                        <?php endforeach; ?>
+                        <div class="payment-methods">
+                            <?php foreach ($gateways as $gw): ?>
+                            <label class="payment-option <?= $gw['id'] === ($gateways[0]['id'] ?? '') ? 'active' : '' ?>">
+                                <input type="radio" name="gateway" value="<?= e($gw['id']) ?>" <?= $gw['id'] === ($gateways[0]['id'] ?? '') ? 'checked' : '' ?>>
+                                <div class="payment-option-icon">
+                                    <?php if ($gw['icon'] === 'paypal'): ?>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="#003087"><path d="M7.076 21.337H2.47a.641.641 0 01-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797H9.603c-.536 0-.99.394-1.073.926l-.002.012-.894 5.7-.002.012c-.058.37-.348.646-.72.646z"/></svg>
+                                    <?php elseif ($gw['icon'] === 'card'): ?>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                                    <?php elseif ($gw['icon'] === 'pix'): ?>
+                                    <svg width="24" height="24" viewBox="0 0 512 512" fill="#32BCAD"><path d="M242.4 292.5C247.8 287.1 257.1 287.1 262.5 292.5L339.5 369.5C344.9 374.9 344.9 384.1 339.5 389.5L searching.5 466.5C257.1 471.9 247.8 471.9 242.4 466.5L165.4 389.5C160 384.1 160 374.9 165.4 369.5L242.4 292.5z"/><path d="M410.3 124.7L378.8 93.2C371.6 86 360.1 86 352.9 93.2L309.5 136.5C304.1 141.9 304.1 151.2 309.5 156.5L355.5 202.5C360.9 207.9 370.1 207.9 375.5 202.5L410.3 167.7C424.5 153.5 424.5 138.9 410.3 124.7z"/><path d="M101.7 124.7L133.2 93.2C140.4 86 151.9 86 159.1 93.2L202.5 136.5C207.9 141.9 207.9 151.2 202.5 156.5L156.5 202.5C151.1 207.9 141.9 207.9 136.5 202.5L101.7 167.7C87.5 153.5 87.5 138.9 101.7 124.7z"/></svg>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="payment-option-info">
+                                    <strong><?= e($gw['name']) ?></strong>
+                                    <small><?= e($gw['description']) ?></small>
+                                </div>
+                                <div class="payment-option-check">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                                </div>
+                            </label>
+                            <?php endforeach; ?>
+                        </div>
+
+                        <!-- CPF para PIX -->
+                        <div class="pix-cpf-field" id="pixCpfField" style="display:none;">
+                            <div class="form-group">
+                                <label>CPF <span class="text-muted">(obrigatório para PIX)</span></label>
+                                <input type="text" name="cpf" id="cpfInput" class="form-control" placeholder="000.000.000-00" maxlength="14">
+                            </div>
+                        </div>
 
                         <?php if ($partialEnabled): ?>
                         <div class="partial-payment-option">
@@ -141,6 +163,23 @@
 
                     <!-- PayPal Container -->
                     <div id="paypalButtonContainer" style="display:none; margin-top: 16px;"></div>
+
+                    <!-- PIX QR Code Container -->
+                    <div id="pixContainer" style="display:none; margin-top: 16px;">
+                        <div class="pix-qr-card">
+                            <h4>Escaneie o QR Code para pagar</h4>
+                            <div class="pix-qr-image" id="pixQrImage"></div>
+                            <div class="pix-copy-paste">
+                                <label>Ou copie o código PIX:</label>
+                                <div class="pix-code-wrapper">
+                                    <input type="text" id="pixCodeText" class="form-control" readonly>
+                                    <button type="button" class="btn btn-sm btn-primary" onclick="copyPixCode()">Copiar</button>
+                                </div>
+                            </div>
+                            <p class="pix-expiration">Expira em <span id="pixTimer">30:00</span> minutos</p>
+                            <p class="pix-status" id="pixStatus">Aguardando pagamento...</p>
+                        </div>
+                    </div>
                 </form>
             </div>
 
@@ -243,28 +282,55 @@ document.addEventListener('DOMContentLoaded', function() {
     const gatewayRadios = document.querySelectorAll('input[name="gateway"]');
     const addressFields = document.querySelectorAll('.address-field');
     const addressLabels = document.querySelectorAll('.address-required-label');
+    const pixCpfField = document.getElementById('pixCpfField');
+    const paymentOptions = document.querySelectorAll('.payment-option');
 
     function updateAddressRequired() {
         const selected = document.querySelector('input[name="gateway"]:checked');
-        // Stripe exige endereço, PayPal não
-        const requireAddress = selected && selected.value === 'stripe';
+        const gateway = selected ? selected.value : '';
 
+        // Stripe exige endereço
+        const requireAddress = gateway === 'stripe';
         addressFields.forEach(field => {
-            if (requireAddress) {
-                field.setAttribute('required', 'required');
-            } else {
-                field.removeAttribute('required');
-            }
+            if (requireAddress) { field.setAttribute('required', 'required'); }
+            else { field.removeAttribute('required'); }
         });
         addressLabels.forEach(label => {
             label.textContent = requireAddress ? '*' : '(opcional)';
         });
+
+        // PIX exige CPF
+        if (pixCpfField) {
+            pixCpfField.style.display = gateway === 'pix' ? 'block' : 'none';
+            const cpfInput = document.getElementById('cpfInput');
+            if (cpfInput) {
+                if (gateway === 'pix') { cpfInput.setAttribute('required', 'required'); }
+                else { cpfInput.removeAttribute('required'); }
+            }
+        }
+
+        // Atualizar visual das opções
+        paymentOptions.forEach(opt => opt.classList.remove('active'));
+        if (selected) selected.closest('.payment-option')?.classList.add('active');
     }
 
     gatewayRadios.forEach(radio => {
         radio.addEventListener('change', updateAddressRequired);
     });
     updateAddressRequired();
+
+    // CPF mask
+    const cpfInput = document.getElementById('cpfInput');
+    if (cpfInput) {
+        cpfInput.addEventListener('input', function(e) {
+            let v = e.target.value.replace(/\D/g, '');
+            if (v.length > 11) v = v.slice(0, 11);
+            if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+            else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, '$1.$2.$3');
+            else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, '$1.$2');
+            e.target.value = v;
+        });
+    }
 
     // Partial payment toggle
     const partialCheck = document.getElementById('partialCheck');
@@ -275,6 +341,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Copy PIX code
+function copyPixCode() {
+    const codeInput = document.getElementById('pixCodeText');
+    if (codeInput) {
+        codeInput.select();
+        document.execCommand('copy');
+        alert('Código PIX copiado!');
+    }
+}
 </script>
 <?php if ($paypalClientId): ?>
 <script src="https://www.paypal.com/sdk/js?client-id=<?= e($paypalClientId) ?>&currency=USD"></script>
