@@ -8,31 +8,31 @@
 </section>
 
 <!-- Stepper de Progresso -->
-<section class="booking-stepper-section">
+<section style="padding:30px 0 10px;">
     <div class="container">
-        <div class="booking-stepper">
-            <div class="stepper-step completed">
-                <div class="stepper-circle">
+        <div style="display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:nowrap;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;border:2px solid #0077b6;display:flex;align-items:center;justify-content:center;background:#fff;color:#0077b6;flex-shrink:0;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
-                <span class="stepper-label">Selecione uma data</span>
+                <span style="font-size:13px;font-weight:500;color:#6b7280;white-space:nowrap;">Selecione uma data</span>
             </div>
-            <div class="stepper-line completed"></div>
-            <div class="stepper-step completed">
-                <div class="stepper-circle">
+            <div style="width:50px;height:2px;background:#0077b6;margin:0 12px;flex-shrink:0;"></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;border:2px solid #0077b6;display:flex;align-items:center;justify-content:center;background:#fff;color:#0077b6;flex-shrink:0;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
-                <span class="stepper-label">Viajantes</span>
+                <span style="font-size:13px;font-weight:500;color:#6b7280;white-space:nowrap;">Viajantes</span>
             </div>
-            <div class="stepper-line active"></div>
-            <div class="stepper-step active">
-                <div class="stepper-circle"><span>3</span></div>
-                <span class="stepper-label">Detalhes De Cobrança</span>
+            <div style="width:50px;height:2px;background:#0077b6;margin:0 12px;flex-shrink:0;"></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;border:2px solid #0077b6;display:flex;align-items:center;justify-content:center;background:#0077b6;color:#fff;font-size:13px;font-weight:600;flex-shrink:0;">3</div>
+                <span style="font-size:13px;font-weight:600;color:#1f2937;white-space:nowrap;">Detalhes De Cobrança</span>
             </div>
-            <div class="stepper-line"></div>
-            <div class="stepper-step">
-                <div class="stepper-circle"><span>4</span></div>
-                <span class="stepper-label">Pagamento</span>
+            <div style="width:50px;height:2px;background:#e5e7eb;margin:0 12px;flex-shrink:0;"></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:36px;height:36px;border-radius:50%;border:2px solid #d1d5db;display:flex;align-items:center;justify-content:center;background:#fff;color:#9ca3af;font-size:13px;font-weight:600;flex-shrink:0;">4</div>
+                <span style="font-size:13px;font-weight:500;color:#9ca3af;white-space:nowrap;">Pagamento</span>
             </div>
         </div>
     </div>
