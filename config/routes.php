@@ -128,6 +128,8 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->get('/cart/count', [ApiCartController::class, 'count'], [], 'api.cart.count');
     $router->post('/webhook/payment', [WebhookController::class, 'handlePayment'], [], 'api.webhook.payment');
     $router->post('/webhook/stripe', [WebhookController::class, 'handleStripe'], [], 'api.webhook.stripe');
+    $router->post('/webhook/pix-status', [WebhookController::class, 'pixStatus'], [], 'api.webhook.pix_status');
+    $router->post('/webhooks/pagbank', [WebhookController::class, 'handlePagBank'], [], 'api.webhook.pagbank');
 });
 
 // ============================================================

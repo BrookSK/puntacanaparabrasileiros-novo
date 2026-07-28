@@ -692,6 +692,8 @@
                             capturePayPal(response);
                         } else if (response.gateway === 'stripe' && response.stripe_client_secret) {
                             handleStripePayment(response);
+                        } else if (response.gateway === 'pix' && response.pix) {
+                            handlePixPayment(response);
                         } else {
                             window.location = '/checkout/sucesso/' + response.booking_number;
                         }
@@ -701,6 +703,68 @@
                     }
                 }).catch(() => { document.getElementById('checkoutLoading').style.display = 'none'; alert('Erro de conexão.'); });
         });
+    }
+
+    function handlePixPayment(response) {
+        document.getElementById('checkoutLoading').style.display = 'none';
+
+        // Esconder formulário e mostrar QR Code
+        const formSections = document.querySelectorAll('.checkout-section, .checkout-submit, #checkoutStep4, #checkoutTerms, #paymentContainer, #checkoutStep3Actions');
+        formSections.forEach(el => { if (el) el.style.display = 'none'; });
+
+        const pixContainer = document.getElementById('pixContainer');
+        if (pixContainer) {
+            pixContainer.style.display = 'block';
+
+            const pix = response.pix;
+
+            // QR Code image
+            const qrImage = document.getElementById('pixQrImage');
+            if (qrImage && pix.qr_code_url) {
+                qrImage.innerHTML = '<img src="' + pix.qr_code_url + '" alt="QR Code PIX" style="max-width:220px;border-radius:12px;border:2px solid #e5e7eb;">';
+            } else if (qrImage) {
+                qrImage.innerHTML = '<div style="padding:20px;background:#f1f5f9;border-radius:12px;color:#64748b;">QR Code será exibido aqui</div>';
+            }
+
+            // PIX copia e cola
+            const pixCodeText = document.getElementById('pixCodeText');
+            if (pixCodeText && pix.qr_code_text) {
+                pixCodeText.value = pix.qr_code_text;
+            }
+
+            // Valor em BRL
+            const pixAmountEl = document.getElementById('pixAmountBRL');
+            if (pixAmountEl && pix.amount_brl) {
+                pixAmountEl.textContent = 'R$ ' + pix.amount_brl.toFixed(2).replace('.', ',');
+            }
+
+            // Timer countdown (30 min)
+            let timeLeft = 30 * 60;
+            const timerEl = document.getElementById('pixTimer');
+            const countdown = setInterval(() => {
+                timeLeft--;
+                const mins = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                if (timerEl) timerEl.textContent = mins.toString().padStart(2, '0') + ':' + secs.toString().padStart(2, '0');
+                if (timeLeft <= 0) { clearInterval(countdown); if (timerEl) timerEl.textContent = 'Expirado'; }
+            }, 1000);
+
+            // Polling para verificar pagamento (a cada 5 seg)
+            const paymentId = response.payment_id;
+            const bookingNumber = response.booking_number;
+            const checkInterval = setInterval(() => {
+                ajax('/api/webhook/pix-status', { body: JSON.stringify({ payment_id: paymentId }) })
+                    .then(statusData => {
+                        if (statusData.paid) {
+                            clearInterval(checkInterval);
+                            clearInterval(countdown);
+                            const statusEl = document.getElementById('pixStatus');
+                            if (statusEl) { statusEl.textContent = 'Pagamento confirmado! Redirecionando...'; statusEl.style.color = '#16a34a'; }
+                            setTimeout(() => { window.location = '/checkout/sucesso/' + bookingNumber; }, 2000);
+                        }
+                    }).catch(() => {});
+            }, 5000);
+        }
     }
 
     function capturePayPal(response) {

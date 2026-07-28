@@ -215,10 +215,15 @@
                     <!-- PIX QR Code Container -->
                     <div id="pixContainer" style="display:none; margin-top: 16px;">
                         <div class="pix-qr-card">
-                            <h4>Escaneie o QR Code para pagar</h4>
+                            <div style="margin-bottom:16px;">
+                                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+                            </div>
+                            <h4>Pague com PIX</h4>
+                            <p style="font-size:13px;color:#6b7280;margin-bottom:20px;">Escaneie o QR Code abaixo ou copie o código para pagar</p>
                             <div class="pix-qr-image" id="pixQrImage"></div>
+                            <p id="pixAmountBRL" style="font-size:20px;font-weight:700;color:#1f2937;margin:16px 0 4px;"></p>
                             <div class="pix-copy-paste">
-                                <label>Ou copie o código PIX:</label>
+                                <label>Código PIX (copia e cola):</label>
                                 <div class="pix-code-wrapper">
                                     <input type="text" id="pixCodeText" class="form-control" readonly>
                                     <button type="button" class="btn btn-sm btn-primary" onclick="copyPixCode()">Copiar</button>

@@ -9,6 +9,7 @@ use Core\Response;
 use App\Services\PaymentService;
 use App\Services\PayPalService;
 use App\Services\StripeService;
+use App\Services\PagBankService;
 
 class WebhookController extends Controller
 {
@@ -124,5 +125,85 @@ class WebhookController extends Controller
 
         $paymentService = new PaymentService();
         $paymentService->failPayment($paymentId, json_encode($intent));
+    }
+
+    /**
+     * Verifica status do pagamento PIX (polling do frontend).
+     */
+    public function pixStatus(Request $request, Response $response): void
+    {
+        $data = $request->json();
+        $paymentId = (int) ($data['payment_id'] ?? 0);
+
+        if (!$paymentId) {
+            $this->json(['error' => 'Payment ID inválido.'], 400);
+            return;
+        }
+
+        // Buscar o payment no banco
+        $payment = $this->db->fetchOne("SELECT * FROM payments WHERE id = ?", [$paymentId]);
+        if (!$payment) {
+            $this->json(['error' => 'Pagamento não encontrado.'], 404);
+            return;
+        }
+
+        // Se já está pago no nosso sistema
+        if ($payment['status'] === 'completed') {
+            $this->json(['paid' => true]);
+            return;
+        }
+
+        // Consultar PagBank
+        $chargeId = $payment['gateway_transaction_id'] ?? '';
+        if (!$chargeId) {
+            $this->json(['paid' => false, 'status' => 'waiting']);
+            return;
+        }
+
+        try {
+            $pagBankService = new PagBankService();
+            if ($pagBankService->isChargePaid($chargeId)) {
+                // Confirmar pagamento
+                $paymentService = new PaymentService();
+                $paymentService->confirmPayment($paymentId, $chargeId, json_encode(['status' => 'PAID']));
+                $this->json(['paid' => true]);
+            } else {
+                $this->json(['paid' => false, 'status' => 'waiting']);
+            }
+        } catch (\Throwable $e) {
+            $this->json(['paid' => false, 'status' => 'error']);
+        }
+    }
+
+    /**
+     * Webhook do PagBank (notificação de pagamento PIX).
+     */
+    public function handlePagBank(Request $request, Response $response): void
+    {
+        $payload = $request->rawBody();
+        $event = json_decode($payload, true);
+
+        if (!$event) {
+            $this->json(['error' => 'Payload inválido.'], 400);
+            return;
+        }
+
+        $chargeId = $event['id'] ?? '';
+        $status = $event['status'] ?? '';
+
+        if ($status === 'PAID' && $chargeId) {
+            // Buscar payment pelo charge_id
+            $payment = $this->db->fetchOne(
+                "SELECT * FROM payments WHERE gateway_transaction_id = ? AND status = 'pending'",
+                [$chargeId]
+            );
+
+            if ($payment) {
+                $paymentService = new PaymentService();
+                $paymentService->confirmPayment((int) $payment['id'], $chargeId, $payload);
+            }
+        }
+
+        $this->json(['received' => true]);
     }
 }
