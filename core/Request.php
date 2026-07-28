@@ -23,6 +23,18 @@ class Request
         $this->files = $_FILES;
         $this->server = $_SERVER;
         $this->headers = $this->parseHeaders();
+
+        // Se o body é JSON, parsear e mesclar com POST
+        $contentType = $this->server['CONTENT_TYPE'] ?? $this->server['HTTP_CONTENT_TYPE'] ?? '';
+        if (empty($this->post) && str_contains($contentType, 'json')) {
+            $rawBody = file_get_contents('php://input');
+            if ($rawBody) {
+                $jsonData = json_decode($rawBody, true);
+                if (is_array($jsonData)) {
+                    $this->post = $jsonData;
+                }
+            }
+        }
     }
 
     /**
@@ -74,19 +86,7 @@ class Request
      */
     public function input(string $key, mixed $default = null): mixed
     {
-        // Check POST first, then JSON body, then GET
-        if (isset($this->post[$key])) return $this->post[$key];
-
-        // If POST is empty and content-type is JSON, parse body
-        if (empty($this->post) && str_contains($this->header('content-type', ''), 'json')) {
-            static $jsonBody = null;
-            if ($jsonBody === null) {
-                $jsonBody = json_decode($this->rawBody(), true) ?: [];
-            }
-            if (isset($jsonBody[$key])) return $jsonBody[$key];
-        }
-
-        return $this->query[$key] ?? $default;
+        return $this->post[$key] ?? $this->query[$key] ?? $default;
     }
 
     /**
