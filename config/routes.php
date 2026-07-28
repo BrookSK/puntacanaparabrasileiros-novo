@@ -79,7 +79,7 @@ $router->post('/carrinho/limpar', [CartController::class, 'clear'], [CsrfMiddlew
 
 // Checkout
 $router->get('/checkout', [CheckoutController::class, 'index'], [], 'checkout.index');
-$router->post('/checkout/processar', [CheckoutController::class, 'process'], [CsrfMiddleware::class], 'checkout.process');
+$router->post('/checkout/processar', [CheckoutController::class, 'process'], [], 'checkout.process');
 $router->get('/checkout/sucesso/{booking_number}', [CheckoutController::class, 'success'], [], 'checkout.success');
 $router->get('/transfer-obrigado', [CheckoutController::class, 'transferSuccess'], [], 'checkout.transfer_success');
 

@@ -705,7 +705,7 @@
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!document.getElementById('termsCheck').checked) { alert('Aceite os termos e condiÃ§Ãµes.'); return; }
+            if (!document.getElementById('termsCheck').checked) { toast('Aceite os termos e condições.', 'warning'); return; }
 
             const formData = new FormData(checkoutForm);
             const data = Object.fromEntries(formData.entries());
@@ -727,9 +727,9 @@
                         }
                     } else {
                         document.getElementById('checkoutLoading').style.display = 'none';
-                        alert(response.error || 'Erro ao processar.');
+                        toast(response.error || 'Erro ao processar.', 'error');
                     }
-                }).catch(err => { document.getElementById('checkoutLoading').style.display = 'none'; alert('Erro de conexÃ£o. Tente novamente.'); });
+                }).catch(err => { document.getElementById('checkoutLoading').style.display = 'none'; toast('Erro de conexão. Tente novamente.', 'error'); });
         });
     }
 
@@ -806,7 +806,7 @@
         if (typeof Stripe === 'undefined') { alert('Stripe nÃ£o carregado.'); return; }
         const stripe = Stripe(typeof CHECKOUT_CONFIG !== 'undefined' ? CHECKOUT_CONFIG.stripePublishableKey : '');
         stripe.confirmCardPayment(response.stripe_client_secret).then(result => {
-            if (result.error) { document.getElementById('checkoutLoading').style.display = 'none'; alert(result.error.message); }
+            if (result.error) { document.getElementById('checkoutLoading').style.display = 'none'; toast(result.error.message, 'error'); }
             else { window.location = '/checkout/sucesso/' + response.booking_number; }
         });
     }

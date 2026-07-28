@@ -59,6 +59,13 @@ class CheckoutController extends Controller
 
     public function process(Request $request, Response $response): void
     {
+        // Validar CSRF manualmente (aceita header ou body)
+        $token = $request->input('_token') ?? $request->header('X-CSRF-TOKEN', '');
+        if (!$this->session->validateCsrfToken($token)) {
+            $this->json(['success' => false, 'error' => 'Sessão expirada. Recarregue a página e tente novamente.'], 419);
+            return;
+        }
+
         if ($this->cartService->isEmpty()) {
             $this->json(['error' => 'Carrinho vazio.'], 400);
             return;
