@@ -2104,7 +2104,7 @@ img { max-width: 100%; height: auto; }
 .stepper-step.completed .stepper-label { color: #6b7280; }
 .stepper-line.completed { background: var(--primary); }
 .stepper-line.active { background: var(--primary); }
-.booking-modal-stepper { padding: 16px 24px 0; grid-column: 1 / -1; }
+.booking-modal-stepper { display: none; }
 .checkout-terms { border-bottom: none; padding-bottom: 16px; }
 .checkout-submit { margin-top: 8px; }
 .summary-item { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }
