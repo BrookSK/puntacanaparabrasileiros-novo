@@ -5603,6 +5603,19 @@ img { max-width: 100%; height: auto; }
     color: var(--gray);
     margin-bottom: 12px;
 }
+.bm-sidebar-code {
+    margin-bottom: 14px;
+}
+.bm-code-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    background: #fffbeb;
+    border: 1px solid #fbbf24;
+    color: #92400e;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+}
 .bm-sidebar-package {
     margin-bottom: 16px;
 }

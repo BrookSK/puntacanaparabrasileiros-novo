@@ -740,6 +740,11 @@
         e.preventDefault();
         modal.style.display = 'flex';
         document.getElementById('bmSidebarTitle').textContent = tripTitle;
+        // Código da viagem
+        const codeEl = document.getElementById('bmSidebarCode');
+        if (codeEl && typeof TRIP_ID !== 'undefined') {
+            codeEl.innerHTML = '<span class="bm-code-badge">Código Da Viagem: WTE-' + (8000 + TRIP_ID) + '</span>';
+        }
         renderCalendar();
     });
 

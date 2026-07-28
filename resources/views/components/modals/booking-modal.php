@@ -79,6 +79,7 @@
                 <h4 class="bm-sidebar-label">RESUMO DA RESERVA</h4>
                 <h3 class="bm-sidebar-title" id="bmSidebarTitle"></h3>
                 <p class="bm-sidebar-date" id="bmSidebarDate">Data De Início: --</p>
+                <div class="bm-sidebar-code" id="bmSidebarCode"></div>
                 <div class="bm-sidebar-package" id="bmSidebarPackage" style="display:none">
                     <span id="bmSidebarPackageName"></span>
                 </div>
