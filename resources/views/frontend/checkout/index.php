@@ -159,7 +159,7 @@
                                     <?php elseif ($gw['icon'] === 'card'): ?>
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
                                     <?php elseif ($gw['icon'] === 'pix'): ?>
-                                    <svg width="24" height="24" viewBox="0 0 512 512" fill="#32BCAD"><path d="M389.2 234.2l-88.6-88.6c-12.5-12.5-32.8-12.5-45.3 0l-88.6 88.6c-12.5 12.5-12.5 32.8 0 45.3l88.6 88.6c12.5 12.5 32.8 12.5 45.3 0l88.6-88.6c12.5-12.5 12.5-32.8 0-45.3z"/><path d="M156.6 234.2l-47.1-47.1c-25-25-25-65.5 0-90.5l47.1-47.1c25-25 65.5-25 90.5 0l22.2 22.2-45.3 45.3c-25 25-25 65.5 0 90.5l.4.4-22.5 22.5c-12.5 12.5-32.8 12.5-45.3 3.7z"/><path d="M355.4 277.8l47.1 47.1c25 25 25 65.5 0 90.5l-47.1 47.1c-25 25-65.5 25-90.5 0l-22.2-22.2 45.3-45.3c25-25 25-65.5 0-90.5l-.4-.4 22.5-22.5c12.5-12.5 32.8-12.5 45.3-3.7z"/></svg>
+                                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg/120px-Logo%E2%80%94pix_powered_by_Banco_Central_%28Brazil%2C_2020%29.svg.png" alt="PIX" width="24" height="24" style="object-fit:contain;">
                                     <?php endif; ?>
                                 </div>
                                 <div class="payment-option-info">
