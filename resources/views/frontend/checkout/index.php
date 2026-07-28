@@ -46,6 +46,9 @@
                 <form id="checkoutForm">
                     <input type="hidden" name="_token" value="<?= e(csrf_token()) ?>">
 
+                    <!-- Step 3: Detalhes de Cobrança -->
+                    <div id="checkoutStep3">
+
                     <!-- Dados Pessoais -->
                     <div class="checkout-section">
                         <h3>Dados Pessoais</h3>
@@ -131,6 +134,18 @@
                         </div>
                     </div>
 
+                    <!-- Botão ir para pagamento -->
+                    <div class="checkout-section checkout-next-step" id="checkoutStep3Actions">
+                        <button type="button" class="btn btn-primary btn-block btn-lg" id="goToPaymentBtn">
+                            Continuar para Pagamento
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-left:8px;"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                        </button>
+                    </div>
+                    </div><!-- end step3 -->
+
+                    <!-- Step 4: Pagamento (oculto inicialmente) -->
+                    <div id="checkoutStep4" style="display:none;">
+
                     <!-- Método de Pagamento -->
                     <div class="checkout-section">
                         <h3>Forma de Pagamento</h3>
@@ -177,8 +192,10 @@
                         <?php endif; ?>
                     </div>
 
+                    </div><!-- end checkoutStep4 -->
+
                     <!-- Termos -->
-                    <div class="checkout-section checkout-terms">
+                    <div class="checkout-section checkout-terms" id="checkoutTerms" style="display:none;">
                         <label class="terms-checkbox">
                             <input type="checkbox" id="termsCheck" required>
                             <span>Marque a caixa para confirmar que você leu e concorda com nossos <a href="/termos-e-condicoes" target="_blank">termos e condições</a> e <a href="/politicas-de-privacidade" target="_blank">política de privacidade</a>.</span>
@@ -186,7 +203,7 @@
                     </div>
 
                     <!-- Botão -->
-                    <div id="paymentContainer" class="checkout-submit">
+                    <div id="paymentContainer" class="checkout-submit" style="display:none;">
                         <button type="submit" id="submitBtn" class="btn btn-primary btn-block btn-lg">
                             Confirmar e Pagar <?= money($cart['grand_total']) ?>
                         </button>
@@ -383,6 +400,28 @@ function copyPixCode() {
         alert('Código PIX copiado!');
     }
 }
+
+// Step navigation: Step 3 -> Step 4
+document.getElementById('goToPaymentBtn')?.addEventListener('click', function() {
+    // Validar campos obrigatórios do step 3
+    const step3 = document.getElementById('checkoutStep3');
+    const requiredFields = step3.querySelectorAll('[required]');
+    let valid = true;
+    requiredFields.forEach(f => { if (!f.value.trim()) { f.focus(); valid = false; } });
+    if (!valid) { alert('Preencha todos os campos obrigatórios.'); return; }
+
+    // Esconder step 3, mostrar step 4
+    step3.style.display = 'none';
+    document.getElementById('checkoutStep3Actions').style.display = 'none';
+    document.getElementById('checkoutStep4').style.display = 'block';
+    document.getElementById('checkoutTerms').style.display = 'block';
+    document.getElementById('paymentContainer').style.display = 'block';
+
+    // Atualizar stepper visual (step 3 completed, step 4 active)
+    const stepperSteps = document.querySelectorAll('.booking-stepper-section .stepper-step, section > .container > div > div');
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
 </script>
 <?php if ($paypalClientId): ?>
 <script src="https://www.paypal.com/sdk/js?client-id=<?= e($paypalClientId) ?>&currency=USD"></script>
