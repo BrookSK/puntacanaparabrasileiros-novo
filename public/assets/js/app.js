@@ -817,6 +817,13 @@
         document.getElementById('bmStep2').classList.add('active');
         document.getElementById('bmTab1').classList.remove('active');
         document.getElementById('bmTab2').classList.add('active');
+        // Update stepper
+        const s1 = document.getElementById('bmStepper1');
+        const s2 = document.getElementById('bmStepper2');
+        const line1 = document.getElementById('bmStepperLine1');
+        if (s1) { s1.classList.remove('active'); s1.classList.add('completed'); }
+        if (s2) { s2.classList.add('active'); }
+        if (line1) { line1.classList.add('completed'); }
         renderPackages();
     });
 
@@ -824,6 +831,13 @@
     document.getElementById('bmBack')?.addEventListener('click', () => {
         document.getElementById('bmStep2').classList.remove('active');
         document.getElementById('bmStep1').classList.add('active');
+        // Update stepper
+        const s1 = document.getElementById('bmStepper1');
+        const s2 = document.getElementById('bmStepper2');
+        const line1 = document.getElementById('bmStepperLine1');
+        if (s1) { s1.classList.add('active'); s1.classList.remove('completed'); }
+        if (s2) { s2.classList.remove('active'); }
+        if (line1) { line1.classList.remove('completed'); }
         document.getElementById('bmTab2').classList.remove('active');
         document.getElementById('bmTab1').classList.add('active');
     });

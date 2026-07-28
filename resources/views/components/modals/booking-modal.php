@@ -5,6 +5,31 @@
         <button class="booking-modal-close" id="bookingModalClose">&times;</button>
 
         <div class="booking-modal-layout">
+            <!-- Stepper no Modal -->
+            <div class="booking-modal-stepper">
+                <div class="booking-stepper">
+                    <div class="stepper-step active" id="bmStepper1">
+                        <div class="stepper-circle"><span>1</span></div>
+                        <span class="stepper-label">Selecione uma data</span>
+                    </div>
+                    <div class="stepper-line" id="bmStepperLine1"></div>
+                    <div class="stepper-step" id="bmStepper2">
+                        <div class="stepper-circle"><span>2</span></div>
+                        <span class="stepper-label">Viajantes</span>
+                    </div>
+                    <div class="stepper-line"></div>
+                    <div class="stepper-step">
+                        <div class="stepper-circle"><span>3</span></div>
+                        <span class="stepper-label">Detalhes De Cobrança</span>
+                    </div>
+                    <div class="stepper-line"></div>
+                    <div class="stepper-step">
+                        <div class="stepper-circle"><span>4</span></div>
+                        <span class="stepper-label">Pagamento</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Conteúdo Principal (esquerda) -->
             <div class="booking-modal-main">
                 <!-- Tabs -->

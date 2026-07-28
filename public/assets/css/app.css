@@ -2089,6 +2089,22 @@ img { max-width: 100%; height: auto; }
 .checkout-section { margin-bottom: 30px; padding-bottom: 24px; border-bottom: 1px solid #eee; }
 .checkout-section h3 { font-size: 18px; font-weight: 600; margin-bottom: 16px; }
 .checkout-section:last-of-type { border-bottom: none; }
+
+/* Booking Stepper */
+.booking-stepper-section { padding: 30px 0 10px; }
+.booking-stepper { display: flex; align-items: center; justify-content: center; gap: 0; }
+.stepper-step { display: flex; align-items: center; gap: 10px; }
+.stepper-circle { width: 36px; height: 36px; border-radius: 50%; border: 2px solid #d1d5db; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: #9ca3af; background: #fff; flex-shrink: 0; transition: all .2s; }
+.stepper-circle span { line-height: 1; }
+.stepper-label { font-size: 13px; font-weight: 500; color: #9ca3af; white-space: nowrap; }
+.stepper-line { width: 50px; height: 2px; background: #e5e7eb; margin: 0 12px; flex-shrink: 0; }
+.stepper-step.active .stepper-circle { border-color: var(--primary); color: #fff; background: var(--primary); }
+.stepper-step.active .stepper-label { color: #1f2937; font-weight: 600; }
+.stepper-step.completed .stepper-circle { border-color: var(--primary); background: #fff; color: var(--primary); }
+.stepper-step.completed .stepper-label { color: #6b7280; }
+.stepper-line.completed { background: var(--primary); }
+.stepper-line.active { background: var(--primary); }
+.booking-modal-stepper { padding: 16px 24px 0; grid-column: 1 / -1; }
 .checkout-terms { border-bottom: none; padding-bottom: 16px; }
 .checkout-submit { margin-top: 8px; }
 .summary-item { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 8px; }

@@ -7,6 +7,37 @@
     </div>
 </section>
 
+<!-- Stepper de Progresso -->
+<section class="booking-stepper-section">
+    <div class="container">
+        <div class="booking-stepper">
+            <div class="stepper-step completed">
+                <div class="stepper-circle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <span class="stepper-label">Selecione uma data</span>
+            </div>
+            <div class="stepper-line completed"></div>
+            <div class="stepper-step completed">
+                <div class="stepper-circle">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                </div>
+                <span class="stepper-label">Viajantes</span>
+            </div>
+            <div class="stepper-line active"></div>
+            <div class="stepper-step active">
+                <div class="stepper-circle"><span>3</span></div>
+                <span class="stepper-label">Detalhes De Cobrança</span>
+            </div>
+            <div class="stepper-line"></div>
+            <div class="stepper-step">
+                <div class="stepper-circle"><span>4</span></div>
+                <span class="stepper-label">Pagamento</span>
+            </div>
+        </div>
+    </div>
+</section>
+
 <section class="section">
     <div class="container">
         <div class="checkout-layout">
