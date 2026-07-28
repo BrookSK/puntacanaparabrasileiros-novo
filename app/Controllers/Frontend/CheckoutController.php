@@ -59,9 +59,9 @@ class CheckoutController extends Controller
 
     public function process(Request $request, Response $response): void
     {
-        // Validar CSRF manualmente (aceita header ou body)
-        $token = $request->input('_token') ?? $request->header('X-CSRF-TOKEN', '');
-        if (!$this->session->validateCsrfToken($token)) {
+        // Validar CSRF (aceita _token do body ou X-CSRF-TOKEN do header)
+        $token = $request->input('_token', '') ?: ($request->header('X-CSRF-TOKEN') ?? '');
+        if (empty($token) || !$this->session->validateCsrfToken($token)) {
             $this->json(['success' => false, 'error' => 'Sessão expirada. Recarregue a página e tente novamente.'], 419);
             return;
         }
@@ -264,15 +264,24 @@ class CheckoutController extends Controller
                 }
 
                 // Confirmar pagamento imediatamente
-                $this->paymentService->confirmPayment(
-                    $paymentId,
-                    'SIM-' . strtoupper(bin2hex(random_bytes(8))),
-                    json_encode(['gateway' => 'simulate', 'approved_by' => $currentUser['email'], 'approved_at' => date('c')])
-                );
+                try {
+                    $this->paymentService->confirmPayment(
+                        $paymentId,
+                        'SIM-' . strtoupper(bin2hex(random_bytes(8))),
+                        json_encode(['gateway' => 'simulate', 'approved_at' => date('c')])
+                    );
+                } catch (\Throwable $simErr) {
+                    $this->json(['success' => false, 'error' => 'Erro na simulação: ' . $simErr->getMessage()]);
+                    return;
+                }
 
                 // Executar ações pós-pagamento (vouchers, emails, WhatsApp, comissões)
                 $this->db->commit();
-                $this->postPaymentActions($bookingId);
+                try {
+                    $this->postPaymentActions($bookingId);
+                } catch (\Throwable $e) {
+                    // Não bloquear por erro em notificações
+                }
 
                 // Limpar carrinho
                 $this->cartService->clearAll();
@@ -287,8 +296,8 @@ class CheckoutController extends Controller
             $this->json($responseData);
 
         } catch (\Throwable $e) {
-            $this->db->rollback();
-            $this->json(['error' => 'Erro ao processar reserva: ' . $e->getMessage()], 500);
+            try { $this->db->rollback(); } catch (\Throwable $rb) {}
+            $this->json(['success' => false, 'error' => 'Erro ao processar reserva: ' . $e->getMessage()], 500);
         }
     }
 
