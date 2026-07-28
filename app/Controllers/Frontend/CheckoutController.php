@@ -182,19 +182,37 @@ class CheckoutController extends Controller
 
             // Se Stripe, criar PaymentIntent
             if ($gateway === 'stripe') {
-                $stripeService = new StripeService();
-                $intent = $stripeService->createPaymentIntent($payAmount, 'usd', [
-                    'booking_id' => $bookingId,
-                    'payment_id' => $paymentId,
-                ]);
-                $responseData['stripe_client_secret'] = $intent['client_secret'];
+                try {
+                    $stripeService = new StripeService();
+                    $intent = $stripeService->createPaymentIntent($payAmount, 'usd', [
+                        'booking_id' => $bookingId,
+                        'payment_id' => $paymentId,
+                    ]);
+                    $responseData['stripe_client_secret'] = $intent['client_secret'];
+                } catch (\Throwable $stripeError) {
+                    $this->db->commit();
+                    $this->json([
+                        'success' => false,
+                        'error' => 'Erro ao processar cartão. Verifique se o Stripe está configurado. Detalhes: ' . $stripeError->getMessage(),
+                    ], 400);
+                    return;
+                }
             }
 
             // Se PayPal, criar order
             if ($gateway === 'paypal') {
-                $paypalService = new PayPalService();
-                $order = $paypalService->createOrder($payAmount, 'USD', 'Reserva ' . $bookingNumber);
-                $responseData['paypal_order_id'] = $order['id'];
+                try {
+                    $paypalService = new PayPalService();
+                    $order = $paypalService->createOrder($payAmount, 'USD', 'Reserva ' . $bookingNumber);
+                    $responseData['paypal_order_id'] = $order['id'];
+                } catch (\Throwable $paypalError) {
+                    $this->db->commit();
+                    $this->json([
+                        'success' => false,
+                        'error' => 'Erro ao processar PayPal. Verifique se o PayPal está configurado. Detalhes: ' . $paypalError->getMessage(),
+                    ], 400);
+                    return;
+                }
             }
 
             // Se PIX (PagBank), criar cobrança
