@@ -34,11 +34,17 @@
         <!-- Vouchers listados -->
         <h3 style="font-size:14px;margin:0 0 12px;color:#333;">Vouchers Anexados:</h3>
         <?php foreach ($vouchers as $v): ?>
-        <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:#f3f4f6;border-radius:6px;margin-bottom:8px;">
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f3f4f6;border-radius:6px;margin-bottom:8px;">
             <span style="font-size:20px;">📄</span>
             <div>
-                <strong style="font-size:13px;color:#1a1a1a;"><?= e($v['reference_code'] ?? '') ?></strong>
-                <span style="font-size:12px;color:#666;margin-left:8px;">(<?= e($v['type'] === 'transfer' ? 'Transfer' : 'Passeio') ?>)</span>
+                <strong style="font-size:13px;color:#1a1a1a;">
+                    <?php if (($v['type'] ?? '') === 'transfer'): ?>
+                        VOUCHER TRANSFER
+                    <?php else: ?>
+                        VOUCHER PASSEIO<?php if (!empty($v['trip_name'])): ?> — <?= e($v['trip_name']) ?><?php endif; ?>
+                    <?php endif; ?>
+                </strong>
+                <span style="display:block;font-size:11px;color:#888;margin-top:2px;">Código: <?= e($v['reference_code'] ?? '') ?></span>
             </div>
         </div>
         <?php endforeach; ?>

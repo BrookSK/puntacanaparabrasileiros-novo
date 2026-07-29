@@ -20,7 +20,19 @@ class Voucher extends Model
 
     public function getByBooking(int $bookingId): array
     {
-        return $this->where('booking_id = ?', [$bookingId], 'created_at DESC');
+        return $this->db->fetchAll(
+            "SELECT v.*, 
+                    COALESCE(t.title, CONCAT(tlo.title, ' → ', tld.title)) as trip_name
+             FROM vouchers v
+             LEFT JOIN booking_items bi ON v.booking_item_id = bi.id
+             LEFT JOIN trips t ON bi.trip_id = t.id
+             LEFT JOIN transfer_bookings tb ON v.transfer_booking_id = tb.id
+             LEFT JOIN transfer_locations tlo ON tb.origin_id = tlo.id
+             LEFT JOIN transfer_locations tld ON tb.destination_id = tld.id
+             WHERE v.booking_id = ?
+             ORDER BY v.created_at DESC",
+            [$bookingId]
+        );
     }
 
     public function generateReference(): string
