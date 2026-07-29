@@ -9,7 +9,7 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
 .voucher-page{width:210mm;min-height:297mm;margin:0 auto;padding:24mm 20mm;position:relative}
 
 /* Header */
-.v-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:20px;border-bottom:2px solid #E4B505;margin-bottom:24px}
+.v-header{display:flex;align-items:center;justify-content:space-between;padding:24px 30px;background:#f5f5f5;border-bottom:2px solid #E4B505;margin-bottom:24px;border-radius:6px 6px 0 0}
 .v-header-left{display:flex;align-items:center;gap:16px}
 .v-logo{width:80px;height:auto}
 .v-company-info h2{font-size:14px;font-weight:700;color:#1a1a1a;margin-bottom:3px}
@@ -83,12 +83,14 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
         </div>
     </div>
 
-    <!-- Type Badge -->
-    <div class="v-type-badge">VOUCHER DE VIAGEM</div>
+    <!-- Type Badge + Code -->
+    <div style="margin-bottom:24px;">
+        <h1 style="font-size:26px;font-weight:800;color:#1a1a1a;text-transform:uppercase;letter-spacing:1px;margin:0 0 6px;">VOUCHER PASSEIO</h1>
+        <p style="font-size:13px;color:#888;font-weight:400;">Código: <?= e($reference) ?></p>
+    </div>
 
-    <!-- Title -->
-    <h1 class="v-title"><?= e($item['trip_title'] ?? '') ?></h1>
-    <p class="v-code">Código: <strong><?= e($reference) ?></strong></p>
+    <!-- Nome do Passeio -->
+    <h2 style="font-size:20px;font-weight:700;color:#1B6F00;margin-bottom:24px;"><?= e($item['trip_title'] ?? '') ?></h2>
 
     <!-- Dados do Cliente -->
     <div class="v-section">
