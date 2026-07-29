@@ -125,7 +125,7 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                 <div class="booking-trip-card-header">
                     <div class="booking-trip-card-info">
                         <?php if (!empty($item['featured_image'])): ?>
-                        <img src="<?= e($item['featured_image']) ?>" alt="" class="booking-trip-thumb">
+                        <img src="<?= e($item['featured_image']) ?>" alt="" class="booking-trip-thumb" width="48" height="34">
                         <?php endif; ?>
                         <div>
                             <h4 class="booking-trip-title"><?= e($item['trip_title'] ?? $item['title'] ?? '-') ?></h4>
