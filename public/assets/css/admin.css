@@ -273,7 +273,7 @@ a { color: var(--primary); text-decoration: none; }
 .booking-page-service svg { color: var(--primary); flex-shrink: 0; }
 .booking-page-code { font-size: 14px; color: #64748b; margin: 0; }
 .booking-page-code strong { color: #475569; font-weight: 600; }
-.booking-page-header-right { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.booking-page-header-right { display: flex; align-items: flex-end; flex-direction: column; gap: 10px; }
 .booking-page-date { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #64748b; }
 
 /* Booking Detail Grid */
@@ -302,9 +302,10 @@ a { color: var(--primary); text-decoration: none; }
 .booking-trip-detail svg { color: #94a3b8; }
 
 /* Transfer Cards */
-.booking-transfer-card { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 22px; margin-bottom: 16px; position: relative; }
+.booking-transfer-card { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 22px; margin-bottom: 16px; }
 .booking-transfer-card:last-child { margin-bottom: 0; }
-.booking-transfer-route { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.booking-transfer-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.booking-transfer-route { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; }
 .booking-transfer-point { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 500; color: #1e293b; line-height: 1.5; }
 .booking-transfer-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .booking-transfer-dot-origin { background: #0077b6; }
@@ -313,7 +314,7 @@ a { color: var(--primary); text-decoration: none; }
 .booking-transfer-meta { display: flex; gap: 20px; flex-wrap: wrap; }
 .booking-transfer-meta-item { display: flex; align-items: center; gap: 7px; font-size: 13px; color: #475569; line-height: 1.6; }
 .booking-transfer-meta-item svg { color: #94a3b8; }
-.booking-transfer-price { position: absolute; top: 22px; right: 22px; font-size: 16px; font-weight: 700; color: var(--primary); }
+.booking-transfer-price { font-size: 16px; font-weight: 700; color: var(--primary); white-space: nowrap; flex-shrink: 0; }
 
 /* Payment Items */
 .booking-payments-list { display: flex; flex-direction: column; gap: 0; }
@@ -350,9 +351,9 @@ a { color: var(--primary); text-decoration: none; }
 /* Status Form */
 .booking-status-form { width: 100%; }
 .booking-status-label { font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 12px; display: block; }
-.booking-status-controls { display: flex; gap: 10px; }
+.booking-status-controls { display: flex; gap: 10px; align-items: stretch; }
 .booking-status-controls select { flex: 1; }
-.booking-status-controls .btn { white-space: nowrap; }
+.booking-status-controls .btn { white-space: nowrap; padding: 10px 16px; font-size: 13px; width: auto; display: inline-flex; align-items: center; justify-content: center; }
 
 /* Booking Details List (Right sidebar) */
 .booking-details-list { display: flex; flex-direction: column; gap: 0; }
@@ -402,7 +403,7 @@ a { color: var(--primary); text-decoration: none; }
     .booking-info-grid { grid-template-columns: 1fr; }
     .booking-transfer-route { flex-direction: column; align-items: flex-start; gap: 8px; }
     .booking-transfer-line { width: 2px; height: 20px; min-width: 2px; background: linear-gradient(to bottom, #0077b6, #16a34a); }
-    .booking-transfer-price { position: static; margin-top: 12px; }
+    .booking-transfer-header { flex-direction: column; align-items: flex-start; }
     .booking-payment-item { flex-direction: column; align-items: flex-start; gap: 10px; }
     .booking-payment-item-right { text-align: left; }
     .booking-voucher-item { flex-direction: column; align-items: flex-start; gap: 10px; }

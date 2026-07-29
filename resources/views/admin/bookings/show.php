@@ -31,10 +31,6 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
 <!-- Page Header -->
 <div class="booking-page-header">
     <div class="booking-page-header-left">
-        <a href="/admin/reservas" class="btn-back">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
-            Voltar
-        </a>
         <div class="booking-page-titles">
             <?php if ($serviceName): ?>
             <h1 class="booking-page-service">
@@ -57,6 +53,10 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             <?= !empty($booking['created_at']) ? date('d/m/Y H:i', strtotime($booking['created_at'])) : '-' ?>
         </span>
+        <a href="/admin/reservas" class="btn-back">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Voltar
+        </a>
     </div>
 </div>
 
@@ -178,16 +178,19 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
             </div>
             <?php foreach ($transfers as $tr): ?>
             <div class="booking-transfer-card">
-                <div class="booking-transfer-route">
-                    <div class="booking-transfer-point">
-                        <div class="booking-transfer-dot booking-transfer-dot-origin"></div>
-                        <span><?= e($tr['origin_title'] ?? '?') ?></span>
+                <div class="booking-transfer-header">
+                    <div class="booking-transfer-route">
+                        <div class="booking-transfer-point">
+                            <div class="booking-transfer-dot booking-transfer-dot-origin"></div>
+                            <span><?= e($tr['origin_title'] ?? '?') ?></span>
+                        </div>
+                        <div class="booking-transfer-line"></div>
+                        <div class="booking-transfer-point">
+                            <div class="booking-transfer-dot booking-transfer-dot-dest"></div>
+                            <span><?= e($tr['destination_title'] ?? '?') ?></span>
+                        </div>
                     </div>
-                    <div class="booking-transfer-line"></div>
-                    <div class="booking-transfer-point">
-                        <div class="booking-transfer-dot booking-transfer-dot-dest"></div>
-                        <span><?= e($tr['destination_title'] ?? '?') ?></span>
-                    </div>
+                    <div class="booking-transfer-price">$<?= number_format((float)($tr['price'] ?? 0), 2) ?></div>
                 </div>
                 <div class="booking-transfer-meta">
                     <?php if (!empty($tr['transfer_date'])): ?>
@@ -213,7 +216,6 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                     </div>
                     <?php endif; ?>
                 </div>
-                <div class="booking-transfer-price">$<?= number_format((float)($tr['price'] ?? 0), 2) ?></div>
             </div>
             <?php endforeach; ?>
         </div>
@@ -390,7 +392,7 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                             <option value="cancelled" <?= $st === 'cancelled' ? 'selected' : '' ?>>Cancelado</option>
                             <option value="refunded" <?= $st === 'refunded' ? 'selected' : '' ?>>Reembolsado</option>
                         </select>
-                        <button type="submit" class="btn btn-sm btn-primary btn-block">
+                        <button type="submit" class="btn btn-sm btn-primary">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                             Atualizar
                         </button>
