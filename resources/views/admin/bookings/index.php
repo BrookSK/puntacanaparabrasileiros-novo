@@ -30,12 +30,12 @@
         </tr>
     </thead>
     <tbody>
-        <?php if (empty($bookings['data'])): ?>
+        <?php if (empty($bookings['items'])): ?>
         <tr>
             <td colspan="7" class="text-center">Nenhuma reserva encontrada.</td>
         </tr>
         <?php else: ?>
-        <?php foreach ($bookings['data'] as $booking): ?>
+        <?php foreach ($bookings['items'] as $booking): ?>
         <tr>
             <td><strong><?= e($booking['booking_number'] ?? '-') ?></strong></td>
             <td><?= e(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '')) ?></td>
@@ -73,10 +73,10 @@
     </tbody>
 </table>
 
-<?php if (!empty($bookings['totalPages']) && $bookings['totalPages'] > 1): ?>
+<?php if (!empty($bookings['total_pages']) && $bookings['total_pages'] > 1): ?>
 <div class="pagination">
-    <?php for ($p = 1; $p <= $bookings['totalPages']; $p++): ?>
-    <a href="?page=<?= $p ?>&status=<?= e($currentStatus ?? '') ?>&busca=<?= e($currentSearch ?? '') ?>" class="pagination-btn <?= $p === ($bookings['currentPage'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
+    <?php for ($p = 1; $p <= $bookings['total_pages']; $p++): ?>
+    <a href="?page=<?= $p ?>&status=<?= e($currentStatus ?? '') ?>&busca=<?= e($currentSearch ?? '') ?>" class="pagination-btn <?= $p === ($bookings['current_page'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
     <?php endfor; ?>
 </div>
 <?php endif; ?>
