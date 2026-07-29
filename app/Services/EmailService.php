@@ -65,9 +65,19 @@ class EmailService
 
     /**
      * Envia email via SMTP usando fsockopen.
+     * Se falhar, tenta usar mail() do PHP como fallback.
      */
     private function sendViaSMTP(string $to, string $toName, string $subject, string $body, array $attachments = []): bool
     {
+        // Se não tem host SMTP configurado, usa mail() nativo
+        if (empty($this->host)) {
+            $headers = "From: {$this->fromName} <{$this->fromEmail}>\r\n";
+            $headers .= "Reply-To: {$this->fromEmail}\r\n";
+            $headers .= "MIME-Version: 1.0\r\n";
+            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+            return mail($to, $subject, $body, $headers);
+        }
+
         // Construir mensagem MIME
         $boundary = md5(uniqid((string) time()));
         $headers = $this->buildHeaders($to, $toName, $subject, $boundary, !empty($attachments));

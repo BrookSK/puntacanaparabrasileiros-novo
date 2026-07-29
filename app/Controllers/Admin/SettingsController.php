@@ -93,13 +93,23 @@ class SettingsController extends Controller
             return;
         }
 
-        $emailService = new EmailService();
-        $result = $emailService->sendTestEmail($testTo);
+        // Recarregar settings para pegar os valores atualizados
+        $this->app->reloadSettings();
 
-        if ($result) {
-            $this->flash('success', 'Email de teste enviado para ' . $testTo . '!');
-        } else {
-            $this->flash('error', 'Falha ao enviar email de teste. Verifique as configurações SMTP.');
+        $emailService = new EmailService();
+
+        try {
+            $result = $emailService->sendTestEmail($testTo);
+            if ($result) {
+                $this->flash('success', 'Email de teste enviado com sucesso para ' . $testTo . '!');
+            } else {
+                // Buscar último erro no log
+                $lastLog = $this->db->fetchOne("SELECT * FROM email_log WHERE status = 'failed' ORDER BY id DESC LIMIT 1");
+                $errorDetail = $lastLog['error_message'] ?? 'Erro desconhecido';
+                $this->flash('error', 'Falha ao enviar email. Erro: ' . $errorDetail);
+            }
+        } catch (\Throwable $e) {
+            $this->flash('error', 'Erro SMTP: ' . $e->getMessage());
         }
 
         $this->redirect('/admin/configuracoes');
