@@ -341,6 +341,13 @@ class CheckoutController extends Controller
         $booking = $this->bookingModel->find($bookingId);
         if (!$booking || $booking['status'] === 'pending') return;
 
+        // Verificar se vouchers já foram gerados (evitar duplicação)
+        $existingVouchers = $this->db->fetchOne(
+            "SELECT COUNT(*) as total FROM vouchers WHERE booking_id = ?",
+            [$bookingId]
+        );
+        if ((int)($existingVouchers['total'] ?? 0) > 0) return;
+
         // Gerar vouchers para cada item de trip
         $voucherService = new VoucherService();
         $items = $this->bookingModel->getItems($bookingId);
