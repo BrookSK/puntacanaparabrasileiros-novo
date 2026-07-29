@@ -107,6 +107,15 @@
                 <div class="form-group col-6"><label>Email Remetente</label><input type="email" name="mail_from_email" class="form-control" value="<?= e($settings['email']['mail_from_email']['setting_value'] ?? '') ?>"></div>
                 <div class="form-group col-6"><label>Nome Remetente</label><input type="text" name="mail_from_name" class="form-control" value="<?= e($settings['email']['mail_from_name']['setting_value'] ?? '') ?>"></div>
             </div>
+
+            <div style="margin-top:28px;padding-top:20px;border-top:1px solid #e5e7eb;">
+                <h4 style="font-size:14px;font-weight:600;margin-bottom:12px;">Testar Email</h4>
+                <div style="display:flex;gap:10px;align-items:center;">
+                    <input type="email" id="testEmailInput" class="form-control" placeholder="Digite o email para teste..." style="max-width:300px;">
+                    <button type="button" class="btn btn-outline" onclick="sendTestEmail()">Enviar Teste</button>
+                </div>
+                <small style="display:block;margin-top:8px;color:#6b7280;">Salve as configurações antes de testar.</small>
+            </div>
         </div>
     </div>
 
@@ -268,8 +277,8 @@ document.querySelectorAll('.settings-tab').forEach(btn => {
 });
 
 function sendTestEmail() {
-    const email = document.getElementById('testEmail').value;
-    if (!email) { alert('Informe um email'); return; }
+    const email = document.getElementById('testEmailInput').value;
+    if (!email) { alert('Informe um email para teste'); return; }
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = '/admin/configuracoes/email-teste';
