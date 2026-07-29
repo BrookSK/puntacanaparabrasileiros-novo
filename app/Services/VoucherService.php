@@ -56,7 +56,8 @@ class VoucherService
         ]);
 
         // Salvar arquivo
-        $filename = "voucher-{$bookingId}-{$item['trip_id']}-{$reference}.html";
+        $safeTitle = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($item['trip_title'] ?? 'passeio'));
+        $filename = "Voucher-Viagem-{$safeTitle}-{$reference}.html";
         $filePath = $this->vouchersPath . '/' . $filename;
         file_put_contents($filePath, $html);
 
@@ -117,7 +118,8 @@ class VoucherService
             'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($reference),
         ]);
 
-        $filename = "voucher-transfer-{$transferBookingId}-{$reference}.html";
+        $safeRoute = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower(($transfer['origin_title'] ?? '') . '-' . ($transfer['destination_title'] ?? '')));
+        $filename = "Voucher-Transfer-{$safeRoute}-{$reference}.html";
         $filePath = $this->vouchersPath . '/' . $filename;
         file_put_contents($filePath, $html);
 

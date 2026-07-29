@@ -42,9 +42,15 @@ class VouchersController extends Controller
             $this->abort(404, 'Arquivo do voucher não encontrado.');
         }
 
-        // Servir o HTML direto
+        // Servir o HTML com auto-print para gerar PDF
+        $html = file_get_contents($filePath);
+
+        // Adicionar script de auto-print para download como PDF
+        $autoprint = '<script>window.onload=function(){window.print();};</script>';
+        $html = str_replace('</body>', $autoprint . '</body>', $html);
+
         $response->setHeader('Content-Type', 'text/html; charset=utf-8');
-        $response->setBody(file_get_contents($filePath));
+        $response->setBody($html);
         $response->send();
     }
 
@@ -59,7 +65,11 @@ class VouchersController extends Controller
             $this->abort(404, 'Arquivo não encontrado.');
         }
 
-        $response->download($filePath, 'voucher-' . $voucher['reference_code'] . '.html');
+        // Gerar nome amigável para download
+        $type = ($voucher['type'] ?? 'trip') === 'transfer' ? 'Transfer' : 'Viagem';
+        $downloadName = 'Voucher - ' . $type . ' - ' . $voucher['reference_code'] . '.html';
+
+        $response->download($filePath, $downloadName);
     }
 
     public function send(Request $request, Response $response): void
