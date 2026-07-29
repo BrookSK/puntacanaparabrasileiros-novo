@@ -90,15 +90,28 @@
             <div style="margin-bottom:28px;">
                 <h3 style="font-size:16px;font-weight:600;color:#1f2937;margin-bottom:14px;">Vouchers</h3>
                 <?php foreach ($vouchers as $vc): ?>
-                <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:8px;">
-                    <div style="display:flex;align-items:center;gap:10px;">
-                        <span style="font-size:20px;">📄</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;border:1px solid #e5e7eb;border-radius:10px;margin-bottom:10px;">
+                    <div style="display:flex;align-items:center;gap:14px;">
+                        <div style="width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:<?= ($vc['type'] ?? '') === 'transfer' ? '#eff6ff' : '#f0fdf4' ?>;">
+                            <?php if (($vc['type'] ?? '') === 'transfer'): ?>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+                            <?php else: ?>
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 010 20 14.5 14.5 0 010-20"/><path d="M2 12h20"/></svg>
+                            <?php endif; ?>
+                        </div>
                         <div>
-                            <strong style="font-size:13px;"><?= e($vc['reference_code'] ?? '') ?></strong>
-                            <span style="font-size:12px;color:#6b7280;margin-left:8px;">(<?= ($vc['type'] ?? '') === 'transfer' ? 'Transfer' : 'Viagem' ?>)</span>
+                            <strong style="font-size:14px;color:#1f2937;display:block;">
+                                <?= ($vc['type'] ?? '') === 'transfer' ? 'VOUCHER TRANSFER' : 'VOUCHER PASSEIO' ?>
+                            </strong>
+                            <span style="font-size:13px;color:#6b7280;">
+                                <?php if (!empty($vc['trip_name'])): ?>
+                                    <?= e($vc['trip_name']) ?>
+                                <?php endif; ?>
+                                <span style="font-size:11px;color:#9ca3af;margin-left:6px;">— Cód: <?= e($vc['reference_code'] ?? '') ?></span>
+                            </span>
                         </div>
                     </div>
-                    <a href="/admin/vouchers/<?= (int)$vc['id'] ?>/visualizar" target="_blank" style="font-size:12px;color:#0077b6;font-weight:600;text-decoration:none;">Ver Voucher →</a>
+                    <a href="/admin/vouchers/<?= (int)$vc['id'] ?>/visualizar" target="_blank" style="font-size:12px;color:#0077b6;font-weight:600;text-decoration:none;padding:6px 14px;border:1px solid #0077b6;border-radius:6px;">Ver Voucher</a>
                 </div>
                 <?php endforeach; ?>
             </div>
