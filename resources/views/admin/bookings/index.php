@@ -22,7 +22,7 @@
         <tr>
             <th>Nº Reserva</th>
             <th>Cliente</th>
-            <th>E-mail</th>
+            <th>Serviço</th>
             <th>Total</th>
             <th>Status</th>
             <th>Data</th>
@@ -39,7 +39,7 @@
         <tr>
             <td><strong><?= e($booking['booking_number'] ?? '-') ?></strong></td>
             <td><?= e(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '')) ?></td>
-            <td><?= e($booking['billing_email'] ?? '-') ?></td>
+            <td><span style="font-size:12px;color:#374151;"><?= e($booking['service_names'] ?? '-') ?></span></td>
             <td>$<?= number_format((float)($booking['total'] ?? $booking['subtotal'] ?? 0), 2) ?></td>
             <td>
                 <?php

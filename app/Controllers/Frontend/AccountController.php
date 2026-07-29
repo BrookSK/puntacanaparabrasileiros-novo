@@ -34,6 +34,23 @@ class AccountController extends Controller
         $bookingModel = new Booking();
         $bookings = $bookingModel->getByUser((int) $user['id'], $page, 10);
 
+        // Buscar nomes dos serviços para cada reserva
+        if (!empty($bookings['items'])) {
+            foreach ($bookings['items'] as &$bk) {
+                $items = $this->db->fetchAll(
+                    "SELECT t.title FROM booking_items bi INNER JOIN trips t ON bi.trip_id = t.id WHERE bi.booking_id = ?",
+                    [(int)$bk['id']]
+                );
+                $transfers = $this->db->fetchAll(
+                    "SELECT CONCAT(tlo.title, ' → ', tld.title) as route FROM transfer_bookings tb INNER JOIN transfer_locations tlo ON tb.origin_id = tlo.id INNER JOIN transfer_locations tld ON tb.destination_id = tld.id WHERE tb.booking_id = ?",
+                    [(int)$bk['id']]
+                );
+                $names = array_merge(array_column($items, 'title'), array_column($transfers, 'route'));
+                $bk['service_names'] = implode(', ', $names) ?: '-';
+            }
+            unset($bk);
+        }
+
         $this->view('frontend/account/bookings', [
             'bookings' => $bookings,
             'pageTitle' => 'Minhas Reservas',

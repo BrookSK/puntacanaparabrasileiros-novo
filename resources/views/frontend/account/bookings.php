@@ -6,11 +6,12 @@
         <div class="empty-state"><p>Nenhuma reserva encontrada.</p><a href="/passeios" class="btn btn-primary">Ver Passeios</a></div>
         <?php else: ?>
         <table class="table">
-            <thead><tr><th>Número</th><th>Data</th><th>Total</th><th>Pago</th><th>Status</th><th>Ações</th></tr></thead>
+            <thead><tr><th>Número</th><th>Serviço</th><th>Data</th><th>Total</th><th>Pago</th><th>Status</th><th>Ações</th></tr></thead>
             <tbody>
             <?php foreach ($bookings['items'] as $b): ?>
             <tr>
                 <td><a href="/minha-conta/reservas/<?= (int)$b['id'] ?>"><?= e($b['booking_number']) ?></a></td>
+                <td style="font-size:13px;color:#374151;max-width:200px;"><?= e($b['service_names'] ?? '-') ?></td>
                 <td><?= format_date($b['created_at']) ?></td>
                 <td><?= money((float)$b['total']) ?></td>
                 <td><?= money((float)$b['paid_amount']) ?></td>
