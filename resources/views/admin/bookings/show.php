@@ -137,7 +137,7 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                             <?php endif; ?>
                         </div>
                     </div>
-                    <div class="booking-trip-card-price">$<?= number_format((float)($item['subtotal'] ?? 0), 2) ?></div>
+                    <div class="booking-trip-card-price">$<?= number_format((float)($item['price'] ?? $item['subtotal'] ?? 0), 2) ?></div>
                 </div>
                 <div class="booking-trip-card-details">
                     <?php if (!empty($item['trip_date'])): ?>
