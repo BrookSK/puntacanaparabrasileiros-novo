@@ -1965,21 +1965,6 @@
         <p class="copyright">© 2025 Punta Cana Para Brasileiros. Todos os direitos reservados.</p>
     </footer>
 
-    <!-- CART PREVIEW -->
-    <div class="cart-preview-overlay" id="cartOverlay" onclick="closeCartPreview()"></div>
-    <div class="cart-preview" id="cartPreview">
-        <div class="cart-preview-header">
-            <h3>Meu Carrinho</h3>
-            <button class="cart-preview-close" onclick="closeCartPreview()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-        </div>
-        <div class="cart-preview-body" id="cartPreviewBody"></div>
-        <div class="cart-preview-footer" id="cartPreviewFooter" style="display:none;">
-            <a href="/passeios" class="btn-checkout">Finalizar Reserva</a>
-        </div>
-    </div>
-
     <!-- MODAL -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
         <div class="modal" id="modalContent">
@@ -2475,61 +2460,13 @@
         // Close detail modal if open
         document.getElementById('modalOverlay').classList.remove('active');
         document.body.style.overflow = '';
-
-        // Show cart preview
-        renderCartPreview();
-        openCartPreviewPanel();
     }
 
     function openCartPreview(event) {
         event.preventDefault();
-        renderCartPreview();
-        openCartPreviewPanel();
-    }
-
-    function openCartPreviewPanel() {
-        document.getElementById('cartOverlay').classList.add('active');
-        document.getElementById('cartPreview').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeCartPreview() {
-        document.getElementById('cartOverlay').classList.remove('active');
-        document.getElementById('cartPreview').classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    function removeCartItem(index) {
-        cartItems.splice(index, 1);
-        document.querySelector('.cart-badge').textContent = cartItems.length;
-        renderCartPreview();
-    }
-
-    function renderCartPreview() {
-        const body = document.getElementById('cartPreviewBody');
-        const footer = document.getElementById('cartPreviewFooter');
-
-        if (cartItems.length === 0) {
-            body.innerHTML = '<div class="cart-preview-empty"><p>Seu carrinho está vazio</p></div>';
-            footer.style.display = 'none';
-            return;
+        if (cartItems.length > 0) {
+            window.location.href = '/carrinho';
         }
-
-        footer.style.display = 'block';
-        body.innerHTML = cartItems.map((item, i) => {
-            const paxText = item.passengers.map(p => p.quantity + ' ' + p.category.split('(')[0].trim()).join(', ');
-            return `
-                <div class="cart-preview-item">
-                    <img src="${item.image}" alt="${item.title}">
-                    <div class="cart-preview-item-info">
-                        <h4>${item.title}</h4>
-                        <p>${paxText}</p>
-                    </div>
-                    <span class="cart-preview-item-price">${item.price}</span>
-                    <button class="cart-preview-item-remove" onclick="removeCartItem(${i})" title="Remover">&times;</button>
-                </div>
-            `;
-        }).join('');
     }
 
     // Modal
