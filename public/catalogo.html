@@ -1274,11 +1274,168 @@
             .pax-counter { margin-left: auto; }
         }
 
+        /* TRANSFER PAGE SECTIONS */
+        .transfer-hero {
+            background: linear-gradient(135deg, #1B6F00 0%, #145a00 100%);
+            padding: 48px 24px;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .transfer-hero h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--white);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .transfer-hero p {
+            font-size: 15px;
+            color: rgba(255,255,255,0.85);
+            font-weight: 300;
+        }
+
+        .transfer-info-section {
+            background: var(--white);
+            border: 1px solid #e8e8e8;
+            border-radius: var(--radius);
+            padding: 28px 32px;
+            margin-bottom: 36px;
+        }
+
+        .transfer-info-section h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-green);
+            margin-bottom: 14px;
+        }
+
+        .transfer-info-section p {
+            font-size: 14px;
+            color: var(--gray);
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .transfer-info-section p:last-child {
+            margin-bottom: 0;
+            font-style: italic;
+        }
+
+        .transfer-section-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark);
+            text-align: center;
+            margin-bottom: 24px;
+            margin-top: 8px;
+        }
+
+        .transfer-benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .transfer-benefit-card {
+            background: var(--white);
+            border: 1px solid #e8e8e8;
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            transition: var(--transition);
+        }
+
+        .transfer-benefit-card:hover {
+            border-color: var(--text-green);
+            box-shadow: 0 4px 16px rgba(27,111,0,0.08);
+        }
+
+        .benefit-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: #f0fdf4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .benefit-icon svg {
+            stroke: var(--text-green);
+        }
+
+        .transfer-benefit-card strong {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .transfer-benefit-card p {
+            font-size: 13px;
+            color: var(--gray);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .transfer-steps {
+            max-width: 600px;
+            margin: 0 auto 40px;
+        }
+
+        .transfer-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 18px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .transfer-step:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--text-green);
+            color: var(--white);
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .step-content strong {
+            display: block;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .step-content p {
+            font-size: 13px;
+            color: var(--gray);
+            line-height: 1.5;
+            margin: 0;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 992px) {
             .trips-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 22px;
+            }
+            .transfer-benefits-grid {
+                grid-template-columns: repeat(2, 1fr);
             }
         }
 
@@ -1286,6 +1443,14 @@
             .trips-grid {
                 grid-template-columns: 1fr;
                 gap: 20px;
+            }
+
+            .transfer-benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .transfer-hero h2 {
+                font-size: 22px;
             }
 
             .header-top {
@@ -1405,17 +1570,95 @@
 
     <!-- TRANSFERS TAB -->
     <div class="tab-content" id="tab-transfers">
-        <div class="section-intro">
-            <span class="caveat-label">Transporte Premium</span>
-            <h2>Transfers Privativos</h2>
-            <div class="wave-divider">
-                <svg viewBox="0 0 120 20">
-                    <path d="M0,10 C20,0 40,20 60,10 C80,0 100,20 120,10" stroke-linecap="round"/>
-                </svg>
-            </div>
+        <!-- Transfer Hero Banner -->
+        <div class="transfer-hero">
+            <h2>TRANSFER PRIVADO</h2>
+            <p>Conforto, segurança e tranquilidade para sua chegada e saída</p>
         </div>
 
+        <!-- O que é Transfer Privado -->
         <div class="catalog-container">
+            <div class="transfer-info-section">
+                <h3>O que é Transfer Privado?</h3>
+                <p>Nosso serviço de Transfer Privado oferece transporte exclusivo, motorizado e seguro entre o aeroporto e seu hotel (ou vice-versa). Você será recebido por um motorista profissional, experiente e que fala português, garantindo uma experiência tranquila desde o primeiro momento.</p>
+                <p>Sem filas, sem surpresas com preços, sem esperas longas. Apenas conforto e pontualidade.</p>
+            </div>
+
+            <!-- Benefícios -->
+            <h3 class="transfer-section-title">Benefícios do Transfer Privado</h3>
+            <div class="transfer-benefits-grid">
+                <div class="transfer-benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <strong>Conforto Garantido</strong>
+                    <p>Veículos climatizados, limpos e modernos, com espaço total para bagagem.</p>
+                </div>
+                <div class="transfer-benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                    <strong>Motoristas Profissionais</strong>
+                    <p>Equipe treinada, pontual e que fala português. Sua segurança é nossa prioridade.</p>
+                </div>
+                <div class="transfer-benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <strong>Preço Fixo</strong>
+                    <p>Sem surpresas. Você sabe exatamente o que paga antes de confirmar.</p>
+                </div>
+                <div class="transfer-benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                    </div>
+                    <strong>Rastreamento em Tempo Real</strong>
+                    <p>Acompanhe seu transfer em tempo real através do WhatsApp.</p>
+                </div>
+                <div class="transfer-benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <strong>Flexibilidade</strong>
+                    <p>Adaptamos aos seus horários. Chegadas noturnas? Sem problemas.</p>
+                </div>
+                <div class="transfer-benefit-card">
+                    <div class="benefit-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <strong>Atendimento em Português</strong>
+                    <p>Comunicação clara e direta, tudo em português brasileiro.</p>
+                </div>
+            </div>
+
+            <!-- Como Funciona -->
+            <h3 class="transfer-section-title">Como Funciona?</h3>
+            <div class="transfer-steps">
+                <div class="transfer-step">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <strong>Faça sua Reserva</strong>
+                        <p>Clique no botão "Reservar Transfer" e preencha suas informações: data, horário, origem e destino.</p>
+                    </div>
+                </div>
+                <div class="transfer-step">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <strong>Confirmação Imediata</strong>
+                        <p>Receba a confirmação via WhatsApp com todos os detalhes do motorista e do veículo.</p>
+                    </div>
+                </div>
+                <div class="transfer-step">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <strong>Aproveite seu Transfer</strong>
+                        <p>No dia, seu motorista estará esperando com placa de identificação. Relaxe e aproveite!</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Transfer Cards -->
+            <h3 class="transfer-section-title">Rotas Disponíveis</h3>
             <div class="trips-grid" id="transfers-grid">
                 <!-- Transfer cards inserted via JS -->
             </div>
