@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo - Punta Cana Para Brasileiros</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1C2011;
+            --secondary: #E4B505;
+            --text-green: #1B6F00;
+            --accent: #3772C0;
+            --gold: #E4B505;
+            --dark: #1C2011;
+            --gray: #636e72;
+            --bg-light: #f7f8fa;
+            --white: #ffffff;
+            --shadow: 0 2px 16px rgba(0,0,0,0.07);
+            --shadow-hover: 0 8px 32px rgba(0,0,0,0.12);
+            --radius: 12px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg-light); color: var(--dark); line-height: 1.6; }
+
+        /* Header */
+        .header { background: var(--white); padding: 16px 0; box-shadow: 0 1px 8px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; }
+        .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
+        .logo-area { display: flex; flex-direction: column; }
+        .logo-title { font-size: 20px; font-weight: 700; color: var(--dark); letter-spacing: -0.5px; }
+        .logo-subtitle { font-size: 12px; color: var(--gray); font-weight: 400; }
+        .cart-icon { position: relative; cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s; }
+        .cart-icon:hover { background: var(--bg-light); }
+        .cart-icon svg { width: 24px; height: 24px; fill: none; stroke: var(--dark); stroke-width: 2; }
+        .cart-badge { position: absolute; top: 2px; right: 2px; background: var(--text-green); color: #fff; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; }
+
+        /* Tabs */
+        .tabs-container { max-width: 1200px; margin: 32px auto 0; padding: 0 24px; }
+        .tabs { display: inline-flex; background: var(--white); border-radius: 50px; padding: 4px; box-shadow: var(--shadow); }
+        .tab-btn { padding: 10px 28px; border: none; border-radius: 50px; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.3s; background: transparent; color: var(--gray); }
+        .tab-btn.active { background: var(--text-green); color: #fff; }
+        .tab-btn:hover:not(.active) { color: var(--dark); }
+
+        /* Grid */
+        .catalog-section { max-width: 1200px; margin: 24px auto 48px; padding: 0 24px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+
+        /* Trip Cards */
+        .trip-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform 0.3s, box-shadow 0.3s; }
+        .trip-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+        .trip-card-img { position: relative; overflow: hidden; aspect-ratio: 16/11; }
+        .trip-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+        .trip-card:hover .trip-card-img img { transform: scale(1.05); }
+        .trip-card-badge { position: absolute; top: 12px; left: 12px; background: var(--text-green); color: #fff; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 50px; }
+        .trip-card-body { padding: 16px 18px; }
+        .trip-card-title { font-size: 15px; font-weight: 600; color: var(--dark); margin-bottom: 6px; }
+        .trip-card-desc { font-size: 13px; color: var(--gray); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 14px; line-height: 1.5; }
+
+        .trip-card-footer { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-top: 1px solid #f0f0f0; }
+        .trip-duration { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--gray); }
+        .trip-duration svg { width: 14px; height: 14px; stroke: var(--gray); fill: none; stroke-width: 2; }
+        .trip-price { text-align: right; }
+        .trip-price-label { font-size: 11px; color: var(--gray); }
+        .trip-price-value { font-size: 18px; font-weight: 700; color: var(--text-green); }
+        .trip-card-actions { display: flex; gap: 8px; padding: 0 18px 16px; }
+        .btn-outline { flex: 1; padding: 8px 12px; border: 1.5px solid var(--text-green); color: var(--text-green); background: transparent; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .btn-outline:hover { background: var(--text-green); color: #fff; }
+        .btn-solid { flex: 1; padding: 8px 12px; border: none; background: var(--text-green); color: #fff; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; text-align: center; }
+        .btn-solid:hover { background: #145a00; }
+
+        /* Transfer Cards */
+        .transfer-card { background: var(--white); border-radius: var(--radius); padding: 20px 22px; box-shadow: var(--shadow); transition: transform 0.3s, box-shadow 0.3s; display: flex; flex-direction: column; gap: 14px; }
+        .transfer-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+        .transfer-route { display: flex; align-items: center; gap: 12px; }
+        .transfer-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-green); flex-shrink: 0; }
+        .transfer-line { flex: 1; height: 2px; background: linear-gradient(to right, var(--text-green), var(--accent)); border-radius: 2px; }
+        .transfer-dot-end { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+        .transfer-locations { display: flex; justify-content: space-between; margin-top: -4px; }
+        .transfer-loc { font-size: 13px; font-weight: 500; color: var(--dark); }
+        .transfer-info { display: flex; align-items: center; gap: 16px; font-size: 12px; color: var(--gray); }
+        .transfer-info-item { display: flex; align-items: center; gap: 4px; }
+        .transfer-info-item svg { width: 14px; height: 14px; stroke: var(--gray); fill: none; stroke-width: 2; }
+        .transfer-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 4px; }
+        .transfer-price { font-size: 20px; font-weight: 700; color: var(--text-green); }
+        .transfer-price span { font-size: 12px; font-weight: 400; color: var(--gray); }
+        .btn-transfer { padding: 10px 24px; border: none; background: var(--text-green); color: #fff; border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-transfer:hover { background: #145a00; }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 640px) {
+            .grid { grid-template-columns: 1fr; gap: 18px; }
+            .header-inner { padding: 0 16px; }
+            .logo-title { font-size: 17px; }
+            .tabs-container { padding: 0 16px; }
+            .catalog-section { padding: 0 16px; }
+            .tab-btn { padding: 9px 20px; font-size: 13px; }
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="logo-area">
+                <div class="logo-title">Punta Cana Para Brasileiros</div>
+                <div class="logo-subtitle">Tour Premium &middot; Desde 2021</div>
+            </div>
+            <div class="cart-icon">
+                <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+                <span class="cart-badge">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Tabs -->
+    <div class="tabs-container">
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="passeios">Passeios</button>
+            <button class="tab-btn" data-tab="transfer">Transfer</button>
+        </div>
+    </div>
+
+    <!-- Passeios Tab -->
+    <section class="catalog-section tab-content active" id="tab-passeios">
+        <div class="grid">
+            <!-- Card 1 -->
+            <div class="trip-card">
+                <div class="trip-card-img">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png" alt="Saona Premium Brasil">
+                    <span class="trip-card-badge">Premium</span>
+                </div>
+                <div class="trip-card-body">
+                    <h3 class="trip-card-title">Saona Premium Brasil</h3>
+                    <p class="trip-card-desc">Experimente o melhor da Ilha Saona com serviço premium exclusivo para brasileiros. Inclui open bar, almoço gourmet e praia paradisíaca.</p>
+                </div>
+                <div class="trip-card-footer">
+                    <div class="trip-duration">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>10 horas</span>
+                    </div>
+                    <div class="trip-price">
+                        <div class="trip-price-label">Desde</div>
+                        <div class="trip-price-value">US$ 79</div>
+                    </div>
+                </div>
+                <div class="trip-card-actions">
+                    <button class="btn-outline">Detalhes</button>
+                    <button class="btn-solid">Adicionar</button>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="trip-card">
+                <div class="trip-card-img">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/4.png" alt="Saona Clásica">
+                    <span class="trip-card-badge">Popular</span>
+                </div>
+                <div class="trip-card-body">
+                    <h3 class="trip-card-title">Saona Clásica</h3>
+                    <p class="trip-card-desc">O passeio clássico à Ilha Saona com paradas em piscina natural, estrelas do mar e praia de areia branca.</p>
+                </div>
+                <div class="trip-card-footer">
+                    <div class="trip-duration">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>8 horas</span>
+                    </div>
+                    <div class="trip-price">
+                        <div class="trip-price-label">Desde</div>
+                        <div class="trip-price-value">US$ 49</div>
+                    </div>
+                </div>
+                <div class="trip-card-actions">
+                    <button class="btn-outline">Detalhes</button>
+                    <button class="btn-solid">Adicionar</button>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="trip-card">
+                <div class="trip-card-img">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg" alt="Encontro com Golfinhos">
+                    <span class="trip-card-badge">Exclusivo</span>
+                </div>
+                <div class="trip-card-body">
+                    <h3 class="trip-card-title">Encontro com Golfinhos</h3>
+                    <p class="trip-card-desc">Viva a experiência única de nadar e interagir com golfinhos em um ambiente seguro e inesquecível.</p>
+                </div>
+                <div class="trip-card-footer">
+                    <div class="trip-duration">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>4 horas</span>
+                    </div>
+                    <div class="trip-price">
+                        <div class="trip-price-label">Desde</div>
+                        <div class="trip-price-value">US$ 120</div>
+                    </div>
+                </div>
+                <div class="trip-card-actions">
+                    <button class="btn-outline">Detalhes</button>
+                    <button class="btn-solid">Adicionar</button>
+                </div>
+            </div>
+
+            <!-- Card 4 -->
+            <div class="trip-card">
+                <div class="trip-card-img">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg" alt="Coco Bongo">
+                    <span class="trip-card-badge">Noturno</span>
+                </div>
+                <div class="trip-card-body">
+                    <h3 class="trip-card-title">Coco Bongo</h3>
+                    <p class="trip-card-desc">A melhor festa noturna do Caribe! Show ao vivo, open bar e muita diversão em uma noite épica.</p>
+                </div>
+                <div class="trip-card-footer">
+                    <div class="trip-duration">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>5 horas</span>
+                    </div>
+                    <div class="trip-price">
+                        <div class="trip-price-label">Desde</div>
+                        <div class="trip-price-value">Consultar</div>
+                    </div>
+                </div>
+                <div class="trip-card-actions">
+                    <button class="btn-outline">Detalhes</button>
+                    <button class="btn-solid">Adicionar</button>
+                </div>
+            </div>
+
+            <!-- Card 5 -->
+            <div class="trip-card">
+                <div class="trip-card-img">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg" alt="Isla Catalina y Chavón">
+                    <span class="trip-card-badge">Aventura</span>
+                </div>
+                <div class="trip-card-body">
+                    <h3 class="trip-card-title">Isla Catalina y Chavón</h3>
+                    <p class="trip-card-desc">Combine praias cristalinas com a histórica cidade de Altos de Chavón em um passeio completo de dia inteiro.</p>
+                </div>
+                <div class="trip-card-footer">
+                    <div class="trip-duration">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Dia inteiro</span>
+                    </div>
+                    <div class="trip-price">
+                        <div class="trip-price-label">Desde</div>
+                        <div class="trip-price-value">US$ 59</div>
+                    </div>
+                </div>
+                <div class="trip-card-actions">
+                    <button class="btn-outline">Detalhes</button>
+                    <button class="btn-solid">Adicionar</button>
+                </div>
+            </div>
+
+            <!-- Card 6 -->
+            <div class="trip-card">
+                <div class="trip-card-img">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0044-990x490.jpg" alt="Isla Catalina Snorkel">
+                    <span class="trip-card-badge">Snorkel</span>
+                </div>
+                <div class="trip-card-body">
+                    <h3 class="trip-card-title">Isla Catalina Snorkel</h3>
+                    <p class="trip-card-desc">Mergulhe nas águas cristalinas de Isla Catalina e descubra recifes de corais e peixes tropicais coloridos.</p>
+                </div>
+                <div class="trip-card-footer">
+                    <div class="trip-duration">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <span>Dia inteiro</span>
+                    </div>
+                    <div class="trip-price">
+                        <div class="trip-price-label">Desde</div>
+                        <div class="trip-price-value">US$ 55</div>
+                    </div>
+                </div>
+                <div class="trip-card-actions">
+                    <button class="btn-outline">Detalhes</button>
+                    <button class="btn-solid">Adicionar</button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Transfer Tab -->
+    <section class="catalog-section tab-content" id="tab-transfer">
+        <div class="grid">
+            <!-- Transfer 1 -->
+            <div class="transfer-card">
+                <div class="transfer-route">
+                    <span class="transfer-dot"></span>
+                    <span class="transfer-line"></span>
+                    <span class="transfer-dot-end"></span>
+                </div>
+                <div class="transfer-locations">
+                    <span class="transfer-loc">Aeropuerto Punta Cana</span>
+                    <span class="transfer-loc">Bávaro</span>
+                </div>
+                <div class="transfer-info">
+                    <div class="transfer-info-item">
+                        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="23 7 16 12 23 17 23 7"/></svg>
+                        <span>Van Privada</span>
+                    </div>
+                    <div class="transfer-info-item">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                        <span>Até 8 pessoas</span>
+                    </div>
+                </div>
+                <div class="transfer-bottom">
+                    <div class="transfer-price"><span>Desde </span>US$ 35</div>
+                    <button class="btn-transfer">Reservar</button>
+                </div>
+            </div>
+
+            <!-- Transfer 2 -->
+            <div class="transfer-card">
+                <div class="transfer-route">
+                    <span class="transfer-dot"></span>
+                    <span class="transfer-line"></span>
+                    <span class="transfer-dot-end"></span>
+                </div>
+                <div class="transfer-locations">
+                    <span class="transfer-loc">Bávaro</span>
+                    <span class="transfer-loc">Cap Cana</span>
+                </div>
+                <div class="transfer-info">
+                    <div class="transfer-info-item">
+                        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="23 7 16 12 23 17 23 7"/></svg>
+                        <span>SUV</span>
+                    </div>
+                    <div class="transfer-info-item">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                        <span>Até 4 pessoas</span>
+                    </div>
+                </div>
+                <div class="transfer-bottom">
+                    <div class="transfer-price"><span>Desde </span>US$ 20</div>
+                    <button class="btn-transfer">Reservar</button>
+                </div>
+            </div>
+
+            <!-- Transfer 3 -->
+            <div class="transfer-card">
+                <div class="transfer-route">
+                    <span class="transfer-dot"></span>
+                    <span class="transfer-line"></span>
+                    <span class="transfer-dot-end"></span>
+                </div>
+                <div class="transfer-locations">
+                    <span class="transfer-loc">Aeropuerto Punta Cana</span>
+                    <span class="transfer-loc">Cap Cana</span>
+                </div>
+                <div class="transfer-info">
+                    <div class="transfer-info-item">
+                        <svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13" rx="2"/><polygon points="23 7 16 12 23 17 23 7"/></svg>
+                        <span>Van Premium</span>
+                    </div>
+                    <div class="transfer-info-item">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                        <span>Até 10 pessoas</span>
+                    </div>
+                </div>
+                <div class="transfer-bottom">
+                    <div class="transfer-price"><span>Desde </span>US$ 45</div>
+                    <button class="btn-transfer">Reservar</button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- JavaScript for tabs -->
+    <script>
+        document.querySelectorAll('.tab-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                // Remove active from all tabs
+                document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+                // Remove active from all content
+                document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
+                // Activate clicked tab
+                btn.classList.add('active');
+                // Show corresponding content
+                var tabId = 'tab-' + btn.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    </script>
+
+</body>
+</html>

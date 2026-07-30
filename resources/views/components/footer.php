@@ -49,7 +49,7 @@
                         <li><a href="/minha-conta">Minha Conta</a></li>
                         <li><a href="/painel-afiliado">Conta de Afiliado</a></li>
                         <li><a href="/minha-conta/wishlist">Lista de Desejos</a></li>
-                        <li><a href="#">Baixe Nosso Catálogo</a></li>
+                        <li><a href="/catalogo.html" target="_blank">Baixe Nosso Catálogo</a></li>
                     </ul>
                 </div>
 
