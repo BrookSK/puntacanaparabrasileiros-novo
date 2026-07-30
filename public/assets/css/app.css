@@ -5184,6 +5184,15 @@ img { max-width: 100%; height: auto; }
     background: var(--text-green);
     color: var(--white);
 }
+.btn-wishlist-trip.active {
+    background: var(--text-green);
+    border-color: var(--text-green);
+    color: var(--white);
+}
+.btn-wishlist-trip.active svg {
+    stroke: var(--white);
+    fill: var(--white);
+}
 .btn-wishlist-trip:hover svg {
     stroke: var(--white);
     fill: var(--white);

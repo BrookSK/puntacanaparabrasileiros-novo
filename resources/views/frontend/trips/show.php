@@ -328,6 +328,10 @@
                     </button>
                     <script>
                     function toggleWishlist(tripId) {
+                        var btn = document.getElementById('btnWishlist');
+                        var svg = btn.querySelector('svg');
+                        var text = document.getElementById('wishlistText');
+
                         fetch('/minha-conta/wishlist/toggle', {
                             method: 'POST',
                             headers: {
@@ -339,7 +343,25 @@
                         .then(r => r.json())
                         .then(data => {
                             if (data.success) {
-                                window.location.href = '/minha-conta/wishlist';
+                                if (data.in_wishlist) {
+                                    svg.setAttribute('fill', 'currentColor');
+                                    text.textContent = 'Na Lista de Desejos';
+                                    btn.classList.add('active');
+                                } else {
+                                    svg.setAttribute('fill', 'none');
+                                    text.textContent = 'Adicionar à Lista de Desejos';
+                                    btn.classList.remove('active');
+                                }
+                                // Update wishlist badge in header
+                                var badge = document.getElementById('wishlistBadge');
+                                if (badge) {
+                                    fetch('/api/wishlist/count', { headers: {'X-Requested-With': 'XMLHttpRequest'} })
+                                        .then(r => r.json())
+                                        .then(d => {
+                                            badge.textContent = d.count || '';
+                                            badge.style.display = d.count > 0 ? 'flex' : 'none';
+                                        });
+                                }
                             }
                         });
                     }

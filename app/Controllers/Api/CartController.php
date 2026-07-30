@@ -134,6 +134,18 @@ class CartController extends Controller
         ]);
     }
 
+    public function wishlistCount(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        if (!$user) {
+            $this->json(['count' => 0]);
+            return;
+        }
+        $wishlistModel = new \App\Models\Wishlist();
+        $count = $wishlistModel->countByUser((int) $user['id']);
+        $this->json(['count' => $count]);
+    }
+
     /**
      * Inscrição na newsletter via AJAX.
      */
