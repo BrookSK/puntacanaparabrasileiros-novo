@@ -26,9 +26,8 @@
         /* Header */
         .header { background: var(--white); padding: 16px 0; box-shadow: 0 1px 8px rgba(0,0,0,0.04); position: sticky; top: 0; z-index: 100; }
         .header-inner { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; }
-        .logo-area { display: flex; flex-direction: column; }
-        .logo-title { font-size: 20px; font-weight: 700; color: var(--dark); letter-spacing: -0.5px; }
-        .logo-subtitle { font-size: 12px; color: var(--gray); font-weight: 400; }
+        .logo-area { display: flex; align-items: center; }
+        .logo-img { height: 50px; width: auto; }
         .cart-icon { position: relative; cursor: pointer; padding: 8px; border-radius: 50%; transition: background 0.2s; }
         .cart-icon:hover { background: var(--bg-light); }
         .cart-icon svg { width: 24px; height: 24px; fill: none; stroke: var(--dark); stroke-width: 2; }
@@ -48,10 +47,21 @@
         /* Trip Cards */
         .trip-card { background: var(--white); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); transition: transform 0.3s, box-shadow 0.3s; }
         .trip-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+        /* Image Carousel */
         .trip-card-img { position: relative; overflow: hidden; aspect-ratio: 16/11; }
-        .trip-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
-        .trip-card:hover .trip-card-img img { transform: scale(1.05); }
-        .trip-card-badge { position: absolute; top: 12px; left: 12px; background: var(--text-green); color: #fff; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 50px; }
+        .trip-card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; position: absolute; top: 0; left: 0; opacity: 0; }
+        .trip-card-img img.active { opacity: 1; position: relative; }
+        .trip-card:hover .trip-card-img img.active { transform: scale(1.05); }
+        .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); width: 30px; height: 30px; border-radius: 50%; background: rgba(255,255,255,0.9); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 5; box-shadow: 0 2px 6px rgba(0,0,0,0.15); transition: background 0.2s, transform 0.2s; }
+        .carousel-btn:hover { background: #fff; transform: translateY(-50%) scale(1.1); }
+        .carousel-btn svg { width: 14px; height: 14px; stroke: var(--dark); fill: none; stroke-width: 2.5; }
+        .carousel-prev { left: 8px; }
+        .carousel-next { right: 8px; }
+        .carousel-dots { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 5; }
+        .carousel-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.5); transition: background 0.2s; }
+        .carousel-dot.active { background: #fff; }
+
+        .trip-card-badge { position: absolute; top: 12px; left: 12px; background: var(--text-green); color: #fff; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 50px; z-index: 5; }
         .trip-card-body { padding: 16px 18px; }
         .trip-card-title { font-size: 15px; font-weight: 600; color: var(--dark); margin-bottom: 6px; }
         .trip-card-desc { font-size: 13px; color: var(--gray); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 14px; line-height: 1.5; }
@@ -109,8 +119,7 @@
     <header class="header">
         <div class="header-inner">
             <div class="logo-area">
-                <div class="logo-title">Punta Cana Para Brasileiros</div>
-                <div class="logo-subtitle">Tour Premium &middot; Desde 2021</div>
+                <img src="https://puntacananovo.lrvweb.com.br/assets/images/layout/PUNTA-CANA-1.png" alt="Punta Cana Para Brasileiros" class="logo-img">
             </div>
             <div class="cart-icon">
                 <svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
@@ -132,8 +141,13 @@
         <div class="grid">
             <!-- Card 1 -->
             <div class="trip-card">
-                <div class="trip-card-img">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png" alt="Saona Premium Brasil">
+                <div class="trip-card-img" data-carousel>
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png" alt="Saona Premium Brasil" class="active">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/4.png" alt="Saona Premium Brasil">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0044-990x490.jpg" alt="Saona Premium Brasil">
+                    <button class="carousel-btn carousel-prev" onclick="carouselPrev(this)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+                    <button class="carousel-btn carousel-next" onclick="carouselNext(this)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                    <div class="carousel-dots"></div>
                     <span class="trip-card-badge">Premium</span>
                 </div>
                 <div class="trip-card-body">
@@ -158,8 +172,13 @@
 
             <!-- Card 2 -->
             <div class="trip-card">
-                <div class="trip-card-img">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/4.png" alt="Saona Clásica">
+                <div class="trip-card-img" data-carousel>
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/4.png" alt="Saona Clásica" class="active">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png" alt="Saona Clásica">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg" alt="Saona Clásica">
+                    <button class="carousel-btn carousel-prev" onclick="carouselPrev(this)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+                    <button class="carousel-btn carousel-next" onclick="carouselNext(this)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                    <div class="carousel-dots"></div>
                     <span class="trip-card-badge">Popular</span>
                 </div>
                 <div class="trip-card-body">
@@ -184,8 +203,12 @@
 
             <!-- Card 3 -->
             <div class="trip-card">
-                <div class="trip-card-img">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg" alt="Encontro com Golfinhos">
+                <div class="trip-card-img" data-carousel>
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg" alt="Encontro com Golfinhos" class="active">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg" alt="Encontro com Golfinhos">
+                    <button class="carousel-btn carousel-prev" onclick="carouselPrev(this)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+                    <button class="carousel-btn carousel-next" onclick="carouselNext(this)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                    <div class="carousel-dots"></div>
                     <span class="trip-card-badge">Exclusivo</span>
                 </div>
                 <div class="trip-card-body">
@@ -210,8 +233,12 @@
 
             <!-- Card 4 -->
             <div class="trip-card">
-                <div class="trip-card-img">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg" alt="Coco Bongo">
+                <div class="trip-card-img" data-carousel>
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg" alt="Coco Bongo" class="active">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg" alt="Coco Bongo">
+                    <button class="carousel-btn carousel-prev" onclick="carouselPrev(this)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+                    <button class="carousel-btn carousel-next" onclick="carouselNext(this)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                    <div class="carousel-dots"></div>
                     <span class="trip-card-badge">Noturno</span>
                 </div>
                 <div class="trip-card-body">
@@ -236,8 +263,13 @@
 
             <!-- Card 5 -->
             <div class="trip-card">
-                <div class="trip-card-img">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg" alt="Isla Catalina y Chavón">
+                <div class="trip-card-img" data-carousel>
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg" alt="Isla Catalina y Chavón" class="active">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0044-990x490.jpg" alt="Isla Catalina y Chavón">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png" alt="Isla Catalina y Chavón">
+                    <button class="carousel-btn carousel-prev" onclick="carouselPrev(this)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+                    <button class="carousel-btn carousel-next" onclick="carouselNext(this)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                    <div class="carousel-dots"></div>
                     <span class="trip-card-badge">Aventura</span>
                 </div>
                 <div class="trip-card-body">
@@ -262,8 +294,12 @@
 
             <!-- Card 6 -->
             <div class="trip-card">
-                <div class="trip-card-img">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0044-990x490.jpg" alt="Isla Catalina Snorkel">
+                <div class="trip-card-img" data-carousel>
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0044-990x490.jpg" alt="Isla Catalina Snorkel" class="active">
+                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg" alt="Isla Catalina Snorkel">
+                    <button class="carousel-btn carousel-prev" onclick="carouselPrev(this)"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+                    <button class="carousel-btn carousel-next" onclick="carouselNext(this)"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>
+                    <div class="carousel-dots"></div>
                     <span class="trip-card-badge">Snorkel</span>
                 </div>
                 <div class="trip-card-body">
@@ -376,21 +412,58 @@
         </div>
     </section>
 
-    <!-- JavaScript for tabs -->
+    <!-- JavaScript for tabs and carousel -->
     <script>
+        // Tabs
         document.querySelectorAll('.tab-btn').forEach(function(btn) {
             btn.addEventListener('click', function() {
-                // Remove active from all tabs
                 document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
-                // Remove active from all content
                 document.querySelectorAll('.tab-content').forEach(function(c) { c.classList.remove('active'); });
-                // Activate clicked tab
                 btn.classList.add('active');
-                // Show corresponding content
                 var tabId = 'tab-' + btn.getAttribute('data-tab');
                 document.getElementById(tabId).classList.add('active');
             });
         });
+
+        // Carousel - Initialize dots
+        document.querySelectorAll('[data-carousel]').forEach(function(carousel) {
+            var images = carousel.querySelectorAll('img');
+            var dotsContainer = carousel.querySelector('.carousel-dots');
+            if (images.length <= 1) {
+                // Hide arrows if only 1 image
+                carousel.querySelectorAll('.carousel-btn').forEach(function(b) { b.style.display = 'none'; });
+                return;
+            }
+            images.forEach(function(img, i) {
+                var dot = document.createElement('span');
+                dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+                dotsContainer.appendChild(dot);
+            });
+        });
+
+        function carouselNext(btn) {
+            var carousel = btn.closest('[data-carousel]');
+            var images = carousel.querySelectorAll('img');
+            var dots = carousel.querySelectorAll('.carousel-dot');
+            var current = carousel.querySelector('img.active');
+            var idx = Array.from(images).indexOf(current);
+            var next = (idx + 1) % images.length;
+            current.classList.remove('active');
+            images[next].classList.add('active');
+            dots.forEach(function(d, i) { d.classList.toggle('active', i === next); });
+        }
+
+        function carouselPrev(btn) {
+            var carousel = btn.closest('[data-carousel]');
+            var images = carousel.querySelectorAll('img');
+            var dots = carousel.querySelectorAll('.carousel-dot');
+            var current = carousel.querySelector('img.active');
+            var idx = Array.from(images).indexOf(current);
+            var prev = (idx - 1 + images.length) % images.length;
+            current.classList.remove('active');
+            images[prev].classList.add('active');
+            dots.forEach(function(d, i) { d.classList.toggle('active', i === prev); });
+        }
     </script>
 
 </body>
