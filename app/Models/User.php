@@ -64,8 +64,8 @@ class User extends Model
         return $this->paginate(
             $page,
             $perPage,
-            'first_name LIKE ? OR last_name LIKE ? OR email LIKE ?',
-            [$search, $search, $search]
+            'first_name LIKE ? OR last_name LIKE ? OR email LIKE ? OR CONCAT(first_name, " ", last_name) LIKE ?',
+            [$search, $search, $search, $search]
         );
     }
 }
