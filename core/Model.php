@@ -47,14 +47,12 @@ abstract class Model
     public function all(string $orderBy = 'id DESC', ?int $limit = null, int $offset = 0): array
     {
         $sql = "SELECT * FROM `{$this->table}` ORDER BY {$orderBy}";
-        $params = [];
 
         if ($limit !== null) {
-            $sql .= " LIMIT ? OFFSET ?";
-            $params = [$limit, $offset];
+            $sql .= " LIMIT {$limit} OFFSET {$offset}";
         }
 
-        return $this->db->fetchAll($sql, $params);
+        return $this->db->fetchAll($sql);
     }
 
     /**
@@ -65,9 +63,7 @@ abstract class Model
         $sql = "SELECT * FROM `{$this->table}` WHERE {$where} ORDER BY {$orderBy}";
 
         if ($limit !== null) {
-            $sql .= " LIMIT ? OFFSET ?";
-            $params[] = $limit;
-            $params[] = $offset;
+            $sql .= " LIMIT {$limit} OFFSET {$offset}";
         }
 
         return $this->db->fetchAll($sql, $params);
