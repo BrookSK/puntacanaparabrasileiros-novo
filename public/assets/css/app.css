@@ -5166,13 +5166,13 @@ img { max-width: 100%; height: auto; }
     justify-content: center;
     gap: 8px;
     width: 100%;
-    padding: 12px 20px;
-    border: none;
+    padding: 13px 20px;
+    border: 2px solid var(--text-green);
     border-radius: var(--radius);
-    background: transparent;
+    background: var(--white);
     color: var(--text-green);
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 600;
     font-family: var(--font);
     text-align: center;
     transition: all .2s;
@@ -5181,12 +5181,17 @@ img { max-width: 100%; height: auto; }
     text-decoration: none;
 }
 .btn-wishlist-trip:hover {
-    background: #f0fdf4;
-    color: var(--text-green);
+    background: var(--text-green);
+    color: var(--white);
+}
+.btn-wishlist-trip:hover svg {
+    stroke: var(--white);
+    fill: var(--white);
 }
 .btn-wishlist-trip svg {
     flex-shrink: 0;
-    color: var(--text-green);
+    stroke: var(--text-green);
+    transition: all .2s;
 }
 .trip-price-help {
     font-size: 12px;
