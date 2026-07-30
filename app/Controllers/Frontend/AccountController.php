@@ -360,13 +360,9 @@ class AccountController extends Controller
         $voucherHtml = file_get_contents($filePath);
         header('Content-Type: text/html; charset=UTF-8');
         echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Voucher ' . htmlspecialchars($reference) . '</title>';
-        echo '<style>body{margin:0;padding:20px;background:#f5f5f5;}.voucher-wrapper{max-width:800px;margin:0 auto;padding-bottom:40px;}.voucher-footer-actions{text-align:center;padding:24px 0;}.voucher-footer-actions a{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:#1B6F00;color:#fff;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;font-family:sans-serif;transition:all .2s;}.voucher-footer-actions a:hover{background:#145a00;}.voucher-footer-actions p{font-size:12px;color:#888;margin-top:10px;font-family:sans-serif;}@media print{.voucher-footer-actions{display:none !important;}}</style>';
+        echo '<style>body{margin:0;padding:20px;background:#f5f5f5;}.voucher-wrapper{max-width:800px;margin:0 auto;}@media print{body{padding:0;background:#fff;}}</style>';
         echo '</head><body>';
         echo '<div class="voucher-wrapper">' . $voucherHtml . '</div>';
-        echo '<div class="voucher-footer-actions">';
-        echo '<a href="javascript:window.print()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Baixar como PDF</a>';
-        echo '<p>Use Ctrl+P > "Salvar como PDF" para gerar o arquivo.</p>';
-        echo '</div>';
         echo '</body></html>';
         exit;
     }
