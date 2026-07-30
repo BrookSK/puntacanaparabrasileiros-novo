@@ -47,8 +47,10 @@ $router->get('/contato', [PageController::class, 'contact'], [], 'pages.contact'
 $router->post('/contato', [PageController::class, 'sendContact'], [CsrfMiddleware::class], 'pages.contact.send');
 $router->get('/pesquisa', [PageController::class, 'search'], [], 'pages.search');
 $router->get('/termos-e-condicoes', [PageController::class, 'terms'], [], 'pages.terms');
+$router->get('/termos-e-condicoes/pdf', [PageController::class, 'termsPdf'], [], 'pages.terms.pdf');
 $router->get('/termos-afiliados', [PageController::class, 'affiliateTerms'], [], 'pages.affiliate_terms');
 $router->get('/politicas-de-cancelamento', [PageController::class, 'cancellationPolicy'], [], 'pages.cancellation_policy');
+$router->get('/politicas-de-cancelamento/pdf', [PageController::class, 'cancellationPolicyPdf'], [], 'pages.cancellation_policy.pdf');
 $router->get('/politicas-de-privacidade', [PageController::class, 'privacyPolicy'], [], 'pages.privacy_policy');
 $router->get('/programa-de-afiliados', [PageController::class, 'affiliateProgram'], [], 'pages.affiliate_program');
 $router->get('/cadastro-afiliado', [PageController::class, 'affiliateRegister'], [], 'pages.affiliate_register');

@@ -80,6 +80,11 @@ class PageController extends Controller
         ], 'app');
     }
 
+    public function cancellationPolicyPdf(Request $request, Response $response): void
+    {
+        $this->view('frontend/pages/cancellation-policy-pdf', []);
+    }
+
     public function privacyPolicy(Request $request, Response $response): void
     {
         $this->view('frontend/pages/privacy-policy', [
@@ -195,6 +200,11 @@ class PageController extends Controller
             'pageTitle' => 'Termos e Condições - Punta Cana para Brasileiros',
             'metaDescription' => 'Termos e condições de uso do site Punta Cana para Brasileiros.',
         ], 'app');
+    }
+
+    public function termsPdf(Request $request, Response $response): void
+    {
+        $this->view('frontend/pages/terms-pdf', []);
     }
 
     public function search(Request $request, Response $response): void

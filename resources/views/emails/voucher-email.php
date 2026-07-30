@@ -47,6 +47,39 @@
         </div>
         <?php endforeach; ?>
 
+        <!-- Termos e Política de Cancelamento -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:20px;margin-top:24px;">
+            <h3 style="font-size:14px;margin:0 0 12px;color:#1B6F00;text-transform:uppercase;letter-spacing:0.5px;">📋 Documentos Importantes</h3>
+            <p style="font-size:13px;color:#555;margin:0 0 16px;line-height:1.6;">
+                Leia atentamente nossos termos e políticas. Você pode visualizar online ou baixar em PDF para guardar.
+            </p>
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td style="padding:8px 0;">
+                        <strong style="font-size:13px;color:#1a1a1a;">Termos e Condições</strong>
+                        <span style="display:block;font-size:11px;color:#888;margin-top:2px;">Regras gerais de uso e contratação dos serviços</span>
+                    </td>
+                    <td style="padding:8px 0;text-align:right;white-space:nowrap;">
+                        <a href="https://puntacananovo.lrvweb.com.br/termos-e-condicoes" style="display:inline-block;padding:6px 14px;background:#1B6F00;color:#fff;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;margin-right:6px;">Visualizar</a>
+                        <a href="https://puntacananovo.lrvweb.com.br/termos-e-condicoes/pdf" style="display:inline-block;padding:6px 14px;background:#E4B505;color:#1a1a1a;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;">⬇ Baixar PDF</a>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" style="padding:0;"><div style="border-top:1px solid #e5e7eb;margin:4px 0;"></div></td>
+                </tr>
+                <tr>
+                    <td style="padding:8px 0;">
+                        <strong style="font-size:13px;color:#1a1a1a;">Política de Cancelamento</strong>
+                        <span style="display:block;font-size:11px;color:#888;margin-top:2px;">Prazos, reembolsos e reagendamentos</span>
+                    </td>
+                    <td style="padding:8px 0;text-align:right;white-space:nowrap;">
+                        <a href="https://puntacananovo.lrvweb.com.br/politicas-de-cancelamento" style="display:inline-block;padding:6px 14px;background:#1B6F00;color:#fff;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;margin-right:6px;">Visualizar</a>
+                        <a href="https://puntacananovo.lrvweb.com.br/politicas-de-cancelamento/pdf" style="display:inline-block;padding:6px 14px;background:#E4B505;color:#1a1a1a;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;">⬇ Baixar PDF</a>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
         <p style="font-size:13px;color:#666;margin-top:20px;line-height:1.7;">
             Dúvidas? Fale conosco pelo WhatsApp: <a href="https://api.whatsapp.com/send?phone=18294582170" style="color:#1B6F00;font-weight:600;">+1 (829) 458-2170</a>
         </p>
