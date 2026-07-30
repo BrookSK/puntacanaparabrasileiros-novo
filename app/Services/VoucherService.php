@@ -161,13 +161,24 @@ class VoucherService
             }
         }
 
+        // Preparar dados dos vouchers com nomes dos passeios
+        foreach ($vouchers as &$v) {
+            if ($v['type'] === 'trip' && !empty($v['booking_item_id'])) {
+                $item = $this->db->fetchOne(
+                    "SELECT t.title as trip_name FROM booking_items bi INNER JOIN trips t ON bi.trip_id = t.id WHERE bi.id = ?",
+                    [(int) $v['booking_item_id']]
+                );
+                $v['trip_name'] = $item['trip_name'] ?? '';
+            }
+        }
+        unset($v);
+
         $sent = $emailService->sendTemplate(
             $booking['billing_email'],
             $booking['billing_first_name'] . ' ' . $booking['billing_last_name'],
             'Seus Vouchers - Punta Cana para Brasileiros',
             'voucher-email',
-            ['booking' => $booking, 'vouchers' => $vouchers],
-            $attachments
+            ['booking' => $booking, 'vouchers' => $vouchers]
         );
 
         if ($sent) {

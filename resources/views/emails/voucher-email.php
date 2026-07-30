@@ -1,6 +1,6 @@
 <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#1a1a1a;">
     <!-- Header -->
-    <div style="background:#2d3748;padding:30px;text-align:center;border-radius:10px 10px 0 0;">
+    <div style="background:#1C2011;padding:30px;text-align:center;border-radius:10px 10px 0 0;">
         <img src="https://puntacananovo.lrvweb.com.br/assets/images/layout/PUNTA-CANA-1.png" alt="Punta Cana para Brasileiros" style="max-height:60px;margin-bottom:12px;">
         <h1 style="color:#fff;font-size:22px;margin:0;">Seus Vouchers</h1>
     </div>
@@ -10,7 +10,7 @@
         <p style="font-size:16px;margin-bottom:6px;">Olá <strong><?= e($booking['billing_first_name'] ?? 'Cliente') ?></strong>,</p>
         <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:24px;">
             Sua reserva <strong><?= e($booking['booking_number'] ?? '') ?></strong> foi confirmada com sucesso!
-            Seguem em anexo os vouchers da sua viagem.
+            Clique nos links abaixo para visualizar, imprimir ou baixar seus vouchers.
         </p>
 
         <!-- Resumo da Reserva -->
@@ -31,21 +31,19 @@
             </p>
         </div>
 
-        <!-- Vouchers listados -->
-        <h3 style="font-size:14px;margin:0 0 12px;color:#333;">Vouchers Anexados:</h3>
+        <!-- Vouchers com links -->
+        <h3 style="font-size:14px;margin:0 0 12px;color:#333;">Seus Vouchers:</h3>
         <?php foreach ($vouchers as $v): ?>
-        <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f3f4f6;border-radius:6px;margin-bottom:8px;">
-            <span style="font-size:20px;">📄</span>
-            <div>
-                <strong style="font-size:13px;color:#1a1a1a;">
-                    <?php if (($v['type'] ?? '') === 'transfer'): ?>
-                        VOUCHER TRANSFER
-                    <?php else: ?>
-                        VOUCHER PASSEIO<?php if (!empty($v['trip_name'])): ?> — <?= e($v['trip_name']) ?><?php endif; ?>
-                    <?php endif; ?>
-                </strong>
-                <span style="display:block;font-size:11px;color:#888;margin-top:2px;">Código: <?= e($v['reference_code'] ?? '') ?></span>
-            </div>
+        <div style="padding:14px 16px;background:#f3f4f6;border-radius:8px;margin-bottom:10px;">
+            <strong style="font-size:13px;color:#1a1a1a;display:block;margin-bottom:6px;">
+                <?php if (($v['type'] ?? '') === 'transfer'): ?>
+                    📄 VOUCHER TRANSFER
+                <?php else: ?>
+                    📄 VOUCHER PASSEIO<?php if (!empty($v['trip_name'])): ?> — <?= e($v['trip_name']) ?><?php endif; ?>
+                <?php endif; ?>
+            </strong>
+            <span style="display:block;font-size:11px;color:#888;margin-bottom:10px;">Código: <?= e($v['reference_code'] ?? '') ?></span>
+            <a href="https://puntacananovo.lrvweb.com.br/voucher/<?= e($v['reference_code'] ?? '') ?>" style="display:inline-block;padding:8px 18px;background:#1B6F00;color:#fff;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;">Visualizar Voucher</a>
         </div>
         <?php endforeach; ?>
 

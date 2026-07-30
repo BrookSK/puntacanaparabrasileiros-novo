@@ -40,6 +40,7 @@ use App\Middleware\CsrfMiddleware;
 $router->get('/', [HomeController::class, 'index'], [], 'home');
 $router->get('/passeios', [TripsController::class, 'index'], [], 'trips.index');
 $router->get('/passeios/{slug}', [TripsController::class, 'show'], [], 'trips.show');
+$router->get('/voucher/{reference}', [App\Controllers\Frontend\AccountController::class, 'viewVoucherPublic'], [], 'voucher.public');
 $router->get('/transfers', [TransferController::class, 'index'], [], 'transfers.index');
 $router->get('/sobre-nos', [PageController::class, 'about'], [], 'pages.about');
 $router->get('/contato', [PageController::class, 'contact'], [], 'pages.contact');

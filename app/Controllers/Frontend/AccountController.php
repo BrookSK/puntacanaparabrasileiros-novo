@@ -340,6 +340,37 @@ class AccountController extends Controller
         $response->download($filePath, 'voucher-' . $reference . '.html');
     }
 
+    public function viewVoucherPublic(Request $request, Response $response): void
+    {
+        $reference = $request->param('reference', '');
+
+        $voucherModel = new Voucher();
+        $voucher = $voucherModel->findByReference($reference);
+
+        if (!$voucher) {
+            $this->abort(404, 'Voucher não encontrado.');
+        }
+
+        $filePath = BASE_PATH . '/public/uploads/vouchers/' . $voucher['file_path'];
+        if (!file_exists($filePath)) {
+            $this->abort(404, 'Arquivo do voucher não encontrado.');
+        }
+
+        // Render the voucher HTML directly with print/download buttons
+        $voucherHtml = file_get_contents($filePath);
+        header('Content-Type: text/html; charset=UTF-8');
+        echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Voucher ' . htmlspecialchars($reference) . '</title>';
+        echo '<style>body{margin:0;padding:0;background:#f5f5f5;}.voucher-actions{position:fixed;top:0;left:0;right:0;background:#1C2011;padding:12px 24px;display:flex;align-items:center;justify-content:center;gap:12px;z-index:1000;box-shadow:0 2px 8px rgba(0,0,0,0.2);}.voucher-actions a,.voucher-actions button{display:inline-flex;align-items:center;gap:6px;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;border:none;font-family:sans-serif;transition:all .2s;}.btn-print{background:#E4B505;color:#1C2011;}.btn-print:hover{background:#c9a004;}.btn-download{background:#fff;color:#1C2011;}.btn-download:hover{background:#f0f0f0;}.voucher-wrapper{padding-top:60px;max-width:800px;margin:0 auto;padding-bottom:40px;}@media print{.voucher-actions{display:none !important;}.voucher-wrapper{padding-top:0;}}</style>';
+        echo '</head><body>';
+        echo '<div class="voucher-actions">';
+        echo '<button class="btn-print" onclick="window.print()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir</button>';
+        echo '<a class="btn-download" href="/minha-conta/voucher/' . htmlspecialchars($reference) . '" download><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Baixar</a>';
+        echo '</div>';
+        echo '<div class="voucher-wrapper">' . $voucherHtml . '</div>';
+        echo '</body></html>';
+        exit;
+    }
+
     // ==================== PAINEL DO AFILIADO ====================
 
     public function affiliateDashboard(Request $request, Response $response): void
