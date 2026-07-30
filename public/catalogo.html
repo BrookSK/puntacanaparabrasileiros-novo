@@ -2301,8 +2301,8 @@
 
     function confirmAddToCart() {
         const trip = trips[currentAddIdx];
-        // Redirect to the trip page on the site where user can select date/package and add to cart
-        window.location.href = '/passeios/' + trip.slug;
+        // Redirect to the trips page with search query to find the trip
+        window.location.href = '/passeios?busca=' + encodeURIComponent(trip.title);
     }
 
     // Modal
