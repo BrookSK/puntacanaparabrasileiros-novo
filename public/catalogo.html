@@ -748,6 +748,291 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
+        /* MODAL */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 520px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--light-bg);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            transition: var(--transition);
+        }
+
+        .modal-close:hover {
+            background: #e2e2e2;
+        }
+
+        .modal-close svg {
+            width: 16px;
+            height: 16px;
+            stroke: var(--dark);
+            stroke-width: 2.5;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .modal-body {
+            padding: 24px 28px 28px;
+        }
+
+        .modal-badge {
+            display: inline-block;
+            background: var(--text-green);
+            color: var(--white);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 3px 12px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .modal-rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--gray);
+            margin-bottom: 14px;
+        }
+
+        .modal-rating svg {
+            width: 16px;
+            height: 16px;
+            fill: var(--secondary);
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: var(--gray);
+            line-height: 1.7;
+            margin-bottom: 20px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .modal-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .modal-info-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-info-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #f0fdf4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .modal-info-icon svg {
+            width: 18px;
+            height: 18px;
+            stroke: var(--text-green);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .modal-info-label {
+            font-size: 11px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .modal-info-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .modal-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-section-title svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .modal-prices {
+            margin-bottom: 22px;
+        }
+
+        .modal-price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f8f8f8;
+        }
+
+        .modal-price-row:last-child {
+            border-bottom: none;
+        }
+
+        .modal-price-category {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .modal-price-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-green);
+        }
+
+        .modal-price-dot.child { background: var(--accent); }
+        .modal-price-dot.infant { background: var(--secondary); }
+
+        .modal-price-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-green);
+        }
+
+        .modal-price-free {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--secondary);
+            background: #fffbeb;
+            padding: 2px 10px;
+            border-radius: 12px;
+        }
+
+        .modal-list {
+            list-style: none;
+            margin-bottom: 22px;
+        }
+
+        .modal-list li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 7px 0;
+            font-size: 13px;
+            color: var(--dark);
+            line-height: 1.5;
+        }
+
+        .modal-list li svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .modal-list.includes li svg {
+            stroke: var(--text-green);
+            fill: none;
+            stroke-width: 2.5;
+        }
+
+        .modal-list.excludes li svg {
+            stroke: #e74c3c;
+            fill: none;
+            stroke-width: 2.5;
+        }
+
+        .modal-footer {
+            padding: 20px 28px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #fafbfc;
+            border-radius: 0 0 16px 16px;
+        }
+
+        .modal-footer-price .modal-footer-label {
+            font-size: 12px;
+            color: var(--gray);
+        }
+
+        .modal-footer-price .modal-footer-amount {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-green);
+        }
+
+        .modal-footer .btn-add {
+            padding: 14px 28px;
+            font-size: 14px;
+        }
+
         /* RESPONSIVE */
         @media (max-width: 992px) {
             .trips-grid {
@@ -906,6 +1191,18 @@
         <p class="copyright">© 2025 Punta Cana Para Brasileiros. Todos os direitos reservados.</p>
     </footer>
 
+    <!-- MODAL -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" id="modalContent">
+            <button class="modal-close" onclick="closeModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <img class="modal-image" id="modalImage" src="" alt="">
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+
     <script>
     // Trip data
     const trips = [
@@ -915,7 +1212,30 @@
             price: 'US$79',
             duration: '10h',
             rating: 4.9,
+            reviews: 296,
+            schedule: '7:00 - 19:00',
             description: 'Experiência premium na paradisíaca Ilha Saona com almoço gourmet, open bar e atendimento exclusivo em português.',
+            fullDescription: 'Lancha privada exclusiva para brasileiros – Dia inteiro (10h). Desfrute de um dia completo na Ilha Saona com serviço VIP, almoço buffet exclusivo, open bar premium e duas paradas em praias paradisíacas.',
+            prices: [
+                { category: 'Adultos (12+ años)', price: 'US$79', type: 'adult' },
+                { category: 'Crianças (5-11 años)', price: 'US$?', type: 'child' },
+                { category: 'Infants (0-4 años)', price: 'GRATIS', type: 'infant' }
+            ],
+            includes: [
+                'Transporte terrestre ida y vuelta',
+                'Transporte marítimo en lancha rápida',
+                'Dos playas paradisíacas (El Toro/Flamenco y Abanico)',
+                'Piscina Natural de Playa Palmilla',
+                'Petiscos en primera playa',
+                'Almuerzo buffet privado y exclusivo',
+                'Open bar premium (agua, refrescos, cervejas, rum)',
+                'Brinde con espumante en piscina natural'
+            ],
+            excludes: [
+                'Fotos profissionais',
+                'Items personales',
+                'Gorjetas (opcional)'
+            ],
             images: [
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png',
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/4.png'
@@ -927,7 +1247,28 @@
             price: 'US$49',
             duration: '8h',
             rating: 4.8,
+            reviews: 184,
+            schedule: '7:00 - 17:00',
             description: 'O passeio mais procurado de Punta Cana. Conheça a Ilha Saona com piscina natural e praia paradisíaca.',
+            fullDescription: 'Catamarã compartilhado – Ilha Saona com animação (10h). Passeio clássico e mais procurado com parada em piscina natural, estrelas do mar e praia de areia branca.',
+            prices: [
+                { category: 'Adultos (12+ años)', price: 'US$49', type: 'adult' },
+                { category: 'Crianças (5-11 años)', price: 'US$35', type: 'child' },
+                { category: 'Infants (0-4 años)', price: 'GRATIS', type: 'infant' }
+            ],
+            includes: [
+                'Transporte terrestre ida y vuelta',
+                'Passeio de catamarã com música',
+                'Parada na piscina natural',
+                'Almoço na praia (buffet)',
+                'Open bar (rum, cerveja, refrigerantes)',
+                'Tempo livre na praia'
+            ],
+            excludes: [
+                'Fotos profissionais',
+                'Items pessoais',
+                'Gorjetas (opcional)'
+            ],
             images: [
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/4.png',
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png'
@@ -939,7 +1280,28 @@
             price: 'US$120',
             duration: '4h',
             rating: 4.9,
+            reviews: 156,
+            schedule: 'Múltiplos horários',
             description: 'Nade e interaja com golfinhos em um ambiente seguro e inesquecível. Perfeito para toda a família.',
+            fullDescription: 'Nado e interação guiada com golfinhos em santuário natural (4h). Você irá interagir e nadar com golfinhos em uma plataforma segura.',
+            prices: [
+                { category: 'Adultos (12+ años)', price: 'US$120', type: 'adult' },
+                { category: 'Crianças (5-11 años)', price: 'US$90', type: 'child' },
+                { category: 'Observador', price: 'US$45', type: 'child' }
+            ],
+            includes: [
+                'Transporte ida e volta do hotel',
+                'Interação com golfinho (20 min)',
+                'Nado com golfinho',
+                'Fotos disponíveis para compra',
+                'Tempo livre no parque',
+                'Orientação em português'
+            ],
+            excludes: [
+                'Pacote de fotos',
+                'Alimentação',
+                'Locker (disponível para aluguel)'
+            ],
             images: [
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg',
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg'
@@ -951,7 +1313,26 @@
             price: 'Consultar',
             duration: '5h',
             rating: 4.7,
+            reviews: 203,
+            schedule: '20:00 - 01:00',
             description: 'A melhor balada do Caribe! Show espetacular com acrobatas, efeitos especiais e muita diversão.',
+            fullDescription: 'Show noturno de lujo com espetáculos e performance (5h). A experiência noturna mais incrível de Punta Cana com shows ao vivo ao estilo Las Vegas.',
+            prices: [
+                { category: 'Adultos (18+ años)', price: 'Consultar', type: 'adult' },
+                { category: 'VIP Front Row', price: 'Consultar', type: 'adult' }
+            ],
+            includes: [
+                'Entrada para o show',
+                'Open bar nacional e internacional',
+                'Shows ao vivo e performances',
+                'Efeitos especiais e acrobacias',
+                'Ambiente climatizado'
+            ],
+            excludes: [
+                'Transporte (disponível à parte)',
+                'Menores de 18 anos não permitidos',
+                'Gorjetas'
+            ],
             images: [
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg',
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg'
@@ -963,7 +1344,28 @@
             price: 'US$59',
             duration: 'Dia inteiro',
             rating: 4.8,
+            reviews: 167,
+            schedule: 'Lunes, miércoles y viernes',
             description: 'Combine snorkel em águas cristalinas com visita à cidade dos artistas de Altos de Chavón.',
+            fullDescription: 'Snorkel em recife de coral + Pueblo medieval artesanal (10h). Combine duas experiências incríveis em um único dia: mergulho nos corais de Isla Catalina e visita cultural em Altos de Chavón.',
+            prices: [
+                { category: 'Adultos (12+ años)', price: 'US$59', type: 'adult' },
+                { category: 'Crianças (5-11 años)', price: 'US$40', type: 'child' },
+                { category: 'Infants (0-4 años)', price: 'GRATIS', type: 'infant' }
+            ],
+            includes: [
+                'Transporte ida e volta',
+                'Equipamento de snorkel',
+                'Passeio de barco até a ilha',
+                'Almoço na praia',
+                'Visita a Altos de Chavón',
+                'Guia em português'
+            ],
+            excludes: [
+                'Fotos subaquáticas',
+                'Compras em Chavón',
+                'Gorjetas'
+            ],
             images: [
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg',
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0044-990x490.jpg'
@@ -975,7 +1377,28 @@
             price: 'US$55',
             duration: 'Dia inteiro',
             rating: 4.6,
+            reviews: 134,
+            schedule: 'Todos los días (consultar disponibilidad)',
             description: 'Mergulhe nas águas mais transparentes do Caribe. Recifes de coral e peixes tropicais te esperam.',
+            fullDescription: 'Snorkel em arrecife de coral – Dia completo (10h). Explore os recifes de coral mais preservados do Caribe dominicano com equipamento profissional e guia especializado.',
+            prices: [
+                { category: 'Adultos (12+ años)', price: 'US$55', type: 'adult' },
+                { category: 'Crianças (5-11 años)', price: 'US$35', type: 'child' },
+                { category: 'Infants (0-4 años)', price: 'GRATIS', type: 'infant' }
+            ],
+            includes: [
+                'Transporte ida e volta',
+                'Equipamento completo de snorkel',
+                'Passeio de barco',
+                'Almoço incluído',
+                'Frutas e bebidas',
+                'Guia bilíngue'
+            ],
+            excludes: [
+                'Fotos subaquáticas',
+                'Items pessoais',
+                'Gorjetas (opcional)'
+            ],
             images: [
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0044-990x490.jpg',
                 'https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg'
@@ -1057,7 +1480,7 @@
                     </div>
                     <button class="btn-add" onclick="addToCart('${trip.title}')">Adicionar</button>
                 </div>
-                <a href="#" class="card-details">Ver Detalhes <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+                <a href="#" class="card-details" onclick="openModal(${idx}); return false;">Ver Detalhes <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
             </div>
         `).join('');
     }
@@ -1141,10 +1564,104 @@
     function addToCart(name) {
         cartCount++;
         document.querySelector('.cart-badge').textContent = cartCount;
-        document.querySelector('.cart-badge').style.animation = 'none';
-        setTimeout(() => {
-            document.querySelector('.cart-badge').style.animation = 'pulse 0.3s ease';
-        }, 10);
+    }
+
+    // Modal
+    function openModal(idx) {
+        const trip = trips[idx];
+        const overlay = document.getElementById('modalOverlay');
+        document.getElementById('modalImage').src = trip.images[0];
+        document.getElementById('modalImage').alt = trip.title;
+
+        document.getElementById('modalBody').innerHTML = `
+            <span class="modal-badge">${trip.badge}</span>
+            <h2 class="modal-title">${trip.title}</h2>
+            <div class="modal-rating">
+                <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                <strong>${trip.rating}</strong> (${trip.reviews} avaliações)
+            </div>
+            <p class="modal-desc">${trip.fullDescription}</p>
+
+            <div class="modal-info-grid">
+                <div class="modal-info-item">
+                    <div class="modal-info-icon">
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div>
+                        <div class="modal-info-label">Duração</div>
+                        <div class="modal-info-value">${trip.duration}</div>
+                    </div>
+                </div>
+                <div class="modal-info-item">
+                    <div class="modal-info-icon">
+                        <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    </div>
+                    <div>
+                        <div class="modal-info-label">Horário</div>
+                        <div class="modal-info-value">${trip.schedule}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-green)" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                Preços (por pessoa)
+            </div>
+            <div class="modal-prices">
+                ${trip.prices.map(p => `
+                    <div class="modal-price-row">
+                        <span class="modal-price-category">
+                            <span class="modal-price-dot ${p.type}"></span>
+                            ${p.category}
+                        </span>
+                        ${p.price === 'GRATIS' ? '<span class="modal-price-free">GRATIS</span>' : '<span class="modal-price-value">' + p.price + '</span>'}
+                    </div>
+                `).join('')}
+            </div>
+
+            <div class="modal-section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="var(--text-green)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                Está Incluído en el Tour
+            </div>
+            <ul class="modal-list includes">
+                ${trip.includes.map(item => `
+                    <li>
+                        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        ${item}
+                    </li>
+                `).join('')}
+            </ul>
+
+            <div class="modal-section-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                No Está Incluído
+            </div>
+            <ul class="modal-list excludes">
+                ${trip.excludes.map(item => `
+                    <li>
+                        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                        ${item}
+                    </li>
+                `).join('')}
+            </ul>
+        `;
+
+        document.getElementById('modalFooter').innerHTML = `
+            <div class="modal-footer-price">
+                <span class="modal-footer-label">Desde</span>
+                <span class="modal-footer-amount">${trip.price}</span>
+            </div>
+            <button class="btn-add" onclick="addToCart('${trip.title}'); closeModal();">Adicionar</button>
+        `;
+
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(event) {
+        if (event && event.target !== event.currentTarget) return;
+        document.getElementById('modalOverlay').classList.remove('active');
+        document.body.style.overflow = '';
     }
 
     // Init
