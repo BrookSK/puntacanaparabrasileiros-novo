@@ -27,12 +27,12 @@
         </tr>
     </thead>
     <tbody>
-        <?php if (empty($users['data'])): ?>
+        <?php if (empty($users['items'])): ?>
         <tr>
             <td colspan="6" class="text-center">Nenhum usuário encontrado.</td>
         </tr>
         <?php else: ?>
-        <?php foreach ($users['data'] as $user): ?>
+        <?php foreach ($users['items'] as $user): ?>
         <tr>
             <td><strong><?= e(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')) ?></strong></td>
             <td><?= e($user['email'] ?? '-') ?></td>
@@ -63,10 +63,10 @@
     </tbody>
 </table>
 
-<?php if (!empty($users['totalPages']) && $users['totalPages'] > 1): ?>
+<?php if (!empty($users['total_pages']) && $users['total_pages'] > 1): ?>
 <div class="pagination">
-    <?php for ($p = 1; $p <= $users['totalPages']; $p++): ?>
-    <a href="?page=<?= $p ?>&role=<?= e($currentRole ?? '') ?>&busca=<?= e($currentSearch ?? '') ?>" class="pagination-btn <?= $p === ($users['currentPage'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
+    <?php for ($p = 1; $p <= $users['total_pages']; $p++): ?>
+    <a href="?page=<?= $p ?>&role=<?= e($currentRole ?? '') ?>&busca=<?= e($currentSearch ?? '') ?>" class="pagination-btn <?= $p === ($users['current_page'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
     <?php endfor; ?>
 </div>
 <?php endif; ?>
