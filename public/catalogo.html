@@ -1309,45 +1309,49 @@
 
         .vehicle-card {
             background: var(--white);
-            border: 1px solid #e8e8e8;
-            border-radius: var(--radius);
-            overflow: hidden;
+            border-radius: 0;
+            overflow: visible;
             transition: var(--transition);
+            text-align: center;
+            border: none;
+            box-shadow: none;
         }
 
         .vehicle-card:hover {
-            border-color: var(--text-green);
-            box-shadow: 0 4px 16px rgba(27,111,0,0.08);
+            border-color: transparent;
+            box-shadow: none;
         }
 
         .vehicle-card-img {
-            height: 220px;
-            overflow: hidden;
-            background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e8 100%);
+            height: auto;
+            overflow: visible;
+            background: none;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 12px;
-            border-bottom: 1px solid #e8e8e8;
+            padding: 0;
+            border-bottom: none;
+            margin-bottom: 16px;
         }
 
         .vehicle-card-img img {
-            width: 95%;
+            width: 100%;
             height: auto;
-            max-height: 100%;
             object-fit: contain;
-            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
+            filter: none;
+            border-radius: 12px;
         }
 
         .vehicle-card-body {
-            padding: 18px;
+            padding: 0 12px;
+            text-align: center;
         }
 
         .vehicle-card-body h4 {
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             color: var(--dark);
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .vehicle-specs {
