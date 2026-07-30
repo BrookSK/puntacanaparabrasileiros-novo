@@ -322,16 +322,30 @@
                     </div>
                     <a href="#booking-section" class="btn-verificar">Verificar Disponibilidade</a>
                     <?php if (current_user()): ?>
-                    <form method="POST" action="/minha-conta/wishlist/toggle" style="margin-bottom:12px;">
-                        <?= csrf_field() ?>
-                        <input type="hidden" name="trip_id" value="<?= (int)$trip['id'] ?>">
-                        <button type="submit" class="btn-wishlist-trip">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="<?= !empty($inWishlist) ? 'currentColor' : 'none' ?>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                            <?= !empty($inWishlist) ? 'Na Lista de Desejos' : 'Adicionar à Lista de Desejos' ?>
-                        </button>
-                    </form>
+                    <button type="button" class="btn-wishlist-trip" id="btnWishlist" onclick="toggleWishlist(<?= (int)$trip['id'] ?>)">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="<?= !empty($inWishlist) ? 'currentColor' : 'none' ?>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                        <span id="wishlistText"><?= !empty($inWishlist) ? 'Na Lista de Desejos' : 'Adicionar à Lista de Desejos' ?></span>
+                    </button>
+                    <script>
+                    function toggleWishlist(tripId) {
+                        fetch('/minha-conta/wishlist/toggle', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: '_token=' + document.querySelector('meta[name="csrf-token"]').content + '&trip_id=' + tripId
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success) {
+                                window.location.href = '/minha-conta/wishlist';
+                            }
+                        });
+                    }
+                    </script>
                     <?php else: ?>
-                    <a href="/login" class="btn-wishlist-trip" style="margin-bottom:12px;">
+                    <a href="/login" class="btn-wishlist-trip">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                         Adicionar à Lista de Desejos
                     </a>
