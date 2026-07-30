@@ -1859,6 +1859,7 @@
     const trips = [
         {
             title: 'Saona Premium Brasil',
+            slug: 'saona-premium-brasil',
             badge: 'Premium',
             price: 'US$79',
             duration: '10h',
@@ -1894,6 +1895,7 @@
         },
         {
             title: 'Saona Clásica',
+            slug: 'saona-clasica',
             badge: 'Popular',
             price: 'US$49',
             duration: '8h',
@@ -1927,6 +1929,7 @@
         },
         {
             title: 'Encontro com Golfinhos',
+            slug: 'nado-e-interacao-com-golfinho',
             badge: 'Exclusivo',
             price: 'US$120',
             duration: '4h',
@@ -1960,6 +1963,7 @@
         },
         {
             title: 'Coco Bongo',
+            slug: 'coco-bongo',
             badge: 'Noturno',
             price: 'Consultar',
             duration: '5h',
@@ -1991,6 +1995,7 @@
         },
         {
             title: 'Isla Catalina y Chavón',
+            slug: 'isla-catalina-y-chavon',
             badge: 'Aventura',
             price: 'US$59',
             duration: 'Dia inteiro',
@@ -2024,6 +2029,7 @@
         },
         {
             title: 'Isla Catalina Snorkel',
+            slug: 'isla-catalina-snorkel',
             badge: 'Snorkel',
             price: 'US$55',
             duration: 'Dia inteiro',
@@ -2295,16 +2301,8 @@
 
     function confirmAddToCart() {
         const trip = trips[currentAddIdx];
-        let totalPax = 0;
-        trip.prices.forEach((p, i) => {
-            totalPax += parseInt(document.getElementById('paxInput' + i).value) || 0;
-        });
-        cartCount += totalPax;
-        document.querySelector('.cart-badge').textContent = cartCount;
-        closePaxPopup();
-        // Close detail modal if open
-        document.getElementById('modalOverlay').classList.remove('active');
-        document.body.style.overflow = '';
+        // Redirect to the trip page on the site where user can select date/package and add to cart
+        window.location.href = '/passeios/' + trip.slug;
     }
 
     // Modal
