@@ -309,7 +309,7 @@
                         <img src="<?= asset('images/onibus.png') ?>" alt="Ônibus Compartilhado" loading="lazy">
                     </div>
                     <h3 class="transfer-home-title">Transfer em Ônibus Compartilhado</h3>
-                    <p class="transfer-home-desc">Viaje com conforto e economia em um <strong>ônibus climatizado</strong>, com embarques regulares e motoristas experientes. Ideal para quem busca praticidade em <strong>Punta Cana</strong>.</p>
+                    <p class="transfer-home-desc">Viaje com conforto e economia em um <strong>ônibus climatizado</strong>, com embarques regulares e motoristas experientes. Ideal para quem busca praticidade em Punta Cana.</p>
                 </div>
                 <div class="transfer-home-card">
                     <div class="transfer-home-img">
