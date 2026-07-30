@@ -1650,8 +1650,8 @@
     <!-- HERO -->
     <section class="hero">
         <div class="hero-content">
-            <h1>Nosso Catálogo de Experiências</h1>
-            <p>Descubra passeios exclusivos e transfers privativos em Punta Cana</p>
+            <h1 id="heroTitle">Nosso Catálogo de Experiências</h1>
+            <p id="heroSubtitle">Descubra passeios exclusivos e transfers privativos em Punta Cana</p>
         </div>
         <div class="hero-wave">
             <svg viewBox="0 0 1440 40" preserveAspectRatio="none">
@@ -2201,12 +2201,30 @@
     }
 
     // Tab switching
+    const heroTexts = {
+        passeios: {
+            title: 'Nosso Catálogo de Experiências',
+            subtitle: 'Descubra passeios exclusivos e experiências únicas em Punta Cana'
+        },
+        transfers: {
+            title: 'Transfer Privado em Punta Cana',
+            subtitle: 'Conforto, segurança e tranquilidade para sua chegada e saída'
+        }
+    };
+
     document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+
+            // Update hero text
+            const texts = heroTexts[btn.dataset.tab];
+            if (texts) {
+                document.getElementById('heroTitle').textContent = texts.title;
+                document.getElementById('heroSubtitle').textContent = texts.subtitle;
+            }
         });
     });
 
