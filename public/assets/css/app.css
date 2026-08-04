@@ -955,8 +955,9 @@ img { max-width: 100%; height: auto; }
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.5);
     transition: background .2s, transform .2s;
+    cursor: pointer;
 }
 .card-carousel-dots span.active {
     background: #fff;
