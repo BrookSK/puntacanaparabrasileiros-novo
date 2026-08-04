@@ -1094,3 +1094,71 @@
         select.parentNode.insertBefore(wrapper, select.nextSibling);
     });
 })();
+
+
+// ==================== CARD CAROUSEL (galeria de imagens nos cards) ====================
+(function() {
+    function initCardCarousels() {
+        var wrappers = document.querySelectorAll('.card-carousel-wrapper');
+        if (!wrappers.length) return;
+
+        wrappers.forEach(function(wrapper) {
+            var images = wrapper.querySelectorAll('.card-carousel-img');
+            var dots = wrapper.querySelectorAll('.card-carousel-dots span');
+            var prevBtn = wrapper.querySelector('.card-carousel-prev');
+            var nextBtn = wrapper.querySelector('.card-carousel-next');
+
+            if (images.length <= 1) return;
+
+            function getCurrentIndex() {
+                for (var i = 0; i < images.length; i++) {
+                    if (images[i].classList.contains('active')) return i;
+                }
+                return 0;
+            }
+
+            function goTo(index) {
+                var current = getCurrentIndex();
+                if (index === current) return;
+                images[current].classList.remove('active');
+                if (dots[current]) dots[current].classList.remove('active');
+                images[index].classList.add('active');
+                if (dots[index]) dots[index].classList.add('active');
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var current = getCurrentIndex();
+                    var next = (current - 1 + images.length) % images.length;
+                    goTo(next);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var current = getCurrentIndex();
+                    var next = (current + 1) % images.length;
+                    goTo(next);
+                });
+            }
+
+            dots.forEach(function(dot, idx) {
+                dot.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    goTo(idx);
+                });
+            });
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCardCarousels);
+    } else {
+        initCardCarousels();
+    }
+})();

@@ -880,6 +880,91 @@ img { max-width: 100%; height: auto; }
     color: var(--dark);
 }
 
+/* Card Carousel (galeria de imagens nos cards) */
+.card-carousel-wrapper {
+    position: relative;
+    aspect-ratio: 16/11;
+    overflow: hidden;
+    border-radius: 12px 12px 0 0;
+}
+.card-carousel-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity .3s ease;
+    pointer-events: none;
+}
+.card-carousel-img.active {
+    opacity: 1;
+}
+.card-carousel-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+.card-carousel-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 3;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity .2s, background .2s;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+.card-carousel-btn svg {
+    width: 16px;
+    height: 16px;
+    stroke: #333;
+}
+.card-carousel-wrapper:hover .card-carousel-btn {
+    opacity: 1;
+}
+.card-carousel-btn:hover {
+    background: #fff;
+}
+.card-carousel-prev {
+    left: 8px;
+}
+.card-carousel-next {
+    right: 8px;
+}
+.card-carousel-dots {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    display: flex;
+    gap: 5px;
+}
+.card-carousel-dots span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.6);
+    transition: background .2s, transform .2s;
+}
+.card-carousel-dots span.active {
+    background: #fff;
+    transform: scale(1.2);
+}
+.card-carousel-wrapper .ft-card-featured-badge,
+.card-carousel-wrapper .ft-card-discount {
+    z-index: 2;
+}
+
 /* Filtros Inline (barra de filtros na listagem completa) */
 .section-todos-passeios {
     padding: 50px 0 80px;

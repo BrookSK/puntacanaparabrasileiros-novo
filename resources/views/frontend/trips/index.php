@@ -41,18 +41,46 @@
         <h2 class="section-title">Experiências em Destaque</h2>
 
         <div class="destaque-trips-grid">
+            <?php foreach ($featuredTrips as $ft): ?>
+            <?php $ftGallery = !empty($ft['gallery']) ? json_decode($ft['gallery'], true) : []; ?>
+            <?php $ftImages = array_merge(
+                [$ft['featured_image'] ?? '/assets/images/placeholder.jpg'],
+                is_array($ftGallery) ? $ftGallery : []
+            ); ?>
             <div class="destaque-trip-card">
-                <a href="/passeios/buggies-cenote-domitai" class="destaque-trip-image">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0101.jpg" alt="Buggies + Cenote Domitai" loading="lazy">
+                <div class="card-carousel-wrapper">
+                    <?php foreach ($ftImages as $imgIdx => $imgUrl): ?>
+                    <img src="<?= e($imgUrl) ?>" alt="<?= e($ft['title']) ?>" loading="lazy" class="card-carousel-img <?= $imgIdx === 0 ? 'active' : '' ?>">
+                    <?php endforeach; ?>
+                    <?php if (count($ftImages) > 1): ?>
+                    <button class="card-carousel-btn card-carousel-prev" aria-label="Imagem anterior">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <button class="card-carousel-btn card-carousel-next" aria-label="Próxima imagem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <div class="card-carousel-dots">
+                        <?php foreach ($ftImages as $dotIdx => $dotImg): ?>
+                        <span class="<?= $dotIdx === 0 ? 'active' : '' ?>"></span>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                    <a href="/passeios/<?= e($ft['slug']) ?>" class="card-carousel-link"></a>
+                    <?php if (!empty($ft['featured'])): ?>
                     <span class="ft-card-featured-badge" title="Destaque">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
                     </span>
-                </a>
+                    <?php endif; ?>
+                    <?php if (isset($ft['regular_price']) && $ft['regular_price'] > $ft['min_price'] && $ft['min_price'] > 0): ?>
+                    <?php $discount = round(100 - ($ft['min_price'] / $ft['regular_price'] * 100)); ?>
+                    <span class="ft-card-discount"><?= $discount ?>% Off</span>
+                    <?php endif; ?>
+                </div>
                 <div class="destaque-trip-body">
                     <h3 class="destaque-trip-title">
-                        <a href="/passeios/buggies-cenote-domitai">Buggies + Cenote Domitai</a>
+                        <a href="/passeios/<?= e($ft['slug']) ?>"><?= e($ft['title']) ?></a>
                     </h3>
-                    <p class="destaque-trip-desc">Prepare-se para explorar as estradas de Macao, em Punta Cana, dirigindo com facilidade e muita diversão. Aproveite as paisagens deslumbrantes,...</p>
+                    <p class="destaque-trip-desc"><?= e(truncate($ft['short_description'] ?? '', 120)) ?></p>
                     <div class="destaque-trip-footer">
                         <div class="destaque-trip-meta">
                             <span class="meta-location">
@@ -61,69 +89,14 @@
                             </span>
                             <span class="meta-duration">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                4 Horas
+                                <?= e($ft['duration'] ?? '') ?> <?= ($ft['duration_unit'] ?? 'hours') === 'hours' ? 'Horas' : 'Dias' ?>
                             </span>
                         </div>
-                        <span class="destaque-trip-price">$55</span>
+                        <span class="destaque-trip-price"><?= money($ft['min_price'] ?? 0) ?></span>
                     </div>
                 </div>
             </div>
-
-            <div class="destaque-trip-card">
-                <a href="/passeios/quadriciclos-cenote" class="destaque-trip-image">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/09/IMG_6370-1.jpeg" alt="Quadriciclos + Cenote" loading="lazy">
-                    <span class="ft-card-featured-badge" title="Destaque">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
-                    </span>
-                </a>
-                <div class="destaque-trip-body">
-                    <h3 class="destaque-trip-title">
-                        <a href="/passeios/quadriciclos-cenote">Quadriciclos + Cenote</a>
-                    </h3>
-                    <p class="destaque-trip-desc">Prepare-se para explorar as estradas de Macao, em Punta Cana, dirigindo com facilidade e muita diversão. Aproveite as paisagens deslumbrantes,...</p>
-                    <div class="destaque-trip-footer">
-                        <div class="destaque-trip-meta">
-                            <span class="meta-location">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                Punta Cana
-                            </span>
-                            <span class="meta-duration">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                4 Horas
-                            </span>
-                        </div>
-                        <span class="destaque-trip-price">$65</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="destaque-trip-card">
-                <a href="/passeios/nado-e-interacao-com-golfinho" class="destaque-trip-image">
-                    <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/IMG-20250527-WA0138-990x490.jpg" alt="Nado e interação com 1 Golfinho" loading="lazy">
-                    <span class="ft-card-featured-badge" title="Destaque">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
-                    </span>
-                </a>
-                <div class="destaque-trip-body">
-                    <h3 class="destaque-trip-title">
-                        <a href="/passeios/nado-e-interacao-com-golfinho">Nado e interação com 1 Golfinho</a>
-                    </h3>
-                    <p class="destaque-trip-desc">Você irá interagir e nadar com 1 golfinho em uma plataforma onde todos ficam de pé enquanto eles se aproximam....</p>
-                    <div class="destaque-trip-footer">
-                        <div class="destaque-trip-meta">
-                            <span class="meta-location">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                Punta Cana
-                            </span>
-                            <span class="meta-duration">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                4 Horas
-                            </span>
-                        </div>
-                        <span class="destaque-trip-price">$155</span>
-                    </div>
-                </div>
-            </div>
+            <?php endforeach; ?>
         </div>
 
         <div class="section-cta">
@@ -166,9 +139,30 @@
         <?php else: ?>
         <div class="destaque-trips-grid">
             <?php foreach ($trips['items'] as $trip): ?>
+            <?php $gallery = !empty($trip['gallery']) ? json_decode($trip['gallery'], true) : []; ?>
+            <?php $images = array_merge(
+                [$trip['featured_image'] ?? '/assets/images/placeholder.jpg'],
+                is_array($gallery) ? $gallery : []
+            ); ?>
             <div class="destaque-trip-card">
-                <a href="/passeios/<?= e($trip['slug']) ?>" class="destaque-trip-image">
-                    <img src="<?= e($trip['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($trip['title']) ?>" loading="lazy">
+                <div class="card-carousel-wrapper">
+                    <?php foreach ($images as $imgIdx => $imgUrl): ?>
+                    <img src="<?= e($imgUrl) ?>" alt="<?= e($trip['title']) ?>" loading="lazy" class="card-carousel-img <?= $imgIdx === 0 ? 'active' : '' ?>">
+                    <?php endforeach; ?>
+                    <?php if (count($images) > 1): ?>
+                    <button class="card-carousel-btn card-carousel-prev" aria-label="Imagem anterior">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+                    </button>
+                    <button class="card-carousel-btn card-carousel-next" aria-label="Próxima imagem">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </button>
+                    <div class="card-carousel-dots">
+                        <?php foreach ($images as $dotIdx => $dotImg): ?>
+                        <span class="<?= $dotIdx === 0 ? 'active' : '' ?>"></span>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                    <a href="/passeios/<?= e($trip['slug']) ?>" class="card-carousel-link"></a>
                     <?php if (!empty($trip['featured'])): ?>
                     <span class="ft-card-featured-badge" title="Destaque">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
@@ -178,7 +172,7 @@
                     <?php $discount = round(100 - ($trip['min_price'] / $trip['regular_price'] * 100)); ?>
                     <span class="ft-card-discount"><?= $discount ?>% Off</span>
                     <?php endif; ?>
-                </a>
+                </div>
                 <div class="destaque-trip-body">
                     <h3 class="destaque-trip-title">
                         <a href="/passeios/<?= e($trip['slug']) ?>"><?= e($trip['title']) ?></a>
