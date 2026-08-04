@@ -903,13 +903,13 @@ img { max-width: 100%; height: auto; }
 .card-carousel-link {
     position: absolute;
     inset: 0;
-    z-index: 1;
+    z-index: 2;
 }
 .card-carousel-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    z-index: 3;
+    z-index: 4;
     width: 32px;
     height: 32px;
     border-radius: 50%;
@@ -922,6 +922,7 @@ img { max-width: 100%; height: auto; }
     opacity: 0;
     transition: opacity .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s, transform .2s;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    pointer-events: auto;
 }
 .card-carousel-btn svg {
     width: 16px;
@@ -937,17 +938,17 @@ img { max-width: 100%; height: auto; }
     transform: translateY(-50%) scale(1.1);
 }
 .card-carousel-prev {
-    left: 8px;
+    left: 10px;
 }
 .card-carousel-next {
-    right: 8px;
+    right: 10px;
 }
 .card-carousel-dots {
     position: absolute;
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 3;
+    z-index: 4;
     display: flex;
     gap: 5px;
 }

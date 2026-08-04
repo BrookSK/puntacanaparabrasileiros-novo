@@ -52,6 +52,7 @@
                     <?php foreach ($ftImages as $imgIdx => $imgUrl): ?>
                     <img src="<?= e($imgUrl) ?>" alt="<?= e($ft['title']) ?>" loading="lazy" class="card-carousel-img <?= $imgIdx === 0 ? 'active' : '' ?>">
                     <?php endforeach; ?>
+                    <a href="/passeios/<?= e($ft['slug']) ?>" class="card-carousel-link"></a>
                     <?php if (count($ftImages) > 1): ?>
                     <button class="card-carousel-btn card-carousel-prev" aria-label="Imagem anterior">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -65,7 +66,6 @@
                         <?php endforeach; ?>
                     </div>
                     <?php endif; ?>
-                    <a href="/passeios/<?= e($ft['slug']) ?>" class="card-carousel-link"></a>
                     <?php if (!empty($ft['featured'])): ?>
                     <span class="ft-card-featured-badge" title="Destaque">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
@@ -149,6 +149,7 @@
                     <?php foreach ($images as $imgIdx => $imgUrl): ?>
                     <img src="<?= e($imgUrl) ?>" alt="<?= e($trip['title']) ?>" loading="lazy" class="card-carousel-img <?= $imgIdx === 0 ? 'active' : '' ?>">
                     <?php endforeach; ?>
+                    <a href="/passeios/<?= e($trip['slug']) ?>" class="card-carousel-link"></a>
                     <?php if (count($images) > 1): ?>
                     <button class="card-carousel-btn card-carousel-prev" aria-label="Imagem anterior">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
@@ -162,7 +163,6 @@
                         <?php endforeach; ?>
                     </div>
                     <?php endif; ?>
-                    <a href="/passeios/<?= e($trip['slug']) ?>" class="card-carousel-link"></a>
                     <?php if (!empty($trip['featured'])): ?>
                     <span class="ft-card-featured-badge" title="Destaque">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="white" stroke="none"><path d="M5 16L3 5l5.5 4L12 2l3.5 7L21 5l-2 11H5zm0 2h14v2H5v-2z"/></svg>
