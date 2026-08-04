@@ -913,26 +913,28 @@ img { max-width: 100%; height: auto; }
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.9);
+    background: rgba(255,255,255,0.95);
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity .2s, background .2s;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    transition: opacity .3s cubic-bezier(0.4, 0, 0.2, 1), background .2s, transform .2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 .card-carousel-btn svg {
     width: 16px;
     height: 16px;
     stroke: #333;
 }
-.card-carousel-wrapper:hover .card-carousel-btn {
+.card-carousel-wrapper:hover .card-carousel-btn,
+.destaque-trip-card:hover .card-carousel-btn {
     opacity: 1;
 }
 .card-carousel-btn:hover {
     background: #fff;
+    transform: translateY(-50%) scale(1.1);
 }
 .card-carousel-prev {
     left: 8px;
