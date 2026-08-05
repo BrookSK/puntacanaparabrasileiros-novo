@@ -241,6 +241,34 @@ class PageController extends Controller
         ], 'app');
     }
 
+    public function catalog(Request $request, Response $response): void
+    {
+        // Buscar passeios publicados
+        $tripModel = new \App\Models\Trip();
+        $packageModel = new \App\Models\TripPackage();
+
+        $trips = $tripModel->getPublished(1, 50, 'sort_order ASC');
+        foreach ($trips['items'] as &$trip) {
+            $packages = $packageModel->getByTrip((int) $trip['id']);
+            $trip['min_price'] = 0;
+            if (!empty($packages)) {
+                $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
+            }
+            $trip['rating'] = $tripModel->getAverageRating((int) $trip['id']);
+            $trip['gallery_images'] = $trip['gallery'] ? json_decode($trip['gallery'], true) : [];
+        }
+
+        // Buscar veículos de transfer
+        $vehicles = $this->db->fetchAll("SELECT * FROM transfer_vehicles WHERE status = 'active' ORDER BY sort_order ASC");
+
+        $this->view('frontend/pages/catalog', [
+            'trips' => $trips['items'],
+            'vehicles' => $vehicles,
+            'pageTitle' => 'Catálogo de Experiências | Punta Cana para Brasileiros',
+            'metaDescription' => 'Descubra passeios exclusivos e transfers privativos em Punta Cana. Catálogo completo de experiências.',
+        ], 'catalog');
+    }
+
     public function show(Request $request, Response $response): void
     {
         $slug = $request->param('slug', '');

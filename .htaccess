@@ -20,9 +20,11 @@ RewriteEngine On
 # Servir assets diretamente do /public
 RewriteRule ^assets/(.*)$ public/assets/$1 [L]
 RewriteRule ^uploads/(.*)$ public/uploads/$1 [L]
-RewriteRule ^catalogo\.html$ public/catalogo.html [L]
 RewriteRule ^import\.png$ public/import.png [L]
 RewriteRule ^favicon\.ico$ public/favicon.ico [L]
+
+# Redirect antigo catalogo.html para nova rota
+RewriteRule ^catalogo\.html$ /catalogo [R=301,L]
 
 # Se o arquivo ou diretório existir na raiz, entrega direto
 RewriteCond %{REQUEST_FILENAME} -f [OR]
