@@ -54,7 +54,7 @@ class TripPackage extends Model
     public function getBasePrice(int $packageId): float
     {
         $price = $this->db->fetchColumn(
-            "SELECT MIN(COALESCE(sale_price, price)) FROM trip_package_categories WHERE package_id = ?",
+            "SELECT MIN(COALESCE(sale_price, price)) FROM trip_package_categories WHERE package_id = ? AND COALESCE(sale_price, price) > 0",
             [$packageId]
         );
         return (float) ($price ?: 0);
@@ -66,7 +66,7 @@ class TripPackage extends Model
     public function getRegularPrice(int $packageId): float
     {
         $price = $this->db->fetchColumn(
-            "SELECT MIN(price) FROM trip_package_categories WHERE package_id = ?",
+            "SELECT MIN(price) FROM trip_package_categories WHERE package_id = ? AND price > 0",
             [$packageId]
         );
         return (float) ($price ?: 0);
