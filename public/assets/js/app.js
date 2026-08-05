@@ -28,7 +28,7 @@
         // Animar entrada
         requestAnimationFrame(() => toast.classList.add('show'));
 
-        // Auto-remover apÃ³s 5s
+        // Auto-remover após 5s
         setTimeout(() => { if (toast.parentElement) { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); } }, 5000);
     }
 
@@ -105,13 +105,13 @@
             const item = btn.closest('.faq-item');
             const isActive = item.classList.contains('active');
 
-            // Fechar todos (exceto se expandir tudo estÃ¡ ativo)
+            // Fechar todos (exceto se expandir tudo está ativo)
             const expandAll = document.getElementById('expandAllFaqs');
             if (!expandAll || !expandAll.checked) {
                 document.querySelectorAll('.faq-item.active').forEach(el => el.classList.remove('active'));
             }
 
-            // Abrir o clicado (se nÃ£o estava ativo)
+            // Abrir o clicado (se não estava ativo)
             if (!isActive) {
                 item.classList.add('active');
             } else {
@@ -154,14 +154,14 @@
                         current = target;
                         clearInterval(timer);
                     }
-                    // Formatar nÃºmero com ponto para milhares
+                    // Formatar número com ponto para milhares
                     let formatted = current >= 1000 ? current.toLocaleString('pt-BR') : current.toString();
                     el.textContent = prefix + formatted + suffix;
                 }, 30);
             });
         }
 
-        // Intersection Observer para disparar quando visÃ­vel
+        // Intersection Observer para disparar quando visível
         const statsSection = document.querySelector('.section-stats');
         if (statsSection) {
             const observer = new IntersectionObserver((entries) => {
@@ -312,7 +312,7 @@
             ajax('/minha-conta/wishlist/toggle', { body: JSON.stringify({ trip_id: tripId, _token: CSRF_TOKEN }) })
                 .then(data => {
                     if (data.success) {
-                        wishlistBtn.innerHTML = data.in_wishlist ? '&#10084; Na Lista de Desejos' : '&#9825; Adicionar Ã  Lista de Desejos';
+                        wishlistBtn.innerHTML = data.in_wishlist ? '&#10084; Na Lista de Desejos' : '&#9825; Adicionar à Lista de Desejos';
                     }
                 }).catch(() => {});
         });
@@ -402,7 +402,7 @@
         if (!container) return;
         const routes = container.querySelectorAll('.multiple-route-item');
         const newIndex = routes.length + 1;
-        if (newIndex > 10) { toast('MÃ¡ximo de 10 rotas.', 'warning'); return; }
+        if (newIndex > 10) { toast('Máximo de 10 rotas.', 'warning'); return; }
 
         // Get locations options from first route select
         const firstSelect = container.querySelector('.multi-origin');
@@ -442,7 +442,7 @@
     window.removeRoute = function(btn) {
         const container = document.getElementById('multipleRoutesContainer');
         const routes = container.querySelectorAll('.multiple-route-item');
-        if (routes.length <= 2) { toast('MÃ­nimo de 2 rotas.', 'warning'); return; }
+        if (routes.length <= 2) { toast('Mínimo de 2 rotas.', 'warning'); return; }
         const routeItem = btn.closest('.multiple-route-item');
         routeItem.remove();
         // Renumber routes
@@ -510,7 +510,7 @@
             renderMultipleResults(results, routesData);
         }).catch(() => {
             document.getElementById('transferLoading').style.display = 'none';
-            toast('Erro de conexão. Tente novamente.', 'error');
+            toast('Erro de conex�o. Tente novamente.', 'error');
         });
     }
 
@@ -529,7 +529,7 @@
             container.innerHTML += `
             <div class="transfer-result-item">
                 <div class="transfer-result-route">
-                    <strong>Rota ${idx + 1}:</strong> ${data.origin} â†’ ${data.destination} (${formatDateBR(route.date)})
+                    <strong>Rota ${idx + 1}:</strong> ${data.origin} → ${data.destination} (${formatDateBR(route.date)})
                 </div>
                 <div class="transfer-vehicle-card">
                     <div class="transfer-vehicle-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
@@ -537,9 +537,9 @@
                         <h4>${v.title}</h4>
                         <p>${v.description || ''}</p>
                         <div class="transfer-vehicle-meta">
-                            <span>ðŸŒ ${v.max_passengers} passageiros</span>
-                            <span>ðŸ§³ ${v.max_luggage || 0} malas</span>
-                            <span>â± ${v.duration || 0} min</span>
+                            <span>🌐 ${v.max_passengers} passageiros</span>
+                            <span>🧳 ${v.max_luggage || 0} malas</span>
+                            <span>⏱ ${v.duration || 0} min</span>
                         </div>
                     </div>
                     <div>
@@ -582,7 +582,7 @@
                 } else {
                     alert(data.error || 'Erro na busca.');
                 }
-            }).catch(() => { document.getElementById('transferLoading').style.display = 'none'; toast('Erro de conexão.', 'error'); });
+            }).catch(() => { document.getElementById('transferLoading').style.display = 'none'; toast('Erro de conex�o.', 'error'); });
     }
 
     function renderTransferResults(data) {
@@ -603,7 +603,7 @@
             container.innerHTML += `
             <div class="transfer-result-item">
                 <div class="transfer-result-route">
-                    <strong>Entrada:</strong> ${data.origin} â†’ ${data.destination} (${formatDateBR(arrivalDate)})
+                    <strong>Entrada:</strong> ${data.origin} → ${data.destination} (${formatDateBR(arrivalDate)})
                 </div>
                 <div class="transfer-vehicle-card">
                     <div class="transfer-vehicle-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
@@ -611,9 +611,9 @@
                         <h4>${v.title}</h4>
                         <p>${v.description || ''}</p>
                         <div class="transfer-vehicle-meta">
-                            <span>ðŸŒ ${v.max_passengers} passageiros</span>
-                            <span>ðŸ§³ ${v.max_luggage || 0} malas</span>
-                            <span>â± ${v.duration || 0} min</span>
+                            <span>🌐 ${v.max_passengers} passageiros</span>
+                            <span>🧳 ${v.max_luggage || 0} malas</span>
+                            <span>⏱ ${v.duration || 0} min</span>
                         </div>
                     </div>
                     <div>
@@ -632,7 +632,7 @@
                 container.innerHTML += `
                 <div class="transfer-result-item">
                     <div class="transfer-result-route">
-                        <strong>SaÃ­da:</strong> ${data.destination} â†’ ${data.origin} (${formatDateBR(departureDate)})
+                        <strong>Saída:</strong> ${data.destination} → ${data.origin} (${formatDateBR(departureDate)})
                     </div>
                     <div class="transfer-vehicle-card">
                         <div class="transfer-vehicle-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
@@ -640,9 +640,9 @@
                             <h4>${v.title}</h4>
                             <p>${v.description || ''}</p>
                             <div class="transfer-vehicle-meta">
-                                <span>ðŸŒ ${v.max_passengers} passageiros</span>
-                                <span>ðŸ§³ ${v.max_luggage || 0} malas</span>
-                                <span>â± ${v.duration || 0} min</span>
+                                <span>🌐 ${v.max_passengers} passageiros</span>
+                                <span>🧳 ${v.max_luggage || 0} malas</span>
+                                <span>⏱ ${v.duration || 0} min</span>
                             </div>
                         </div>
                         <div>
@@ -692,7 +692,7 @@
 
         ajax('/api/cart/add-transfer', { body: JSON.stringify(payload) })
             .then(d => { if (d.success) { toast('Transfer adicionado ao carrinho!', 'success'); updateCartBadge(); } else { toast(d.error || 'Erro.', 'error'); } })
-            .catch(() => toast('Erro de conexão.', 'error'));
+            .catch(() => toast('Erro de conex�o.', 'error'));
     });
 
     document.getElementById('btnDirectCheckout')?.addEventListener('click', () => {
@@ -705,7 +705,7 @@
     if (checkoutForm) {
         checkoutForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            if (!document.getElementById('termsCheck').checked) { toast('Aceite os termos e condições.', 'warning'); return; }
+            if (!document.getElementById('termsCheck').checked) { toast('Aceite os termos e condi��es.', 'warning'); return; }
 
             const formData = new FormData(checkoutForm);
             const data = Object.fromEntries(formData.entries());
@@ -717,7 +717,7 @@
                 .then(response => {
                     if (response.success) {
                         if (response.gateway === 'simulate' && response.redirect) {
-                            // Simulação aprovada — redirecionar direto
+                            // Simula��o aprovada � redirecionar direto
                             window.location = response.redirect;
                         } else if (response.gateway === 'paypal' && response.paypal_order_id) {
                             capturePayPal(response);
@@ -732,14 +732,14 @@
                         document.getElementById('checkoutLoading').style.display = 'none';
                         toast(response.error || 'Erro ao processar.', 'error');
                     }
-                }).catch(err => { document.getElementById('checkoutLoading').style.display = 'none'; toast('Erro de conexão. Tente novamente.', 'error'); });
+                }).catch(err => { document.getElementById('checkoutLoading').style.display = 'none'; toast('Erro de conex�o. Tente novamente.', 'error'); });
         });
     }
 
     function handlePixPayment(response) {
         document.getElementById('checkoutLoading').style.display = 'none';
 
-        // Esconder formulÃ¡rio e mostrar QR Code
+        // Esconder formulário e mostrar QR Code
         const formSections = document.querySelectorAll('.checkout-section, .checkout-submit, #checkoutStep4, #checkoutTerms, #paymentContainer, #checkoutStep3Actions');
         formSections.forEach(el => { if (el) el.style.display = 'none'; });
 
@@ -754,7 +754,7 @@
             if (qrImage && pix.qr_code_url) {
                 qrImage.innerHTML = '<img src="' + pix.qr_code_url + '" alt="QR Code PIX" style="max-width:220px;border-radius:12px;border:2px solid #e5e7eb;">';
             } else if (qrImage) {
-                qrImage.innerHTML = '<div style="padding:20px;background:#f1f5f9;border-radius:12px;color:#64748b;">QR Code serÃ¡ exibido aqui</div>';
+                qrImage.innerHTML = '<div style="padding:20px;background:#f1f5f9;border-radius:12px;color:#64748b;">QR Code será exibido aqui</div>';
             }
 
             // PIX copia e cola
@@ -806,7 +806,7 @@
     }
 
     function handleStripePayment(response) {
-        if (typeof Stripe === 'undefined') { alert('Stripe nÃ£o carregado.'); return; }
+        if (typeof Stripe === 'undefined') { alert('Stripe não carregado.'); return; }
         const stripe = Stripe(typeof CHECKOUT_CONFIG !== 'undefined' ? CHECKOUT_CONFIG.stripePublishableKey : '');
         stripe.confirmCardPayment(response.stripe_client_secret).then(result => {
             if (result.error) { document.getElementById('checkoutLoading').style.display = 'none'; toast(result.error.message, 'error'); }
@@ -835,10 +835,10 @@
         e.preventDefault();
         modal.style.display = 'flex';
         document.getElementById('bmSidebarTitle').textContent = tripTitle;
-        // CÃ³digo da viagem
+        // Código da viagem
         const codeEl = document.getElementById('bmSidebarCode');
         if (codeEl && typeof TRIP_ID !== 'undefined') {
-            codeEl.innerHTML = '<span class="bm-code-badge">CÃ³digo Da Viagem: WTE-' + (8000 + TRIP_ID) + '</span>';
+            codeEl.innerHTML = '<span class="bm-code-badge">C\u00F3digo Da Viagem: WTE-' + (8000 + TRIP_ID) + '</span>';
         }
         renderCalendar();
     });
@@ -847,12 +847,12 @@
     document.getElementById('bookingModalClose')?.addEventListener('click', () => { modal.style.display = 'none'; });
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
 
-    // NavegaÃ§Ã£o do calendÃ¡rio
+    // Navegação do calendário
     document.getElementById('bmPrevMonth')?.addEventListener('click', () => { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); });
     document.getElementById('bmNextMonth')?.addEventListener('click', () => { currentMonth++; if (currentMonth > 11) { currentMonth = 0; currentYear++; } renderCalendar(); });
 
     function renderCalendar() {
-        const months = ['Janeiro','Fevereiro','MarÃ§o','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+        const months = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
         const monthSelect = document.getElementById('bmMonth');
         monthSelect.innerHTML = months.map((m, i) => `<option value="${i}" ${i === currentMonth ? 'selected' : ''}>${m}</option>`).join('');
         monthSelect.onchange = function() { currentMonth = parseInt(this.value); renderCalendar(); };
@@ -894,7 +894,7 @@
         const container = document.getElementById('bmTimes');
         const list = document.getElementById('bmTimesList');
         // Default time slots (can be dynamic from fixed_dates)
-        const slots = ['9:00 AM â€“ 12:00 PM', '12:00 PM â€“ 3:00 PM', '3:00 PM â€“ 6:00 PM'];
+        const slots = ['9:00 AM – 12:00 PM', '12:00 PM – 3:00 PM', '3:00 PM – 6:00 PM'];
         list.innerHTML = slots.map(s => `<button type="button" class="bm-time-slot ${selectedTime === s ? 'selected' : ''}" onclick="selectBookingTime('${s}')">${s}</button>`).join('');
         container.style.display = 'block';
     }
@@ -954,9 +954,9 @@
                     <span class="bm-traveler-price">$${parseFloat(price).toFixed(2)} / Pessoa</span>
                 </div>
                 <div class="bm-traveler-counter">
-                    <button type="button" onclick="changeTraveler(${cat.traveler_category_id}, -1)">âˆ’</button>
+                    <button type="button" onclick="changeTraveler(${cat.traveler_category_id}, -1)">&#8722;</button>
                     <input type="text" value="${defaultQty}" id="traveler_${cat.traveler_category_id}" readonly>
-                    <button type="button" onclick="changeTraveler(${cat.traveler_category_id}, 1)">+</button>
+                    <button type="button" onclick="changeTraveler(${cat.traveler_category_id}, 1)">&#43;</button>
                 </div>
             </div>`;
         }).join('');
@@ -976,7 +976,7 @@
         const dateEl = document.getElementById('bmSidebarDate');
         if (selectedDate) {
             const [y,m,d] = selectedDate.split('-');
-            dateEl.textContent = `Data De InÃ­cio: ${d}/${m}/${y}${selectedTime ? ' at ' + selectedTime : ''}`;
+            dateEl.textContent = `Data De In\u00EDcio: ${d}/${m}/${y}${selectedTime ? ' \u00E0s ' + selectedTime : ''}`;
         }
         // Package
         const pkgEl = document.getElementById('bmSidebarPackage');

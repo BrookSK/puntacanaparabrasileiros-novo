@@ -78,7 +78,7 @@
             <div class="booking-modal-sidebar">
                 <h4 class="bm-sidebar-label">RESUMO DA RESERVA</h4>
                 <h3 class="bm-sidebar-title" id="bmSidebarTitle"></h3>
-                <p class="bm-sidebar-date" id="bmSidebarDate">Data De Início: --</p>
+                <p class="bm-sidebar-date" id="bmSidebarDate">Data De In&#237;cio: --</p>
                 <div class="bm-sidebar-code" id="bmSidebarCode"></div>
                 <div class="bm-sidebar-package" id="bmSidebarPackage" style="display:none">
                     <span id="bmSidebarPackageName"></span>
