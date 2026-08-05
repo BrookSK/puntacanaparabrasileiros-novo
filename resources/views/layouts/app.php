@@ -7,12 +7,7 @@
     <title><?= e($pageTitle ?? setting('site_name', 'Punta Cana para Brasileiros')) ?> - <?= e(setting('site_name', '')) ?></title>
 
     <!-- Favicon -->
-    <?php if (setting('site_favicon')): ?>
-    <link rel="icon" href="<?= e(setting('site_favicon')) ?>">
-    <?php else: ?>
-    <link rel="icon" type="image/svg+xml" href="<?= asset('images/favicon.svg') ?>">
-    <link rel="icon" type="image/png" href="<?= asset('images/favicon.png') ?>">
-    <?php endif; ?>
+    <link rel="icon" type="image/png" href="/favicon.ico">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
