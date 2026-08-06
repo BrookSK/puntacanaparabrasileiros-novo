@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/favicon.ico">
-    <link rel="stylesheet" href="<?= asset('css/catalog.css') ?>?v=1.1">
+    <link rel="stylesheet" href="<?= asset('css/catalog.css') ?>?v=1.2">
 </head>
 <body>
     <?= $content ?>

@@ -269,7 +269,7 @@ var CATALOG_TRIPS = <?= json_encode(array_map(function($t) {
     return [
         'title' => $t['title'],
         'slug' => $t['slug'],
-        'description' => $t['description'] ?? $t['short_description'] ?? '',
+        'description' => $t['description'] ?? '',
         'short_description' => $t['short_description'] ?? '',
         'duration' => $t['duration'] . ($t['duration_unit'] === 'hours' ? 'h' : ' dias'),
         'featured_image' => $t['featured_image'] ?? '/assets/images/placeholder.jpg',
@@ -277,6 +277,13 @@ var CATALOG_TRIPS = <?= json_encode(array_map(function($t) {
         'rating' => $t['rating'] > 0 ? $t['rating'] : 4.5,
         'includes' => $t['includes'] ? json_decode($t['includes'], true) : [],
         'excludes' => $t['excludes'] ? json_decode($t['excludes'], true) : [],
+        'prices' => array_map(function($p) {
+            return [
+                'category' => $p['category_name'] . ' (' . ($p['age_group'] ?? '') . ')',
+                'price' => $p['sale_price'] ?: $p['price'],
+                'type' => $p['category_slug'] ?? 'adult',
+            ];
+        }, $t['price_categories'] ?? []),
     ];
 }, $trips), JSON_UNESCAPED_UNICODE) ?>;
 
@@ -331,6 +338,23 @@ function openModal(idx) {
     document.getElementById('modalImage').src = trip.featured_image;
     document.getElementById('modalImage').alt = trip.title;
 
+    // Preços por categoria
+    var pricesHtml = '';
+    if (trip.prices && trip.prices.length > 0) {
+        pricesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2" width="18" height="18"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Pre\u00e7os (por pessoa)</div><div class="modal-prices">';
+        trip.prices.forEach(function(p) {
+            var priceVal = parseFloat(p.price);
+            var dotClass = p.type === 'infantil' ? 'infant' : (p.type === 'crianca' ? 'child' : '');
+            if (priceVal === 0) {
+                pricesHtml += '<div class="modal-price-row"><span class="modal-price-category"><span class="modal-price-dot ' + dotClass + '"></span>' + p.category + '</span><span class="modal-price-free">GRATIS</span></div>';
+            } else {
+                pricesHtml += '<div class="modal-price-row"><span class="modal-price-category"><span class="modal-price-dot ' + dotClass + '"></span>' + p.category + '</span><span class="modal-price-value">US$' + priceVal.toFixed(0) + '</span></div>';
+            }
+        });
+        pricesHtml += '</div>';
+    }
+
+    // Inclui
     var includesHtml = '';
     if (trip.includes && trip.includes.length > 0) {
         includesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg> O que Inclui</div><ul class="modal-list includes">';
@@ -340,6 +364,7 @@ function openModal(idx) {
         includesHtml += '</ul>';
     }
 
+    // Não inclui
     var excludesHtml = '';
     if (trip.excludes && trip.excludes.length > 0) {
         excludesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> O que N\u00e3o Inclui</div><ul class="modal-list excludes">';
@@ -350,14 +375,15 @@ function openModal(idx) {
     }
 
     document.getElementById('modalBody').innerHTML =
+        '<span class="modal-badge">Passeio</span>' +
         '<h2 class="modal-title">' + trip.title + '</h2>' +
         '<div class="modal-rating"><svg viewBox="0 0 24 24" width="16" height="16" fill="#E4B505"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> <strong>' + trip.rating + '</strong></div>' +
-        '<p class="modal-desc">' + (trip.short_description || trip.description) + '</p>' +
+        '<p class="modal-desc">' + (trip.description || trip.short_description) + '</p>' +
         '<div class="modal-info-grid">' +
             '<div class="modal-info-item"><div class="modal-info-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="modal-info-label">Dura\u00e7\u00e3o</div><div class="modal-info-value">' + trip.duration + '</div></div></div>' +
             '<div class="modal-info-item"><div class="modal-info-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="modal-info-label">Local</div><div class="modal-info-value">Punta Cana</div></div></div>' +
         '</div>' +
-        includesHtml + excludesHtml;
+        pricesHtml + includesHtml + excludesHtml;
 
     var priceText = trip.min_price > 0 ? 'US$' + Math.round(trip.min_price) : 'Consultar';
     document.getElementById('modalFooter').innerHTML =

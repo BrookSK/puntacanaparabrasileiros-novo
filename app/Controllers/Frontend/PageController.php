@@ -253,6 +253,9 @@ class PageController extends Controller
             $trip['min_price'] = 0;
             if (!empty($packages)) {
                 $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
+                $trip['price_categories'] = $packageModel->getCategories((int) $packages[0]['id']);
+            } else {
+                $trip['price_categories'] = [];
             }
             $trip['rating'] = $tripModel->getAverageRating((int) $trip['id']);
             $trip['gallery_images'] = $trip['gallery'] ? json_decode($trip['gallery'], true) : [];

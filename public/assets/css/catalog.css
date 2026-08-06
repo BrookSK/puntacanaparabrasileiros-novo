@@ -1163,3 +1163,70 @@ body {
     padding: 14px 28px;
     font-size: 14px;
 }
+
+/* Modal Badge */
+.modal-badge {
+    display: inline-block;
+    background: var(--text-green);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+}
+
+/* Modal Prices */
+.modal-prices {
+    margin-bottom: 22px;
+}
+
+.modal-price-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f8f8f8;
+}
+
+.modal-price-row:last-child {
+    border-bottom: none;
+}
+
+.modal-price-category {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: var(--dark);
+}
+
+.modal-price-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--text-green);
+}
+
+.modal-price-dot.child {
+    background: var(--accent);
+}
+
+.modal-price-dot.infant {
+    background: var(--secondary);
+}
+
+.modal-price-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-green);
+}
+
+.modal-price-free {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--secondary);
+    background: #fffbeb;
+    padding: 2px 10px;
+    border-radius: 12px;
+}
