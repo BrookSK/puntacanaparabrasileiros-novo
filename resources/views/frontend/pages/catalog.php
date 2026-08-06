@@ -9,6 +9,10 @@
             <button class="tab-btn" data-tab="transfers">Transfer</button>
         </nav>
         <div class="header-actions">
+            <a href="/catalogo/pdf" target="_blank" class="btn-cta" style="background:#E4B505;color:#1C2011;margin-right:8px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Baixar PDF
+            </a>
             <a href="/passeios" class="btn-cta">Ver Passeios</a>
         </div>
     </div>

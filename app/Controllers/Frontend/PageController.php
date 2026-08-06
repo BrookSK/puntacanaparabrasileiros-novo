@@ -272,6 +272,31 @@ class PageController extends Controller
         ], 'catalog');
     }
 
+    public function catalogPdf(Request $request, Response $response): void
+    {
+        // Buscar passeios publicados
+        $tripModel = new \App\Models\Trip();
+        $packageModel = new \App\Models\TripPackage();
+
+        $trips = $tripModel->getPublished(1, 50, 'sort_order ASC');
+        foreach ($trips['items'] as &$trip) {
+            $packages = $packageModel->getByTrip((int) $trip['id']);
+            $trip['min_price'] = 0;
+            if (!empty($packages)) {
+                $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
+                $trip['price_categories'] = $packageModel->getCategories((int) $packages[0]['id']);
+            } else {
+                $trip['price_categories'] = [];
+            }
+            $trip['gallery_images'] = $trip['gallery'] ? json_decode($trip['gallery'], true) : [];
+        }
+
+        $this->view('frontend/pages/catalog-pdf', [
+            'trips' => $trips['items'],
+            'pageTitle' => 'Catálogo de Experiências - Punta Cana para Brasileiros',
+        ]);
+    }
+
     public function show(Request $request, Response $response): void
     {
         $slug = $request->param('slug', '');

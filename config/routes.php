@@ -47,6 +47,7 @@ $router->get('/sobre-nos', [PageController::class, 'about'], [], 'pages.about');
 $router->get('/contato', [PageController::class, 'contact'], [], 'pages.contact');
 $router->post('/contato', [PageController::class, 'sendContact'], [CsrfMiddleware::class], 'pages.contact.send');
 $router->get('/catalogo', [PageController::class, 'catalog'], [], 'pages.catalog');
+$router->get('/catalogo/pdf', [PageController::class, 'catalogPdf'], [], 'pages.catalog.pdf');
 $router->get('/pesquisa', [PageController::class, 'search'], [], 'pages.search');
 $router->get('/termos-e-condicoes', [PageController::class, 'terms'], [], 'pages.terms');
 $router->get('/termos-e-condicoes/pdf', [PageController::class, 'termsPdf'], [], 'pages.terms.pdf');
