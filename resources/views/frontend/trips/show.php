@@ -69,28 +69,30 @@
                     </div>
 
                     <!-- O que inclui -->
-                    <?php if (!empty($includes)): ?>
+                    <?php
+                    $displayIncludes = !empty($includes) ? $includes : ['Transporte ida e volta do hotel', 'Guia em portugues', 'Equipamentos inclusos'];
+                    ?>
                     <div class="trip-section">
                         <h3>O que inclui</h3>
                         <ul class="trip-check-list">
-                            <?php foreach ($includes as $item): ?>
+                            <?php foreach ($displayIncludes as $item): ?>
                             <li><span class="check-icon">&#10003;</span> <?= e($item) ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
-                    <?php endif; ?>
 
                     <!-- O que não inclui -->
-                    <?php if (!empty($excludes)): ?>
+                    <?php
+                    $displayExcludes = !empty($excludes) ? $excludes : ['Fotos profissionais', 'Gorjetas (opcional)', 'Itens pessoais'];
+                    ?>
                     <div class="trip-section">
                         <h3>O que não inclui</h3>
                         <ul class="trip-x-list">
-                            <?php foreach ($excludes as $item): ?>
+                            <?php foreach ($displayExcludes as $item): ?>
                             <li><span class="x-icon">&#10007;</span> <?= e($item) ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
-                    <?php endif; ?>
 
                     <!-- Itinerário / Destaques -->
                     <?php if (!empty($itinerary)): ?>
@@ -109,27 +111,23 @@
                 <div class="trip-tab-content" id="tab-custo">
                     <h2>Inclui / Exclui</h2>
 
-                    <?php if (!empty($includes)): ?>
                     <div class="trip-section">
                         <h3>Inclui</h3>
                         <ul class="trip-check-list">
-                            <?php foreach ($includes as $item): ?>
+                            <?php foreach ($displayIncludes as $item): ?>
                             <li><span class="check-icon">&#10003;</span> <?= e($item) ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
-                    <?php endif; ?>
 
-                    <?php if (!empty($excludes)): ?>
                     <div class="trip-section">
                         <h3>Não Inclui</h3>
                         <ul class="trip-x-list">
-                            <?php foreach ($excludes as $item): ?>
+                            <?php foreach ($displayExcludes as $item): ?>
                             <li><span class="x-icon">&#10007;</span> <?= e($item) ?></li>
                             <?php endforeach; ?>
                         </ul>
                     </div>
-                    <?php endif; ?>
 
                     <?php foreach ($packages as $pkg): ?>
                     <div class="trip-package-card">
