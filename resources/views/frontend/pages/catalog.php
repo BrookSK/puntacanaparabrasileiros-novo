@@ -266,6 +266,16 @@
 <script>
 // Dados dos trips para o modal
 var CATALOG_TRIPS = <?= json_encode(array_map(function($t) {
+    $inc = [];
+    $exc = [];
+    if (!empty($t['includes'])) {
+        $decoded = json_decode($t['includes'], true);
+        if (is_array($decoded)) $inc = $decoded;
+    }
+    if (!empty($t['excludes'])) {
+        $decoded = json_decode($t['excludes'], true);
+        if (is_array($decoded)) $exc = $decoded;
+    }
     return [
         'title' => $t['title'],
         'slug' => $t['slug'],
@@ -275,8 +285,8 @@ var CATALOG_TRIPS = <?= json_encode(array_map(function($t) {
         'featured_image' => $t['featured_image'] ?? '/assets/images/placeholder.jpg',
         'min_price' => $t['min_price'] ?? 0,
         'rating' => $t['rating'] > 0 ? $t['rating'] : 4.5,
-        'includes' => $t['includes'] ? json_decode($t['includes'], true) : [],
-        'excludes' => $t['excludes'] ? json_decode($t['excludes'], true) : [],
+        'includes' => $inc,
+        'excludes' => $exc,
         'prices' => array_map(function($p) {
             return [
                 'category' => $p['category_name'] . ' (' . ($p['age_group'] ?? '') . ')',
@@ -285,7 +295,7 @@ var CATALOG_TRIPS = <?= json_encode(array_map(function($t) {
             ];
         }, $t['price_categories'] ?? []),
     ];
-}, $trips), JSON_UNESCAPED_UNICODE) ?>;
+}, $trips), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
 
 // Carousel navigation
 function carouselNav(cardIdx, direction) {
@@ -356,23 +366,21 @@ function openModal(idx) {
 
     // Inclui
     var includesHtml = '';
-    if (trip.includes && trip.includes.length > 0) {
-        includesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg> O que Inclui</div><ul class="modal-list includes">';
-        trip.includes.forEach(function(item) {
-            includesHtml += '<li><svg viewBox="0 0 24 24" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>' + item + '</li>';
-        });
-        includesHtml += '</ul>';
-    }
+    var incl = trip.includes && trip.includes.length > 0 ? trip.includes : ['Transporte ida e volta do hotel', 'Guia em portugues', 'Equipamentos inclusos'];
+    includesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg> O que Inclui</div><ul class="modal-list includes">';
+    incl.forEach(function(item) {
+        includesHtml += '<li><svg viewBox="0 0 24 24" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>' + item + '</li>';
+    });
+    includesHtml += '</ul>';
 
     // Não inclui
     var excludesHtml = '';
-    if (trip.excludes && trip.excludes.length > 0) {
-        excludesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> O que N\u00e3o Inclui</div><ul class="modal-list excludes">';
-        trip.excludes.forEach(function(item) {
-            excludesHtml += '<li><svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' + item + '</li>';
-        });
-        excludesHtml += '</ul>';
-    }
+    var excl = trip.excludes && trip.excludes.length > 0 ? trip.excludes : ['Fotos profissionais', 'Gorjetas (opcional)', 'Itens pessoais'];
+    excludesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> O que N\u00e3o Inclui</div><ul class="modal-list excludes">';
+    excl.forEach(function(item) {
+        excludesHtml += '<li><svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' + item + '</li>';
+    });
+    excludesHtml += '</ul>';
 
     document.getElementById('modalBody').innerHTML =
         '<span class="modal-badge">Passeio</span>' +
