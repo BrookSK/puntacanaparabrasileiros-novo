@@ -145,7 +145,24 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
             </div>
             <div class="v-cell">
                 <div class="v-cell-label">Horário</div>
-                <div class="v-cell-value"><?= e($item['trip_time'] ?? 'Confirmar 1 dia antes') ?></div>
+                <div class="v-cell-value"><?php
+                    $time = $item['trip_time'] ?? null;
+                    if ($time) {
+                        // Formatar horário para AM/PM
+                        $startTime = date('g:i A', strtotime($time));
+                        // Se tiver duração do passeio, calcular horário de fim
+                        $duration = $item['duration'] ?? null;
+                        $durationUnit = $item['duration_unit'] ?? 'hours';
+                        if ($duration && $durationUnit === 'hours') {
+                            $endTime = date('g:i A', strtotime($time . ' +' . (int)$duration . ' hours'));
+                            echo e($startTime . ' - ' . $endTime);
+                        } else {
+                            echo e($startTime);
+                        }
+                    } else {
+                        echo 'Confirmar 1 dia antes';
+                    }
+                ?></div>
             </div>
             <div class="v-cell">
                 <div class="v-cell-label">Ponto de Encontro</div>
