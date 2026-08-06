@@ -351,8 +351,35 @@ class AccountController extends Controller
             $this->abort(404, 'Voucher não encontrado.');
         }
 
+        $filePath = BASE_PATH . '/public/uploads/vouchers/' . $voucher['file_path'];
+        if (!file_exists($filePath)) {
+            $this->abort(404, 'Arquivo do voucher não encontrado.');
+        }
+
+        // Render the voucher HTML directly
+        $voucherHtml = file_get_contents($filePath);
+        header('Content-Type: text/html; charset=UTF-8');
+        echo '<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Voucher ' . htmlspecialchars($reference) . '</title>';
+        echo '<style>body{margin:0;padding:20px;background:#f5f5f5;}.voucher-wrapper{max-width:800px;margin:0 auto;}.voucher-actions{text-align:center;margin:20px auto;max-width:800px;}.voucher-actions button,.voucher-actions a{display:inline-block;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;margin:0 8px;}.btn-print{background:#1B6F00;color:#fff;border:none;}.btn-download{background:#E4B505;color:#1C2011;border:none;}@media print{.voucher-actions{display:none;}body{padding:0;background:#fff;}}</style>';
+        echo '</head><body>';
+        echo '<div class="voucher-actions"><button class="btn-print" onclick="window.print()">Imprimir Voucher</button></div>';
+        echo '<div class="voucher-wrapper">' . $voucherHtml . '</div>';
+        echo '</body></html>';
+        exit;
+    }
+
+    public function confirmVoucherPublic(Request $request, Response $response): void
+    {
+        $reference = $request->param('reference', '');
+
+        $voucherModel = new Voucher();
+        $voucher = $voucherModel->findByReference($reference);
+
+        if (!$voucher) {
+            $this->abort(404, 'Voucher não encontrado.');
+        }
+
         // Buscar dados do booking
-        $booking = null;
         $tripName = '';
         $customerName = '';
         $date = '';
@@ -365,7 +392,6 @@ class AccountController extends Controller
                 $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
                 $status = $booking['status'] ?? 'pending';
             }
-            // Buscar nome do passeio
             if ($voucher['booking_item_id']) {
                 $item = $this->db->fetchOne(
                     "SELECT bi.*, t.title as trip_title FROM booking_items bi LEFT JOIN trips t ON bi.trip_id = t.id WHERE bi.id = ?",
@@ -386,12 +412,11 @@ class AccountController extends Controller
                 [$voucher['transfer_booking_id']]
             );
             if ($transfer) {
-                $tripName = ($transfer['origin_title'] ?? '') . ' → ' . ($transfer['destination_title'] ?? '');
+                $tripName = ($transfer['origin_title'] ?? '') . ' \u2192 ' . ($transfer['destination_title'] ?? '');
                 $customerName = $transfer['passenger_name'] ?? '';
                 $date = $transfer['pickup_date'] ?? '';
                 $status = $transfer['status'] ?? 'pending';
             }
-            // Buscar booking pai se existir
             if (!$customerName && $voucher['booking_id']) {
                 $booking = $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [$voucher['booking_id']]);
                 if ($booking) {
