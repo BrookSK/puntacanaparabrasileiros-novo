@@ -103,7 +103,7 @@
                     </div>
                     <a href="/passeios/<?= e($trip['slug']) ?>" class="btn-add">Ver Passeio</a>
                 </div>
-                <a href="/passeios/<?= e($trip['slug']) ?>" class="card-details">Ver Detalhes <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+                <a href="#" class="card-details" onclick="openModal(<?= $idx ?>); return false;">Ver Detalhes <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
             </div>
             <?php endforeach; ?>
         </div>
@@ -251,7 +251,35 @@
     <p class="copyright">&copy; <?= date('Y') ?> Punta Cana Para Brasileiros. Todos os direitos reservados.</p>
 </footer>
 
+<!-- MODAL DE DETALHES -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modalContent">
+        <button class="modal-close" onclick="closeModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <img class="modal-image" id="modalImage" src="" alt="">
+        <div class="modal-body" id="modalBody"></div>
+        <div class="modal-footer" id="modalFooter"></div>
+    </div>
+</div>
+
 <script>
+// Dados dos trips para o modal
+var CATALOG_TRIPS = <?= json_encode(array_map(function($t) {
+    return [
+        'title' => $t['title'],
+        'slug' => $t['slug'],
+        'description' => $t['description'] ?? $t['short_description'] ?? '',
+        'short_description' => $t['short_description'] ?? '',
+        'duration' => $t['duration'] . ($t['duration_unit'] === 'hours' ? 'h' : ' dias'),
+        'featured_image' => $t['featured_image'] ?? '/assets/images/placeholder.jpg',
+        'min_price' => $t['min_price'] ?? 0,
+        'rating' => $t['rating'] > 0 ? $t['rating'] : 4.5,
+        'includes' => $t['includes'] ? json_decode($t['includes'], true) : [],
+        'excludes' => $t['excludes'] ? json_decode($t['excludes'], true) : [],
+    ];
+}, $trips), JSON_UNESCAPED_UNICODE) ?>;
+
 // Carousel navigation
 function carouselNav(cardIdx, direction) {
     const carousel = document.querySelector('[data-card="' + cardIdx + '"]');
@@ -284,8 +312,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
 
         const heroTexts = {
-            passeios: { title: 'Nosso Catálogo de Experiências', subtitle: 'Descubra passeios exclusivos e experiências únicas em Punta Cana' },
-            transfers: { title: 'Transfer Privado em Punta Cana', subtitle: 'Conforto, segurança e tranquilidade para sua chegada e saída' }
+            passeios: { title: 'Nosso Cat\u00e1logo de Experi\u00eancias', subtitle: 'Descubra passeios exclusivos e experi\u00eancias \u00fanicas em Punta Cana' },
+            transfers: { title: 'Transfer Privado em Punta Cana', subtitle: 'Conforto, seguran\u00e7a e tranquilidade para sua chegada e sa\u00edda' }
         };
         const texts = heroTexts[btn.dataset.tab];
         if (texts) {
@@ -294,4 +322,56 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         }
     });
 });
+
+// Modal
+function openModal(idx) {
+    var trip = CATALOG_TRIPS[idx];
+    if (!trip) return;
+    var overlay = document.getElementById('modalOverlay');
+    document.getElementById('modalImage').src = trip.featured_image;
+    document.getElementById('modalImage').alt = trip.title;
+
+    var includesHtml = '';
+    if (trip.includes && trip.includes.length > 0) {
+        includesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2" width="18" height="18"><polyline points="20 6 9 17 4 12"/></svg> O que Inclui</div><ul class="modal-list includes">';
+        trip.includes.forEach(function(item) {
+            includesHtml += '<li><svg viewBox="0 0 24 24" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>' + item + '</li>';
+        });
+        includesHtml += '</ul>';
+    }
+
+    var excludesHtml = '';
+    if (trip.excludes && trip.excludes.length > 0) {
+        excludesHtml = '<div class="modal-section-title"><svg viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" width="18" height="18"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> O que N\u00e3o Inclui</div><ul class="modal-list excludes">';
+        trip.excludes.forEach(function(item) {
+            excludesHtml += '<li><svg viewBox="0 0 24 24" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' + item + '</li>';
+        });
+        excludesHtml += '</ul>';
+    }
+
+    document.getElementById('modalBody').innerHTML =
+        '<h2 class="modal-title">' + trip.title + '</h2>' +
+        '<div class="modal-rating"><svg viewBox="0 0 24 24" width="16" height="16" fill="#E4B505"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> <strong>' + trip.rating + '</strong></div>' +
+        '<p class="modal-desc">' + (trip.short_description || trip.description) + '</p>' +
+        '<div class="modal-info-grid">' +
+            '<div class="modal-info-item"><div class="modal-info-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="modal-info-label">Dura\u00e7\u00e3o</div><div class="modal-info-value">' + trip.duration + '</div></div></div>' +
+            '<div class="modal-info-item"><div class="modal-info-icon"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><div class="modal-info-label">Local</div><div class="modal-info-value">Punta Cana</div></div></div>' +
+        '</div>' +
+        includesHtml + excludesHtml;
+
+    var priceText = trip.min_price > 0 ? 'US$' + Math.round(trip.min_price) : 'Consultar';
+    document.getElementById('modalFooter').innerHTML =
+        '<div class="modal-footer-price"><span class="modal-footer-label">Desde</span><span class="modal-footer-amount">' + priceText + '</span></div>' +
+        '<a href="/passeios/' + trip.slug + '" class="btn-add">Ver Passeio</a>';
+
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(event) {
+    if (event && event.target !== event.currentTarget) return;
+    document.getElementById('modalOverlay').classList.remove('active');
+    document.body.style.overflow = '';
+}
 </script>
+
