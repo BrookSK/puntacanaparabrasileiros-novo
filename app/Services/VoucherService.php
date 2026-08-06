@@ -52,7 +52,7 @@ class VoucherService
             'logo' => App::getInstance()->setting('voucher_logo', ''),
             'footer_text' => App::getInstance()->setting('voucher_footer_text', ''),
             'instructions' => App::getInstance()->setting('voucher_instructions', ''),
-            'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode(rtrim(App::getInstance()->setting('site_url', ''), '/') . '/voucher/' . $reference . '/confirmar'),
+            'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode(rtrim(App::getInstance()->setting('site_url', 'https://puntacananovo.lrvweb.com.br'), '/') . '/voucher/' . $reference . '/confirmar'),
         ]);
 
         // Salvar arquivo
@@ -115,7 +115,7 @@ class VoucherService
             'reference' => $reference,
             'logo' => App::getInstance()->setting('voucher_logo', ''),
             'footer_text' => App::getInstance()->setting('voucher_footer_text', ''),
-            'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode(rtrim(App::getInstance()->setting('site_url', ''), '/') . '/voucher/' . $reference . '/confirmar'),
+            'qr_url' => 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode(rtrim(App::getInstance()->setting('site_url', 'https://puntacananovo.lrvweb.com.br'), '/') . '/voucher/' . $reference . '/confirmar'),
         ]);
 
         $safeRoute = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower(($transfer['origin_title'] ?? '') . '-' . ($transfer['destination_title'] ?? '')));
