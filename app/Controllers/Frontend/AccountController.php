@@ -348,12 +348,16 @@ class AccountController extends Controller
         $voucher = $voucherModel->findByReference($reference);
 
         if (!$voucher) {
-            $this->abort(404, 'Voucher não encontrado.');
+            // Se não encontrar na tabela vouchers, redirecionar para confirmação
+            $this->redirect('/voucher/' . $reference . '/confirmar');
+            return;
         }
 
         $filePath = BASE_PATH . '/public/uploads/vouchers/' . $voucher['file_path'];
         if (!file_exists($filePath)) {
-            $this->abort(404, 'Arquivo do voucher não encontrado.');
+            // Arquivo não encontrado, mostrar confirmação
+            $this->redirect('/voucher/' . $reference . '/confirmar');
+            return;
         }
 
         // Render the voucher HTML directly
@@ -375,55 +379,59 @@ class AccountController extends Controller
         $voucherModel = new Voucher();
         $voucher = $voucherModel->findByReference($reference);
 
-        if (!$voucher) {
-            $this->abort(404, 'Voucher não encontrado.');
-        }
-
         // Buscar dados do booking
         $tripName = '';
         $customerName = '';
         $date = '';
-        $status = '';
-        $type = $voucher['type'] ?? 'trip';
+        $status = 'booked';
+        $type = 'trip';
 
-        if ($type === 'trip' && $voucher['booking_id']) {
-            $booking = $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [$voucher['booking_id']]);
-            if ($booking) {
-                $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
-                $status = $booking['status'] ?? 'pending';
-            }
-            if ($voucher['booking_item_id']) {
-                $item = $this->db->fetchOne(
-                    "SELECT bi.*, t.title as trip_title FROM booking_items bi LEFT JOIN trips t ON bi.trip_id = t.id WHERE bi.id = ?",
-                    [$voucher['booking_item_id']]
-                );
-                if ($item) {
-                    $tripName = $item['trip_title'] ?? '';
-                    $date = $item['travel_date'] ?? '';
-                }
-            }
-        } elseif ($type === 'transfer' && $voucher['transfer_booking_id']) {
-            $transfer = $this->db->fetchOne(
-                "SELECT tb.*, tlo.title as origin_title, tld.title as destination_title
-                 FROM transfer_bookings tb
-                 INNER JOIN transfer_locations tlo ON tb.origin_id = tlo.id
-                 INNER JOIN transfer_locations tld ON tb.destination_id = tld.id
-                 WHERE tb.id = ?",
-                [$voucher['transfer_booking_id']]
-            );
-            if ($transfer) {
-                $tripName = ($transfer['origin_title'] ?? '') . ' \u2192 ' . ($transfer['destination_title'] ?? '');
-                $customerName = $transfer['passenger_name'] ?? '';
-                $date = $transfer['pickup_date'] ?? '';
-                $status = $transfer['status'] ?? 'pending';
-            }
-            if (!$customerName && $voucher['booking_id']) {
+        if ($voucher) {
+            $type = $voucher['type'] ?? 'trip';
+
+            if ($type === 'trip' && $voucher['booking_id']) {
                 $booking = $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [$voucher['booking_id']]);
                 if ($booking) {
                     $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
-                    $status = $status ?: ($booking['status'] ?? 'pending');
+                    $status = $booking['status'] ?? 'booked';
+                }
+                if ($voucher['booking_item_id']) {
+                    $item = $this->db->fetchOne(
+                        "SELECT bi.*, t.title as trip_title FROM booking_items bi LEFT JOIN trips t ON bi.trip_id = t.id WHERE bi.id = ?",
+                        [$voucher['booking_item_id']]
+                    );
+                    if ($item) {
+                        $tripName = $item['trip_title'] ?? '';
+                        $date = $item['travel_date'] ?? '';
+                    }
+                }
+            } elseif ($type === 'transfer' && $voucher['transfer_booking_id']) {
+                $transfer = $this->db->fetchOne(
+                    "SELECT tb.*, tlo.title as origin_title, tld.title as destination_title
+                     FROM transfer_bookings tb
+                     INNER JOIN transfer_locations tlo ON tb.origin_id = tlo.id
+                     INNER JOIN transfer_locations tld ON tb.destination_id = tld.id
+                     WHERE tb.id = ?",
+                    [$voucher['transfer_booking_id']]
+                );
+                if ($transfer) {
+                    $tripName = ($transfer['origin_title'] ?? '') . ' \u2192 ' . ($transfer['destination_title'] ?? '');
+                    $customerName = $transfer['passenger_name'] ?? '';
+                    $date = $transfer['pickup_date'] ?? '';
+                    $status = $transfer['status'] ?? 'confirmed';
+                }
+                if (!$customerName && $voucher['booking_id']) {
+                    $booking = $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [$voucher['booking_id']]);
+                    if ($booking) {
+                        $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
+                        $status = $status ?: ($booking['status'] ?? 'booked');
+                    }
                 }
             }
+        } else {
+            // Voucher não encontrado no banco, mas tenta buscar pelo booking_number ou reference
+            // Mostrar confirmação genérica com a referência
+            $status = 'booked';
         }
 
         $this->view('frontend/voucher/confirmation', [

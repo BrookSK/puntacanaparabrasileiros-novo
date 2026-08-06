@@ -187,6 +187,7 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/vouchers/{id}/visualizar', [AdminVouchersController::class, 'show'], [], 'admin.vouchers.view');
     $router->get('/vouchers/{id}/download', [AdminVouchersController::class, 'download'], [], 'admin.vouchers.download');
     $router->post('/vouchers/{id}/enviar', [AdminVouchersController::class, 'send'], [CsrfMiddleware::class], 'admin.vouchers.send');
+    $router->get('/vouchers/regenerar-qr', [AdminVouchersController::class, 'regenerateQrCodes'], [], 'admin.vouchers.regenerate_qr');
 
     // Afiliados
     $router->get('/afiliados', [AdminAffiliatesController::class, 'index'], [], 'admin.affiliates.index');

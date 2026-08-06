@@ -108,4 +108,43 @@ class VouchersController extends Controller
 
         $this->redirect('/admin/vouchers');
     }
+
+    /**
+     * Regenera o QR code de todos os vouchers existentes para apontar para /confirmar.
+     */
+    public function regenerateQrCodes(Request $request, Response $response): void
+    {
+        $vouchersPath = BASE_PATH . '/public/uploads/vouchers/';
+        $siteUrl = rtrim($this->setting('site_url', 'https://puntacananovo.lrvweb.com.br'), '/');
+        $vouchers = $this->db->fetchAll("SELECT id, reference_code, file_path FROM vouchers");
+        $count = 0;
+
+        foreach ($vouchers as $v) {
+            $filePath = $vouchersPath . $v['file_path'];
+            if (!file_exists($filePath)) continue;
+
+            $html = file_get_contents($filePath);
+            $confirmUrl = $siteUrl . '/voucher/' . $v['reference_code'] . '/confirmar';
+            $newQrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=' . urlencode($confirmUrl);
+
+            // Substituir o QR antigo pelo novo
+            $html = preg_replace(
+                '/(<img[^>]*class="[^"]*"[^>]*src=")[^"]*qrserver\.com[^"]*("[^>]*>)/i',
+                '${1}' . htmlspecialchars($newQrUrl) . '${2}',
+                $html
+            );
+            // Tentar também o padrão sem class
+            $html = preg_replace(
+                '/(src=")https:\/\/api\.qrserver\.com\/v1\/create-qr-code\/[^"]*(")/i',
+                '${1}' . htmlspecialchars($newQrUrl) . '${2}',
+                $html
+            );
+
+            file_put_contents($filePath, $html);
+            $count++;
+        }
+
+        $this->flash('success', $count . ' vouchers atualizados com novo QR code.');
+        $this->redirect('/admin/vouchers');
+    }
 }
