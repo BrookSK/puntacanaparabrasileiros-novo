@@ -316,7 +316,7 @@
                             echo money($basePrice);
                             ?>
                         </span>
-                        <span class="price-per">/ Adulto: 18-85</span>
+                        <span class="price-per">/ Adulto: 12-85</span>
                     </div>
                     <a href="#booking-section" class="btn-verificar">Verificar Disponibilidade</a>
                     <?php if (current_user()): ?>
@@ -375,7 +375,7 @@
 
                 <!-- Related Trips -->
                 <div class="trip-related-card">
-                    <h4>Related trips you might interested in</h4>
+                    <h4>Passeios relacionados que podem te interessar</h4>
                     <?php foreach ($relatedTrips as $related): ?>
                     <a href="/passeios/<?= e($related['slug']) ?>" class="related-trip-item">
                         <div class="related-trip-img">
@@ -399,7 +399,7 @@
 
                 <!-- Featured Trips -->
                 <div class="trip-related-card">
-                    <h4>Featured Trips</h4>
+                    <h4>Passeios em Destaque</h4>
                     <?php foreach (array_slice($relatedTrips, 0, 3) as $ft): ?>
                     <a href="/passeios/<?= e($ft['slug']) ?>" class="related-trip-item related-trip-featured">
                         <div class="related-trip-img">
