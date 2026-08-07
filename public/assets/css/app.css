@@ -2578,64 +2578,126 @@ img { max-width: 100%; height: auto; }
    ============================================================ */
 /* Usa as mesmas classes .table, .badge, .btn da página de reservas */
 
-/* Modal genérico */
+/* Modal genérico — Popup de cancelamento */
 .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 9999;
-    display: flex;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: rgba(28, 32, 17, 0.65);
+    z-index: 99999 !important;
+    display: flex !important;
     align-items: center;
     justify-content: center;
     padding: 20px;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+.modal-overlay.modal-hidden {
+    display: none !important;
 }
 .modal-box {
     background: var(--white);
-    border-radius: 12px;
+    border-radius: 16px;
     width: 100%;
-    max-width: 500px;
-    box-shadow: var(--shadow-lg);
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
     overflow: hidden;
+    animation: modalSlideIn 0.25s ease-out;
+    position: relative;
+}
+@keyframes modalSlideIn {
+    from { opacity: 0; transform: translateY(-20px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .modal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 20px 24px;
-    border-bottom: 1px solid #f0f0f0;
+    padding: 22px 28px;
+    background: linear-gradient(135deg, #1B6F00 0%, #2a8f10 100%);
+    color: white;
 }
 .modal-header h3 {
     font-size: 18px;
     font-weight: 700;
-    color: var(--dark);
+    color: white;
     margin: 0;
 }
 .modal-close {
-    background: none;
+    background: rgba(255,255,255,0.2);
     border: none;
-    font-size: 24px;
-    color: var(--gray);
+    font-size: 20px;
+    color: white;
     cursor: pointer;
     line-height: 1;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .2s;
 }
 .modal-close:hover {
-    color: var(--dark);
+    background: rgba(255,255,255,0.35);
 }
 .modal-body {
-    padding: 20px 24px;
+    padding: 24px 28px;
 }
 .modal-subtitle {
     font-size: 14px;
     color: var(--gray);
-    margin-bottom: 16px;
+    margin-bottom: 18px;
+}
+.modal-subtitle strong {
+    color: var(--dark);
+}
+.modal-body .form-group label {
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 8px;
+}
+.modal-body textarea.form-control {
+    border: 2px solid #e8e8e8;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+    transition: border-color .2s;
+}
+.modal-body textarea.form-control:focus {
+    border-color: var(--text-green);
+    box-shadow: 0 0 0 3px rgba(27, 111, 0, 0.1);
 }
 .modal-footer {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 12px;
-    padding: 16px 24px;
+    padding: 18px 28px;
+    background: #f9fafb;
     border-top: 1px solid #f0f0f0;
+}
+.modal-footer .btn-danger {
+    background: var(--danger);
+    color: white;
+    font-weight: 600;
+    padding: 10px 24px;
+    border-radius: var(--radius);
+}
+.modal-footer .btn-danger:hover {
+    background: #c0392b;
+}
+.modal-footer .btn-outline {
+    border: 2px solid #ddd;
+    color: var(--gray);
+}
+.modal-footer .btn-outline:hover {
+    border-color: var(--dark);
+    color: var(--dark);
 }
 
 /* ============================================================

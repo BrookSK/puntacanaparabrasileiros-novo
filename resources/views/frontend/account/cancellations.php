@@ -55,7 +55,7 @@
 </div>
 
 <!-- Modal de Solicitar Cancelamento -->
-<div id="cancelModal" class="modal-overlay" style="display:none">
+<div id="cancelModal" class="modal-overlay modal-hidden">
     <div class="modal-box">
         <div class="modal-header">
             <h3>Solicitar Cancelamento</h3>
@@ -70,7 +70,7 @@
                     <label for="cancellation_reason">Motivo do cancelamento <span style="color:#e74c3c">*</span></label>
                     <textarea name="cancellation_reason" id="cancellation_reason" class="form-control" rows="4" required placeholder="Informe o motivo pelo qual deseja cancelar esta reserva..."></textarea>
                 </div>
-                <p style="font-size:12px;color:#636e72;margin-top:8px;">Após o envio, sua solicitação será analisada pela equipe. Você receberá uma resposta por e-mail.</p>
+                <p style="font-size:12px;color:#636e72;margin-top:12px;">Após o envio, sua solicitação será analisada pela equipe. Você receberá uma resposta por e-mail.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeCancelModal()">Voltar</button>
@@ -81,7 +81,7 @@
 </div>
 
 <!-- Modal de Detalhes do Cancelamento -->
-<div id="detailModal" class="modal-overlay" style="display:none">
+<div id="detailModal" class="modal-overlay modal-hidden">
     <div class="modal-box">
         <div class="modal-header">
             <h3>Detalhes do Cancelamento</h3>
@@ -102,10 +102,12 @@ function openCancelModal(bookingId, bookingNumber) {
     document.getElementById('cancelBookingId').value = bookingId;
     document.getElementById('cancelBookingNumber').textContent = bookingNumber;
     document.getElementById('cancellation_reason').value = '';
-    document.getElementById('cancelModal').style.display = 'flex';
+    document.getElementById('cancelModal').classList.remove('modal-hidden');
+    document.body.style.overflow = 'hidden';
 }
 function closeCancelModal() {
-    document.getElementById('cancelModal').style.display = 'none';
+    document.getElementById('cancelModal').classList.add('modal-hidden');
+    document.body.style.overflow = '';
 }
 document.getElementById('cancelModal').addEventListener('click', function(e) {
     if (e.target === this) closeCancelModal();
@@ -121,35 +123,33 @@ function openDetailModal(el) {
 
     var html = '';
 
-    // Status
     var statusLabel = {pending: 'Aguardando Análise', approved: 'Aprovado', rejected: 'Não Autorizado'};
     var statusColor = {pending: '#d97706', approved: '#1B6F00', rejected: '#dc2626'};
     html += '<div style="margin-bottom:16px;"><strong>Status:</strong> <span style="color:' + statusColor[status] + ';font-weight:600;">' + statusLabel[status] + '</span></div>';
 
-    // Motivo do cliente
-    html += '<div style="margin-bottom:16px;"><strong>Seu motivo:</strong><div style="margin-top:6px;padding:12px;background:#f8f9fa;border-radius:8px;font-size:13px;white-space:pre-line;">' + escapeHtml(reason) + '</div></div>';
+    html += '<div style="margin-bottom:16px;"><strong>Seu motivo:</strong><div style="margin-top:6px;padding:12px 16px;background:#f8f9fa;border-radius:8px;font-size:13px;white-space:pre-line;line-height:1.5;">' + escapeHtml(reason) + '</div></div>';
 
-    // Resposta do admin
     if (status === 'approved' && response) {
-        html += '<div style="margin-bottom:16px;"><strong>Resposta da equipe:</strong><div style="margin-top:6px;padding:12px;background:#f0fdf4;border-left:4px solid #1B6F00;border-radius:6px;font-size:13px;white-space:pre-line;">' + escapeHtml(response) + '</div></div>';
+        html += '<div style="margin-bottom:16px;"><strong>Resposta da equipe:</strong><div style="margin-top:6px;padding:12px 16px;background:#f0fdf4;border-left:4px solid #1B6F00;border-radius:6px;font-size:13px;white-space:pre-line;line-height:1.5;">' + escapeHtml(response) + '</div></div>';
     } else if (status === 'rejected' && response) {
-        html += '<div style="margin-bottom:16px;"><strong>Motivo da recusa:</strong><div style="margin-top:6px;padding:12px;background:#fef2f2;border-left:4px solid #dc2626;border-radius:6px;font-size:13px;white-space:pre-line;">' + escapeHtml(response) + '</div></div>';
+        html += '<div style="margin-bottom:16px;"><strong>Motivo da recusa:</strong><div style="margin-top:6px;padding:12px 16px;background:#fef2f2;border-left:4px solid #dc2626;border-radius:6px;font-size:13px;white-space:pre-line;line-height:1.5;">' + escapeHtml(response) + '</div></div>';
     } else if (status === 'pending') {
-        html += '<div style="padding:12px;background:#fffbeb;border-radius:8px;font-size:13px;color:#92400e;">Sua solicitação está sendo analisada. Você receberá uma resposta por e-mail.</div>';
+        html += '<div style="padding:12px 16px;background:#fffbeb;border-radius:8px;font-size:13px;color:#92400e;line-height:1.5;">Sua solicitação está sendo analisada pela equipe. Você receberá uma resposta por e-mail.</div>';
     }
 
-    // Reembolso
     if (status === 'approved' && refund === 'refunded') {
-        html += '<div style="margin-top:16px;padding:12px;background:#eff6ff;border-radius:8px;font-size:13px;color:#1e40af;"><strong>Reembolso processado:</strong> $' + refundAmount + '</div>';
+        html += '<div style="margin-top:16px;padding:12px 16px;background:#eff6ff;border-radius:8px;font-size:13px;color:#1e40af;"><strong>Reembolso processado:</strong> $' + refundAmount + '</div>';
     } else if (status === 'approved' && refund === 'none') {
-        html += '<div style="margin-top:16px;padding:12px;background:#fffbeb;border-radius:8px;font-size:13px;color:#92400e;">Cancelamento aprovado. Reembolso em processamento.</div>';
+        html += '<div style="margin-top:16px;padding:12px 16px;background:#fffbeb;border-radius:8px;font-size:13px;color:#92400e;">Cancelamento aprovado. Reembolso em processamento.</div>';
     }
 
     document.getElementById('detailContent').innerHTML = html;
-    document.getElementById('detailModal').style.display = 'flex';
+    document.getElementById('detailModal').classList.remove('modal-hidden');
+    document.body.style.overflow = 'hidden';
 }
 function closeDetailModal() {
-    document.getElementById('detailModal').style.display = 'none';
+    document.getElementById('detailModal').classList.add('modal-hidden');
+    document.body.style.overflow = '';
 }
 document.getElementById('detailModal').addEventListener('click', function(e) {
     if (e.target === this) closeDetailModal();
@@ -160,4 +160,12 @@ function escapeHtml(str) {
     div.appendChild(document.createTextNode(str));
     return div.innerHTML;
 }
+
+// Fechar modal com ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeCancelModal();
+        closeDetailModal();
+    }
+});
 </script>
