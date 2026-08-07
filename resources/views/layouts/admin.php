@@ -38,6 +38,9 @@
                 <a href="/admin/reservas" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/reservas') ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></span> Reservas
                 </a>
+                <a href="/admin/cancelamentos" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/cancelamentos') ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span> Cancelamentos
+                </a>
                 <a href="/admin/vouchers" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/vouchers') ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 010-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 000-5C13 2 12 7 12 7z"/></svg></span> Vouchers
                 </a>

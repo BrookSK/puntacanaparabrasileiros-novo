@@ -21,6 +21,7 @@ use App\Controllers\Admin\AffiliatesController as AdminAffiliatesController;
 use App\Controllers\Admin\UsersController as AdminUsersController;
 use App\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Controllers\Admin\NewsletterController as AdminNewsletterController;
+use App\Controllers\Admin\CancellationsController as AdminCancellationsController;
 use App\Controllers\Api\TransferSearchController;
 use App\Controllers\Api\PricingController;
 use App\Controllers\Api\CartController as ApiCartController;
@@ -217,4 +218,11 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/newsletter/exportar', [AdminNewsletterController::class, 'export'], [], 'admin.newsletter.export');
     $router->get('/newsletter/campanhas', [AdminNewsletterController::class, 'createCampaign'], [], 'admin.newsletter.campaigns');
     $router->post('/newsletter/campanhas/enviar', [AdminNewsletterController::class, 'sendCampaign'], [CsrfMiddleware::class], 'admin.newsletter.send');
+
+    // Cancelamentos
+    $router->get('/cancelamentos', [AdminCancellationsController::class, 'index'], [], 'admin.cancellations.index');
+    $router->get('/cancelamentos/{id}', [AdminCancellationsController::class, 'show'], [], 'admin.cancellations.show');
+    $router->post('/cancelamentos/{id}/aprovar', [AdminCancellationsController::class, 'approve'], [CsrfMiddleware::class], 'admin.cancellations.approve');
+    $router->post('/cancelamentos/{id}/rejeitar', [AdminCancellationsController::class, 'reject'], [CsrfMiddleware::class], 'admin.cancellations.reject');
+    $router->post('/cancelamentos/{id}/reembolsar', [AdminCancellationsController::class, 'refund'], [CsrfMiddleware::class], 'admin.cancellations.refund');
 });

@@ -111,7 +111,6 @@ class AccountController extends Controller
     public function cancellations(Request $request, Response $response): void
     {
         $user = $this->currentUser();
-        $bookingModel = new Booking();
         $page = max(1, (int) $request->query('page', '1'));
         $perPage = 10;
 
@@ -128,12 +127,15 @@ class AccountController extends Controller
         $totalPages = max(1, (int) ceil($totalCount / $perPage));
         $offset = ($page - 1) * $perPage;
 
-        // Buscar reservas paginadas do usuário com seus itens
+        // Buscar reservas paginadas com status de cancelamento
         $bookings = $this->db->fetchAll(
-            "SELECT b.*, bi.id as item_id, bi.trip_id, bi.trip_date, t.title as trip_title
+            "SELECT b.*, bi.id as item_id, bi.trip_id, bi.trip_date, t.title as trip_title,
+                    cr.id as cancellation_request_id, cr.status as cancellation_status,
+                    cr.admin_response, cr.refund_status, cr.refund_amount, cr.reason as cancellation_reason
              FROM bookings b
              INNER JOIN booking_items bi ON b.id = bi.booking_id
              INNER JOIN trips t ON bi.trip_id = t.id
+             LEFT JOIN cancellation_requests cr ON cr.booking_id = b.id
              WHERE b.user_id = ?
              ORDER BY b.created_at DESC
              LIMIT $perPage OFFSET $offset",
@@ -152,6 +154,14 @@ class AccountController extends Controller
     {
         $user = $this->currentUser();
         $bookingId = (int) $request->input('booking_id');
+        $reason = trim($request->input('cancellation_reason', ''));
+
+        // Validar motivo
+        if (empty($reason)) {
+            $this->flash('error', 'Por favor, informe o motivo do cancelamento.');
+            $this->redirect('/minha-conta/cancelamentos');
+            return;
+        }
 
         // Verificar se o booking pertence ao usuário
         $bookingModel = new Booking();
@@ -170,8 +180,26 @@ class AccountController extends Controller
             return;
         }
 
-        // Atualizar status para "cancellation_requested"
-        $bookingModel->updateStatus($bookingId, 'cancelled');
+        // Verificar se já existe uma solicitação pendente
+        $existing = $this->db->fetchOne(
+            "SELECT id FROM cancellation_requests WHERE booking_id = ? AND status = 'pending'",
+            [$bookingId]
+        );
+        if ($existing) {
+            $this->flash('error', 'Já existe uma solicitação de cancelamento pendente para esta reserva.');
+            $this->redirect('/minha-conta/cancelamentos');
+            return;
+        }
+
+        // Criar solicitação de cancelamento
+        $cancellationModel = new \App\Models\CancellationRequest();
+        $cancellationModel->create([
+            'booking_id' => $bookingId,
+            'user_id' => (int) $user['id'],
+            'reason' => $reason,
+            'status' => 'pending',
+            'refund_status' => 'none',
+        ]);
 
         // Log
         $this->db->insert('activity_log', [
@@ -182,18 +210,39 @@ class AccountController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
-        // Notificar admin
+        // Notificar admin por email
         $emailService = new \App\Services\EmailService();
         $adminEmail = $this->setting('admin_email', '');
         if ($adminEmail) {
             $emailService->send(
                 $adminEmail, 'Admin',
-                'Cancelamento Solicitado: ' . $booking['booking_number'],
-                '<p>O cliente <strong>' . e($user['first_name'] . ' ' . $user['last_name']) . '</strong> solicitou o cancelamento da reserva <strong>' . e($booking['booking_number']) . '</strong>.</p>'
+                'Nova Solicitação de Cancelamento: ' . $booking['booking_number'],
+                '<h2>Solicitação de Cancelamento</h2>'
+                . '<p>O cliente <strong>' . e($user['first_name'] . ' ' . $user['last_name']) . '</strong> solicitou o cancelamento da reserva <strong>' . e($booking['booking_number']) . '</strong>.</p>'
+                . '<p><strong>Motivo:</strong></p>'
+                . '<blockquote style="border-left:4px solid #e74c3c;padding:12px;background:#fef2f2;margin:10px 0;">' . nl2br(e($reason)) . '</blockquote>'
+                . '<p><a href="' . url('/admin/cancelamentos') . '" style="display:inline-block;padding:10px 24px;background:#1B6F00;color:white;border-radius:8px;text-decoration:none;">Ver no Painel</a></p>'
             );
         }
 
-        $this->flash('success', 'Cancelamento solicitado com sucesso. Você receberá uma confirmação por email.');
+        // Notificar cliente por email
+        $clientEmail = $booking['billing_email'] ?? $user['email'] ?? '';
+        $clientName = $user['first_name'] ?? 'Cliente';
+        if ($clientEmail) {
+            $emailService->send(
+                $clientEmail, $clientName,
+                'Solicitação de Cancelamento Recebida - ' . $booking['booking_number'],
+                '<h2>Solicitação de Cancelamento Recebida</h2>'
+                . '<p>Olá, <strong>' . e($clientName) . '</strong>!</p>'
+                . '<p>Recebemos sua solicitação de cancelamento para a reserva <strong>' . e($booking['booking_number']) . '</strong>.</p>'
+                . '<p><strong>Motivo informado:</strong></p>'
+                . '<blockquote style="border-left:4px solid #3772C0;padding:12px;background:#eff6ff;margin:10px 0;">' . nl2br(e($reason)) . '</blockquote>'
+                . '<p>Nossa equipe analisará sua solicitação e você receberá uma resposta em breve.</p>'
+                . '<p style="color:#636e72;font-size:13px;">Equipe Punta Cana para Brasileiros</p>'
+            );
+        }
+
+        $this->flash('success', 'Solicitação de cancelamento enviada com sucesso! Você receberá uma resposta por e-mail.');
         $this->redirect('/minha-conta/cancelamentos');
     }
 

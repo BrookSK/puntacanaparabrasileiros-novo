@@ -2578,6 +2578,66 @@ img { max-width: 100%; height: auto; }
    ============================================================ */
 /* Usa as mesmas classes .table, .badge, .btn da página de reservas */
 
+/* Modal genérico */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.modal-box {
+    background: var(--white);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 500px;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.modal-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0;
+}
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--gray);
+    cursor: pointer;
+    line-height: 1;
+}
+.modal-close:hover {
+    color: var(--dark);
+}
+.modal-body {
+    padding: 20px 24px;
+}
+.modal-subtitle {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 16px;
+}
+.modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    padding: 16px 24px;
+    border-top: 1px solid #f0f0f0;
+}
+
 /* ============================================================
    WISHLIST — Layout conforme Figma
    ============================================================ */
