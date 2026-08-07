@@ -125,6 +125,11 @@ class CancellationsController extends Controller
         $booking = $this->bookingModel->find((int) $cancellation['booking_id']);
         $clientEmail = $booking['billing_email'] ?? '';
         $clientName = ($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '');
+        $bookingItems = $this->db->fetchAll(
+            "SELECT t.title FROM booking_items bi INNER JOIN trips t ON bi.trip_id = t.id WHERE bi.booking_id = ?",
+            [(int) $cancellation['booking_id']]
+        );
+        $serviceName = implode(', ', array_column($bookingItems, 'title')) ?: '';
 
         if ($clientEmail) {
             $emailService = new EmailService();
@@ -137,6 +142,7 @@ class CancellationsController extends Controller
                     'clientName' => trim($clientName),
                     'emailMessage' => 'Sua solicitação de cancelamento para a reserva abaixo foi <strong style="color:#1B6F00">aprovada</strong>.',
                     'bookingNumber' => $booking['booking_number'] ?? '',
+                    'serviceName' => $serviceName,
                     'bookingTotal' => $booking['total'] ?? 0,
                     'statusLabel' => 'Aprovado',
                     'statusColor' => '#1B6F00',
@@ -189,6 +195,11 @@ class CancellationsController extends Controller
         $booking = $this->bookingModel->find((int) $cancellation['booking_id']);
         $clientEmail = $booking['billing_email'] ?? '';
         $clientName = ($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '');
+        $bookingItems = $this->db->fetchAll(
+            "SELECT t.title FROM booking_items bi INNER JOIN trips t ON bi.trip_id = t.id WHERE bi.booking_id = ?",
+            [(int) $cancellation['booking_id']]
+        );
+        $serviceName = implode(', ', array_column($bookingItems, 'title')) ?: '';
 
         if ($clientEmail) {
             $emailService = new EmailService();
@@ -201,6 +212,7 @@ class CancellationsController extends Controller
                     'clientName' => trim($clientName),
                     'emailMessage' => 'Infelizmente, sua solicitação de cancelamento para a reserva abaixo <strong style="color:#dc2626">não foi autorizada</strong>.',
                     'bookingNumber' => $booking['booking_number'] ?? '',
+                    'serviceName' => $serviceName,
                     'bookingTotal' => $booking['total'] ?? 0,
                     'statusLabel' => 'Não Autorizado',
                     'statusColor' => '#dc2626',
@@ -256,6 +268,11 @@ class CancellationsController extends Controller
         $booking = $this->bookingModel->find((int) $cancellation['booking_id']);
         $clientEmail = $booking['billing_email'] ?? '';
         $clientName = ($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '');
+        $bookingItems = $this->db->fetchAll(
+            "SELECT t.title FROM booking_items bi INNER JOIN trips t ON bi.trip_id = t.id WHERE bi.booking_id = ?",
+            [(int) $cancellation['booking_id']]
+        );
+        $serviceName = implode(', ', array_column($bookingItems, 'title')) ?: '';
 
         if ($clientEmail) {
             $emailService = new EmailService();
@@ -268,6 +285,7 @@ class CancellationsController extends Controller
                     'clientName' => trim($clientName),
                     'emailMessage' => 'O reembolso referente à sua reserva foi processado com sucesso.',
                     'bookingNumber' => $booking['booking_number'] ?? '',
+                    'serviceName' => $serviceName,
                     'bookingTotal' => $booking['total'] ?? 0,
                     'refundAmount' => $refundAmount,
                     'statusLabel' => 'Reembolsado',

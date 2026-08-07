@@ -5,7 +5,7 @@
 
     <!-- Header -->
     <div style="background:linear-gradient(135deg,#1B6F00 0%,#2a8f10 100%);padding:32px 30px;text-align:center;">
-        <img src="<?= url('/assets/images/logo-white.png') ?>" alt="Punta Cana para Brasileiros" style="height:40px;margin-bottom:16px;" onerror="this.style.display='none'">
+        <img src="<?= url('/assets/images/layout/PUNTA-CANA-1.png') ?>" alt="Punta Cana para Brasileiros" style="height:48px;margin-bottom:14px;display:inline-block;">
         <h1 style="margin:0;font-size:22px;color:#ffffff;font-weight:700;"><?= e($emailTitle ?? 'Cancelamento') ?></h1>
     </div>
 
@@ -26,6 +26,12 @@
                     <td style="padding:8px 0;font-size:13px;color:#64748b;width:140px;">Nº da Reserva</td>
                     <td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:600;"><?= e($bookingNumber ?? '') ?></td>
                 </tr>
+                <?php if (!empty($serviceName)): ?>
+                <tr>
+                    <td style="padding:8px 0;font-size:13px;color:#64748b;border-top:1px solid #f0f0f0;">Passeio</td>
+                    <td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:600;border-top:1px solid #f0f0f0;"><?= e($serviceName) ?></td>
+                </tr>
+                <?php endif; ?>
                 <?php if (!empty($bookingTotal)): ?>
                 <tr>
                     <td style="padding:8px 0;font-size:13px;color:#64748b;border-top:1px solid #f0f0f0;">Valor da Reserva</td>

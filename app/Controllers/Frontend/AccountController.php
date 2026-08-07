@@ -210,6 +210,13 @@ class AccountController extends Controller
             'ip_address' => $request->ip(),
         ]);
 
+        // Buscar nome do(s) passeio(s) da reserva
+        $bookingItems = $this->db->fetchAll(
+            "SELECT t.title FROM booking_items bi INNER JOIN trips t ON bi.trip_id = t.id WHERE bi.booking_id = ?",
+            [$bookingId]
+        );
+        $serviceName = implode(', ', array_column($bookingItems, 'title')) ?: '';
+
         // Notificar admin por email
         $emailService = new \App\Services\EmailService();
         $adminEmail = $this->setting('admin_email', '');
@@ -223,6 +230,7 @@ class AccountController extends Controller
                     'clientName' => 'Admin',
                     'emailMessage' => 'O cliente <strong>' . e($user['first_name'] . ' ' . $user['last_name']) . '</strong> solicitou o cancelamento da reserva abaixo.',
                     'bookingNumber' => $booking['booking_number'],
+                    'serviceName' => $serviceName,
                     'bookingTotal' => $booking['total'] ?? 0,
                     'statusLabel' => 'Aguardando Análise',
                     'statusColor' => '#d97706',
@@ -250,6 +258,7 @@ class AccountController extends Controller
                     'clientName' => $clientName,
                     'emailMessage' => 'Recebemos sua solicitação de cancelamento para a reserva abaixo. Nossa equipe analisará o pedido e você receberá uma resposta em breve.',
                     'bookingNumber' => $booking['booking_number'],
+                    'serviceName' => $serviceName,
                     'bookingTotal' => $booking['total'] ?? 0,
                     'statusLabel' => 'Aguardando Análise',
                     'statusColor' => '#d97706',
