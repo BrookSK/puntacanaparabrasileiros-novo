@@ -15,20 +15,30 @@
                 <td><?= $b['trip_date'] ? format_date($b['trip_date']) : format_date($b['created_at']) ?></td>
                 <td><?= money((float)($b['total'] ?? 0)) ?></td>
                 <td><?= money((float)($b['paid_amount'] ?? 0)) ?></td>
-                <td><span class="badge badge-<?= booking_status_class($b['status']) ?>"><?= booking_status_label($b['status']) ?></span></td>
+                <td>
+                    <?php if (!empty($b['cancellation_request_id']) && $b['cancellation_status'] === 'pending'): ?>
+                    <span class="badge badge-warning">Cancelamento em Análise</span>
+                    <?php elseif (!empty($b['cancellation_request_id']) && $b['cancellation_status'] === 'approved'): ?>
+                    <span class="badge badge-success">Cancelamento Aprovado</span>
+                    <?php elseif (!empty($b['cancellation_request_id']) && $b['cancellation_status'] === 'rejected'): ?>
+                    <span class="badge badge-danger">Cancelamento Negado</span>
+                    <?php else: ?>
+                    <span class="badge badge-<?= booking_status_class($b['status']) ?>"><?= booking_status_label($b['status']) ?></span>
+                    <?php endif; ?>
+                </td>
                 <td>
                     <?php if (in_array($b['status'], ['booked', 'pending', 'partially_paid']) && empty($b['cancellation_request_id'])): ?>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="openCancelModal(<?= (int)$b['id'] ?>, '<?= e($b['booking_number'] ?? '#' . (int)$b['id']) ?>')">Cancelar</button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="openCancelModal(<?= (int)$b['id'] ?>, '<?= e($b['booking_number'] ?? '#' . (int)$b['id']) ?>')">Solicitar Cancelamento</button>
 
                     <?php elseif (!empty($b['cancellation_request_id'])): ?>
                         <?php if ($b['cancellation_status'] === 'pending'): ?>
-                        <span class="badge badge-warning" style="cursor:pointer" onclick="openDetailModal(this)" data-status="pending" data-reason="<?= e($b['cancellation_reason'] ?? '') ?>">Aguardando</span>
+                        <button type="button" class="btn btn-sm btn-outline" disabled style="opacity:.7;cursor:default;">Cancelamento Solicitado</button>
 
                         <?php elseif ($b['cancellation_status'] === 'approved'): ?>
-                        <span class="badge badge-success" style="cursor:pointer" onclick="openDetailModal(this)" data-status="approved" data-reason="<?= e($b['cancellation_reason'] ?? '') ?>" data-response="<?= e($b['admin_response'] ?? '') ?>" data-refund="<?= e($b['refund_status'] ?? 'none') ?>" data-refund-amount="<?= number_format((float)($b['refund_amount'] ?? 0), 2, '.', '') ?>">Aprovado</span>
+                        <span class="badge badge-success" style="cursor:pointer" onclick="openDetailModal(this)" data-status="approved" data-reason="<?= e($b['cancellation_reason'] ?? '') ?>" data-response="<?= e($b['admin_response'] ?? '') ?>" data-refund="<?= e($b['refund_status'] ?? 'none') ?>" data-refund-amount="<?= number_format((float)($b['refund_amount'] ?? 0), 2, '.', '') ?>">Ver Detalhes</span>
 
                         <?php elseif ($b['cancellation_status'] === 'rejected'): ?>
-                        <span class="badge badge-danger" style="cursor:pointer" onclick="openDetailModal(this)" data-status="rejected" data-reason="<?= e($b['cancellation_reason'] ?? '') ?>" data-response="<?= e($b['admin_response'] ?? '') ?>">Negado</span>
+                        <span class="badge badge-danger" style="cursor:pointer" onclick="openDetailModal(this)" data-status="rejected" data-reason="<?= e($b['cancellation_reason'] ?? '') ?>" data-response="<?= e($b['admin_response'] ?? '') ?>">Ver Detalhes</span>
                         <?php endif; ?>
 
                     <?php elseif ($b['status'] === 'cancelled'): ?>
@@ -74,7 +84,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeCancelModal()">Voltar</button>
-                <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
+                <button type="submit" class="btn btn-danger">Solicitar Cancelamento</button>
             </div>
         </form>
     </div>
@@ -84,7 +94,7 @@
 <div id="detailModal" class="modal-overlay modal-hidden">
     <div class="modal-box">
         <div class="modal-header">
-            <h3>Detalhes do Cancelamento</h3>
+            <h3>Detalhes da Solicitação</h3>
             <button type="button" class="modal-close" onclick="closeDetailModal()">&times;</button>
         </div>
         <div class="modal-body">
@@ -123,18 +133,16 @@ function openDetailModal(el) {
 
     var html = '';
 
-    var statusLabel = {pending: 'Aguardando Análise', approved: 'Aprovado', rejected: 'Não Autorizado'};
+    var statusLabel = {pending: 'Cancelamento em Análise', approved: 'Cancelamento Aprovado', rejected: 'Cancelamento Não Autorizado'};
     var statusColor = {pending: '#d97706', approved: '#1B6F00', rejected: '#dc2626'};
     html += '<div style="margin-bottom:16px;"><strong>Status:</strong> <span style="color:' + statusColor[status] + ';font-weight:600;">' + statusLabel[status] + '</span></div>';
 
-    html += '<div style="margin-bottom:16px;"><strong>Seu motivo:</strong><div style="margin-top:6px;padding:12px 16px;background:#f8f9fa;border-radius:8px;font-size:13px;white-space:pre-line;line-height:1.5;">' + escapeHtml(reason) + '</div></div>';
+    html += '<div style="margin-bottom:16px;"><strong>Motivo informado:</strong><div style="margin-top:6px;padding:12px 16px;background:#f8f9fa;border-radius:8px;font-size:13px;white-space:pre-line;line-height:1.5;">' + escapeHtml(reason) + '</div></div>';
 
     if (status === 'approved' && response) {
         html += '<div style="margin-bottom:16px;"><strong>Resposta da equipe:</strong><div style="margin-top:6px;padding:12px 16px;background:#f0fdf4;border-left:4px solid #1B6F00;border-radius:6px;font-size:13px;white-space:pre-line;line-height:1.5;">' + escapeHtml(response) + '</div></div>';
     } else if (status === 'rejected' && response) {
         html += '<div style="margin-bottom:16px;"><strong>Motivo da recusa:</strong><div style="margin-top:6px;padding:12px 16px;background:#fef2f2;border-left:4px solid #dc2626;border-radius:6px;font-size:13px;white-space:pre-line;line-height:1.5;">' + escapeHtml(response) + '</div></div>';
-    } else if (status === 'pending') {
-        html += '<div style="padding:12px 16px;background:#fffbeb;border-radius:8px;font-size:13px;color:#92400e;line-height:1.5;">Sua solicitação está sendo analisada pela equipe. Você receberá uma resposta por e-mail.</div>';
     }
 
     if (status === 'approved' && refund === 'refunded') {
