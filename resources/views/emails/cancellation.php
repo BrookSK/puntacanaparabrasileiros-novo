@@ -4,9 +4,9 @@
 <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
 
     <!-- Header -->
-    <div style="background:#1e293b;padding:28px 30px;text-align:center;">
-        <img src="<?= url('/assets/images/layout/PUNTA-CANA-1.png') ?>" alt="Punta Cana para Brasileiros" style="height:48px;margin-bottom:14px;display:inline-block;">
-        <h1 style="margin:0;font-size:20px;color:#ffffff;font-weight:700;"><?= e($emailTitle ?? 'Cancelamento') ?></h1>
+    <div style="background:#f5f5f5;padding:30px;text-align:center;border-bottom:2px solid #E4B505;">
+        <img src="<?= url('/assets/images/layout/PUNTA-CANA-1.png') ?>" alt="Punta Cana para Brasileiros" style="max-height:60px;margin-bottom:12px;">
+        <h1 style="color:#1C2011;font-size:22px;margin:0;"><?= e($emailTitle ?? 'Cancelamento') ?></h1>
     </div>
 
     <!-- Body -->
