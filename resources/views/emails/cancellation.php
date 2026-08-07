@@ -4,9 +4,9 @@
 <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 4px 20px rgba(0,0,0,0.08);">
 
     <!-- Header -->
-    <div style="background:linear-gradient(135deg,#1B6F00 0%,#2a8f10 100%);padding:32px 30px;text-align:center;">
+    <div style="background:#1e293b;padding:28px 30px;text-align:center;">
         <img src="<?= url('/assets/images/layout/PUNTA-CANA-1.png') ?>" alt="Punta Cana para Brasileiros" style="height:48px;margin-bottom:14px;display:inline-block;">
-        <h1 style="margin:0;font-size:22px;color:#ffffff;font-weight:700;"><?= e($emailTitle ?? 'Cancelamento') ?></h1>
+        <h1 style="margin:0;font-size:20px;color:#ffffff;font-weight:700;"><?= e($emailTitle ?? 'Cancelamento') ?></h1>
     </div>
 
     <!-- Body -->
@@ -22,16 +22,16 @@
         <!-- Info Box -->
         <div style="background:#f8fafb;border:1px solid #e8eeec;border-radius:8px;padding:20px;margin:0 0 24px;">
             <table style="width:100%;border-collapse:collapse;">
-                <tr>
-                    <td style="padding:8px 0;font-size:13px;color:#64748b;width:140px;">Nº da Reserva</td>
-                    <td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:600;"><?= e($bookingNumber ?? '') ?></td>
-                </tr>
                 <?php if (!empty($serviceName)): ?>
                 <tr>
-                    <td style="padding:8px 0;font-size:13px;color:#64748b;border-top:1px solid #f0f0f0;">Passeio</td>
-                    <td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:600;border-top:1px solid #f0f0f0;"><?= e($serviceName) ?></td>
+                    <td style="padding:8px 0;font-size:13px;color:#64748b;width:140px;">Passeio</td>
+                    <td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:600;"><?= e($serviceName) ?></td>
                 </tr>
                 <?php endif; ?>
+                <tr>
+                    <td style="padding:8px 0;font-size:13px;color:#64748b;width:140px;<?= !empty($serviceName) ? 'border-top:1px solid #f0f0f0;' : '' ?>">Nº da Reserva</td>
+                    <td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:600;<?= !empty($serviceName) ? 'border-top:1px solid #f0f0f0;' : '' ?>"><?= e($bookingNumber ?? '') ?></td>
+                </tr>
                 <?php if (!empty($bookingTotal)): ?>
                 <tr>
                     <td style="padding:8px 0;font-size:13px;color:#64748b;border-top:1px solid #f0f0f0;">Valor da Reserva</td>
