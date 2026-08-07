@@ -2572,129 +2572,250 @@ img { max-width: 100%; height: auto; }
 .empty-state-text { text-align: center; color: var(--gray); font-size: 15px; padding: 40px 20px; }
 
 /* ============================================================
-   CANCELAMENTOS — Layout conforme Figma
+   CANCELAMENTOS — Redesign
    ============================================================ */
+
+/* Resumo numérico */
+.cancel-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+.cancel-summary-item {
+    background: var(--white);
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 18px 16px;
+    text-align: center;
+    transition: box-shadow .2s;
+}
+.cancel-summary-item:hover {
+    box-shadow: var(--shadow);
+}
+.cancel-summary-number {
+    display: block;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.2;
+}
+.cancel-summary-label {
+    display: block;
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+.cancel-summary-active .cancel-summary-number { color: var(--text-green); }
+.cancel-summary-cancelled .cancel-summary-number { color: var(--danger); }
+.cancel-summary-refunded .cancel-summary-number { color: #7b2ff7; }
+
+/* Lista de cards */
 .cancellations-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 16px;
 }
-.cancellation-card {
+
+/* Card individual */
+.cancel-card {
     background: var(--white);
     border: 1px solid #eee;
     border-radius: 12px;
     overflow: hidden;
+    transition: box-shadow .2s, border-color .2s;
 }
-.cancellation-bar {
-    height: 5px;
-    background: linear-gradient(90deg, #3772C0, #7b2ff7, #e74c3c, #f39c12);
+.cancel-card:hover {
+    box-shadow: var(--shadow);
+    border-color: #ddd;
 }
-.cancellation-bar-cancelled {
-    background: linear-gradient(90deg, #e74c3c, #c0392b, #7b2ff7);
+
+/* Borda lateral por status */
+.cancel-card--booked { border-left: 4px solid var(--accent); }
+.cancel-card--pending { border-left: 4px solid var(--warning); }
+.cancel-card--partially_paid { border-left: 4px solid var(--warning); }
+.cancel-card--cancelled { border-left: 4px solid var(--danger); }
+.cancel-card--refunded { border-left: 4px solid #7b2ff7; }
+.cancel-card--completed { border-left: 4px solid var(--text-green); }
+
+/* Header do card */
+.cancel-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding: 20px 24px 0;
+    gap: 16px;
 }
-.cancellation-bar-completed {
-    background: linear-gradient(90deg, #1B6F00, #3772C0);
+.cancel-card-title-wrap {
+    flex: 1;
+    min-width: 0;
 }
-.cancellation-bar-booked {
-    background: linear-gradient(90deg, #3772C0, #00b4d8);
-}
-.cancellation-bar-pending {
-    background: linear-gradient(90deg, #f39c12, #E4B505);
-}
-.cancellation-bar-refunded {
-    background: linear-gradient(90deg, #7b2ff7, #9b59b6);
-}
-.cancellation-card-body {
-    padding: 24px;
-}
-.cancellation-title {
-    font-size: 20px;
+.cancel-card-title {
+    font-size: 17px;
     font-weight: 700;
     color: var(--dark);
-    margin-bottom: 12px;
+    margin: 0 0 4px;
+    line-height: 1.3;
 }
-.cancellation-info {
-    margin-bottom: 14px;
-}
-.cancellation-info p {
-    font-size: 14px;
+.cancel-card-id {
+    font-size: 12px;
     color: var(--gray);
-    margin-bottom: 4px;
 }
-.cancellation-info strong {
-    color: var(--dark);
-}
-.cancellation-info .text-muted {
-    color: #aaa;
-    font-style: italic;
-}
-.cancellation-badge {
-    display: inline-block;
-    padding: 6px 16px;
+
+/* Status badge */
+.cancel-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
     border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.cancel-status--blue { background: #eef4ff; color: #1e40af; }
+.cancel-status--green { background: #e8f5e9; color: #1B6F00; }
+.cancel-status--yellow { background: #fef9e7; color: #92400e; }
+.cancel-status--red { background: #fef2f2; color: #991b1b; }
+.cancel-status--purple { background: #f3e8ff; color: #6b21a8; }
+.cancel-status--gray { background: #f3f4f6; color: #4b5563; }
+
+/* Body do card */
+.cancel-card-body {
+    padding: 16px 24px 20px;
+}
+.cancel-card-details {
+    display: flex;
+    gap: 32px;
     margin-bottom: 16px;
 }
-.cancellation-badge-red {
-    background: #e74c3c;
-    color: white;
+.cancel-detail-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
 }
-.cancellation-badge-green {
-    background: #1B6F00;
-    color: white;
+.cancel-detail-item svg {
+    color: var(--gray);
+    margin-top: 2px;
+    flex-shrink: 0;
 }
-.cancellation-badge-blue {
-    background: #3772C0;
-    color: white;
+.cancel-detail-label {
+    display: block;
+    font-size: 11px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-bottom: 2px;
 }
-.cancellation-badge-yellow {
-    background: #f39c12;
-    color: white;
+.cancel-detail-value {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--dark);
 }
-.cancellation-badge-purple {
-    background: #7b2ff7;
-    color: white;
+
+/* Ações / Notices */
+.cancel-card-action {
+    margin-top: 4px;
 }
-.cancellation-badge-gray {
-    background: #6b7280;
-    color: white;
-}
-.cancellation-notice {
+
+.cancel-notice {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     padding: 12px 16px;
-    background: #fef9e7;
-    border-left: 4px solid #f39c12;
-    border-radius: 6px;
+    border-radius: 8px;
     font-size: 13px;
-    color: #856404;
 }
-.cancellation-notice-info {
-    background: #eef4ff;
-    border-left-color: #3772C0;
-    color: #1e40af;
+.cancel-notice svg {
+    flex-shrink: 0;
 }
-.cancellation-notice p {
+.cancel-notice p {
     margin: 0;
+    line-height: 1.4;
 }
-.btn-solicitar-cancelamento {
-    padding: 10px 24px;
-    background: var(--danger);
-    color: white;
-    border: none;
-    border-radius: 6px;
+.cancel-notice--warning {
+    background: #fef9e7;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+.cancel-notice--warning svg { color: #f59e0b; }
+.cancel-notice--success {
+    background: #e8f5e9;
+    color: #1B6F00;
+    border: 1px solid #a7f3d0;
+}
+.cancel-notice--success svg { color: #1B6F00; }
+.cancel-notice--info {
+    background: #eef4ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+.cancel-notice--info svg { color: #3772C0; }
+
+/* Botão solicitar cancelamento */
+.btn-cancel-request {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 22px;
+    background: var(--white);
+    color: var(--danger);
+    border: 2px solid var(--danger);
+    border-radius: var(--radius);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     font-family: var(--font);
-    transition: background .2s;
+    transition: all .2s;
 }
-.btn-solicitar-cancelamento:hover {
-    background: #c0392b;
+.btn-cancel-request:hover {
+    background: var(--danger);
+    color: white;
 }
-.cancellation-form {
-    margin-top: 4px;
+.btn-cancel-request:hover svg {
+    stroke: white;
+}
+.cancel-form {
+    margin-top: 0;
+}
+
+/* Empty state melhorado */
+.empty-state-icon {
+    color: var(--gray);
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .cancel-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+    .cancel-card-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 16px 18px 0;
+    }
+    .cancel-card-body {
+        padding: 14px 18px 18px;
+    }
+    .cancel-card-details {
+        flex-direction: column;
+        gap: 12px;
+    }
+}
+@media (max-width: 480px) {
+    .cancel-summary {
+        grid-template-columns: 1fr 1fr;
+    }
+    .cancel-summary-number {
+        font-size: 22px;
+    }
 }
 
 /* ============================================================
