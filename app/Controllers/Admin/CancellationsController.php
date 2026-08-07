@@ -128,15 +128,26 @@ class CancellationsController extends Controller
 
         if ($clientEmail) {
             $emailService = new EmailService();
-            $emailService->send(
+            $emailService->sendTemplate(
                 $clientEmail, trim($clientName),
                 'Cancelamento Aprovado - ' . ($booking['booking_number'] ?? ''),
-                '<h2>Cancelamento Aprovado</h2>'
-                . '<p>Olá, <strong>' . e(trim($clientName)) . '</strong>!</p>'
-                . '<p>Sua solicitação de cancelamento para a reserva <strong>' . e($booking['booking_number'] ?? '') . '</strong> foi <strong style="color:#1B6F00">aprovada</strong>.</p>'
-                . ($adminResponse ? '<p><strong>Mensagem da equipe:</strong></p><blockquote style="border-left:4px solid #1B6F00;padding:12px;background:#f0fdf4;margin:10px 0;">' . nl2br(e($adminResponse)) . '</blockquote>' : '')
-                . '<p>Caso tenha direito a reembolso, você será notificado em breve sobre o processamento.</p>'
-                . '<p style="color:#636e72;font-size:13px;">Equipe Punta Cana para Brasileiros</p>'
+                'cancellation',
+                [
+                    'emailTitle' => 'Cancelamento Aprovado',
+                    'clientName' => trim($clientName),
+                    'emailMessage' => 'Sua solicitação de cancelamento para a reserva abaixo foi <strong style="color:#1B6F00">aprovada</strong>.',
+                    'bookingNumber' => $booking['booking_number'] ?? '',
+                    'bookingTotal' => $booking['total'] ?? 0,
+                    'statusLabel' => 'Aprovado',
+                    'statusColor' => '#1B6F00',
+                    'blockquoteLabel' => 'Mensagem da Equipe',
+                    'blockquoteText' => $adminResponse ?: null,
+                    'blockquoteColor' => '#1B6F00',
+                    'blockquoteBg' => '#f0fdf4',
+                    'additionalMessage' => 'Caso tenha direito a reembolso, você será notificado assim que o processamento for concluído.',
+                    'ctaUrl' => url('/minha-conta/cancelamentos'),
+                    'ctaText' => 'Ver Meus Cancelamentos',
+                ]
             );
         }
 
@@ -181,16 +192,26 @@ class CancellationsController extends Controller
 
         if ($clientEmail) {
             $emailService = new EmailService();
-            $emailService->send(
+            $emailService->sendTemplate(
                 $clientEmail, trim($clientName),
                 'Cancelamento Não Autorizado - ' . ($booking['booking_number'] ?? ''),
-                '<h2>Cancelamento Não Autorizado</h2>'
-                . '<p>Olá, <strong>' . e(trim($clientName)) . '</strong>!</p>'
-                . '<p>Infelizmente, sua solicitação de cancelamento para a reserva <strong>' . e($booking['booking_number'] ?? '') . '</strong> <strong style="color:#e74c3c">não foi autorizada</strong>.</p>'
-                . '<p><strong>Motivo:</strong></p>'
-                . '<blockquote style="border-left:4px solid #e74c3c;padding:12px;background:#fef2f2;margin:10px 0;">' . nl2br(e($adminResponse)) . '</blockquote>'
-                . '<p>Se tiver dúvidas, entre em contato com nossa equipe.</p>'
-                . '<p style="color:#636e72;font-size:13px;">Equipe Punta Cana para Brasileiros</p>'
+                'cancellation',
+                [
+                    'emailTitle' => 'Cancelamento Não Autorizado',
+                    'clientName' => trim($clientName),
+                    'emailMessage' => 'Infelizmente, sua solicitação de cancelamento para a reserva abaixo <strong style="color:#dc2626">não foi autorizada</strong>.',
+                    'bookingNumber' => $booking['booking_number'] ?? '',
+                    'bookingTotal' => $booking['total'] ?? 0,
+                    'statusLabel' => 'Não Autorizado',
+                    'statusColor' => '#dc2626',
+                    'blockquoteLabel' => 'Motivo da Recusa',
+                    'blockquoteText' => $adminResponse,
+                    'blockquoteColor' => '#dc2626',
+                    'blockquoteBg' => '#fef2f2',
+                    'additionalMessage' => 'Se tiver dúvidas, entre em contato com nossa equipe pelo WhatsApp.',
+                    'ctaUrl' => url('/minha-conta/cancelamentos'),
+                    'ctaText' => 'Ver Meus Cancelamentos',
+                ]
             );
         }
 
@@ -238,16 +259,27 @@ class CancellationsController extends Controller
 
         if ($clientEmail) {
             $emailService = new EmailService();
-            $emailService->send(
+            $emailService->sendTemplate(
                 $clientEmail, trim($clientName),
                 'Reembolso Processado - ' . ($booking['booking_number'] ?? ''),
-                '<h2>Reembolso Processado</h2>'
-                . '<p>Olá, <strong>' . e(trim($clientName)) . '</strong>!</p>'
-                . '<p>O reembolso referente à reserva <strong>' . e($booking['booking_number'] ?? '') . '</strong> foi processado.</p>'
-                . '<p><strong>Valor reembolsado:</strong> $' . number_format($refundAmount, 2) . '</p>'
-                . ($refundNotes ? '<p><strong>Observações:</strong></p><blockquote style="border-left:4px solid #3772C0;padding:12px;background:#eff6ff;margin:10px 0;">' . nl2br(e($refundNotes)) . '</blockquote>' : '')
-                . '<p>O valor será creditado de acordo com o meio de pagamento utilizado.</p>'
-                . '<p style="color:#636e72;font-size:13px;">Equipe Punta Cana para Brasileiros</p>'
+                'cancellation',
+                [
+                    'emailTitle' => 'Reembolso Processado',
+                    'clientName' => trim($clientName),
+                    'emailMessage' => 'O reembolso referente à sua reserva foi processado com sucesso.',
+                    'bookingNumber' => $booking['booking_number'] ?? '',
+                    'bookingTotal' => $booking['total'] ?? 0,
+                    'refundAmount' => $refundAmount,
+                    'statusLabel' => 'Reembolsado',
+                    'statusColor' => '#1B6F00',
+                    'blockquoteLabel' => 'Observações',
+                    'blockquoteText' => $refundNotes ?: null,
+                    'blockquoteColor' => '#3772C0',
+                    'blockquoteBg' => '#eff6ff',
+                    'additionalMessage' => 'O valor será creditado de acordo com o meio de pagamento utilizado na compra.',
+                    'ctaUrl' => url('/minha-conta/cancelamentos'),
+                    'ctaText' => 'Ver Meus Cancelamentos',
+                ]
             );
         }
 

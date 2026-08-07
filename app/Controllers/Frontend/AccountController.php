@@ -214,14 +214,26 @@ class AccountController extends Controller
         $emailService = new \App\Services\EmailService();
         $adminEmail = $this->setting('admin_email', '');
         if ($adminEmail) {
-            $emailService->send(
+            $emailService->sendTemplate(
                 $adminEmail, 'Admin',
                 'Nova Solicitação de Cancelamento: ' . $booking['booking_number'],
-                '<h2>Solicitação de Cancelamento</h2>'
-                . '<p>O cliente <strong>' . e($user['first_name'] . ' ' . $user['last_name']) . '</strong> solicitou o cancelamento da reserva <strong>' . e($booking['booking_number']) . '</strong>.</p>'
-                . '<p><strong>Motivo:</strong></p>'
-                . '<blockquote style="border-left:4px solid #e74c3c;padding:12px;background:#fef2f2;margin:10px 0;">' . nl2br(e($reason)) . '</blockquote>'
-                . '<p><a href="' . url('/admin/cancelamentos') . '" style="display:inline-block;padding:10px 24px;background:#1B6F00;color:white;border-radius:8px;text-decoration:none;">Ver no Painel</a></p>'
+                'cancellation',
+                [
+                    'emailTitle' => 'Nova Solicitação de Cancelamento',
+                    'clientName' => 'Admin',
+                    'emailMessage' => 'O cliente <strong>' . e($user['first_name'] . ' ' . $user['last_name']) . '</strong> solicitou o cancelamento da reserva abaixo.',
+                    'bookingNumber' => $booking['booking_number'],
+                    'bookingTotal' => $booking['total'] ?? 0,
+                    'statusLabel' => 'Aguardando Análise',
+                    'statusColor' => '#d97706',
+                    'blockquoteLabel' => 'Motivo do Cliente',
+                    'blockquoteText' => $reason,
+                    'blockquoteColor' => '#e74c3c',
+                    'blockquoteBg' => '#fef2f2',
+                    'additionalMessage' => 'Acesse o painel administrativo para analisar e processar esta solicitação.',
+                    'ctaUrl' => url('/admin/cancelamentos'),
+                    'ctaText' => 'Ver no Painel Admin',
+                ]
             );
         }
 
@@ -229,16 +241,26 @@ class AccountController extends Controller
         $clientEmail = $booking['billing_email'] ?? $user['email'] ?? '';
         $clientName = $user['first_name'] ?? 'Cliente';
         if ($clientEmail) {
-            $emailService->send(
+            $emailService->sendTemplate(
                 $clientEmail, $clientName,
                 'Solicitação de Cancelamento Recebida - ' . $booking['booking_number'],
-                '<h2>Solicitação de Cancelamento Recebida</h2>'
-                . '<p>Olá, <strong>' . e($clientName) . '</strong>!</p>'
-                . '<p>Recebemos sua solicitação de cancelamento para a reserva <strong>' . e($booking['booking_number']) . '</strong>.</p>'
-                . '<p><strong>Motivo informado:</strong></p>'
-                . '<blockquote style="border-left:4px solid #3772C0;padding:12px;background:#eff6ff;margin:10px 0;">' . nl2br(e($reason)) . '</blockquote>'
-                . '<p>Nossa equipe analisará sua solicitação e você receberá uma resposta em breve.</p>'
-                . '<p style="color:#636e72;font-size:13px;">Equipe Punta Cana para Brasileiros</p>'
+                'cancellation',
+                [
+                    'emailTitle' => 'Solicitação Recebida',
+                    'clientName' => $clientName,
+                    'emailMessage' => 'Recebemos sua solicitação de cancelamento para a reserva abaixo. Nossa equipe analisará o pedido e você receberá uma resposta em breve.',
+                    'bookingNumber' => $booking['booking_number'],
+                    'bookingTotal' => $booking['total'] ?? 0,
+                    'statusLabel' => 'Aguardando Análise',
+                    'statusColor' => '#d97706',
+                    'blockquoteLabel' => 'Motivo Informado',
+                    'blockquoteText' => $reason,
+                    'blockquoteColor' => '#3772C0',
+                    'blockquoteBg' => '#eff6ff',
+                    'additionalMessage' => 'Você receberá um e-mail assim que sua solicitação for processada.',
+                    'ctaUrl' => url('/minha-conta/cancelamentos'),
+                    'ctaText' => 'Acompanhar Solicitação',
+                ]
             );
         }
 
