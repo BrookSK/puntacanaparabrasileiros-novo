@@ -2572,249 +2572,208 @@ img { max-width: 100%; height: auto; }
 .empty-state-text { text-align: center; color: var(--gray); font-size: 15px; padding: 40px 20px; }
 
 /* ============================================================
-   CANCELAMENTOS — Redesign
+   CANCELAMENTOS
    ============================================================ */
 
-/* Resumo numérico */
-.cancel-summary {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
+/* Page Header */
+.cancel-page-header {
     margin-bottom: 28px;
 }
-.cancel-summary-item {
-    background: var(--white);
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 18px 16px;
-    text-align: center;
-    transition: box-shadow .2s;
+.cancel-page-header h2 {
+    margin-bottom: 6px;
 }
-.cancel-summary-item:hover {
-    box-shadow: var(--shadow);
-}
-.cancel-summary-number {
-    display: block;
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--dark);
-    line-height: 1.2;
-}
-.cancel-summary-label {
-    display: block;
-    font-size: 12px;
-    color: var(--gray);
-    margin-top: 4px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-.cancel-summary-active .cancel-summary-number { color: var(--text-green); }
-.cancel-summary-cancelled .cancel-summary-number { color: var(--danger); }
-.cancel-summary-refunded .cancel-summary-number { color: #7b2ff7; }
 
-/* Lista de cards */
-.cancellations-list {
+/* Stats Grid */
+.cancel-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 32px;
+}
+.cancel-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 18px 16px;
+    background: var(--white);
+    border: 1px solid #f0f0f0;
+    border-radius: 12px;
+    transition: box-shadow .2s, transform .2s;
+}
+.cancel-stat-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    transform: translateY(-1px);
+}
+.cancel-stat-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.cancel-stat-icon--total { background: #f0fdf4; color: #1B6F00; }
+.cancel-stat-icon--active { background: #eff6ff; color: #3772C0; }
+.cancel-stat-icon--cancelled { background: #fef2f2; color: #dc2626; }
+.cancel-stat-icon--refunded { background: #f5f3ff; color: #7c3aed; }
+.cancel-stat-content {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+}
+.cancel-stat-number {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.1;
+}
+.cancel-stat-label {
+    font-size: 12px;
+    color: var(--gray);
+    margin-top: 2px;
 }
 
-/* Card individual */
-.cancel-card {
+/* Booking List */
+.cancel-booking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+/* Booking Card */
+.cancel-booking-card {
     background: var(--white);
-    border: 1px solid #eee;
+    border: 1px solid #f0f0f0;
     border-radius: 12px;
-    overflow: hidden;
-    transition: box-shadow .2s, border-color .2s;
+    padding: 22px 24px;
+    transition: box-shadow .2s;
 }
-.cancel-card:hover {
-    box-shadow: var(--shadow);
-    border-color: #ddd;
+.cancel-booking-card:hover {
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
 }
-
-/* Borda lateral por status */
-.cancel-card--booked { border-left: 4px solid var(--accent); }
-.cancel-card--pending { border-left: 4px solid var(--warning); }
-.cancel-card--partially_paid { border-left: 4px solid var(--warning); }
-.cancel-card--cancelled { border-left: 4px solid var(--danger); }
-.cancel-card--refunded { border-left: 4px solid #7b2ff7; }
-.cancel-card--completed { border-left: 4px solid var(--text-green); }
-
-/* Header do card */
-.cancel-card-header {
+.cancel-booking-top {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 20px 24px 0;
     gap: 16px;
+    margin-bottom: 14px;
 }
-.cancel-card-title-wrap {
+.cancel-booking-info {
     flex: 1;
     min-width: 0;
 }
-.cancel-card-title {
-    font-size: 17px;
+.cancel-booking-title {
+    font-size: 16px;
     font-weight: 700;
     color: var(--dark);
-    margin: 0 0 4px;
+    margin: 0 0 8px;
     line-height: 1.3;
 }
-.cancel-card-id {
-    font-size: 12px;
-    color: var(--gray);
+.cancel-booking-meta {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-wrap: wrap;
 }
-
-/* Status badge */
-.cancel-status {
+.cancel-booking-meta-item {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 14px;
+    font-size: 13px;
+    color: var(--gray);
+}
+.cancel-booking-meta-item svg {
+    opacity: 0.6;
+}
+.cancel-booking-badge {
+    display: inline-block;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
     flex-shrink: 0;
 }
-.cancel-status--blue { background: #eef4ff; color: #1e40af; }
-.cancel-status--green { background: #e8f5e9; color: #1B6F00; }
-.cancel-status--yellow { background: #fef9e7; color: #92400e; }
-.cancel-status--red { background: #fef2f2; color: #991b1b; }
-.cancel-status--purple { background: #f3e8ff; color: #6b21a8; }
-.cancel-status--gray { background: #f3f4f6; color: #4b5563; }
-
-/* Body do card */
-.cancel-card-body {
-    padding: 16px 24px 20px;
-}
-.cancel-card-details {
-    display: flex;
-    gap: 32px;
-    margin-bottom: 16px;
-}
-.cancel-detail-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-}
-.cancel-detail-item svg {
-    color: var(--gray);
-    margin-top: 2px;
-    flex-shrink: 0;
-}
-.cancel-detail-label {
-    display: block;
-    font-size: 11px;
-    color: var(--gray);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin-bottom: 2px;
-}
-.cancel-detail-value {
-    display: block;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--dark);
+.cancel-booking-bottom {
+    padding-top: 14px;
+    border-top: 1px solid #f5f5f5;
 }
 
-/* Ações / Notices */
-.cancel-card-action {
-    margin-top: 4px;
-}
-
-.cancel-notice {
+/* Mensagens de status */
+.cancel-booking-msg {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 12px 16px;
     border-radius: 8px;
     font-size: 13px;
-}
-.cancel-notice svg {
-    flex-shrink: 0;
-}
-.cancel-notice p {
-    margin: 0;
     line-height: 1.4;
 }
-.cancel-notice--warning {
-    background: #fef9e7;
+.cancel-booking-msg svg {
+    flex-shrink: 0;
+}
+.cancel-booking-msg--warning {
+    background: #fffbeb;
     color: #92400e;
     border: 1px solid #fde68a;
 }
-.cancel-notice--warning svg { color: #f59e0b; }
-.cancel-notice--success {
-    background: #e8f5e9;
-    color: #1B6F00;
-    border: 1px solid #a7f3d0;
+.cancel-booking-msg--success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
 }
-.cancel-notice--success svg { color: #1B6F00; }
-.cancel-notice--info {
-    background: #eef4ff;
+.cancel-booking-msg--info {
+    background: #eff6ff;
     color: #1e40af;
     border: 1px solid #bfdbfe;
 }
-.cancel-notice--info svg { color: #3772C0; }
 
-/* Botão solicitar cancelamento */
-.btn-cancel-request {
+/* Botão de cancelamento */
+.cancel-booking-btn {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 10px 22px;
-    background: var(--white);
-    color: var(--danger);
-    border: 2px solid var(--danger);
-    border-radius: var(--radius);
+    padding: 10px 20px;
+    background: transparent;
+    color: #dc2626;
+    border: 1.5px solid #dc2626;
+    border-radius: 8px;
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
     font-family: var(--font);
     transition: all .2s;
 }
-.btn-cancel-request:hover {
-    background: var(--danger);
+.cancel-booking-btn:hover {
+    background: #dc2626;
     color: white;
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
 }
-.btn-cancel-request:hover svg {
+.cancel-booking-btn:hover svg {
     stroke: white;
-}
-.cancel-form {
-    margin-top: 0;
-}
-
-/* Empty state melhorado */
-.empty-state-icon {
-    color: var(--gray);
-    margin-bottom: 16px;
-    opacity: 0.5;
 }
 
 /* Responsivo */
-@media (max-width: 768px) {
-    .cancel-summary {
+@media (max-width: 900px) {
+    .cancel-stats {
         grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
     }
-    .cancel-card-header {
+}
+@media (max-width: 768px) {
+    .cancel-booking-top {
         flex-direction: column;
         gap: 10px;
-        padding: 16px 18px 0;
     }
-    .cancel-card-body {
-        padding: 14px 18px 18px;
-    }
-    .cancel-card-details {
-        flex-direction: column;
+    .cancel-booking-meta {
         gap: 12px;
     }
 }
 @media (max-width: 480px) {
-    .cancel-summary {
-        grid-template-columns: 1fr 1fr;
+    .cancel-stats {
+        grid-template-columns: 1fr;
     }
-    .cancel-summary-number {
-        font-size: 22px;
+    .cancel-booking-card {
+        padding: 16px 18px;
     }
 }
 
