@@ -112,20 +112,38 @@ class AccountController extends Controller
     {
         $user = $this->currentUser();
         $bookingModel = new Booking();
+        $page = max(1, (int) $request->query('page', '1'));
+        $perPage = 10;
 
-        // Buscar todas as reservas do usuário com seus itens
+        // Contar total de reservas do usuário
+        $countRow = $this->db->fetchOne(
+            "SELECT COUNT(DISTINCT b.id) as total
+             FROM bookings b
+             INNER JOIN booking_items bi ON b.id = bi.booking_id
+             WHERE b.user_id = ?",
+            [(int) $user['id']]
+        );
+        $totalCount = (int) ($countRow['total'] ?? 0);
+
+        $totalPages = max(1, (int) ceil($totalCount / $perPage));
+        $offset = ($page - 1) * $perPage;
+
+        // Buscar reservas paginadas do usuário com seus itens
         $bookings = $this->db->fetchAll(
             "SELECT b.*, bi.id as item_id, bi.trip_id, bi.trip_date, t.title as trip_title
              FROM bookings b
              INNER JOIN booking_items bi ON b.id = bi.booking_id
              INNER JOIN trips t ON bi.trip_id = t.id
              WHERE b.user_id = ?
-             ORDER BY b.created_at DESC",
+             ORDER BY b.created_at DESC
+             LIMIT $perPage OFFSET $offset",
             [(int) $user['id']]
         );
 
         $this->view('frontend/account/cancellations', [
             'bookings' => $bookings,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
             'pageTitle' => 'Cancelamentos',
         ], 'app');
     }

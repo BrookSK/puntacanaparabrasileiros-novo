@@ -35,6 +35,13 @@
             <?php endforeach; ?>
             </tbody>
         </table>
+        <?php if ($totalPages > 1): ?>
+        <nav class="pagination">
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+            <a href="?page=<?= $i ?>" class="page-link <?= $i === $currentPage ? 'active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </nav>
+        <?php endif; ?>
         <?php endif; ?>
     </div>
 </div>
