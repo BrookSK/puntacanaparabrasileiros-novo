@@ -48,6 +48,7 @@ img { max-width: 100%; height: auto; }
 .btn-outline-white { border: 2px solid var(--white); color: var(--white); background: transparent; }
 .btn-outline-white:hover { background: var(--white); color: var(--dark); }
 .btn-danger { background: var(--danger); color: var(--white); }
+.btn-danger:hover { background: #c0392b; color: var(--white); }
 .btn-sm { padding: 6px 14px; font-size: 12px; }
 .btn-lg { padding: 14px 32px; font-size: 16px; }
 .btn-block { display: block; width: 100%; }
@@ -2411,6 +2412,7 @@ img { max-width: 100%; height: auto; }
 .badge-danger { background: #f8d7da; color: #721c24; }
 .badge-info { background: #d1ecf1; color: #0c5460; }
 .badge-secondary { background: #e9ecef; color: #495057; }
+.badge-purple { background: #ede9fe; color: #6b21a8; }
 
 /* Tables */
 .table { width: 100%; border-collapse: collapse; }
@@ -2575,205 +2577,109 @@ img { max-width: 100%; height: auto; }
    CANCELAMENTOS
    ============================================================ */
 
-/* Page Header */
-.cancel-page-header {
-    margin-bottom: 28px;
-}
-.cancel-page-header h2 {
-    margin-bottom: 6px;
-}
-
-/* Stats Grid */
-.cancel-stats {
+/* Grid 2 colunas */
+.cancel-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 32px;
-}
-.cancel-stat-card {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 18px 16px;
-    background: var(--white);
-    border: 1px solid #f0f0f0;
-    border-radius: 12px;
-    transition: box-shadow .2s, transform .2s;
-}
-.cancel-stat-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
-    transform: translateY(-1px);
-}
-.cancel-stat-icon {
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-.cancel-stat-icon--total { background: #f0fdf4; color: #1B6F00; }
-.cancel-stat-icon--active { background: #eff6ff; color: #3772C0; }
-.cancel-stat-icon--cancelled { background: #fef2f2; color: #dc2626; }
-.cancel-stat-icon--refunded { background: #f5f3ff; color: #7c3aed; }
-.cancel-stat-content {
-    display: flex;
-    flex-direction: column;
-}
-.cancel-stat-number {
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--dark);
-    line-height: 1.1;
-}
-.cancel-stat-label {
-    font-size: 12px;
-    color: var(--gray);
-    margin-top: 2px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
 }
 
-/* Booking List */
-.cancel-booking-list {
+/* Card individual */
+.cancel-item {
+    background: var(--white);
+    border: 1px solid #e8e8e8;
+    border-radius: 12px;
+    padding: 22px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-}
-
-/* Booking Card */
-.cancel-booking-card {
-    background: var(--white);
-    border: 1px solid #f0f0f0;
-    border-radius: 12px;
-    padding: 22px 24px;
     transition: box-shadow .2s;
 }
-.cancel-booking-card:hover {
-    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+.cancel-item:hover {
+    box-shadow: var(--shadow);
 }
-.cancel-booking-top {
+
+/* Header do card */
+.cancel-item-header {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 14px;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f0f0f0;
 }
-.cancel-booking-info {
+.cancel-item-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0;
+    line-height: 1.3;
     flex: 1;
     min-width: 0;
 }
-.cancel-booking-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: var(--dark);
-    margin: 0 0 8px;
-    line-height: 1.3;
+
+/* Detalhes */
+.cancel-item-details {
+    flex: 1;
+    margin-bottom: 16px;
 }
-.cancel-booking-meta {
+.cancel-item-row {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 18px;
-    flex-wrap: wrap;
+    padding: 6px 0;
 }
-.cancel-booking-meta-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
+.cancel-item-row + .cancel-item-row {
+    border-top: 1px solid #f8f8f8;
+}
+.cancel-item-label {
     font-size: 13px;
     color: var(--gray);
 }
-.cancel-booking-meta-item svg {
-    opacity: 0.6;
-}
-.cancel-booking-badge {
-    display: inline-block;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-size: 12px;
+.cancel-item-value {
+    font-size: 13px;
     font-weight: 600;
-    white-space: nowrap;
-    flex-shrink: 0;
-}
-.cancel-booking-bottom {
-    padding-top: 14px;
-    border-top: 1px solid #f5f5f5;
+    color: var(--dark);
 }
 
-/* Mensagens de status */
-.cancel-booking-msg {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 12px 16px;
-    border-radius: 8px;
+/* Footer com ação */
+.cancel-item-footer {
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid #f0f0f0;
+}
+.cancel-item-footer .btn {
+    width: 100%;
+    display: block;
+}
+
+/* Mensagens de status no footer */
+.cancel-item-msg {
+    display: block;
+    text-align: center;
+    padding: 10px 16px;
+    border-radius: var(--radius);
     font-size: 13px;
-    line-height: 1.4;
+    font-weight: 500;
 }
-.cancel-booking-msg svg {
-    flex-shrink: 0;
-}
-.cancel-booking-msg--warning {
-    background: #fffbeb;
+.cancel-item-msg--warning {
+    background: #fef9e7;
     color: #92400e;
-    border: 1px solid #fde68a;
 }
-.cancel-booking-msg--success {
+.cancel-item-msg--success {
     background: #f0fdf4;
     color: #166534;
-    border: 1px solid #bbf7d0;
 }
-.cancel-booking-msg--info {
+.cancel-item-msg--info {
     background: #eff6ff;
     color: #1e40af;
-    border: 1px solid #bfdbfe;
-}
-
-/* Botão de cancelamento */
-.cancel-booking-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 20px;
-    background: transparent;
-    color: #dc2626;
-    border: 1.5px solid #dc2626;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: var(--font);
-    transition: all .2s;
-}
-.cancel-booking-btn:hover {
-    background: #dc2626;
-    color: white;
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
-}
-.cancel-booking-btn:hover svg {
-    stroke: white;
 }
 
 /* Responsivo */
-@media (max-width: 900px) {
-    .cancel-stats {
-        grid-template-columns: repeat(2, 1fr);
-    }
-}
 @media (max-width: 768px) {
-    .cancel-booking-top {
-        flex-direction: column;
-        gap: 10px;
-    }
-    .cancel-booking-meta {
-        gap: 12px;
-    }
-}
-@media (max-width: 480px) {
-    .cancel-stats {
+    .cancel-grid {
         grid-template-columns: 1fr;
-    }
-    .cancel-booking-card {
-        padding: 16px 18px;
+        gap: 16px;
     }
 }
 
