@@ -2,77 +2,39 @@
     <?= partial('account-sidebar') ?>
     <div class="account-content">
         <h2>Cancelamentos</h2>
-        <p class="account-subtitle">Gerencie suas reservas e solicite cancelamentos quando necessário.</p>
-
         <?php if (empty($bookings)): ?>
-        <div class="empty-state">
-            <h3>Nenhuma reserva encontrada</h3>
-            <p>Você ainda não tem reservas para gerenciar.</p>
-            <a href="/passeios" class="btn btn-primary">Explorar Passeios</a>
-        </div>
+        <div class="empty-state"><p>Nenhuma reserva encontrada.</p><a href="/passeios" class="btn btn-primary">Ver Passeios</a></div>
         <?php else: ?>
-
-        <!-- Grid de cancelamentos em 2 colunas -->
-        <div class="cancel-grid">
-            <?php foreach ($bookings as $booking): ?>
-            <?php
-            $statusLabel = match($booking['status']) {
-                'cancelled' => 'Cancelamento Solicitado',
-                'refunded' => 'Reembolsado',
-                'completed' => 'Concluído',
-                'booked' => 'Confirmado',
-                'pending' => 'Pendente',
-                'partially_paid' => 'Parcialmente Pago',
-                default => ucfirst($booking['status']),
-            };
-            $statusClass = match($booking['status']) {
-                'cancelled' => 'danger',
-                'refunded' => 'purple',
-                'completed' => 'success',
-                'booked' => 'info',
-                'pending' => 'warning',
-                default => 'secondary',
-            };
-            ?>
-            <div class="cancel-item">
-                <div class="cancel-item-header">
-                    <h4 class="cancel-item-title"><?= e($booking['trip_title']) ?></h4>
-                    <span class="badge badge-<?= $statusClass ?>"><?= $statusLabel ?></span>
-                </div>
-
-                <div class="cancel-item-details">
-                    <div class="cancel-item-row">
-                        <span class="cancel-item-label">Reserva</span>
-                        <span class="cancel-item-value">#<?= (int)$booking['id'] ?></span>
-                    </div>
-                    <div class="cancel-item-row">
-                        <span class="cancel-item-label">Data do Passeio</span>
-                        <span class="cancel-item-value"><?= $booking['trip_date'] ? format_date($booking['trip_date']) : 'Não definida' ?></span>
-                    </div>
-                    <div class="cancel-item-row">
-                        <span class="cancel-item-label">ID do Passeio</span>
-                        <span class="cancel-item-value">#<?= (int)$booking['trip_id'] ?></span>
-                    </div>
-                </div>
-
-                <div class="cancel-item-footer">
-                    <?php if ($booking['status'] === 'cancelled'): ?>
-                    <span class="cancel-item-msg cancel-item-msg--warning">Cancelamento já solicitado</span>
-                    <?php elseif ($booking['status'] === 'refunded'): ?>
-                    <span class="cancel-item-msg cancel-item-msg--success">Reembolsado com sucesso</span>
-                    <?php elseif ($booking['status'] === 'completed'): ?>
-                    <span class="cancel-item-msg cancel-item-msg--info">Passeio já realizado</span>
-                    <?php elseif (in_array($booking['status'], ['booked', 'pending', 'partially_paid'])): ?>
-                    <form method="POST" action="/minha-conta/cancelamentos/solicitar" onsubmit="return confirm('Tem certeza que deseja solicitar o cancelamento desta reserva?')">
+        <table class="table">
+            <thead><tr><th>Número</th><th>Serviço</th><th>Data</th><th>Total</th><th>Pago</th><th>Status</th><th>Ações</th></tr></thead>
+            <tbody>
+            <?php foreach ($bookings as $b): ?>
+            <tr>
+                <td><?= e($b['booking_number'] ?? '#' . (int)$b['id']) ?></td>
+                <td style="font-size:13px;color:#374151;max-width:200px;"><?= e($b['trip_title']) ?></td>
+                <td><?= $b['trip_date'] ? format_date($b['trip_date']) : format_date($b['created_at']) ?></td>
+                <td><?= money((float)($b['total'] ?? 0)) ?></td>
+                <td><?= money((float)($b['paid_amount'] ?? 0)) ?></td>
+                <td><span class="badge badge-<?= booking_status_class($b['status']) ?>"><?= booking_status_label($b['status']) ?></span></td>
+                <td>
+                    <?php if (in_array($b['status'], ['booked', 'pending', 'partially_paid'])): ?>
+                    <form method="POST" action="/minha-conta/cancelamentos/solicitar" onsubmit="return confirm('Tem certeza que deseja solicitar o cancelamento desta reserva?')" style="display:inline">
                         <?= csrf_field() ?>
-                        <input type="hidden" name="booking_id" value="<?= (int)$booking['id'] ?>">
-                        <button type="submit" class="btn btn-danger">Solicitar Cancelamento</button>
+                        <input type="hidden" name="booking_id" value="<?= (int)$b['id'] ?>">
+                        <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
                     </form>
+                    <?php elseif ($b['status'] === 'cancelled'): ?>
+                    <span class="btn btn-sm btn-outline" style="pointer-events:none;opacity:.6;">Solicitado</span>
+                    <?php elseif ($b['status'] === 'refunded'): ?>
+                    <span class="btn btn-sm btn-outline" style="pointer-events:none;opacity:.6;">Reembolsado</span>
+                    <?php else: ?>
+                    <span class="btn btn-sm btn-outline" style="pointer-events:none;opacity:.6;">Indisponível</span>
                     <?php endif; ?>
-                </div>
-            </div>
+                </td>
+            </tr>
             <?php endforeach; ?>
-        </div>
+            </tbody>
+        </table>
         <?php endif; ?>
     </div>
 </div>
