@@ -62,11 +62,6 @@ class TransferVehicle extends Model
 
         // Tentar rota inversa se não encontrou
         if (empty($vehicles)) {
-            $sql = str_replace(
-                'tr.origin_id = ? AND tr.destination_id = ?',
-                'tr.origin_id = ? AND tr.destination_id = ?',
-                $sql
-            );
             $vehicles = $this->db->fetchAll($sql, [$destinationId, $originId, $totalPax]);
         }
 
@@ -102,11 +97,10 @@ class TransferVehicle extends Model
                     return (float) $tariff['price'];
                 }
             }
-            // Nenhuma faixa corresponde
-            return null;
+            // Pax fora das faixas configuradas — usar última tarifa ou base_price
         }
 
-        // Sem tarifas por faixa — usar preço base da rota
+        // Sem tarifas para este service_type — usar preço base da rota
         $route = $this->db->fetchOne("SELECT base_price FROM transfer_routes WHERE id = ?", [$routeId]);
         if ($route) {
             return (float) $route['base_price'];
