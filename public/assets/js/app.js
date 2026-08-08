@@ -586,82 +586,131 @@
     }
 
     function renderTransferResults(data) {
-        const container = document.getElementById('resultsList');
         const resultsDiv = document.getElementById('transferResults');
-        const totalBar = document.getElementById('transferTotalBar');
-        container.innerHTML = '';
+        const arrivalContainer = document.getElementById('arrivalVehicles');
+        const departureContainer = document.getElementById('departureVehicles');
+        const arrivalSection = document.getElementById('transferArrivalSection');
+        const departureSection = document.getElementById('transferDepartureSection');
+        const summaryDiv = document.getElementById('transferSummary');
 
-        let totalPrice = 0;
+        arrivalContainer.innerHTML = '';
+        departureContainer.innerHTML = '';
+        summaryDiv.style.display = 'none';
+
         const arrivalDate = document.querySelector('[name="arrival_date"]')?.value || '';
-        const arrivalTime = document.querySelector('[name="arrival_time"]')?.value || '';
         const departureDate = document.querySelector('[name="departure_date"]')?.value || '';
-        const departureTime = document.querySelector('[name="departure_time"]')?.value || '';
+        const activeTab = document.querySelector('.transfer-tab.active')?.dataset.tab;
+        const isRoundtrip = activeTab === 'roundtrip' && departureDate;
 
-        // Render arrival
-        data.results.forEach(v => {
-            totalPrice += v.price;
-            container.innerHTML += `
-            <div class="transfer-result-item">
-                <div class="transfer-result-route">
-                    <strong>Entrada:</strong> ${data.origin} → ${data.destination} (${formatDateBR(arrivalDate)})
-                </div>
-                <div class="transfer-vehicle-card">
-                    <div class="transfer-vehicle-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
-                    <div class="transfer-vehicle-info">
-                        <h4>${v.title}</h4>
-                        <p>${v.description || ''}</p>
-                        <div class="transfer-vehicle-meta">
-                            <span>🌐 ${v.max_passengers} passageiros</span>
-                            <span>🧳 ${v.max_luggage || 0} malas</span>
-                            <span>⏱ ${v.duration || 0} min</span>
-                        </div>
-                    </div>
-                    <div>
-                        <span class="transfer-vehicle-price">$${v.price.toFixed(2)}</span>
-                        <span class="transfer-vehicle-currency">USD</span>
-                    </div>
-                </div>
-            </div>`;
+        // Set route labels
+        document.getElementById('arrivalRouteLabel').textContent = data.origin + ' → ' + data.destination + (arrivalDate ? ' (' + formatDateBR(arrivalDate) + ')' : '');
+        if (isRoundtrip) {
+            document.getElementById('departureRouteLabel').textContent = data.destination + ' → ' + data.origin + (departureDate ? ' (' + formatDateBR(departureDate) + ')' : '');
+            departureSection.style.display = 'block';
+        } else {
+            departureSection.style.display = 'none';
+        }
+
+        // Render vehicle cards for ARRIVAL
+        data.results.forEach((v, idx) => {
+            arrivalContainer.innerHTML += buildVehicleCard(v, 'arrival', idx);
         });
 
-        // If roundtrip, also show return
-        const activeTab = document.querySelector('.transfer-tab.active')?.dataset.tab;
-        if (activeTab === 'roundtrip' && departureDate) {
-            data.results.forEach(v => {
-                totalPrice += v.price;
-                container.innerHTML += `
-                <div class="transfer-result-item">
-                    <div class="transfer-result-route">
-                        <strong>Saída:</strong> ${data.destination} → ${data.origin} (${formatDateBR(departureDate)})
-                    </div>
-                    <div class="transfer-vehicle-card">
-                        <div class="transfer-vehicle-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
-                        <div class="transfer-vehicle-info">
-                            <h4>${v.title}</h4>
-                            <p>${v.description || ''}</p>
-                            <div class="transfer-vehicle-meta">
-                                <span>🌐 ${v.max_passengers} passageiros</span>
-                                <span>🧳 ${v.max_luggage || 0} malas</span>
-                                <span>⏱ ${v.duration || 0} min</span>
-                            </div>
-                        </div>
-                        <div>
-                            <span class="transfer-vehicle-price">$${v.price.toFixed(2)}</span>
-                            <span class="transfer-vehicle-currency">USD</span>
-                        </div>
-                    </div>
-                </div>`;
+        // Render vehicle cards for DEPARTURE (same vehicles, reverse route)
+        if (isRoundtrip) {
+            data.results.forEach((v, idx) => {
+                departureContainer.innerHTML += buildVehicleCard(v, 'departure', idx);
             });
         }
 
-        // Show total
-        document.getElementById('transferTotalValue').textContent = '$' + totalPrice.toFixed(2) + ' USD';
-        totalBar.style.display = 'block';
         resultsDiv.style.display = 'block';
 
-        // Store data for cart
-        window._transferSearchResults = data;
-        window._transferTotalPrice = totalPrice;
+        // Store data
+        window._transferData = data;
+        window._transferSelection = { arrival: null, departure: null };
+
+        // Bind click events
+        document.querySelectorAll('.transfer-vehicle-option').forEach(card => {
+            card.addEventListener('click', function() {
+                const direction = this.dataset.direction;
+                const vehicleIdx = parseInt(this.dataset.idx);
+                selectVehicle(direction, vehicleIdx);
+            });
+        });
+    }
+
+    function buildVehicleCard(v, direction, idx) {
+        return `
+        <div class="transfer-vehicle-option" data-direction="${direction}" data-idx="${idx}" data-price="${v.price}" data-id="${v.id}">
+            <div class="tv-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
+            <div class="tv-body">
+                <div class="tv-info">
+                    <h4>${v.title}</h4>
+                    <p>${v.description || ''}</p>
+                    <div class="tv-specs">
+                        <span class="tv-spec">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            Até ${v.max_passengers} passageiros
+                        </span>
+                        <span class="tv-spec">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg>
+                            Até ${v.max_luggage} malas
+                        </span>
+                        <span class="tv-spec">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ${v.duration} min
+                        </span>
+                    </div>
+                </div>
+                <div class="tv-price-col">
+                    <span class="tv-price">$${v.price.toFixed(2)}</span>
+                    <span class="tv-price-label">USD</span>
+                </div>
+            </div>
+            <div class="tv-select-indicator"></div>
+        </div>`;
+    }
+
+    function selectVehicle(direction, idx) {
+        // Deselect all in this direction
+        document.querySelectorAll(`.transfer-vehicle-option[data-direction="${direction}"]`).forEach(c => c.classList.remove('selected'));
+        // Select clicked
+        const card = document.querySelector(`.transfer-vehicle-option[data-direction="${direction}"][data-idx="${idx}"]`);
+        if (card) card.classList.add('selected');
+
+        // Store selection
+        const data = window._transferData;
+        window._transferSelection[direction] = data.results[idx];
+
+        // Update summary
+        updateTransferSummary();
+    }
+
+    function updateTransferSummary() {
+        const sel = window._transferSelection;
+        const data = window._transferData;
+        const summaryDiv = document.getElementById('transferSummary');
+        const itemsDiv = document.getElementById('transferSummaryItems');
+        const activeTab = document.querySelector('.transfer-tab.active')?.dataset.tab;
+        const isRoundtrip = activeTab === 'roundtrip';
+
+        // Need at least arrival selected
+        if (!sel.arrival) { summaryDiv.style.display = 'none'; return; }
+        // For roundtrip, need both
+        if (isRoundtrip && !sel.departure) { summaryDiv.style.display = 'none'; return; }
+
+        let total = sel.arrival.price;
+        let html = `<div class="transfer-summary-item"><span class="transfer-summary-item-label">Entrada: ${sel.arrival.title}</span><span class="transfer-summary-item-value">$${sel.arrival.price.toFixed(2)}</span></div>`;
+
+        if (isRoundtrip && sel.departure) {
+            total += sel.departure.price;
+            html += `<div class="transfer-summary-item"><span class="transfer-summary-item-label">Saída: ${sel.departure.title}</span><span class="transfer-summary-item-value">$${sel.departure.price.toFixed(2)}</span></div>`;
+        }
+
+        itemsDiv.innerHTML = html;
+        document.getElementById('transferTotalValue').textContent = '$' + total.toFixed(2) + ' USD';
+        summaryDiv.style.display = 'block';
+        window._transferTotalPrice = total;
     }
 
     function formatDateBR(dateStr) {
@@ -672,27 +721,55 @@
 
     // Add to cart button
     document.getElementById('btnAddCart')?.addEventListener('click', () => {
-        if (!window._transferSearchResults) return;
-        const data = window._transferSearchResults;
-        const v = data.results[0];
-        if (!v) return;
+        const sel = window._transferSelection;
+        if (!sel || !sel.arrival) { toast('Selecione um transfer de entrada.', 'warning'); return; }
 
-        const payload = {
-            vehicle_id: v.id,
-            origin_id: document.getElementById('originSelect').value,
-            destination_id: document.getElementById('destinationSelect').value,
+        const activeTab = document.querySelector('.transfer-tab.active')?.dataset.tab;
+        const isRoundtrip = activeTab === 'roundtrip';
+        if (isRoundtrip && !sel.departure) { toast('Selecione um transfer de saída.', 'warning'); return; }
+
+        const groupId = 'tg_' + Date.now();
+        const originId = document.getElementById('originSelect').value;
+        const destinationId = document.getElementById('destinationSelect').value;
+        const serviceType = document.getElementById('serviceType').value;
+        const adults = document.getElementById('transferAdults').value;
+        const children = document.getElementById('transferChildren').value;
+        const infants = document.getElementById('transferInfants').value;
+
+        // Add arrival
+        const arrivalPayload = {
+            vehicle_id: sel.arrival.id,
+            origin_id: originId,
+            destination_id: destinationId,
             date: document.querySelector('[name="arrival_date"]').value,
             time: document.querySelector('[name="arrival_time"]').value,
             type: 'arrival',
-            service_type: document.getElementById('serviceType').value,
-            adults: document.getElementById('transferAdults').value,
-            children: document.getElementById('transferChildren').value,
-            infants: document.getElementById('transferInfants').value,
+            service_type: serviceType,
+            adults, children, infants,
+            group_id: groupId,
         };
 
-        ajax('/api/cart/add-transfer', { body: JSON.stringify(payload) })
-            .then(d => { if (d.success) { toast('Transfer adicionado ao carrinho!', 'success'); updateCartBadge(); } else { toast(d.error || 'Erro.', 'error'); } })
-            .catch(() => toast('Erro de conex�o.', 'error'));
+        const addArrival = ajax('/api/cart/add-transfer', { body: JSON.stringify(arrivalPayload) });
+
+        if (isRoundtrip && sel.departure) {
+            const departurePayload = {
+                vehicle_id: sel.departure.id,
+                origin_id: destinationId,
+                destination_id: originId,
+                date: document.querySelector('[name="departure_date"]').value,
+                time: document.querySelector('[name="departure_time"]').value,
+                type: 'departure',
+                service_type: serviceType,
+                adults, children, infants,
+                group_id: groupId,
+            };
+            addArrival.then(() => ajax('/api/cart/add-transfer', { body: JSON.stringify(departurePayload) }))
+                .then(d => { if (d.success) { toast('Transfers adicionados ao carrinho!', 'success'); updateCartBadge(); } else { toast(d.error || 'Erro.', 'error'); } })
+                .catch(() => toast('Erro de conexão.', 'error'));
+        } else {
+            addArrival.then(d => { if (d.success) { toast('Transfer adicionado ao carrinho!', 'success'); updateCartBadge(); } else { toast(d.error || 'Erro.', 'error'); } })
+                .catch(() => toast('Erro de conexão.', 'error'));
+        }
     });
 
     document.getElementById('btnDirectCheckout')?.addEventListener('click', () => {

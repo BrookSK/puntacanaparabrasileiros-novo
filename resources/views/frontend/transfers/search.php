@@ -252,17 +252,45 @@
         <!-- Resultados -->
         <div class="transfer-results-area" id="transferResults" style="display:none;">
             <div class="transfer-results-card">
-                <h3 class="transfer-results-title">PACOTE DE TRANSFERS</h3>
-                <hr class="transfer-divider">
-                <div id="resultsList"></div>
+                <!-- Seção ENTRADA -->
+                <div class="transfer-section" id="transferArrivalSection">
+                    <div class="transfer-section-header">
+                        <div class="transfer-section-icon transfer-section-icon--arrival">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="transfer-section-title">ENTRADA</h3>
+                            <p class="transfer-section-route" id="arrivalRouteLabel"></p>
+                        </div>
+                    </div>
+                    <div class="transfer-vehicles-grid" id="arrivalVehicles"></div>
+                </div>
 
-                <!-- Total e Botões -->
-                <div class="transfer-total-bar" id="transferTotalBar" style="display:none;">
-                    <p class="transfer-total-label">TOTAL:</p>
-                    <p class="transfer-total-value" id="transferTotalValue">$0.00 USD</p>
-                    <div class="transfer-total-actions">
-                        <button type="button" class="btn-add-cart" id="btnAddCart">ADICIONAR AO CARRINHO</button>
-                        <button type="button" class="btn-direct-checkout" id="btnDirectCheckout">IR DIRETO AO CHECKOUT</button>
+                <!-- Seção SAÍDA (visível apenas em ida e volta) -->
+                <div class="transfer-section" id="transferDepartureSection" style="display:none;">
+                    <div class="transfer-section-header">
+                        <div class="transfer-section-icon transfer-section-icon--departure">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="transfer-section-title">SAÍDA</h3>
+                            <p class="transfer-section-route" id="departureRouteLabel"></p>
+                        </div>
+                    </div>
+                    <div class="transfer-vehicles-grid" id="departureVehicles"></div>
+                </div>
+
+                <!-- Resumo da Seleção -->
+                <div class="transfer-summary" id="transferSummary" style="display:none;">
+                    <h4 class="transfer-summary-title">Resumo da sua seleção</h4>
+                    <div class="transfer-summary-items" id="transferSummaryItems"></div>
+                    <div class="transfer-summary-total">
+                        <span>Total:</span>
+                        <strong id="transferTotalValue">$0.00 USD</strong>
+                    </div>
+                    <div class="transfer-summary-actions">
+                        <button type="button" class="btn btn-primary btn-lg" id="btnAddCart">Adicionar ao Carrinho</button>
+                        <button type="button" class="btn btn-accent btn-lg" id="btnDirectCheckout">Ir para Checkout</button>
                     </div>
                 </div>
             </div>
