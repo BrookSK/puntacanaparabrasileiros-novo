@@ -5458,6 +5458,14 @@ img { max-width: 100%; height: auto; }
     margin-bottom: 20px;
 }
 .trip-body-content p { margin-bottom: 12px; }
+.trip-notes-content {
+    padding: 16px 20px;
+    background: #fffbeb;
+    border-left: 4px solid #E4B505;
+    border-radius: 0 8px 8px 0;
+    font-style: italic;
+    color: #6b5a00;
+}
 .trip-section {
     margin-top: 24px;
 }

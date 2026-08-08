@@ -68,31 +68,15 @@
                         <?= $trip['description'] ?>
                     </div>
 
-                    <!-- O que inclui -->
-                    <?php
-                    $displayIncludes = !empty($includes) ? $includes : ['Transporte ida e volta do hotel', 'Guia em portugues', 'Equipamentos inclusos'];
-                    ?>
+                    <!-- Notas Importantes -->
+                    <?php if (!empty($trip['important_notes'])): ?>
                     <div class="trip-section">
-                        <h3>O que inclui</h3>
-                        <ul class="trip-check-list">
-                            <?php foreach ($displayIncludes as $item): ?>
-                            <li><span class="check-icon">&#10003;</span> <?= e($item) ?></li>
-                            <?php endforeach; ?>
-                        </ul>
+                        <h3>Informações Importantes</h3>
+                        <div class="trip-body-content trip-notes-content">
+                            <?= nl2br(e($trip['important_notes'])) ?>
+                        </div>
                     </div>
-
-                    <!-- O que não inclui -->
-                    <?php
-                    $displayExcludes = !empty($excludes) ? $excludes : ['Fotos profissionais', 'Gorjetas (opcional)', 'Itens pessoais'];
-                    ?>
-                    <div class="trip-section">
-                        <h3>O que não inclui</h3>
-                        <ul class="trip-x-list">
-                            <?php foreach ($displayExcludes as $item): ?>
-                            <li><span class="x-icon">&#10007;</span> <?= e($item) ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
+                    <?php endif; ?>
 
                     <!-- Itinerário / Destaques -->
                     <?php if (!empty($itinerary)): ?>
@@ -110,6 +94,11 @@
                 <!-- Tab: Custo -->
                 <div class="trip-tab-content" id="tab-custo">
                     <h2>Inclui / Exclui</h2>
+
+                    <?php
+                    $displayIncludes = !empty($includes) ? $includes : ['Transporte ida e volta do hotel', 'Guia em portugues', 'Equipamentos inclusos'];
+                    $displayExcludes = !empty($excludes) ? $excludes : ['Fotos profissionais', 'Gorjetas (opcional)', 'Itens pessoais'];
+                    ?>
 
                     <div class="trip-section">
                         <h3>Inclui</h3>
