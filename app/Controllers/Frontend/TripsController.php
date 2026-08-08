@@ -31,6 +31,7 @@ class TripsController extends Controller
         $category = $request->query('categoria');
         $search = $request->query('busca');
         $orderBy = $request->query('ordenar', 'sort_order ASC, created_at DESC');
+        $duration = $request->query('duracao');
 
         // Mapear ordenação
         $orderMap = [
@@ -89,6 +90,7 @@ class TripsController extends Controller
             'currentCategory' => $category,
             'currentSearch' => $search,
             'currentOrder' => $orderBy,
+            'currentDuration' => $duration,
             'pageTitle' => 'Passeios em Punta Cana',
         ], 'app');
     }

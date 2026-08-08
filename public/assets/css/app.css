@@ -970,21 +970,246 @@ img { max-width: 100%; height: auto; }
     z-index: 2;
 }
 
-/* Filtros Inline (barra de filtros na listagem completa) */
+/* Filtros Sidebar (layout sidebar + lista na listagem completa) */
 .section-todos-passeios {
     padding: 50px 0 80px;
     background: var(--white);
 }
-.section-todos-passeios .section-title {
-    font-size: 26px;
-    margin-bottom: 24px;
+
+/* Layout grid: sidebar + content */
+.passeios-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 30px;
+    align-items: start;
 }
-.passeios-filtros-bar {
-    margin-bottom: 30px;
+
+/* Sidebar */
+.passeios-sidebar {
+    background: var(--white);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 24px;
+    position: sticky;
+    top: 90px;
 }
-.filtros-inline {
+.sidebar-header {
     display: flex;
-    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #f0f0f0;
+}
+.sidebar-header h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0;
+}
+.sidebar-clear {
+    font-size: 12px;
+    color: var(--text-green);
+    text-decoration: none;
+}
+.sidebar-clear:hover {
+    text-decoration: underline;
+}
+.sidebar-filter-group {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #f8f8f8;
+}
+.sidebar-filter-group:last-of-type {
+    border-bottom: none;
+    margin-bottom: 16px;
+}
+.sidebar-filter-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--dark);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin: 0 0 12px;
+}
+.sidebar-filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.sidebar-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--dark);
+}
+.sidebar-checkbox input {
+    accent-color: var(--text-green);
+}
+.sidebar-checkbox-label {
+    flex: 1;
+}
+.sidebar-checkbox-count {
+    font-size: 12px;
+    color: var(--gray);
+    background: #f5f5f5;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+/* Content Area */
+.passeios-content {
+    min-width: 0;
+}
+.passeios-content-header {
+    margin-bottom: 20px;
+}
+.passeios-count {
+    font-size: 14px;
+    color: var(--gray);
+}
+
+/* Horizontal Card (lista) */
+.passeios-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.passeio-card-horizontal {
+    display: flex;
+    background: var(--white);
+    border: 1px solid #eee;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: box-shadow .2s;
+}
+.passeio-card-horizontal:hover {
+    box-shadow: var(--shadow);
+}
+.passeio-card-img {
+    width: 280px;
+    min-height: 200px;
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+.passeio-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .3s;
+}
+.passeio-card-horizontal:hover .passeio-card-img img {
+    transform: scale(1.04);
+}
+.passeio-card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--text-green);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+.passeio-card-body {
+    flex: 1;
+    padding: 22px 24px;
+    display: flex;
+    flex-direction: column;
+}
+.passeio-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    gap: 16px;
+}
+.passeio-card-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0;
+    line-height: 1.3;
+}
+.passeio-card-title a {
+    color: var(--dark);
+}
+.passeio-card-title a:hover {
+    color: var(--text-green);
+}
+.passeio-card-price {
+    text-align: right;
+    flex-shrink: 0;
+}
+.passeio-card-price .price-from {
+    display: block;
+    font-size: 13px;
+    color: var(--gray);
+    text-decoration: line-through;
+}
+.passeio-card-price .price-current {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-green);
+}
+.passeio-card-meta {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 10px;
+}
+.passeio-card-meta span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: var(--gray);
+}
+.passeio-card-meta svg {
+    color: var(--text-green);
+}
+.passeio-card-desc {
+    font-size: 13px;
+    color: var(--gray);
+    line-height: 1.6;
+    margin: 0 0 auto;
+    flex: 1;
+}
+.passeio-card-footer {
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+    .passeios-layout {
+        grid-template-columns: 1fr;
+    }
+    .passeios-sidebar {
+        position: static;
+    }
+}
+@media (max-width: 768px) {
+    .passeio-card-horizontal {
+        flex-direction: column;
+    }
+    .passeio-card-img {
+        width: 100%;
+        height: 200px;
+    }
+    .passeio-card-top {
+        flex-direction: column;
+        gap: 8px;
+    }
+    .passeio-card-price {
+        text-align: left;
+    }
+}
     align-items: center;
     flex-wrap: wrap;
 }
