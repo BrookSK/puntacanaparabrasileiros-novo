@@ -95,6 +95,49 @@ class TripsController extends Controller
         ], 'app');
     }
 
+    public function category(Request $request, Response $response): void
+    {
+        $slug = $request->param('slug', '');
+        $page = max(1, (int) $request->query('page', '1'));
+        $orderBy = $request->query('ordenar', '');
+
+        $orderMap = [
+            'preco_asc' => 'sort_order ASC',
+            'preco_desc' => 'sort_order DESC',
+            'popular' => 'bookings_count DESC',
+            'recente' => 'created_at DESC',
+        ];
+        $order = $orderMap[$orderBy] ?? 'sort_order ASC, created_at DESC';
+
+        $cat = $this->categoryModel->findBySlug($slug);
+        if (!$cat) {
+            $this->abort(404, 'Categoria não encontrada.');
+        }
+
+        $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12);
+
+        // Adicionar preço mínimo a cada trip
+        foreach ($trips['items'] as &$trip) {
+            $packages = $this->packageModel->getByTrip((int) $trip['id']);
+            $trip['min_price'] = 0;
+            $trip['regular_price'] = 0;
+            if (!empty($packages)) {
+                $trip['min_price'] = $this->packageModel->getBasePrice((int) $packages[0]['id']);
+                $trip['regular_price'] = $this->packageModel->getRegularPrice((int) $packages[0]['id']);
+            }
+        }
+
+        $categories = $this->categoryModel->getWithTripCount();
+
+        $this->view('frontend/trips/category', [
+            'trips' => $trips,
+            'category' => $cat,
+            'categories' => $categories,
+            'currentOrder' => $orderBy,
+            'pageTitle' => $cat['name'] . ' - Passeios em Punta Cana',
+        ], 'app');
+    }
+
     public function show(Request $request, Response $response): void
     {
         $slug = $request->param('slug', '');

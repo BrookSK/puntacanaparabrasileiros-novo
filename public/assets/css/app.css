@@ -1059,6 +1059,32 @@ img { max-width: 100%; height: auto; }
     border-radius: 10px;
 }
 
+/* Sidebar category links */
+.sidebar-cat-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: var(--dark);
+    text-decoration: none;
+    transition: all .15s;
+}
+.sidebar-cat-link:hover {
+    background: #f5f5f5;
+    color: var(--text-green);
+}
+.sidebar-cat-link.active {
+    background: var(--text-green);
+    color: white;
+    font-weight: 600;
+}
+.sidebar-cat-link.active .sidebar-checkbox-count {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
 /* Content Area */
 .passeios-content {
     min-width: 0;
