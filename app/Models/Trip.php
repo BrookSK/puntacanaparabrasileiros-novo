@@ -413,7 +413,7 @@ class Trip extends Model
      */
     public function getPriceRange(): array
     {
-        $row = $this->db->fetch(
+        $row = $this->db->fetchOne(
             "SELECT
                 FLOOR(MIN(COALESCE(tpc.sale_price, tpc.price))) as min,
                 CEIL(MAX(COALESCE(tpc.sale_price, tpc.price))) as max
@@ -433,7 +433,7 @@ class Trip extends Model
      */
     public function getDurationRange(): array
     {
-        $row = $this->db->fetch(
+        $row = $this->db->fetchOne(
             "SELECT
                 MIN(CASE WHEN duration_unit = 'days' THEN CAST(duration AS UNSIGNED) ELSE CEIL(CAST(duration AS UNSIGNED) / 24) END) as min,
                 MAX(CASE WHEN duration_unit = 'days' THEN CAST(duration AS UNSIGNED) ELSE CEIL(CAST(duration AS UNSIGNED) / 24) END) as max

@@ -110,19 +110,24 @@ class TripsController extends Controller
 
         // Coletar todos os filtros da sidebar
         $currentFilters = [
-            'destino' => (array) $request->query('destino', []),
+            'destino' => array_filter((array) ($request->query('destino') ?? [])),
             'preco_min' => $request->query('preco_min'),
             'preco_max' => $request->query('preco_max'),
             'duracao_min' => $request->query('duracao_min'),
             'duracao_max' => $request->query('duracao_max'),
-            'atividade' => (array) $request->query('atividade', []),
-            'tipo' => (array) $request->query('tipo', []),
-            'tag' => (array) $request->query('tag', []),
-            'data' => (array) $request->query('data', []),
+            'atividade' => array_filter((array) ($request->query('atividade') ?? [])),
+            'tipo' => array_filter((array) ($request->query('tipo') ?? [])),
+            'tag' => array_filter((array) ($request->query('tag') ?? [])),
+            'data' => array_filter((array) ($request->query('data') ?? [])),
         ];
 
         // Buscar passeios com filtros
-        $trips = $this->tripModel->getFiltered((int) $cat['id'], $currentFilters, $orderBy, $page, 12);
+        try {
+            $trips = $this->tripModel->getFiltered((int) $cat['id'], $currentFilters, $orderBy, $page, 12);
+        } catch (\Exception $e) {
+            // Fallback se tabelas de tags não existem ainda
+            $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12, $orderBy);
+        }
 
         // Adicionar preço mínimo e próximas datas a cada trip
         foreach ($trips['items'] as &$trip) {
@@ -138,12 +143,26 @@ class TripsController extends Controller
 
         // Dados para os filtros da sidebar
         $categories = $this->categoryModel->getWithTripCount();
-        $destinations = $this->tripModel->getTagsWithCount('destino');
-        $activities = $this->tripModel->getTagsWithCount('atividade');
-        $tags = $this->tripModel->getTagsWithCount('tag');
+
+        // Tags (podem não existir se a migration 017 ainda não foi rodada)
+        try {
+            $destinations = $this->tripModel->getTagsWithCount('destino');
+            $activities = $this->tripModel->getTagsWithCount('atividade');
+            $tags = $this->tripModel->getTagsWithCount('tag');
+        } catch (\Exception $e) {
+            $destinations = [];
+            $activities = [];
+            $tags = [];
+        }
+
         $priceRange = $this->tripModel->getPriceRange();
         $durationRange = $this->tripModel->getDurationRange();
-        $availableDates = $this->tripModel->getAvailableMonths();
+
+        try {
+            $availableDates = $this->tripModel->getAvailableMonths();
+        } catch (\Exception $e) {
+            $availableDates = [];
+        }
 
         $this->view('frontend/trips/category', [
             'trips' => $trips,
