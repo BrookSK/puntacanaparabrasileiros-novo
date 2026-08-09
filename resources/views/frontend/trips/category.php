@@ -43,7 +43,6 @@
                             <option value="preco_asc" <?= ($currentOrder ?? '') === 'preco_asc' ? 'selected' : '' ?>>Menor Preço</option>
                             <option value="preco_desc" <?= ($currentOrder ?? '') === 'preco_desc' ? 'selected' : '' ?>>Maior Preço</option>
                             <option value="recente" <?= ($currentOrder ?? '') === 'recente' ? 'selected' : '' ?>>Mais Recente</option>
-                            <option value="antigo" <?= ($currentOrder ?? '') === 'antigo' ? 'selected' : '' ?>>Mais Antigo</option>
                         </select>
                     </form>
                 </div>
