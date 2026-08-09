@@ -102,19 +102,19 @@ class TripsController extends Controller
         $orderBy = $request->query('ordenar', '');
 
         $orderMap = [
-            'preco_asc' => 'sort_order ASC',
-            'preco_desc' => 'sort_order DESC',
-            'popular' => 'bookings_count DESC',
-            'recente' => 'created_at DESC',
+            'preco_asc' => 't.sort_order ASC',
+            'preco_desc' => 't.sort_order DESC',
+            'popular' => 't.bookings_count DESC',
+            'recente' => 't.created_at DESC',
         ];
-        $order = $orderMap[$orderBy] ?? 'sort_order ASC, created_at DESC';
+        $order = $orderMap[$orderBy] ?? null;
 
         $cat = $this->categoryModel->findBySlug($slug);
         if (!$cat) {
             $this->abort(404, 'Categoria não encontrada.');
         }
 
-        $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12);
+        $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12, $order);
 
         // Adicionar preço mínimo a cada trip
         foreach ($trips['items'] as &$trip) {

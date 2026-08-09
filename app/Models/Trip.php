@@ -39,12 +39,13 @@ class Trip extends Model
         );
     }
 
-    public function getByCategory(int $categoryId, int $page = 1, int $perPage = 12): array
+    public function getByCategory(int $categoryId, int $page = 1, int $perPage = 12, ?string $orderBy = null): array
     {
+        $order = $orderBy ?? 't.sort_order ASC, t.created_at DESC';
         $sql = "SELECT t.* FROM `{$this->table}` t
                 INNER JOIN trip_category_relations tcr ON t.id = tcr.trip_id
                 WHERE tcr.category_id = ? AND t.status = 'published'
-                ORDER BY t.sort_order ASC
+                ORDER BY {$order}
                 LIMIT ? OFFSET ?";
         $offset = ($page - 1) * $perPage;
         $items = $this->db->fetchAll($sql, [$categoryId, $perPage, $offset]);
