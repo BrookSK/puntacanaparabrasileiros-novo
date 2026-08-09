@@ -109,6 +109,9 @@ class TripsController extends Controller
         }
 
         // Coletar todos os filtros da sidebar
+        $priceRange = $this->tripModel->getPriceRange();
+        $durationRange = $this->tripModel->getDurationRange();
+
         $currentFilters = [
             'destino' => array_filter((array) ($request->query('destino') ?? [])),
             'preco_min' => $request->query('preco_min'),
@@ -119,6 +122,21 @@ class TripsController extends Controller
             'tag' => array_filter((array) ($request->query('tag') ?? [])),
             'data' => array_filter((array) ($request->query('data') ?? [])),
         ];
+
+        // Não aplicar filtro de preço se os valores são iguais ao range completo
+        if ((int)($currentFilters['preco_min'] ?? 0) <= $priceRange['min']) {
+            $currentFilters['preco_min'] = null;
+        }
+        if ((int)($currentFilters['preco_max'] ?? 0) >= $priceRange['max']) {
+            $currentFilters['preco_max'] = null;
+        }
+        // Não aplicar filtro de duração se os valores são iguais ao range completo
+        if ((int)($currentFilters['duracao_min'] ?? 0) <= $durationRange['min']) {
+            $currentFilters['duracao_min'] = null;
+        }
+        if ((int)($currentFilters['duracao_max'] ?? 0) >= $durationRange['max']) {
+            $currentFilters['duracao_max'] = null;
+        }
 
         // Buscar passeios com filtros
         try {
@@ -141,8 +159,6 @@ class TripsController extends Controller
 
         // Dados para os filtros da sidebar
         $categories = $this->categoryModel->getWithTripCount();
-        $priceRange = $this->tripModel->getPriceRange();
-        $durationRange = $this->tripModel->getDurationRange();
 
         // Tags e datas (requerem migration 017)
         try {

@@ -1043,8 +1043,6 @@ img { max-width: 100%; height: auto; }
    FILTERS SIDEBAR
    ============================================================ */
 .cat-filters {
-    position: sticky;
-    top: 80px;
     background: #ffffff;
     border-radius: 16px;
     border: 1px solid #ebebeb;

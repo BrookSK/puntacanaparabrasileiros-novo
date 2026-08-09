@@ -284,7 +284,7 @@ class Trip extends Model
             $params = array_merge($params, $filters['atividade']);
         }
 
-        // Filtro por tags genéricas (Tipos de Viagem no site antigo)
+        // Filtro por tags genéricas (Tipos de Viagem)
         if (!empty($filters['tag'])) {
             $placeholders = implode(',', array_fill(0, count($filters['tag']), '?'));
             $joins[] = "INNER JOIN trip_tag_relations ttr_tag ON t.id = ttr_tag.trip_id
@@ -312,34 +312,35 @@ class Trip extends Model
             $params[] = (int)$filters['duracao_max'];
         }
 
-        // Filtro por preço
+        // JOIN de preço (sempre necessário para filtro OU ordenação)
         $needsPriceFilter = (!empty($filters['preco_min']) && (int)$filters['preco_min'] > 0) || (!empty($filters['preco_max']) && (int)$filters['preco_max'] > 0);
         $needsPriceOrder = in_array($orderBy, ['preco_asc', 'preco_desc']);
-        $needsPriceJoin = $needsPriceFilter || $needsPriceOrder;
 
-        if ($needsPriceJoin) {
-            $joins[] = "LEFT JOIN trip_packages tp_price ON tp_price.trip_id = t.id
-                        LEFT JOIN trip_package_categories tpc_price ON tpc_price.package_id = tp_price.id AND COALESCE(tpc_price.sale_price, tpc_price.price) > 0";
-        }
+        // Sempre fazer JOIN de preço para ter o min_price disponível
+        $joins[] = "LEFT JOIN trip_packages tp_price ON tp_price.trip_id = t.id
+                    LEFT JOIN trip_package_categories tpc_price ON tpc_price.package_id = tp_price.id AND COALESCE(tpc_price.sale_price, tpc_price.price) > 0";
 
+        // Aplicar filtro de preço no HAVING (após GROUP BY calcular MIN)
+        $havingConditions = [];
         if ($needsPriceFilter) {
             if (!empty($filters['preco_min']) && (int)$filters['preco_min'] > 0) {
-                $conditions[] = "COALESCE(tpc_price.sale_price, tpc_price.price) >= ?";
+                $havingConditions[] = "min_price >= ?";
                 $params[] = (int)$filters['preco_min'];
             }
             if (!empty($filters['preco_max']) && (int)$filters['preco_max'] > 0) {
-                $conditions[] = "COALESCE(tpc_price.sale_price, tpc_price.price) <= ?";
+                $havingConditions[] = "min_price <= ?";
                 $params[] = (int)$filters['preco_max'];
             }
         }
 
         $joinsSql = implode("\n", $joins);
         $conditionsSql = implode(' AND ', $conditions);
+        $havingSql = !empty($havingConditions) ? 'HAVING ' . implode(' AND ', $havingConditions) : '';
 
         // Ordenação
         if ($needsPriceOrder) {
             $direction = $orderBy === 'preco_asc' ? 'ASC' : 'DESC';
-            $orderSql = "ORDER BY MIN(COALESCE(tpc_price.sale_price, tpc_price.price)) {$direction}";
+            $orderSql = "ORDER BY min_price {$direction}";
         } else {
             $orderMap = [
                 'recente' => 'ORDER BY t.created_at DESC',
@@ -348,11 +349,12 @@ class Trip extends Model
             $orderSql = $orderMap[$orderBy] ?? 'ORDER BY t.sort_order ASC, t.created_at DESC';
         }
 
-        $sql = "SELECT t.*
+        $sql = "SELECT t.*, MIN(COALESCE(tpc_price.sale_price, tpc_price.price)) as min_price
                 FROM `{$this->table}` t
                 {$joinsSql}
                 WHERE {$conditionsSql}
                 GROUP BY t.id
+                {$havingSql}
                 {$orderSql}
                 LIMIT ? OFFSET ?";
         $params[] = $perPage;
@@ -360,13 +362,68 @@ class Trip extends Model
 
         $items = $this->db->fetchAll($sql, $params);
 
-        // Count
-        $countParams = array_slice($params, 0, -2);
-        $countSql = "SELECT COUNT(DISTINCT t.id)
-                     FROM `{$this->table}` t
-                     {$joinsSql}
-                     WHERE {$conditionsSql}";
-        $total = (int) $this->db->fetchColumn($countSql, $countParams);
+        // Count (sem LIMIT, sem HAVING para preço usamos subquery)
+        if (!empty($havingConditions)) {
+            $countParams = array_slice($params, 0, -2); // sem limit/offset
+            $countSql = "SELECT COUNT(*) FROM (
+                            SELECT t.id, MIN(COALESCE(tpc_price.sale_price, tpc_price.price)) as min_price
+                            FROM `{$this->table}` t
+                            {$joinsSql}
+                            WHERE {$conditionsSql}
+                            GROUP BY t.id
+                            {$havingSql}
+                         ) sub";
+            $total = (int) $this->db->fetchColumn($countSql, $countParams);
+        } else {
+            // Sem filtro de preço, count simples
+            $baseParams = [];
+            $baseJoins = ["INNER JOIN trip_category_relations tcr ON t.id = tcr.trip_id AND tcr.category_id = ?"];
+            $baseParams[] = $categoryId;
+
+            // Re-adicionar joins de filtros de tag (sem os de preço)
+            $tagParamIdx = 1; // após categoryId
+            if (!empty($filters['destino'])) {
+                $placeholders = implode(',', array_fill(0, count($filters['destino']), '?'));
+                $baseJoins[] = "INNER JOIN trip_tag_relations ttr_dest ON t.id = ttr_dest.trip_id
+                                INNER JOIN trip_tags tt_dest ON ttr_dest.tag_id = tt_dest.id AND tt_dest.type = 'destino' AND tt_dest.slug IN ({$placeholders})";
+                $baseParams = array_merge($baseParams, $filters['destino']);
+            }
+            if (!empty($filters['atividade'])) {
+                $placeholders = implode(',', array_fill(0, count($filters['atividade']), '?'));
+                $baseJoins[] = "INNER JOIN trip_tag_relations ttr_act ON t.id = ttr_act.trip_id
+                                INNER JOIN trip_tags tt_act ON ttr_act.tag_id = tt_act.id AND tt_act.type = 'atividade' AND tt_act.slug IN ({$placeholders})";
+                $baseParams = array_merge($baseParams, $filters['atividade']);
+            }
+            if (!empty($filters['tag'])) {
+                $placeholders = implode(',', array_fill(0, count($filters['tag']), '?'));
+                $baseJoins[] = "INNER JOIN trip_tag_relations ttr_tag ON t.id = ttr_tag.trip_id
+                                INNER JOIN trip_tags tt_tag ON ttr_tag.tag_id = tt_tag.id AND tt_tag.type = 'tag' AND tt_tag.slug IN ({$placeholders})";
+                $baseParams = array_merge($baseParams, $filters['tag']);
+            }
+            if (!empty($filters['data'])) {
+                $dateConditions2 = [];
+                foreach ($filters['data'] as $monthKey) {
+                    $dateConditions2[] = "DATE_FORMAT(tfd.date, '%Y-%m') = ?";
+                    $baseParams[] = $monthKey;
+                }
+                $baseJoins[] = "INNER JOIN trip_fixed_dates tfd ON t.id = tfd.trip_id AND tfd.status = 'available' AND tfd.date >= CURDATE() AND (" . implode(' OR ', $dateConditions2) . ")";
+            }
+
+            $baseConditions = ["t.status = 'published'"];
+            if (!empty($filters['duracao_min']) && (int)$filters['duracao_min'] > 0) {
+                $baseConditions[] = "CASE WHEN t.duration_unit = 'days' THEN CAST(t.duration AS UNSIGNED) ELSE CEIL(CAST(t.duration AS UNSIGNED) / 24) END >= ?";
+                $baseParams[] = (int)$filters['duracao_min'];
+            }
+            if (!empty($filters['duracao_max']) && (int)$filters['duracao_max'] > 0) {
+                $baseConditions[] = "CASE WHEN t.duration_unit = 'days' THEN CAST(t.duration AS UNSIGNED) ELSE CEIL(CAST(t.duration AS UNSIGNED) / 24) END <= ?";
+                $baseParams[] = (int)$filters['duracao_max'];
+            }
+
+            $baseJoinsSql = implode("\n", $baseJoins);
+            $baseCondSql = implode(' AND ', $baseConditions);
+            $countSql = "SELECT COUNT(DISTINCT t.id) FROM `{$this->table}` t {$baseJoinsSql} WHERE {$baseCondSql}";
+            $total = (int) $this->db->fetchColumn($countSql, $baseParams);
+        }
 
         return [
             'items' => $items,
