@@ -39,10 +39,11 @@
                     <h4 class="sidebar-filter-title">Ordenar por</h4>
                     <form method="GET" action="/passeios/categoria/<?= e($category['slug']) ?>">
                         <select name="ordenar" class="form-control" onchange="this.form.submit()">
-                            <option value="">Relevância</option>
+                            <option value="relevancia" <?= ($currentOrder ?? '') === 'relevancia' || empty($currentOrder) ? 'selected' : '' ?>>Relevância</option>
                             <option value="preco_asc" <?= ($currentOrder ?? '') === 'preco_asc' ? 'selected' : '' ?>>Menor Preço</option>
                             <option value="preco_desc" <?= ($currentOrder ?? '') === 'preco_desc' ? 'selected' : '' ?>>Maior Preço</option>
                             <option value="recente" <?= ($currentOrder ?? '') === 'recente' ? 'selected' : '' ?>>Mais Recente</option>
+                            <option value="antigo" <?= ($currentOrder ?? '') === 'antigo' ? 'selected' : '' ?>>Mais Antigo</option>
                         </select>
                     </form>
                 </div>

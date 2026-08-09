@@ -30,30 +30,26 @@ class TripsController extends Controller
         $page = max(1, (int) $request->query('page', '1'));
         $category = $request->query('categoria');
         $search = $request->query('busca');
-        $orderBy = $request->query('ordenar', 'sort_order ASC, created_at DESC');
+        $orderBy = $request->query('ordenar', 'relevancia');
         $duration = $request->query('duracao');
 
-        // Mapear ordenação
-        $orderMap = [
-            'preco_asc' => 'sort_order ASC',
-            'preco_desc' => 'sort_order DESC',
-            'popular' => 'bookings_count DESC',
-            'recente' => 'created_at DESC',
-            'nome' => 'title ASC',
-        ];
-        $order = $orderMap[$orderBy] ?? 'sort_order ASC, created_at DESC';
+        // Validar valores permitidos
+        $allowedOrders = ['relevancia', 'preco_asc', 'preco_desc', 'recente', 'antigo'];
+        if (!in_array($orderBy, $allowedOrders)) {
+            $orderBy = 'relevancia';
+        }
 
         if ($search) {
             $trips = $this->tripModel->search($search, $page, 12);
         } elseif ($category) {
             $cat = $this->categoryModel->findBySlug($category);
             if ($cat) {
-                $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12);
+                $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12, $orderBy);
             } else {
-                $trips = $this->tripModel->getPublished($page, 12, $order);
+                $trips = $this->tripModel->getPublished($page, 12, $orderBy);
             }
         } else {
-            $trips = $this->tripModel->getPublished($page, 12, $order);
+            $trips = $this->tripModel->getPublished($page, 12, $orderBy);
         }
 
         // Adicionar preço mínimo a cada trip
@@ -99,22 +95,20 @@ class TripsController extends Controller
     {
         $slug = $request->param('slug', '');
         $page = max(1, (int) $request->query('page', '1'));
-        $orderBy = $request->query('ordenar', '');
+        $orderBy = $request->query('ordenar', 'relevancia');
 
-        $orderMap = [
-            'preco_asc' => 't.sort_order ASC',
-            'preco_desc' => 't.sort_order DESC',
-            'popular' => 't.bookings_count DESC',
-            'recente' => 't.created_at DESC',
-        ];
-        $order = $orderMap[$orderBy] ?? null;
+        // Validar valores permitidos
+        $allowedOrders = ['relevancia', 'preco_asc', 'preco_desc', 'recente', 'antigo'];
+        if (!in_array($orderBy, $allowedOrders)) {
+            $orderBy = 'relevancia';
+        }
 
         $cat = $this->categoryModel->findBySlug($slug);
         if (!$cat) {
             $this->abort(404, 'Categoria não encontrada.');
         }
 
-        $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12, $order);
+        $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12, $orderBy);
 
         // Adicionar preço mínimo a cada trip
         foreach ($trips['items'] as &$trip) {

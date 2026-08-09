@@ -23,10 +23,46 @@ class Trip extends Model
         return $this->findWhere('slug', $slug);
     }
 
-    public function getPublished(int $page = 1, int $perPage = 12, ?string $orderBy = null): array
+    public function getPublished(int $page = 1, int $perPage = 12, string $orderBy = 'relevancia'): array
     {
-        $order = $orderBy ?? 'sort_order ASC, created_at DESC';
-        return $this->paginate($page, $perPage, "status = 'published'", [], $order);
+        $offset = ($page - 1) * $perPage;
+        $needsPriceJoin = in_array($orderBy, ['preco_asc', 'preco_desc']);
+
+        if ($needsPriceJoin) {
+            $direction = $orderBy === 'preco_asc' ? 'ASC' : 'DESC';
+            $sql = "SELECT t.*, MIN(COALESCE(tpc.sale_price, tpc.price)) as min_price
+                    FROM `{$this->table}` t
+                    LEFT JOIN trip_packages tp ON tp.trip_id = t.id
+                    LEFT JOIN trip_package_categories tpc ON tpc.package_id = tp.id AND COALESCE(tpc.sale_price, tpc.price) > 0
+                    WHERE t.status = 'published'
+                    GROUP BY t.id
+                    ORDER BY min_price {$direction}
+                    LIMIT ? OFFSET ?";
+            $items = $this->db->fetchAll($sql, [$perPage, $offset]);
+        } else {
+            $orderMap = [
+                'recente' => 'created_at DESC',
+                'antigo' => 'created_at ASC',
+                'relevancia' => 'sort_order ASC, created_at DESC',
+            ];
+            $order = $orderMap[$orderBy] ?? 'sort_order ASC, created_at DESC';
+            $items = $this->db->fetchAll(
+                "SELECT * FROM `{$this->table}` WHERE status = 'published' ORDER BY {$order} LIMIT ? OFFSET ?",
+                [$perPage, $offset]
+            );
+        }
+
+        $total = (int) $this->db->fetchColumn(
+            "SELECT COUNT(*) FROM `{$this->table}` WHERE status = 'published'"
+        );
+
+        return [
+            'items' => $items,
+            'total' => $total,
+            'per_page' => $perPage,
+            'current_page' => $page,
+            'total_pages' => (int) ceil($total / $perPage),
+        ];
     }
 
     public function getFeatured(int $limit = 6): array
@@ -39,15 +75,38 @@ class Trip extends Model
         );
     }
 
-    public function getByCategory(int $categoryId, int $page = 1, int $perPage = 12, ?string $orderBy = null): array
+    public function getByCategory(int $categoryId, int $page = 1, int $perPage = 12, string $orderBy = 'relevancia'): array
     {
-        $order = $orderBy ?? 't.sort_order ASC, t.created_at DESC';
-        $sql = "SELECT t.* FROM `{$this->table}` t
-                INNER JOIN trip_category_relations tcr ON t.id = tcr.trip_id
-                WHERE tcr.category_id = ? AND t.status = 'published'
-                ORDER BY {$order}
-                LIMIT ? OFFSET ?";
         $offset = ($page - 1) * $perPage;
+
+        // Para ordenar por preço, precisa de JOIN com trip_packages e trip_package_categories
+        $needsPriceJoin = in_array($orderBy, ['preco_asc', 'preco_desc']);
+
+        if ($needsPriceJoin) {
+            $direction = $orderBy === 'preco_asc' ? 'ASC' : 'DESC';
+            $sql = "SELECT t.*, MIN(COALESCE(tpc.sale_price, tpc.price)) as min_price
+                    FROM `{$this->table}` t
+                    INNER JOIN trip_category_relations tcr ON t.id = tcr.trip_id
+                    LEFT JOIN trip_packages tp ON tp.trip_id = t.id
+                    LEFT JOIN trip_package_categories tpc ON tpc.package_id = tp.id AND COALESCE(tpc.sale_price, tpc.price) > 0
+                    WHERE tcr.category_id = ? AND t.status = 'published'
+                    GROUP BY t.id
+                    ORDER BY min_price {$direction}
+                    LIMIT ? OFFSET ?";
+        } else {
+            $orderMap = [
+                'recente' => 't.created_at DESC',
+                'antigo' => 't.created_at ASC',
+                'relevancia' => 't.sort_order ASC, t.created_at DESC',
+            ];
+            $order = $orderMap[$orderBy] ?? 't.sort_order ASC, t.created_at DESC';
+            $sql = "SELECT t.* FROM `{$this->table}` t
+                    INNER JOIN trip_category_relations tcr ON t.id = tcr.trip_id
+                    WHERE tcr.category_id = ? AND t.status = 'published'
+                    ORDER BY {$order}
+                    LIMIT ? OFFSET ?";
+        }
+
         $items = $this->db->fetchAll($sql, [$categoryId, $perPage, $offset]);
 
         $countSql = "SELECT COUNT(*) FROM `{$this->table}` t
