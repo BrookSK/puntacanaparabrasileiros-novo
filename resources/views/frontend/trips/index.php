@@ -20,7 +20,7 @@
                 </div>
             </a>
             <a href="/passeios/categoria/familia" class="categoria-card-lg">
-                <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/4.png" alt="Adequado para crianças" loading="lazy">
+                <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/972359ab-cc9a-4b24-847a-01fbf11ff36b-990x490.jpeg" alt="Adequado para crianças" loading="lazy">
                 <div class="categoria-card-overlay">
                     <span class="categoria-card-name">Adequado para crianças &rarr;</span>
                 </div>
