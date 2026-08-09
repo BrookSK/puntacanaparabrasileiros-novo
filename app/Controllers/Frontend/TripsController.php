@@ -139,11 +139,7 @@ class TripsController extends Controller
         }
 
         // Buscar passeios com filtros
-        try {
-            $trips = $this->tripModel->getFiltered((int) $cat['id'], $currentFilters, $orderBy, $page, 12);
-        } catch (\Throwable $e) {
-            $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12, $orderBy);
-        }
+        $trips = $this->tripModel->getFiltered((int) $cat['id'], $currentFilters, $orderBy, $page, 12);
 
         // Adicionar preço mínimo e próximas datas a cada trip
         foreach ($trips['items'] as &$trip) {
