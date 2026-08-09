@@ -45,8 +45,8 @@
                 </div>
 
                 <!-- Descrição curta -->
-                <?php if ($trip['description']): ?>
-                <p class="trip-short-desc"><?= e($trip['description']) ?></p>
+                <?php if ($trip['short_description']): ?>
+                <p class="trip-short-desc"><?= e($trip['short_description']) ?></p>
                 <?php endif; ?>
 
                 <?php if ($trip['important_notes']): ?>
@@ -65,7 +65,7 @@
                 <div class="trip-tab-content active" id="tab-visao-geral">
                     <h2>Visão Geral</h2>
                     <div class="trip-body-content">
-                        <?= nl2br(e($trip['short_description'] ?? $trip['description'] ?? '')) ?>
+                        <?= $trip['description'] ?>
                     </div>
 
                     <!-- Notas Importantes / Avisos -->

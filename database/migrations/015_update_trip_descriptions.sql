@@ -1,32 +1,50 @@
--- Migration: Atualizar descrições dos passeios com conteúdo completo do site antigo
+-- Migration: Atualizar descrições de TODOS os passeios com conteúdo completo do site antigo
 -- Data: 2026-08-08
 
--- Buggies + Cenote Domitai
-UPDATE trips SET short_description = 'Prepare-se para uma aventura emocionante sobre quatro rodas pelas estradas e trilhas da região de Macao, em Punta Cana! Com paisagens de tirar o fôlego, lama, cavernas escondidas e elementos culturais. O passeio oferece uma experiência vibrante para quem busca adrenalina e diversão. Você poderá nadar em um cenote de águas cristalinas e visitar a Vila Taína para uma imersão na cultura local.
+UPDATE trips SET description = '<p>Prepare-se para explorar as estradas de Macao, em Punta Cana, dirigindo com facilidade e muita diversão. Aproveite as paisagens deslumbrantes, percorra trilhas e lama, descubra e nade em um cenote de águas azuis escondida no caminho e experimente produtos típicos dominicanos. Essa aventura vai render memórias inesquecíveis da sua viagem a Punta Cana.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'buggies-cenote-domitai';
 
-A ordem do passeio poderá ser alterada sem aviso prévio.
+UPDATE trips SET description = '<p><strong>Luzes, câmera, sabores e emoção em um só lugar!</strong></p><p>O <strong>Chic Cabaret &amp; Restaurant</strong> é uma experiência que mistura <strong>música, dança e alta gastronomia</strong> em um show inesquecível. Entre taças, sabores e ritmos latinos, cada prato é um espetáculo e cada música, uma viagem no tempo. Celebre o melhor da vida e <strong>prepare-se para uma noite simplesmente memorável!</strong></p><p><strong>Entrada proibida para menores de 18 anos.</strong></p>' WHERE slug = 'chic-cabaret-restaurant';
 
-Gestantes não são permitidas.
+UPDATE trips SET description = '<p>A Coco Bongo é a casa noturna mais famosa de Punta Cana e do Caribe. É referência em diversão, espetáculos, shows, performances circenses, balada, boa música e gente bonita. Não faltam motivos para incluí-la na sua lista de passeios noturnos. Os shows são inspirados em grandes produções da Broadway e Las Vegas, além de homenagens a estrelas da música e do cinema. Personagens e ícones como O Máscara, Moulin Rouge, Chicago, Batman, Homem-Aranha, Madonna, Michael Jackson e The Beatles são recriados de forma impressionante, combinando talento artístico, vídeos e recursos tecnológicos de última geração.</p><p><strong>Entrada proibida para menores de 18 anos.</strong><br><strong>Preço para sexta-feira e sábado: US$ 200.</strong></p>' WHERE slug = 'coco-bongo-front-row';
 
-O que levar:
+UPDATE trips SET description = '<p>A Coco Bongo é a casa noturna mais famosa de Punta Cana e do Caribe. É referência em diversão, espetáculos, shows, performances circenses, balada, boa música e gente bonita. Não faltam motivos para incluí-la na sua lista de passeios noturnos. Os shows são inspirados em grandes produções da Broadway e Las Vegas, além de homenagens a estrelas da música e do cinema. Personagens e ícones como O Máscara, Moulin Rouge, Chicago, Batman, Homem-Aranha, Madonna, Michael Jackson e The Beatles são recriados de forma impressionante, combinando talento artístico, vídeos e recursos tecnológicos de última geração.</p><p><strong>Entrada proibida para menores de 18 anos.</strong><br><strong>Preço para sexta-feira e sábado: US$ 180.</strong></p>' WHERE slug = 'coco-bongo-gold-member';
 
-• Roupas e calçados confortáveis
-• Roupa de praia
-• Óculos de sol e bandana
-• Protetor solar
-• Repelente
-• Roupa de banho
-• Toalha de banho
-• Dinheiro para fotos'
-WHERE slug = 'buggies-cenote-domitai';
+UPDATE trips SET description = '<p>A Coco Bongo é a casa noturna mais famosa de Punta Cana e do Caribe. É referência em diversão, espetáculos, shows, performances circenses, balada, boa música e gente bonita. Não faltam motivos para incluí-la na sua lista de passeios noturnos. Os shows são inspirados em grandes produções da Broadway e Las Vegas, além de homenagens a estrelas da música e do cinema. Personagens e ícones como O Máscara, Moulin Rouge, Chicago, Batman, Homem-Aranha, Madonna, Michael Jackson e The Beatles são recriados de forma impressionante, combinando talento artístico, vídeos e recursos tecnológicos de última geração.</p><p><strong>Entrada proibida para menores de 18 anos.</strong></p>' WHERE slug = 'coco-bongo-open-bar';
 
--- Destaques do Buggies + Cenote Domitai
-DELETE FROM trip_itinerary WHERE trip_id = (SELECT id FROM trips WHERE slug = 'buggies-cenote-domitai' LIMIT 1);
+UPDATE trips SET description = '<p>Embarque no nosso catamarã e viva a festa mais animada do Caribe! A Party Boat é pura diversão: música, drinks e paisagens de tirar o fôlego. Mergulhe entre corais coloridos, brinde na piscina natural de Bávaro e celebre a vida com amigos e família em alto mar.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'festa-no-catamara-party-boat';
 
-INSERT INTO trip_itinerary (trip_id, day_number, title, description, sort_order) VALUES
-((SELECT id FROM trips WHERE slug = 'buggies-cenote-domitai' LIMIT 1), 1, 'Conduza o veículo escolhido em uma caravana guiada', NULL, 1),
-((SELECT id FROM trips WHERE slug = 'buggies-cenote-domitai' LIMIT 1), 1, 'Trilha em meio à natureza com emoção e lama', NULL, 2),
-((SELECT id FROM trips WHERE slug = 'buggies-cenote-domitai' LIMIT 1), 1, 'Nade no Cenote de nossa Caverna Indígena Iguanabona', NULL, 3),
-((SELECT id FROM trips WHERE slug = 'buggies-cenote-domitai' LIMIT 1), 1, 'Visite a Vila Taíno, recriada historicamente, e assista ao show interativo dos indígenas no Parque Domitai', NULL, 4),
-((SELECT id FROM trips WHERE slug = 'buggies-cenote-domitai' LIMIT 1), 1, 'Experimente café, chocolate, charuto, chá e a famosa mamajuana', NULL, 5),
-((SELECT id FROM trips WHERE slug = 'buggies-cenote-domitai' LIMIT 1), 1, 'Gestantes não são permitidas', NULL, 6);
+UPDATE trips SET description = '<p>Você irá interagir com o golfinho em uma plataforma onde todos ficam de pé enquanto eles se aproximam. Irá interagir com o golfinho por 40 minutos tocando, abraçando, beijando e fazendo todas as interações guiadas:</p><p>✅ Aperto de mão ✅ Beijo e abraço ✅ Dança ✅ Orquestra ✅ Carinho na barriga</p><p><strong>*não inclui nado com golfinho</strong></p><p><strong>Gestantes não podem participar do nado com golfinhos. É permitida apenas a interação, e somente até no máximo 5 meses de gestação.</strong></p>' WHERE slug = 'interacao-com-golfinho';
+
+UPDATE trips SET description = '<p>Mergulhe nas águas cristalinas da Isla Catalina, onde o sol beija o mar e a vida dança entre corais. Sinta o puro sabor do Caribe em cada onda e sorriso.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'isla-catalina-com-snorkel';
+
+UPDATE trips SET description = '<p>Entre pedras e memórias, Altos de Chavón revela sua magia, Isla Catalina convida ao mergulho em um mar de cores e vida. Sol, areia e encanto — o Caribe em sua forma mais pura.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'isla-catalina-com-snorkel-altos-de-chavon';
+
+UPDATE trips SET description = '<p>No coração da natureza, cada trilha revela aventura e encanto. Entre buggies, cavalos e rios cristalinos, a alma se enche de liberdade. O vento da tirolesa e a emoção do salto despertam sorrisos e coragem. E ao sabor da culinária dominicana, guardamos memórias que nunca se apagam.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'la-hacienda-park-fazenda';
+
+UPDATE trips SET description = '<p>Você irá interagir e nadar com 1 golfinho em uma plataforma onde todos ficam de pé enquanto eles se aproximam. Irá interagir e também nadar com 1 golfinho por 50 minutos tocando, abraçando, beijando e fazendo todas as interações guiadas:</p><p>✅ Aperto de mão ✅ Beijo e abraço ✅ Dança ✅ Orquestra ✅ Carinho na barriga ✅ Empurrão ✅ Reboque dorsal ✅ Nado com 1 Golfinho</p><p><strong>Gestantes não podem participar do nado com golfinhos. É permitida apenas a interação, e somente até no máximo 5 meses de gestação.</strong></p>' WHERE slug = 'nado-e-interacao-com-1-golfinho';
+
+UPDATE trips SET description = '<p>Você irá interagir e nadar com 2 golfinhos em uma plataforma onde todos ficam de pé enquanto eles se aproximam. Irá interagir e também nadar com os golfinhos por 60 minutos, tocando, abraçando, beijando e fazendo todas as interações guiadas:</p><p>✅ Aperto de mão ✅ Beijo e abraço ✅ Dança ✅ Orquestra ✅ Carinho na barriga ✅ Empurrão ✅ Reboque dorsal ✅ Nado com 1 Golfinho ✅ Nado com 2 golfinhos ✅ Passeio dorsal peck shake</p><p><strong>Gestantes não podem participar do nado com golfinhos. É permitida apenas a interação, e somente até no máximo 5 meses de gestação.</strong></p>' WHERE slug = 'nado-e-interacao-com-2-golfinhos';
+
+UPDATE trips SET description = '<p>Sinta a liberdade de voar sobre o azul do Caribe! No <strong>Parasailing</strong>, o vento te guia e o mar te abraça lá de cima. Entre céu e oceano, descubra uma vista deslumbrante — uma aventura leve, segura e simplesmente inesquecível.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'parasailing';
+
+UPDATE trips SET description = '<p>Pesque no azul do Caribe e desafie os gigantes do mar. Entre Mahi-Mahi, Marlin e Wahoo, cada lance é pura emoção. Uma aventura inesquecível para quem vive a paixão da pesca esportiva.</p><p><strong>Gestantes não são permitidas.</strong></p><p><strong>Crianças de 5 a 11 anos são permitidos apenas como acompanhante, não sendo permitido pescar.</strong></p><p><strong>Menores de 4 anos não são permitidos.</strong></p>' WHERE slug = 'pesca-em-alto-mar';
+
+UPDATE trips SET description = '<p>Prepare-se para explorar as estradas de Macao, em Punta Cana, dirigindo com facilidade e muita diversão. Aproveite as paisagens deslumbrantes, percorra trilhas e lama, descubra e nade em um cenote de águas azuis escondida no caminho e experimente produtos típicos dominicanos. Essa aventura vai render memórias inesquecíveis da sua viagem a Punta Cana.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'quadriciclos-cenote';
+
+UPDATE trips SET description = '<p>Viva uma jornada inesquecível por Samaná: rios cristalinos, manguezais encantados e a famosa Praia Rincón, eleita uma das mais bonitas do mundo. Relaxe em Cayo Levantado e saboreie a cultura dominicana em cada detalhe desta aventura única.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'samana-playa-rincon-cayo-levantado';
+
+UPDATE trips SET description = '<p>Explore a alma da primeira cidade do Novo Mundo, onde a história de Colombo ainda sussurra entre pedras antigas. Viva séculos de encanto, cultura e cores em Santo Domingo!</p>' WHERE slug = 'santo-domingo';
+
+UPDATE trips SET description = '<p>A <strong>Saona Clássica</strong> é um convite para viver um dia no paraíso: águas azul-turquesa, areia branca e paisagens de tirar o fôlego. O trajeto combina lancha e catamarã, com parada na piscina natural e tempo livre na ilha. Almoço típico, open bar e muita diversão completam essa experiência inesquecível no Caribe.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'saona-classica-catamara';
+
+UPDATE trips SET description = '<p><strong>Exclusividade da Punta Cana para Brasileiros</strong></p><p><strong>Lancha ida e volta</strong></p><p>A <strong>Saona Premium Brasil</strong> nasceu para o viajante brasileiro que busca mais do que um simples roteiro VIP — busca o <strong>verdadeiro significado de Premium</strong>, o prazer de viver <strong>momentos únicos</strong>. Aqui, deixamos para trás as inquietações dos passeios comuns e abrimos espaço para uma <strong>experiência inesquecível</strong>, onde o calor do Brasil se mistura à magia do Caribe, criando lembranças que o tempo não apaga.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'saona-premium-brasil-lancha';
+
+UPDATE trips SET description = '<p>Imagine um dia em que o mar do Caribe te abraça com águas azuis infinitas, onde a brisa salgada acaricia o rosto e cada parada parece uma cena de cartão-postal. Assim começa a experiência Saona VIP Mano Juan, uma aventura que vai muito além de um simples passeio: é uma viagem à essência do paraíso.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'saona-vip-mano-juan-lancha';
+
+UPDATE trips SET description = '<p>Um mundo de sensações te espera entre céu e terra, onde a adrenalina encontra a magia da natureza. Viva aventuras que despertam corpo, mente e alma — e mergulhe nas águas sagradas de um cenote.</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'scape-park-cenote';
+
+UPDATE trips SET description = '<p>Viva uma experiência única explorando o fundo do mar de Punta Cana de uma forma divertida, segura e inesquecível.</p><p><strong>Gestantes não são permitidas.</strong></p><p><strong>Menores de 7 anos não são permitidos.</strong></p>' WHERE slug = 'scuba-doo-aventura-submarina';
+
+UPDATE trips SET description = '<p>Caminhe no fundo do mar e descubra um mundo encantado, entre peixes, corais e sorrisos que dançam nas águas do Caribe. Toque arraias, admire tubarões e celebre a vida ao som das ondas — uma aventura mágica, vibrante e inesquecível!</p><p><strong>Gestantes não são permitidas.</strong></p>' WHERE slug = 'seaquarium';
+
+UPDATE trips SET description = '<p>Experimente a emoção de um Safari dominicano, combinando cultura, natureza e diversão em um dia inesquecível a bordo de nossos caminhões turísticos confortáveis. Supreme Safari é mais do que um simples passeio: é uma imersão completa na alma e na cultura dominicana.</p>' WHERE slug = 'supreme-safari';
