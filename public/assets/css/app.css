@@ -1085,12 +1085,226 @@ img { max-width: 100%; height: auto; }
     color: white;
 }
 
+/* Sidebar Filters - Clear All */
+.sidebar-clear-all {
+    font-size: 12px;
+    color: #e74c3c;
+    text-decoration: none;
+    font-weight: 500;
+}
+.sidebar-clear-all:hover {
+    text-decoration: underline;
+}
+
+/* Collapsible Filter Groups */
+[data-collapsible] .sidebar-filter-options {
+    transition: max-height 0.3s ease, opacity 0.2s ease;
+    overflow: hidden;
+}
+[data-collapsible].collapsed .sidebar-filter-options {
+    max-height: 0 !important;
+    opacity: 0;
+    margin: 0;
+    padding: 0;
+}
+[data-toggle-filter] {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+.filter-chevron {
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+[data-collapsible].collapsed .filter-chevron {
+    transform: rotate(-90deg);
+}
+
+/* Show More Button */
+.filter-show-more {
+    background: none;
+    border: none;
+    color: var(--text-green);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-top: 4px;
+}
+.filter-show-more:hover {
+    text-decoration: underline;
+}
+.filter-options-collapsible .filter-hidden-item {
+    display: none;
+}
+.filter-options-collapsible.expanded .filter-hidden-item {
+    display: flex;
+}
+
+/* Price Range Slider */
+.price-range-slider,
+.duration-range-slider {
+    padding: 4px 0;
+}
+.range-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 10px;
+}
+.range-slider-track {
+    position: relative;
+    height: 30px;
+    display: flex;
+    align-items: center;
+}
+.range-slider-track input[type="range"] {
+    position: absolute;
+    width: 100%;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    pointer-events: none;
+    z-index: 2;
+}
+.range-slider-track input[type="range"]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+.range-slider-track input[type="range"]:first-child::-webkit-slider-runnable-track {
+    background: linear-gradient(to right, #e0e0e0, var(--text-green), #e0e0e0);
+}
+.range-slider-track input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-green);
+    border: 3px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+    pointer-events: all;
+    margin-top: -7px;
+}
+.range-slider-track input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text-green);
+    border: 3px solid white;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    cursor: pointer;
+    pointer-events: all;
+}
+.range-slider-track input[type="range"]::-moz-range-track {
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+}
+
+/* Apply Filter Button */
+.btn-filter-apply {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+}
+
+/* Date Badges in Cards */
+.passeio-card-dates {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #f0f0f0;
+}
+.passeio-card-dates small {
+    font-size: 11px;
+    color: var(--gray);
+    display: block;
+    margin-bottom: 4px;
+}
+.date-badges {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.date-badge {
+    font-size: 11px;
+    background: #f0faf5;
+    color: var(--text-green);
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Availability Bar */
+.availability-bar {
+    background: #f9f9f9;
+    padding: 12px 0;
+    border-top: 1px solid #eee;
+}
+.availability-bar .container {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.availability-label {
+    font-size: 12px;
+    color: var(--gray);
+    white-space: nowrap;
+}
+.availability-months {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.month-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+    background: #e8f5e9;
+    color: var(--text-green);
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+/* Sort select mobile (inline) */
+.sort-select-mobile {
+    display: none;
+    font-size: 13px;
+    padding: 6px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background: white;
+}
+.passeios-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* Responsive: sidebar filters */
+@media (max-width: 992px) {
+    .passeios-sidebar {
+        position: static;
+        margin-bottom: 24px;
+    }
+    .sort-select-mobile {
+        display: block;
+    }
+}
+
 /* Content Area */
 .passeios-content {
     min-width: 0;
-}
-.passeios-content-header {
-    margin-bottom: 20px;
 }
 .passeios-count {
     font-size: 14px;

@@ -98,7 +98,7 @@ class TripsController extends Controller
         $orderBy = $request->query('ordenar', 'relevancia');
 
         // Validar valores permitidos
-        $allowedOrders = ['relevancia', 'preco_asc', 'preco_desc', 'recente', 'antigo'];
+        $allowedOrders = ['relevancia', 'preco_asc', 'preco_desc', 'recente'];
         if (!in_array($orderBy, $allowedOrders)) {
             $orderBy = 'relevancia';
         }
@@ -108,9 +108,23 @@ class TripsController extends Controller
             $this->abort(404, 'Categoria não encontrada.');
         }
 
-        $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12, $orderBy);
+        // Coletar todos os filtros da sidebar
+        $currentFilters = [
+            'destino' => (array) $request->query('destino', []),
+            'preco_min' => $request->query('preco_min'),
+            'preco_max' => $request->query('preco_max'),
+            'duracao_min' => $request->query('duracao_min'),
+            'duracao_max' => $request->query('duracao_max'),
+            'atividade' => (array) $request->query('atividade', []),
+            'tipo' => (array) $request->query('tipo', []),
+            'tag' => (array) $request->query('tag', []),
+            'data' => (array) $request->query('data', []),
+        ];
 
-        // Adicionar preço mínimo a cada trip
+        // Buscar passeios com filtros
+        $trips = $this->tripModel->getFiltered((int) $cat['id'], $currentFilters, $orderBy, $page, 12);
+
+        // Adicionar preço mínimo e próximas datas a cada trip
         foreach ($trips['items'] as &$trip) {
             $packages = $this->packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
@@ -119,14 +133,29 @@ class TripsController extends Controller
                 $trip['min_price'] = $this->packageModel->getBasePrice((int) $packages[0]['id']);
                 $trip['regular_price'] = $this->packageModel->getRegularPrice((int) $packages[0]['id']);
             }
+            $trip['next_dates'] = $this->tripModel->getFixedDates((int) $trip['id'], true);
         }
 
+        // Dados para os filtros da sidebar
         $categories = $this->categoryModel->getWithTripCount();
+        $destinations = $this->tripModel->getTagsWithCount('destino');
+        $activities = $this->tripModel->getTagsWithCount('atividade');
+        $tags = $this->tripModel->getTagsWithCount('tag');
+        $priceRange = $this->tripModel->getPriceRange();
+        $durationRange = $this->tripModel->getDurationRange();
+        $availableDates = $this->tripModel->getAvailableMonths();
 
         $this->view('frontend/trips/category', [
             'trips' => $trips,
             'category' => $cat,
             'categories' => $categories,
+            'destinations' => $destinations,
+            'activities' => $activities,
+            'tags' => $tags,
+            'availableDates' => $availableDates,
+            'priceRange' => $priceRange,
+            'durationRange' => $durationRange,
+            'currentFilters' => $currentFilters,
             'currentOrder' => $orderBy,
             'pageTitle' => $cat['name'] . ' - Passeios em Punta Cana',
         ], 'app');

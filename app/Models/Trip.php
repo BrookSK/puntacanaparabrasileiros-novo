@@ -253,4 +253,233 @@ class Trip extends Model
         }
         return $slug;
     }
+
+    /**
+     * Busca passeios com filtros combinados (sidebar da categoria).
+     */
+    public function getFiltered(int $categoryId, array $filters, string $orderBy = 'relevancia', int $page = 1, int $perPage = 12): array
+    {
+        $offset = ($page - 1) * $perPage;
+        $params = [];
+        $joins = [];
+        $conditions = ["t.status = 'published'"];
+
+        // Filtro por categoria principal
+        $joins[] = "INNER JOIN trip_category_relations tcr ON t.id = tcr.trip_id AND tcr.category_id = ?";
+        $params[] = $categoryId;
+
+        // Filtro por destino (tag tipo 'destino')
+        if (!empty($filters['destino'])) {
+            $placeholders = implode(',', array_fill(0, count($filters['destino']), '?'));
+            $joins[] = "INNER JOIN trip_tag_relations ttr_dest ON t.id = ttr_dest.trip_id
+                        INNER JOIN trip_tags tt_dest ON ttr_dest.tag_id = tt_dest.id AND tt_dest.type = 'destino' AND tt_dest.slug IN ({$placeholders})";
+            $params = array_merge($params, $filters['destino']);
+        }
+
+        // Filtro por atividade (tag tipo 'atividade')
+        if (!empty($filters['atividade'])) {
+            $placeholders = implode(',', array_fill(0, count($filters['atividade']), '?'));
+            $joins[] = "INNER JOIN trip_tag_relations ttr_act ON t.id = ttr_act.trip_id
+                        INNER JOIN trip_tags tt_act ON ttr_act.tag_id = tt_act.id AND tt_act.type = 'atividade' AND tt_act.slug IN ({$placeholders})";
+            $params = array_merge($params, $filters['atividade']);
+        }
+
+        // Filtro por tags genéricas
+        if (!empty($filters['tag'])) {
+            $placeholders = implode(',', array_fill(0, count($filters['tag']), '?'));
+            $joins[] = "INNER JOIN trip_tag_relations ttr_tag ON t.id = ttr_tag.trip_id
+                        INNER JOIN trip_tags tt_tag ON ttr_tag.tag_id = tt_tag.id AND tt_tag.type = 'tag' AND tt_tag.slug IN ({$placeholders})";
+            $params = array_merge($params, $filters['tag']);
+        }
+
+        // Filtro por tipo de viagem (categorias adicionais)
+        if (!empty($filters['tipo'])) {
+            $placeholders = implode(',', array_fill(0, count($filters['tipo']), '?'));
+            $joins[] = "INNER JOIN trip_category_relations tcr_tipo ON t.id = tcr_tipo.trip_id
+                        INNER JOIN trip_categories tc_tipo ON tcr_tipo.category_id = tc_tipo.id AND tc_tipo.slug IN ({$placeholders})";
+            $params = array_merge($params, $filters['tipo']);
+        }
+
+        // Filtro por datas de início (mês)
+        if (!empty($filters['data'])) {
+            $dateConditions = [];
+            foreach ($filters['data'] as $monthKey) {
+                // formato: "2026-08"
+                $dateConditions[] = "DATE_FORMAT(tfd.date, '%Y-%m') = ?";
+                $params[] = $monthKey;
+            }
+            $joins[] = "INNER JOIN trip_fixed_dates tfd ON t.id = tfd.trip_id AND tfd.status = 'available' AND tfd.date >= CURDATE() AND (" . implode(' OR ', $dateConditions) . ")";
+        }
+
+        // Filtro por duração (em dias, convertendo horas para dias)
+        if (!empty($filters['duracao_min']) || !empty($filters['duracao_max'])) {
+            // Converter duração para dias: se hours, dividir por 24 e arredondar para cima (1 dia mínimo)
+            if (!empty($filters['duracao_min']) && (int)$filters['duracao_min'] > 0) {
+                $conditions[] = "CASE WHEN t.duration_unit = 'days' THEN CAST(t.duration AS UNSIGNED) ELSE CEIL(CAST(t.duration AS UNSIGNED) / 24) END >= ?";
+                $params[] = (int)$filters['duracao_min'];
+            }
+            if (!empty($filters['duracao_max'])) {
+                $conditions[] = "CASE WHEN t.duration_unit = 'days' THEN CAST(t.duration AS UNSIGNED) ELSE CEIL(CAST(t.duration AS UNSIGNED) / 24) END <= ?";
+                $params[] = (int)$filters['duracao_max'];
+            }
+        }
+
+        // Filtro por preço (precisa de JOIN com packages)
+        $needsPriceFilter = (!empty($filters['preco_min']) && (int)$filters['preco_min'] > 0) || !empty($filters['preco_max']);
+        $needsPriceOrder = in_array($orderBy, ['preco_asc', 'preco_desc']);
+        $needsPriceJoin = $needsPriceFilter || $needsPriceOrder;
+
+        if ($needsPriceJoin) {
+            $joins[] = "LEFT JOIN trip_packages tp_price ON tp_price.trip_id = t.id
+                        LEFT JOIN trip_package_categories tpc_price ON tpc_price.package_id = tp_price.id AND COALESCE(tpc_price.sale_price, tpc_price.price) > 0";
+        }
+
+        if ($needsPriceFilter) {
+            if (!empty($filters['preco_min']) && (int)$filters['preco_min'] > 0) {
+                $conditions[] = "COALESCE(tpc_price.sale_price, tpc_price.price) >= ?";
+                $params[] = (int)$filters['preco_min'];
+            }
+            if (!empty($filters['preco_max']) && (int)$filters['preco_max'] > 0) {
+                $conditions[] = "COALESCE(tpc_price.sale_price, tpc_price.price) <= ?";
+                $params[] = (int)$filters['preco_max'];
+            }
+        }
+
+        // Montar SQL
+        $joinsSql = implode("\n", $joins);
+        $conditionsSql = implode(' AND ', $conditions);
+
+        // Ordenação
+        if ($needsPriceOrder) {
+            $direction = $orderBy === 'preco_asc' ? 'ASC' : 'DESC';
+            $orderSql = "ORDER BY MIN(COALESCE(tpc_price.sale_price, tpc_price.price)) {$direction}";
+        } else {
+            $orderMap = [
+                'recente' => 'ORDER BY t.created_at DESC',
+                'relevancia' => 'ORDER BY t.sort_order ASC, t.created_at DESC',
+            ];
+            $orderSql = $orderMap[$orderBy] ?? 'ORDER BY t.sort_order ASC, t.created_at DESC';
+        }
+
+        $sql = "SELECT DISTINCT t.*
+                FROM `{$this->table}` t
+                {$joinsSql}
+                WHERE {$conditionsSql}
+                GROUP BY t.id
+                {$orderSql}
+                LIMIT ? OFFSET ?";
+        $params[] = $perPage;
+        $params[] = $offset;
+
+        $items = $this->db->fetchAll($sql, $params);
+
+        // Count total (sem LIMIT)
+        $countParams = array_slice($params, 0, -2); // Remove perPage e offset
+        $countSql = "SELECT COUNT(DISTINCT t.id)
+                     FROM `{$this->table}` t
+                     {$joinsSql}
+                     WHERE {$conditionsSql}";
+        $total = (int) $this->db->fetchColumn($countSql, $countParams);
+
+        return [
+            'items' => $items,
+            'total' => $total,
+            'per_page' => $perPage,
+            'current_page' => $page,
+            'total_pages' => $total > 0 ? (int) ceil($total / $perPage) : 0,
+        ];
+    }
+
+    /**
+     * Retorna tags de um tipo específico com contagem de passeios publicados.
+     */
+    public function getTagsWithCount(string $type): array
+    {
+        return $this->db->fetchAll(
+            "SELECT tt.*, COUNT(DISTINCT ttr.trip_id) as trip_count
+             FROM trip_tags tt
+             LEFT JOIN trip_tag_relations ttr ON tt.id = ttr.tag_id
+             LEFT JOIN trips t ON ttr.trip_id = t.id AND t.status = 'published'
+             WHERE tt.type = ?
+             GROUP BY tt.id
+             HAVING trip_count > 0
+             ORDER BY tt.sort_order ASC",
+            [$type]
+        );
+    }
+
+    /**
+     * Retorna o range de preços (min/max) dos passeios publicados.
+     */
+    public function getPriceRange(): array
+    {
+        $row = $this->db->fetch(
+            "SELECT
+                FLOOR(MIN(COALESCE(tpc.sale_price, tpc.price))) as min,
+                CEIL(MAX(COALESCE(tpc.sale_price, tpc.price))) as max
+             FROM trip_package_categories tpc
+             INNER JOIN trip_packages tp ON tpc.package_id = tp.id
+             INNER JOIN trips t ON tp.trip_id = t.id AND t.status = 'published'
+             WHERE COALESCE(tpc.sale_price, tpc.price) > 0"
+        );
+        return [
+            'min' => (int) ($row['min'] ?? 0),
+            'max' => (int) ($row['max'] ?? 500),
+        ];
+    }
+
+    /**
+     * Retorna o range de duração (em dias) dos passeios publicados.
+     */
+    public function getDurationRange(): array
+    {
+        $row = $this->db->fetch(
+            "SELECT
+                MIN(CASE WHEN duration_unit = 'days' THEN CAST(duration AS UNSIGNED) ELSE CEIL(CAST(duration AS UNSIGNED) / 24) END) as min,
+                MAX(CASE WHEN duration_unit = 'days' THEN CAST(duration AS UNSIGNED) ELSE CEIL(CAST(duration AS UNSIGNED) / 24) END) as max
+             FROM trips
+             WHERE status = 'published' AND duration IS NOT NULL AND duration != ''"
+        );
+        return [
+            'min' => max(0, (int) ($row['min'] ?? 0)),
+            'max' => max(1, (int) ($row['max'] ?? 1)),
+        ];
+    }
+
+    /**
+     * Retorna meses futuros com datas fixas disponíveis, formatados para filtro.
+     */
+    public function getAvailableMonths(): array
+    {
+        $rows = $this->db->fetchAll(
+            "SELECT DISTINCT DATE_FORMAT(tfd.date, '%Y-%m') as month_key,
+                    DATE_FORMAT(tfd.date, '%M, %Y') as label_en
+             FROM trip_fixed_dates tfd
+             INNER JOIN trips t ON tfd.trip_id = t.id AND t.status = 'published'
+             WHERE tfd.date >= CURDATE() AND tfd.status = 'available'
+             ORDER BY month_key ASC
+             LIMIT 12"
+        );
+
+        // Traduzir nomes dos meses
+        $monthNames = [
+            'January' => 'janeiro', 'February' => 'fevereiro', 'March' => 'março',
+            'April' => 'abril', 'May' => 'maio', 'June' => 'junho',
+            'July' => 'julho', 'August' => 'agosto', 'September' => 'setembro',
+            'October' => 'outubro', 'November' => 'novembro', 'December' => 'dezembro',
+        ];
+
+        $result = [];
+        foreach ($rows as $row) {
+            $label = $row['label_en'];
+            foreach ($monthNames as $en => $pt) {
+                $label = str_replace($en, $pt, $label);
+            }
+            $result[] = [
+                'month_key' => $row['month_key'],
+                'label' => $label,
+            ];
+        }
+        return $result;
+    }
 }
