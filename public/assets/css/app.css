@@ -976,283 +976,281 @@ img { max-width: 100%; height: auto; }
     background: var(--white);
 }
 
-/* Layout grid: sidebar + content */
-.passeios-layout {
+/* ============================================================
+   CATEGORY LISTING - Premium Design
+   ============================================================ */
+
+/* Hero */
+.cat-hero {
+    background: linear-gradient(135deg, #f8fdf6 0%, #f0f9ec 100%);
+    padding: 48px 0 40px;
+    text-align: center;
+    border-bottom: 1px solid #eef5ea;
+}
+.cat-hero-title {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0 0 8px;
+}
+.cat-hero-desc {
+    font-size: 15px;
+    color: var(--gray);
+    margin: 0 0 18px;
+    max-width: 540px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.cat-hero-back {
+    font-size: 13px;
+    color: var(--text-green);
+    font-weight: 500;
+    text-decoration: none;
+    transition: opacity .2s;
+}
+.cat-hero-back:hover {
+    opacity: 0.75;
+}
+
+/* Listing section */
+.cat-listing {
+    padding: 40px 0 80px;
+    background: #fafbfc;
+}
+
+/* Results header */
+.cat-results-header {
+    margin-bottom: 28px;
+}
+.cat-results-count {
+    font-size: 14px;
+    color: var(--gray);
+    margin: 0;
+}
+.cat-results-count strong {
+    color: var(--dark);
+}
+
+/* Grid layout */
+.cat-grid {
     display: grid;
-    grid-template-columns: 300px 1fr;
-    gap: 32px;
+    grid-template-columns: 280px 1fr;
+    gap: 36px;
     align-items: start;
 }
 
-/* Sidebar */
-.passeios-sidebar {
-    background: var(--white);
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 24px 22px;
-    position: sticky;
-    top: 90px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
-}
-.sidebar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 6px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid #f0f0f0;
-}
-.sidebar-header h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--dark);
-    margin: 0;
-}
-.sidebar-clear {
-    font-size: 12px;
-    color: var(--text-green);
-    text-decoration: none;
-    font-weight: 500;
-}
-.sidebar-clear:hover {
-    text-decoration: underline;
-}
-.sidebar-filter-group {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid #f8f8f8;
-}
-.sidebar-filter-group:last-of-type {
-    border-bottom: none;
-    margin-bottom: 16px;
-}
-.sidebar-filter-title {
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--dark);
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    margin: 0 0 12px;
-}
-.sidebar-filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-.sidebar-checkbox {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--dark);
-}
-.sidebar-checkbox input {
-    accent-color: var(--text-green);
-}
-.sidebar-checkbox-label {
-    flex: 1;
-}
-.sidebar-checkbox-count {
-    font-size: 12px;
-    color: var(--gray);
-    background: #f5f5f5;
-    padding: 2px 8px;
-    border-radius: 10px;
-}
-
-/* Sidebar category links */
-.sidebar-cat-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 9px 12px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: var(--dark);
-    text-decoration: none;
-    transition: all .15s;
-}
-.sidebar-cat-link:hover {
-    background: #f5f5f5;
-    color: var(--text-green);
-}
-.sidebar-cat-link.active {
-    background: var(--text-green);
-    color: white;
-    font-weight: 600;
-}
-.sidebar-cat-link.active .sidebar-checkbox-count {
-    background: rgba(255,255,255,0.2);
-    color: white;
-}
-
 /* ============================================================
-   SIDEBAR FILTERS - Estilo refinado
+   FILTERS SIDEBAR
    ============================================================ */
-
-/* Clear All */
-.sidebar-clear-all {
-    font-size: 12px;
-    color: var(--text-green);
-    text-decoration: none;
-    font-weight: 500;
-    transition: color .2s;
-}
-.sidebar-clear-all:hover {
-    color: #155c00;
-    text-decoration: underline;
+.cat-filters {
+    position: sticky;
+    top: 80px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #f0f0f0;
+    padding: 28px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
 }
 
-/* Filter Groups */
-.sidebar-filter-group {
-    margin-bottom: 0;
-    padding: 18px 0;
+/* Filters header */
+.cat-filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
     border-bottom: 1px solid #f0f0f0;
 }
-.sidebar-filter-group:last-of-type {
+.cat-filters-label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    letter-spacing: -0.2px;
+}
+.cat-filters-clear {
+    font-size: 12px;
+    color: var(--text-green);
+    text-decoration: none;
+    font-weight: 500;
+    opacity: 0.8;
+    transition: opacity .2s;
+}
+.cat-filters-clear:hover {
+    opacity: 1;
+}
+
+/* Filter blocks */
+.filter-block {
+    padding: 18px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+.filter-block:last-of-type {
     border-bottom: none;
     padding-bottom: 0;
 }
-
-/* Collapsible */
-[data-collapsible] .sidebar-filter-options {
-    transition: max-height 0.3s ease, opacity 0.2s ease, padding 0.2s ease;
-    overflow: hidden;
-}
-[data-collapsible].collapsed .sidebar-filter-options {
-    max-height: 0 !important;
-    opacity: 0;
-    padding: 0;
-}
-[data-toggle-filter] {
-    cursor: pointer;
+.filter-block-title {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    user-select: none;
-    padding: 2px 0;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 14px;
+    font-family: var(--font);
 }
-[data-toggle-filter]:hover {
-    color: var(--text-green);
-}
-.sidebar-filter-title {
+.filter-block-title span {
     font-size: 13px;
     font-weight: 700;
     color: var(--dark);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin: 0 0 14px;
+    letter-spacing: 0.6px;
 }
-.filter-chevron {
+.filter-block-title-static {
+    cursor: default;
+}
+.filter-arrow {
     transition: transform 0.25s ease;
-    flex-shrink: 0;
-    opacity: 0.5;
+    opacity: 0.4;
 }
-[data-collapsible].collapsed .filter-chevron {
+[data-collapsible].collapsed .filter-arrow {
     transform: rotate(-90deg);
 }
-
-/* Filter Options */
-.sidebar-filter-options {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+[data-collapsible].collapsed .filter-block-body {
+    display: none;
 }
 
-/* Checkbox items */
-.sidebar-checkbox {
+/* Filter options */
+.filter-block-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Custom checkbox */
+.filter-option {
     display: flex;
     align-items: center;
     gap: 10px;
+    padding: 7px 10px;
+    border-radius: 8px;
     cursor: pointer;
+    transition: background .15s;
+    position: relative;
+}
+.filter-option:hover {
+    background: #f7faf5;
+}
+.filter-option input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.filter-option-check {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #d4d4d4;
+    border-radius: 5px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s;
+}
+.filter-option input:checked ~ .filter-option-check {
+    background: var(--text-green);
+    border-color: var(--text-green);
+}
+.filter-option input:checked ~ .filter-option-check::after {
+    content: '';
+    width: 5px;
+    height: 9px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-top: -2px;
+}
+.filter-option-label {
     font-size: 13px;
     color: #444;
-    padding: 5px 8px;
-    border-radius: 6px;
-    transition: background .15s, color .15s;
-}
-.sidebar-checkbox:hover {
-    background: #f5faf5;
-    color: var(--text-green);
-}
-.sidebar-checkbox input[type="checkbox"] {
-    width: 16px;
-    height: 16px;
-    border-radius: 4px;
-    border: 2px solid #ccc;
-    accent-color: var(--text-green);
-    cursor: pointer;
-    flex-shrink: 0;
-}
-.sidebar-checkbox-label {
     flex: 1;
     line-height: 1.3;
 }
-.sidebar-checkbox-count {
-    font-size: 11px;
-    color: var(--gray);
-    background: #f5f5f5;
-    padding: 2px 9px;
-    border-radius: 12px;
+.filter-option input:checked ~ .filter-option-check + .filter-option-label {
+    color: var(--dark);
     font-weight: 500;
-    min-width: 24px;
+}
+.filter-option-count {
+    font-size: 11px;
+    color: #999;
+    background: #f5f5f5;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+    min-width: 22px;
     text-align: center;
 }
 
-/* Show More Button */
-.filter-show-more {
+/* Expand/Collapse options */
+.filter-block-expandable .filter-option-hidden {
+    display: none;
+}
+.filter-block-expandable.expanded .filter-option-hidden {
+    display: flex;
+}
+.filter-expand-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
     background: none;
     border: none;
     color: var(--text-green);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 500;
     cursor: pointer;
-    padding: 6px 8px;
-    margin-top: 4px;
-    border-radius: 4px;
-    transition: background .15s;
+    padding: 8px 10px 4px;
+    font-family: var(--font);
+    transition: opacity .2s;
 }
-.filter-show-more:hover {
-    background: #f0faf5;
-    text-decoration: none;
+.filter-expand-btn:hover {
+    opacity: 0.75;
 }
-.filter-options-collapsible .filter-hidden-item {
-    display: none;
+.expand-icon {
+    transition: transform 0.2s;
 }
-.filter-options-collapsible.expanded .filter-hidden-item {
-    display: flex;
+.filter-expand-btn.is-expanded .expand-icon {
+    transform: rotate(180deg);
 }
 
-/* Range Sliders */
-.price-range-slider,
-.duration-range-slider {
-    padding: 8px 4px 4px;
+/* Range slider */
+.filter-range {
+    padding: 6px 0 0;
 }
-.range-values {
+.filter-range-labels {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--dark);
     margin-bottom: 14px;
 }
-.range-values span {
-    background: #f5f5f5;
+.filter-range-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--dark);
+    background: #f7f7f7;
     padding: 4px 12px;
     border-radius: 6px;
-    font-size: 13px;
 }
-.range-slider-track {
+.filter-range-track {
     position: relative;
-    height: 36px;
+    height: 32px;
     display: flex;
     align-items: center;
 }
-.range-slider-track input[type="range"] {
+.filter-range-track input[type="range"] {
     position: absolute;
     width: 100%;
-    height: 6px;
+    height: 5px;
     -webkit-appearance: none;
     appearance: none;
     background: transparent;
@@ -1260,220 +1258,128 @@ img { max-width: 100%; height: auto; }
     z-index: 2;
     margin: 0;
 }
-.range-slider-track input[type="range"]::-webkit-slider-runnable-track {
-    height: 6px;
-    background: #e8e8e8;
+.filter-range-track input[type="range"]::-webkit-slider-runnable-track {
+    height: 5px;
+    background: #ebebeb;
     border-radius: 3px;
 }
-.range-slider-track input[type="range"]::-webkit-slider-thumb {
+.filter-range-track input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: var(--text-green);
     border: 3px solid white;
-    box-shadow: 0 2px 6px rgba(27, 111, 0, 0.3);
+    box-shadow: 0 1px 4px rgba(27,111,0,0.25);
     cursor: pointer;
     pointer-events: all;
     margin-top: -7px;
-    transition: box-shadow .2s;
 }
-.range-slider-track input[type="range"]::-webkit-slider-thumb:hover {
-    box-shadow: 0 2px 10px rgba(27, 111, 0, 0.5);
-}
-.range-slider-track input[type="range"]::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
+.filter-range-track input[type="range"]::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: var(--text-green);
     border: 3px solid white;
-    box-shadow: 0 2px 6px rgba(27, 111, 0, 0.3);
+    box-shadow: 0 1px 4px rgba(27,111,0,0.25);
     cursor: pointer;
     pointer-events: all;
 }
-.range-slider-track input[type="range"]::-moz-range-track {
-    height: 6px;
-    background: #e8e8e8;
+.filter-range-track input[type="range"]::-moz-range-track {
+    height: 5px;
+    background: #ebebeb;
     border-radius: 3px;
     border: none;
 }
 
-/* Apply Filter Button */
-.btn-filter-apply {
+/* Filter select */
+.filter-select {
     width: 100%;
-    margin-top: 20px;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-family: var(--font);
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    background: #fafafa;
+    color: var(--dark);
+    cursor: pointer;
+    transition: border-color .2s;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23636e72' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+}
+.filter-select:focus {
+    outline: none;
+    border-color: var(--text-green);
+    background-color: white;
+}
+
+/* Apply button */
+.filter-apply-btn {
+    display: block;
+    width: 100%;
+    margin-top: 22px;
     padding: 13px 20px;
     font-size: 14px;
     font-weight: 600;
-    border-radius: 8px;
+    font-family: var(--font);
+    border: none;
+    border-radius: 10px;
     background: var(--text-green);
     color: white;
-    border: none;
     cursor: pointer;
     transition: background .2s, transform .1s;
 }
-.btn-filter-apply:hover {
+.filter-apply-btn:hover {
     background: #155c00;
-    transform: translateY(-1px);
 }
-.btn-filter-apply:active {
-    transform: translateY(0);
-}
-
-/* Select form control in sidebar */
-.sidebar-filter-group .form-control {
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 13px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background: #fafafa;
-    color: var(--dark);
-    font-family: var(--font);
-    transition: border-color .2s;
-    cursor: pointer;
-}
-.sidebar-filter-group .form-control:focus {
-    outline: none;
-    border-color: var(--text-green);
-    background: white;
+.filter-apply-btn:active {
+    transform: scale(0.98);
 }
 
-/* Date Badges in Cards */
-.passeio-card-dates {
-    margin-top: 10px;
-    padding-top: 10px;
-    border-top: 1px solid #f0f0f0;
-}
-.passeio-card-dates small {
-    font-size: 11px;
-    color: var(--gray);
-    font-weight: 500;
-    display: block;
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-.date-badges {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-.date-badge {
-    font-size: 11px;
-    background: #f0faf5;
-    color: var(--text-green);
-    padding: 4px 10px;
-    border-radius: 5px;
-    font-weight: 600;
-    border: 1px solid rgba(27, 111, 0, 0.1);
-}
-
-/* Availability Bar */
-.availability-bar {
-    background: #fafff8;
-    padding: 14px 0;
-    border-top: 1px solid #e8f5e0;
-}
-.availability-bar .container {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-.availability-label {
-    font-size: 12px;
-    color: var(--gray);
-    white-space: nowrap;
-    font-weight: 500;
-}
-.availability-months {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-}
-.month-badge {
-    font-size: 11px;
-    padding: 4px 10px;
-    background: #e8f5e9;
-    color: var(--text-green);
-    border-radius: 5px;
-    font-weight: 600;
-}
-
-/* Sort select header (mobile inline) */
-.sort-select-mobile {
-    display: none;
-    font-size: 13px;
-    padding: 8px 12px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    background: white;
-    color: var(--dark);
-    font-family: var(--font);
-    cursor: pointer;
-}
-.passeios-content-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-}
-
-/* Responsive: sidebar filters */
-@media (max-width: 992px) {
-    .passeios-sidebar {
-        position: static;
-        margin-bottom: 24px;
-    }
-    .sort-select-mobile {
-        display: block;
-    }
-}
-
-/* Content Area */
-.passeios-content {
+/* ============================================================
+   TRIP CARDS
+   ============================================================ */
+.cat-content {
     min-width: 0;
 }
-.passeios-count {
-    font-size: 14px;
-    color: var(--gray);
-}
-
-/* Horizontal Card (lista) */
-.passeios-list {
+.cat-trips-list {
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 22px;
 }
-.passeio-card-horizontal {
+.trip-card {
     display: flex;
-    background: var(--white);
-    border: 1px solid #eee;
-    border-radius: 12px;
+    background: #ffffff;
+    border-radius: 14px;
     overflow: hidden;
-    transition: box-shadow .2s;
+    border: 1px solid #f0f0f0;
+    transition: box-shadow .25s, transform .25s;
 }
-.passeio-card-horizontal:hover {
-    box-shadow: var(--shadow);
+.trip-card:hover {
+    box-shadow: 0 8px 28px rgba(0,0,0,0.07);
+    transform: translateY(-2px);
 }
-.passeio-card-img {
-    width: 280px;
-    min-height: 200px;
+.trip-card-image {
+    width: 260px;
+    min-height: 190px;
     flex-shrink: 0;
     position: relative;
     overflow: hidden;
 }
-.passeio-card-img img {
+.trip-card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform .3s;
+    transition: transform .4s ease;
 }
-.passeio-card-horizontal:hover .passeio-card-img img {
-    transform: scale(1.04);
+.trip-card:hover .trip-card-image img {
+    transform: scale(1.05);
 }
-.passeio-card-badge {
+.trip-card-badge {
     position: absolute;
     top: 12px;
     left: 12px;
@@ -1483,105 +1389,175 @@ img { max-width: 100%; height: auto; }
     font-weight: 600;
     padding: 4px 12px;
     border-radius: 20px;
+    letter-spacing: 0.2px;
 }
-.passeio-card-body {
+.trip-card-content {
     flex: 1;
-    padding: 22px 24px;
+    padding: 22px 26px;
     display: flex;
     flex-direction: column;
 }
-.passeio-card-top {
+.trip-card-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 10px;
     gap: 16px;
+    margin-bottom: 10px;
 }
-.passeio-card-title {
-    font-size: 18px;
+.trip-card-name {
+    font-size: 17px;
     font-weight: 700;
     color: var(--dark);
     margin: 0;
-    line-height: 1.3;
+    line-height: 1.35;
 }
-.passeio-card-title a {
-    color: var(--dark);
+.trip-card-name a {
+    color: inherit;
+    text-decoration: none;
 }
-.passeio-card-title a:hover {
+.trip-card-name a:hover {
     color: var(--text-green);
 }
-.passeio-card-price {
+.trip-card-pricing {
     text-align: right;
     flex-shrink: 0;
 }
-.passeio-card-price .price-from {
+.trip-card-price-old {
     display: block;
-    font-size: 13px;
-    color: var(--gray);
+    font-size: 12px;
+    color: #aaa;
     text-decoration: line-through;
+    margin-bottom: 2px;
 }
-.passeio-card-price .price-current {
-    font-size: 24px;
+.trip-card-price {
+    font-size: 22px;
     font-weight: 700;
     color: var(--text-green);
+    letter-spacing: -0.5px;
 }
-.passeio-card-meta {
+.trip-card-meta {
     display: flex;
     gap: 16px;
     margin-bottom: 10px;
 }
-.passeio-card-meta span {
+.trip-card-meta-item {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--gray);
 }
-.passeio-card-meta svg {
+.trip-card-meta-item svg {
     color: var(--text-green);
+    opacity: 0.7;
 }
-.passeio-card-desc {
+.trip-card-desc {
     font-size: 13px;
-    color: var(--gray);
-    line-height: 1.6;
-    margin: 0 0 auto;
+    color: #666;
+    line-height: 1.65;
+    margin: 0;
     flex: 1;
 }
-.passeio-card-footer {
-    margin-top: 14px;
+.trip-card-footer {
+    margin-top: 16px;
     display: flex;
-    align-items: center;
     justify-content: flex-end;
 }
+.trip-card-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: white;
+    background: var(--text-green);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background .2s;
+}
+.trip-card-btn:hover {
+    background: #155c00;
+    color: white;
+}
 
-/* Responsive */
-@media (max-width: 960px) {
-    .passeios-layout {
+/* Empty state */
+.cat-empty {
+    text-align: center;
+    padding: 60px 20px;
+}
+.cat-empty svg {
+    margin-bottom: 16px;
+}
+.cat-empty p {
+    font-size: 15px;
+    color: var(--gray);
+    margin: 0 0 20px;
+}
+
+/* Pagination */
+.cat-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 40px;
+}
+.cat-pagination-link {
+    width: 38px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--dark);
+    text-decoration: none;
+    border: 1px solid #eee;
+    background: white;
+    transition: all .15s;
+}
+.cat-pagination-link:hover {
+    border-color: var(--text-green);
+    color: var(--text-green);
+}
+.cat-pagination-link.active {
+    background: var(--text-green);
+    border-color: var(--text-green);
+    color: white;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 992px) {
+    .cat-grid {
         grid-template-columns: 1fr;
     }
-    .passeios-sidebar {
+    .cat-filters {
         position: static;
     }
 }
 @media (max-width: 768px) {
-    .passeio-card-horizontal {
+    .trip-card {
         flex-direction: column;
     }
-    .passeio-card-img {
+    .trip-card-image {
         width: 100%;
         height: 200px;
     }
-    .passeio-card-top {
+    .trip-card-header {
         flex-direction: column;
-        gap: 8px;
+        gap: 6px;
     }
-    .passeio-card-price {
+    .trip-card-pricing {
         text-align: left;
     }
+    .cat-hero-title {
+        font-size: 26px;
+    }
 }
-    align-items: center;
-    flex-wrap: wrap;
-}
+/* Legacy sidebar styles removed - using new cat-filters design */
+
 .filtro-input {
     flex: 1;
     min-width: 180px;

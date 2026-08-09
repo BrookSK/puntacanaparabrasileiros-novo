@@ -1,44 +1,49 @@
 <!-- Hero da Categoria -->
-<section class="passeios-hero">
+<section class="cat-hero">
     <div class="container">
-        <div class="passeios-hero-content">
-            <h1><?= e($category['name']) ?></h1>
-            <?php if (!empty($category['description'])): ?>
-            <p><?= e($category['description']) ?></p>
-            <?php else: ?>
-            <p>Explore os melhores passeios de <?= e($category['name']) ?> em Punta Cana.</p>
-            <?php endif; ?>
-            <a href="/passeios" class="btn btn-secondary">← Voltar para Todos os Passeios</a>
-        </div>
+        <h1 class="cat-hero-title"><?= e($category['name']) ?></h1>
+        <?php if (!empty($category['description'])): ?>
+        <p class="cat-hero-desc"><?= e($category['description']) ?></p>
+        <?php endif; ?>
+        <a href="/passeios" class="cat-hero-back">← Voltar para Todos os Passeios</a>
     </div>
 </section>
 
-<!-- Listagem da Categoria -->
-<section class="section section-todos-passeios">
+<!-- Listagem -->
+<section class="cat-listing">
     <div class="container">
-        <div class="passeios-layout">
-            <!-- Sidebar com Filtros -->
-            <aside class="passeios-sidebar">
-                <div class="sidebar-header">
-                    <h3>Critérios</h3>
-                    <a href="/passeios/categoria/<?= e($category['slug']) ?>" class="sidebar-clear-all">Limpar tudo</a>
-                </div>
 
+        <!-- Header de resultados -->
+        <div class="cat-results-header">
+            <p class="cat-results-count">
+                <strong><?= $trips['total'] ?? count($trips['items']) ?></strong> passeio<?= ($trips['total'] ?? count($trips['items'])) > 1 ? 's' : '' ?> em <strong><?= e($category['name']) ?></strong>
+            </p>
+        </div>
+
+        <div class="cat-grid">
+            <!-- Sidebar Filtros -->
+            <aside class="cat-filters">
                 <form method="GET" action="/passeios/categoria/<?= e($category['slug']) ?>" id="filters-form">
+
+                    <div class="cat-filters-header">
+                        <span class="cat-filters-label">Filtros</span>
+                        <a href="/passeios/categoria/<?= e($category['slug']) ?>" class="cat-filters-clear">Limpar tudo</a>
+                    </div>
 
                     <!-- Destino -->
                     <?php if (!empty($destinations)): ?>
-                    <div class="sidebar-filter-group" data-collapsible>
-                        <h4 class="sidebar-filter-title" data-toggle-filter>
-                            Destino
-                            <svg class="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                        </h4>
-                        <div class="sidebar-filter-options">
+                    <div class="filter-block" data-collapsible>
+                        <button type="button" class="filter-block-title" data-toggle-filter>
+                            <span>Destino</span>
+                            <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="filter-block-body">
                             <?php foreach ($destinations as $dest): ?>
-                            <label class="sidebar-checkbox">
+                            <label class="filter-option">
                                 <input type="checkbox" name="destino[]" value="<?= e($dest['slug']) ?>" <?= in_array($dest['slug'], $currentFilters['destino'] ?? []) ? 'checked' : '' ?>>
-                                <span class="sidebar-checkbox-label"><?= e($dest['name']) ?></span>
-                                <span class="sidebar-checkbox-count"><?= (int)$dest['trip_count'] ?></span>
+                                <span class="filter-option-check"></span>
+                                <span class="filter-option-label"><?= e($dest['name']) ?></span>
+                                <span class="filter-option-count"><?= (int)$dest['trip_count'] ?></span>
                             </label>
                             <?php endforeach; ?>
                         </div>
@@ -46,18 +51,18 @@
                     <?php endif; ?>
 
                     <!-- Preço -->
-                    <div class="sidebar-filter-group" data-collapsible>
-                        <h4 class="sidebar-filter-title" data-toggle-filter>
-                            Preço
-                            <svg class="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                        </h4>
-                        <div class="sidebar-filter-options">
-                            <div class="price-range-slider">
-                                <div class="range-values">
-                                    <span>$<span id="price-min-val"><?= (int)($currentFilters['preco_min'] ?? $priceRange['min'] ?? 0) ?></span></span>
-                                    <span>$<span id="price-max-val"><?= (int)($currentFilters['preco_max'] ?? $priceRange['max'] ?? 500) ?></span></span>
+                    <div class="filter-block" data-collapsible>
+                        <button type="button" class="filter-block-title" data-toggle-filter>
+                            <span>Preço</span>
+                            <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="filter-block-body">
+                            <div class="filter-range">
+                                <div class="filter-range-labels">
+                                    <span class="filter-range-val">$<span id="price-min-val"><?= (int)($currentFilters['preco_min'] ?? $priceRange['min'] ?? 0) ?></span></span>
+                                    <span class="filter-range-val">$<span id="price-max-val"><?= (int)($currentFilters['preco_max'] ?? $priceRange['max'] ?? 500) ?></span></span>
                                 </div>
-                                <div class="range-slider-track">
+                                <div class="filter-range-track">
                                     <input type="range" name="preco_min" id="price-min" min="<?= (int)($priceRange['min'] ?? 0) ?>" max="<?= (int)($priceRange['max'] ?? 500) ?>" value="<?= (int)($currentFilters['preco_min'] ?? $priceRange['min'] ?? 0) ?>" step="5">
                                     <input type="range" name="preco_max" id="price-max" min="<?= (int)($priceRange['min'] ?? 0) ?>" max="<?= (int)($priceRange['max'] ?? 500) ?>" value="<?= (int)($currentFilters['preco_max'] ?? $priceRange['max'] ?? 500) ?>" step="5">
                                 </div>
@@ -66,18 +71,18 @@
                     </div>
 
                     <!-- Duração -->
-                    <div class="sidebar-filter-group" data-collapsible>
-                        <h4 class="sidebar-filter-title" data-toggle-filter>
-                            Duração
-                            <svg class="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                        </h4>
-                        <div class="sidebar-filter-options">
-                            <div class="duration-range-slider">
-                                <div class="range-values">
-                                    <span><span id="duration-min-val"><?= (int)($currentFilters['duracao_min'] ?? 0) ?></span> dias</span>
-                                    <span><span id="duration-max-val"><?= (int)($currentFilters['duracao_max'] ?? $durationRange['max'] ?? 1) ?></span> dia<?= ((int)($currentFilters['duracao_max'] ?? $durationRange['max'] ?? 1)) > 1 ? 's' : '' ?></span>
+                    <div class="filter-block" data-collapsible>
+                        <button type="button" class="filter-block-title" data-toggle-filter>
+                            <span>Duração</span>
+                            <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="filter-block-body">
+                            <div class="filter-range">
+                                <div class="filter-range-labels">
+                                    <span class="filter-range-val"><span id="duration-min-val"><?= (int)($currentFilters['duracao_min'] ?? 0) ?></span> dias</span>
+                                    <span class="filter-range-val"><span id="duration-max-val"><?= (int)($currentFilters['duracao_max'] ?? $durationRange['max'] ?? 1) ?></span> dia<?= ((int)($currentFilters['duracao_max'] ?? $durationRange['max'] ?? 1)) > 1 ? 's' : '' ?></span>
                                 </div>
-                                <div class="range-slider-track">
+                                <div class="filter-range-track">
                                     <input type="range" name="duracao_min" id="duration-min" min="0" max="<?= (int)($durationRange['max'] ?? 1) ?>" value="<?= (int)($currentFilters['duracao_min'] ?? 0) ?>" step="1">
                                     <input type="range" name="duracao_max" id="duration-max" min="0" max="<?= (int)($durationRange['max'] ?? 1) ?>" value="<?= (int)($currentFilters['duracao_max'] ?? $durationRange['max'] ?? 1) ?>" step="1">
                                 </div>
@@ -87,65 +92,77 @@
 
                     <!-- Atividades -->
                     <?php if (!empty($activities)): ?>
-                    <div class="sidebar-filter-group" data-collapsible>
-                        <h4 class="sidebar-filter-title" data-toggle-filter>
-                            Atividades
-                            <svg class="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                        </h4>
-                        <div class="sidebar-filter-options filter-options-collapsible">
+                    <div class="filter-block" data-collapsible>
+                        <button type="button" class="filter-block-title" data-toggle-filter>
+                            <span>Atividades</span>
+                            <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="filter-block-body filter-block-expandable">
                             <?php foreach ($activities as $i => $act): ?>
-                            <label class="sidebar-checkbox <?= $i >= 5 ? 'filter-hidden-item' : '' ?>">
+                            <label class="filter-option <?= $i >= 5 ? 'filter-option-hidden' : '' ?>">
                                 <input type="checkbox" name="atividade[]" value="<?= e($act['slug']) ?>" <?= in_array($act['slug'], $currentFilters['atividade'] ?? []) ? 'checked' : '' ?>>
-                                <span class="sidebar-checkbox-label"><?= e($act['name']) ?></span>
-                                <span class="sidebar-checkbox-count"><?= (int)$act['trip_count'] ?></span>
+                                <span class="filter-option-check"></span>
+                                <span class="filter-option-label"><?= e($act['name']) ?></span>
+                                <span class="filter-option-count"><?= (int)$act['trip_count'] ?></span>
                             </label>
                             <?php endforeach; ?>
                             <?php if (count($activities) > 5): ?>
-                            <button type="button" class="filter-show-more" data-show-more>Mostrar todos <?= count($activities) ?> ↓</button>
+                            <button type="button" class="filter-expand-btn" data-expand>
+                                <span class="expand-text">Mostrar todos (<?= count($activities) ?>)</span>
+                                <svg class="expand-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
                             <?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>
 
-                    <!-- Tipos de Viagem (Categorias) -->
-                    <div class="sidebar-filter-group" data-collapsible>
-                        <h4 class="sidebar-filter-title" data-toggle-filter>
-                            Tipos de Viagem
-                            <svg class="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                        </h4>
-                        <div class="sidebar-filter-options filter-options-collapsible">
-                            <?php foreach ($categories as $i => $cat): ?>
+                    <!-- Tipos de Viagem -->
+                    <div class="filter-block" data-collapsible>
+                        <button type="button" class="filter-block-title" data-toggle-filter>
+                            <span>Tipos de Viagem</span>
+                            <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="filter-block-body filter-block-expandable">
+                            <?php $catIdx = 0; foreach ($categories as $cat): ?>
                             <?php if ($cat['trip_count'] > 0): ?>
-                            <label class="sidebar-checkbox <?= $i >= 7 ? 'filter-hidden-item' : '' ?>">
+                            <label class="filter-option <?= $catIdx >= 7 ? 'filter-option-hidden' : '' ?>">
                                 <input type="checkbox" name="tipo[]" value="<?= e($cat['slug']) ?>" <?= in_array($cat['slug'], $currentFilters['tipo'] ?? []) ? 'checked' : '' ?> <?= $cat['slug'] === $category['slug'] ? 'checked' : '' ?>>
-                                <span class="sidebar-checkbox-label"><?= e($cat['name']) ?></span>
-                                <span class="sidebar-checkbox-count"><?= (int)$cat['trip_count'] ?></span>
+                                <span class="filter-option-check"></span>
+                                <span class="filter-option-label"><?= e($cat['name']) ?></span>
+                                <span class="filter-option-count"><?= (int)$cat['trip_count'] ?></span>
                             </label>
-                            <?php endif; ?>
+                            <?php $catIdx++; endif; ?>
                             <?php endforeach; ?>
-                            <?php if (count($categories) > 7): ?>
-                            <button type="button" class="filter-show-more" data-show-more>Mostrar todos <?= count($categories) ?> ↓</button>
+                            <?php if ($catIdx > 7): ?>
+                            <button type="button" class="filter-expand-btn" data-expand>
+                                <span class="expand-text">Mostrar todos (<?= $catIdx ?>)</span>
+                                <svg class="expand-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
                             <?php endif; ?>
                         </div>
                     </div>
 
                     <!-- Tags -->
                     <?php if (!empty($tags)): ?>
-                    <div class="sidebar-filter-group" data-collapsible>
-                        <h4 class="sidebar-filter-title" data-toggle-filter>
-                            Tags
-                            <svg class="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                        </h4>
-                        <div class="sidebar-filter-options filter-options-collapsible">
+                    <div class="filter-block" data-collapsible>
+                        <button type="button" class="filter-block-title" data-toggle-filter>
+                            <span>Tags</span>
+                            <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="filter-block-body filter-block-expandable">
                             <?php foreach ($tags as $i => $tag): ?>
-                            <label class="sidebar-checkbox <?= $i >= 5 ? 'filter-hidden-item' : '' ?>">
+                            <label class="filter-option <?= $i >= 5 ? 'filter-option-hidden' : '' ?>">
                                 <input type="checkbox" name="tag[]" value="<?= e($tag['slug']) ?>" <?= in_array($tag['slug'], $currentFilters['tag'] ?? []) ? 'checked' : '' ?>>
-                                <span class="sidebar-checkbox-label"><?= e($tag['name']) ?></span>
-                                <span class="sidebar-checkbox-count"><?= (int)$tag['trip_count'] ?></span>
+                                <span class="filter-option-check"></span>
+                                <span class="filter-option-label"><?= e($tag['name']) ?></span>
+                                <span class="filter-option-count"><?= (int)$tag['trip_count'] ?></span>
                             </label>
                             <?php endforeach; ?>
                             <?php if (count($tags) > 5): ?>
-                            <button type="button" class="filter-show-more" data-show-more>Mostrar todos <?= count($tags) ?> ↓</button>
+                            <button type="button" class="filter-expand-btn" data-expand>
+                                <span class="expand-text">Mostrar todos (<?= count($tags) ?>)</span>
+                                <svg class="expand-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -153,29 +170,33 @@
 
                     <!-- Datas de Início -->
                     <?php if (!empty($availableDates)): ?>
-                    <div class="sidebar-filter-group" data-collapsible>
-                        <h4 class="sidebar-filter-title" data-toggle-filter>
-                            Datas de Início
-                            <svg class="filter-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-                        </h4>
-                        <div class="sidebar-filter-options filter-options-collapsible">
+                    <div class="filter-block" data-collapsible>
+                        <button type="button" class="filter-block-title" data-toggle-filter>
+                            <span>Datas de Início</span>
+                            <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                        </button>
+                        <div class="filter-block-body filter-block-expandable">
                             <?php foreach ($availableDates as $i => $dateGroup): ?>
-                            <label class="sidebar-checkbox <?= $i >= 5 ? 'filter-hidden-item' : '' ?>">
+                            <label class="filter-option <?= $i >= 5 ? 'filter-option-hidden' : '' ?>">
                                 <input type="checkbox" name="data[]" value="<?= e($dateGroup['month_key']) ?>" <?= in_array($dateGroup['month_key'], $currentFilters['data'] ?? []) ? 'checked' : '' ?>>
-                                <span class="sidebar-checkbox-label"><?= e($dateGroup['label']) ?></span>
+                                <span class="filter-option-check"></span>
+                                <span class="filter-option-label"><?= e($dateGroup['label']) ?></span>
                             </label>
                             <?php endforeach; ?>
                             <?php if (count($availableDates) > 5): ?>
-                            <button type="button" class="filter-show-more" data-show-more>Mostrar todos <?= count($availableDates) ?> ↓</button>
+                            <button type="button" class="filter-expand-btn" data-expand>
+                                <span class="expand-text">Mostrar todos (<?= count($availableDates) ?>)</span>
+                                <svg class="expand-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                            </button>
                             <?php endif; ?>
                         </div>
                     </div>
                     <?php endif; ?>
 
-                    <!-- Ordenar por -->
-                    <div class="sidebar-filter-group">
-                        <h4 class="sidebar-filter-title">Ordenar por</h4>
-                        <select name="ordenar" class="form-control">
+                    <!-- Ordenar -->
+                    <div class="filter-block filter-block-order">
+                        <label class="filter-block-title filter-block-title-static">Ordenar por</label>
+                        <select name="ordenar" class="filter-select">
                             <option value="relevancia" <?= ($currentOrder ?? '') === 'relevancia' || empty($currentOrder) ? 'selected' : '' ?>>Relevância</option>
                             <option value="preco_asc" <?= ($currentOrder ?? '') === 'preco_asc' ? 'selected' : '' ?>>Menor Preço</option>
                             <option value="preco_desc" <?= ($currentOrder ?? '') === 'preco_desc' ? 'selected' : '' ?>>Maior Preço</option>
@@ -183,83 +204,62 @@
                         </select>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-block btn-filter-apply">Aplicar Filtros</button>
+                    <button type="submit" class="filter-apply-btn">Aplicar Filtros</button>
                 </form>
             </aside>
 
-            <!-- Conteúdo -->
-            <div class="passeios-content">
-                <div class="passeios-content-header">
-                    <p class="passeios-count"><?= $trips['total'] ?? count($trips['items']) ?> passeio<?= ($trips['total'] ?? count($trips['items'])) > 1 ? 's' : '' ?> em <strong><?= e($category['name']) ?></strong></p>
-                    <select class="sort-select-mobile" onchange="document.querySelector('[name=ordenar]').value=this.value; document.getElementById('filters-form').submit();">
-                        <option value="relevancia" <?= ($currentOrder ?? '') === 'relevancia' || empty($currentOrder) ? 'selected' : '' ?>>Relevância</option>
-                        <option value="preco_asc" <?= ($currentOrder ?? '') === 'preco_asc' ? 'selected' : '' ?>>Menor Preço</option>
-                        <option value="preco_desc" <?= ($currentOrder ?? '') === 'preco_desc' ? 'selected' : '' ?>>Maior Preço</option>
-                        <option value="recente" <?= ($currentOrder ?? '') === 'recente' ? 'selected' : '' ?>>Mais Recente</option>
-                    </select>
-                </div>
-
+            <!-- Lista de Passeios -->
+            <div class="cat-content">
                 <?php if (empty($trips['items'])): ?>
-                <div class="empty-state">
+                <div class="cat-empty">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     <p>Nenhum passeio encontrado com os filtros selecionados.</p>
                     <a href="/passeios/categoria/<?= e($category['slug']) ?>" class="btn btn-primary">Limpar Filtros</a>
                 </div>
                 <?php else: ?>
-                <div class="passeios-list">
+                <div class="cat-trips-list">
                     <?php foreach ($trips['items'] as $trip): ?>
-                    <div class="passeio-card-horizontal">
-                        <a href="/passeios/<?= e($trip['slug']) ?>" class="passeio-card-img">
+                    <article class="trip-card">
+                        <a href="/passeios/<?= e($trip['slug']) ?>" class="trip-card-image">
                             <img src="<?= e($trip['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($trip['title']) ?>" loading="lazy">
                             <?php if (!empty($trip['featured'])): ?>
-                            <span class="passeio-card-badge">Destaque</span>
+                            <span class="trip-card-badge">Destaque</span>
                             <?php endif; ?>
                         </a>
-                        <div class="passeio-card-body">
-                            <div class="passeio-card-top">
-                                <h3 class="passeio-card-title">
+                        <div class="trip-card-content">
+                            <div class="trip-card-header">
+                                <h3 class="trip-card-name">
                                     <a href="/passeios/<?= e($trip['slug']) ?>"><?= e($trip['title']) ?></a>
                                 </h3>
-                                <div class="passeio-card-price">
+                                <div class="trip-card-pricing">
                                     <?php if (isset($trip['regular_price']) && $trip['regular_price'] > $trip['min_price'] && $trip['min_price'] > 0): ?>
-                                    <span class="price-from"><?= money($trip['regular_price']) ?></span>
+                                    <span class="trip-card-price-old"><?= money($trip['regular_price']) ?></span>
                                     <?php endif; ?>
-                                    <span class="price-current"><?= money($trip['min_price'] ?? 0) ?></span>
+                                    <span class="trip-card-price"><?= money($trip['min_price'] ?? 0) ?></span>
                                 </div>
                             </div>
-                            <div class="passeio-card-meta">
-                                <span>
+                            <div class="trip-card-meta">
+                                <span class="trip-card-meta-item">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
                                     Punta Cana
                                 </span>
-                                <span>
+                                <span class="trip-card-meta-item">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                     <?= e($trip['duration'] ?? '') ?> <?= ($trip['duration_unit'] ?? 'hours') === 'hours' ? 'Horas' : 'Dias' ?>
                                 </span>
                             </div>
-                            <p class="passeio-card-desc"><?= e(truncate($trip['short_description'] ?? '', 160)) ?></p>
-
-                            <?php if (!empty($trip['next_dates'])): ?>
-                            <div class="passeio-card-dates">
-                                <small>Próxima Partida</small>
-                                <div class="date-badges">
-                                    <?php foreach (array_slice($trip['next_dates'], 0, 3) as $date): ?>
-                                    <span class="date-badge"><?= date('d/m/Y', strtotime($date['date'])) ?></span>
-                                    <?php endforeach; ?>
-                                </div>
-                            </div>
-                            <?php endif; ?>
-
-                            <div class="passeio-card-footer">
-                                <a href="/passeios/<?= e($trip['slug']) ?>" class="btn btn-primary btn-sm">Ver Detalhes</a>
+                            <p class="trip-card-desc"><?= e(truncate($trip['short_description'] ?? '', 140)) ?></p>
+                            <div class="trip-card-footer">
+                                <a href="/passeios/<?= e($trip['slug']) ?>" class="trip-card-btn">Ver Detalhes</a>
                             </div>
                         </div>
-                    </div>
+                    </article>
                     <?php endforeach; ?>
                 </div>
 
                 <!-- Paginação -->
                 <?php if ($trips['total_pages'] > 1): ?>
-                <nav class="pagination">
+                <nav class="cat-pagination">
                     <?php
                     $queryParams = $_GET;
                     unset($queryParams['page']);
@@ -267,7 +267,7 @@
                     ?>
                     <?php for ($i = 1; $i <= $trips['total_pages']; $i++): ?>
                     <a href="?page=<?= $i ?><?= $baseQuery ? '&' . $baseQuery : '' ?>"
-                       class="page-link <?= $i === $trips['current_page'] ? 'active' : '' ?>">
+                       class="cat-pagination-link <?= $i === $trips['current_page'] ? 'active' : '' ?>">
                         <?= $i ?>
                     </a>
                     <?php endfor; ?>
@@ -279,85 +279,61 @@
     </div>
 </section>
 
-<!-- Disponibilidade (calendário mensal inline) -->
-<?php if (!empty($trips['items'])): ?>
-<div class="availability-bar">
-    <div class="container">
-        <span class="availability-label">Disponível durante todo o ano</span>
-        <div class="availability-months">
-            <?php
-            $months = ['jan','fev','mar','abr','maio','jun','jul','ago','set','out','nov','dez'];
-            foreach ($months as $m): ?>
-            <span class="month-badge"><?= $m ?></span>
-            <?php endforeach; ?>
-        </div>
-    </div>
-</div>
-<?php endif; ?>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Collapsible filter groups
-    document.querySelectorAll('[data-toggle-filter]').forEach(function(el) {
-        el.addEventListener('click', function() {
-            var group = el.closest('[data-collapsible]');
-            group.classList.toggle('collapsed');
-        });
-    });
-
-    // Show more buttons
-    document.querySelectorAll('[data-show-more]').forEach(function(btn) {
+    // Collapse/Expand filter blocks
+    document.querySelectorAll('[data-toggle-filter]').forEach(function(btn) {
         btn.addEventListener('click', function() {
-            var options = btn.closest('.filter-options-collapsible');
-            options.classList.toggle('expanded');
-            if (options.classList.contains('expanded')) {
-                btn.textContent = 'Mostrar menos ↑';
-            } else {
-                btn.textContent = btn.dataset.originalText || 'Mostrar todos ↓';
-            }
+            btn.closest('[data-collapsible]').classList.toggle('collapsed');
         });
-        btn.dataset.originalText = btn.textContent;
     });
 
-    // Price range slider
-    var priceMin = document.getElementById('price-min');
-    var priceMax = document.getElementById('price-max');
-    var priceMinVal = document.getElementById('price-min-val');
-    var priceMaxVal = document.getElementById('price-max-val');
-
-    if (priceMin && priceMax) {
-        priceMin.addEventListener('input', function() {
-            if (parseInt(priceMin.value) > parseInt(priceMax.value)) {
-                priceMin.value = priceMax.value;
+    // Show more / Show less
+    document.querySelectorAll('[data-expand]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var body = btn.closest('.filter-block-expandable');
+            var isExpanded = body.classList.toggle('expanded');
+            var text = btn.querySelector('.expand-text');
+            if (isExpanded) {
+                text.textContent = 'Mostrar menos';
+                btn.classList.add('is-expanded');
+            } else {
+                text.textContent = btn.dataset.originalText || text.textContent;
+                btn.classList.remove('is-expanded');
             }
-            priceMinVal.textContent = priceMin.value;
         });
-        priceMax.addEventListener('input', function() {
-            if (parseInt(priceMax.value) < parseInt(priceMin.value)) {
-                priceMax.value = priceMin.value;
-            }
-            priceMaxVal.textContent = priceMax.value;
+        btn.dataset.originalText = btn.querySelector('.expand-text').textContent;
+    });
+
+    // Price range
+    var pMin = document.getElementById('price-min');
+    var pMax = document.getElementById('price-max');
+    var pMinV = document.getElementById('price-min-val');
+    var pMaxV = document.getElementById('price-max-val');
+    if (pMin && pMax) {
+        pMin.addEventListener('input', function() {
+            if (+pMin.value > +pMax.value) pMin.value = pMax.value;
+            pMinV.textContent = pMin.value;
+        });
+        pMax.addEventListener('input', function() {
+            if (+pMax.value < +pMin.value) pMax.value = pMin.value;
+            pMaxV.textContent = pMax.value;
         });
     }
 
-    // Duration range slider
-    var durMin = document.getElementById('duration-min');
-    var durMax = document.getElementById('duration-max');
-    var durMinVal = document.getElementById('duration-min-val');
-    var durMaxVal = document.getElementById('duration-max-val');
-
-    if (durMin && durMax) {
-        durMin.addEventListener('input', function() {
-            if (parseInt(durMin.value) > parseInt(durMax.value)) {
-                durMin.value = durMax.value;
-            }
-            durMinVal.textContent = durMin.value;
+    // Duration range
+    var dMin = document.getElementById('duration-min');
+    var dMax = document.getElementById('duration-max');
+    var dMinV = document.getElementById('duration-min-val');
+    var dMaxV = document.getElementById('duration-max-val');
+    if (dMin && dMax) {
+        dMin.addEventListener('input', function() {
+            if (+dMin.value > +dMax.value) dMin.value = dMax.value;
+            dMinV.textContent = dMin.value;
         });
-        durMax.addEventListener('input', function() {
-            if (parseInt(durMax.value) < parseInt(durMin.value)) {
-                durMax.value = durMin.value;
-            }
-            durMaxVal.textContent = durMax.value;
+        dMax.addEventListener('input', function() {
+            if (+dMax.value < +dMin.value) dMax.value = dMin.value;
+            dMaxV.textContent = dMax.value;
         });
     }
 });
