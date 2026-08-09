@@ -169,6 +169,20 @@ class TripsController extends Controller
             $availableDates = [];
         }
 
+        // Mapeamento categoria → tag que deve estar pré-selecionada
+        $categoryTagMap = [
+            'familia' => 'adequado-para-criancas',
+            'aventura' => 'amigo-da-natureza',
+            'noturno' => 'vida-noturna',
+            'romantico' => 'romantico',
+        ];
+        $lockedTag = $categoryTagMap[$cat['slug']] ?? null;
+
+        // Se tem tag travada, garantir que está nos filtros
+        if ($lockedTag && !in_array($lockedTag, $currentFilters['tag'])) {
+            $currentFilters['tag'][] = $lockedTag;
+        }
+
         $this->view('frontend/trips/category', [
             'trips' => $trips,
             'category' => $cat,
@@ -181,6 +195,7 @@ class TripsController extends Controller
             'durationRange' => $durationRange,
             'currentFilters' => $currentFilters,
             'currentOrder' => $orderBy,
+            'lockedTag' => $lockedTag,
             'pageTitle' => $cat['name'] . ' - Passeios em Punta Cana',
         ], 'app');
     }

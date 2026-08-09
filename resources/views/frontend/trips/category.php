@@ -125,8 +125,10 @@
                         </button>
                         <div class="filter-block-body filter-block-expandable">
                             <?php foreach ($tags as $i => $tag): ?>
-                            <label class="filter-option <?= $i >= 5 ? 'filter-option-hidden' : '' ?>">
-                                <input type="checkbox" name="tag[]" value="<?= e($tag['slug']) ?>" <?= in_array($tag['slug'], $currentFilters['tag'] ?? []) ? 'checked' : '' ?>>
+                            <?php $isLocked = (isset($lockedTag) && $tag['slug'] === $lockedTag); ?>
+                            <label class="filter-option <?= $i >= 5 ? 'filter-option-hidden' : '' ?> <?= $isLocked ? 'filter-option-locked' : '' ?>">
+                                <input type="checkbox" name="tag[]" value="<?= e($tag['slug']) ?>" <?= in_array($tag['slug'], $currentFilters['tag'] ?? []) ? 'checked' : '' ?> <?= $isLocked ? 'checked disabled' : '' ?>>
+                                <?php if ($isLocked): ?><input type="hidden" name="tag[]" value="<?= e($tag['slug']) ?>"><?php endif; ?>
                                 <span class="filter-option-check"></span>
                                 <span class="filter-option-label"><?= e($tag['name']) ?></span>
                                 <span class="filter-option-count"><?= (int)$tag['trip_count'] ?></span>
