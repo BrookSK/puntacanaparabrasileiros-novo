@@ -14,7 +14,7 @@
         <h2 class="section-title">Todos os Tipos de Experiências</h2>
         <div class="categorias-cards-grid">
             <a href="/passeios/categoria/passeios-de-barco" class="categoria-card-lg">
-                <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/3.png" alt="Praia e Barco" loading="lazy">
+                <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/11/WhatsApp-Image-2025-11-14-at-08.50.25-990x490.jpeg" alt="Praia e Barco" loading="lazy">
                 <div class="categoria-card-overlay">
                     <span class="categoria-card-name">Praia e Barco &rarr;</span>
                 </div>
