@@ -1014,8 +1014,8 @@ img { max-width: 100%; height: auto; }
 
 /* Listing section */
 .cat-listing {
-    padding: 40px 0 80px;
-    background: #fafbfc;
+    padding: 44px 0 80px;
+    background: #f9fafb;
 }
 
 /* Results header */
@@ -1034,8 +1034,8 @@ img { max-width: 100%; height: auto; }
 /* Grid layout */
 .cat-grid {
     display: grid;
-    grid-template-columns: 280px 1fr;
-    gap: 36px;
+    grid-template-columns: 290px 1fr;
+    gap: 40px;
     align-items: start;
 }
 
@@ -1047,9 +1047,9 @@ img { max-width: 100%; height: auto; }
     top: 80px;
     background: #ffffff;
     border-radius: 16px;
-    border: 1px solid #f0f0f0;
-    padding: 28px 24px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    border: 1px solid #ebebeb;
+    padding: 30px 26px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
 }
 
 /* Filters header */
@@ -1356,12 +1356,12 @@ img { max-width: 100%; height: auto; }
     background: #ffffff;
     border-radius: 14px;
     overflow: hidden;
-    border: 1px solid #f0f0f0;
-    transition: box-shadow .25s, transform .25s;
+    border: 1px solid #eee;
+    transition: box-shadow .3s ease, transform .3s ease;
 }
 .trip-card:hover {
-    box-shadow: 0 8px 28px rgba(0,0,0,0.07);
-    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.06);
+    transform: translateY(-3px);
 }
 .trip-card-image {
     width: 260px;
@@ -1430,9 +1430,9 @@ img { max-width: 100%; height: auto; }
     margin-bottom: 2px;
 }
 .trip-card-price {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
-    color: var(--text-green);
+    color: var(--dark);
     letter-spacing: -0.5px;
 }
 .trip-card-meta {
@@ -1466,17 +1466,19 @@ img { max-width: 100%; height: auto; }
 .trip-card-btn {
     display: inline-flex;
     align-items: center;
-    padding: 9px 20px;
-    font-size: 13px;
+    padding: 8px 18px;
+    font-size: 12px;
     font-weight: 600;
-    color: white;
-    background: var(--text-green);
+    color: var(--text-green);
+    background: transparent;
+    border: 1.5px solid var(--text-green);
     border-radius: 8px;
     text-decoration: none;
-    transition: background .2s;
+    transition: all .2s;
+    letter-spacing: 0.2px;
 }
 .trip-card-btn:hover {
-    background: #155c00;
+    background: var(--text-green);
     color: white;
 }
 
