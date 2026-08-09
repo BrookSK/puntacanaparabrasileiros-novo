@@ -284,7 +284,7 @@ class Trip extends Model
             $params = array_merge($params, $filters['atividade']);
         }
 
-        // Filtro por tags genéricas
+        // Filtro por tags genéricas (Tipos de Viagem no site antigo)
         if (!empty($filters['tag'])) {
             $placeholders = implode(',', array_fill(0, count($filters['tag']), '?'));
             $joins[] = "INNER JOIN trip_tag_relations ttr_tag ON t.id = ttr_tag.trip_id
@@ -292,40 +292,28 @@ class Trip extends Model
             $params = array_merge($params, $filters['tag']);
         }
 
-        // Filtro por tipo de viagem (categorias adicionais)
-        if (!empty($filters['tipo'])) {
-            $placeholders = implode(',', array_fill(0, count($filters['tipo']), '?'));
-            $joins[] = "INNER JOIN trip_category_relations tcr_tipo ON t.id = tcr_tipo.trip_id
-                        INNER JOIN trip_categories tc_tipo ON tcr_tipo.category_id = tc_tipo.id AND tc_tipo.slug IN ({$placeholders})";
-            $params = array_merge($params, $filters['tipo']);
-        }
-
         // Filtro por datas de início (mês)
         if (!empty($filters['data'])) {
             $dateConditions = [];
             foreach ($filters['data'] as $monthKey) {
-                // formato: "2026-08"
                 $dateConditions[] = "DATE_FORMAT(tfd.date, '%Y-%m') = ?";
                 $params[] = $monthKey;
             }
             $joins[] = "INNER JOIN trip_fixed_dates tfd ON t.id = tfd.trip_id AND tfd.status = 'available' AND tfd.date >= CURDATE() AND (" . implode(' OR ', $dateConditions) . ")";
         }
 
-        // Filtro por duração (em dias, convertendo horas para dias)
-        if (!empty($filters['duracao_min']) || !empty($filters['duracao_max'])) {
-            // Converter duração para dias: se hours, dividir por 24 e arredondar para cima (1 dia mínimo)
-            if (!empty($filters['duracao_min']) && (int)$filters['duracao_min'] > 0) {
-                $conditions[] = "CASE WHEN t.duration_unit = 'days' THEN CAST(t.duration AS UNSIGNED) ELSE CEIL(CAST(t.duration AS UNSIGNED) / 24) END >= ?";
-                $params[] = (int)$filters['duracao_min'];
-            }
-            if (!empty($filters['duracao_max'])) {
-                $conditions[] = "CASE WHEN t.duration_unit = 'days' THEN CAST(t.duration AS UNSIGNED) ELSE CEIL(CAST(t.duration AS UNSIGNED) / 24) END <= ?";
-                $params[] = (int)$filters['duracao_max'];
-            }
+        // Filtro por duração (em dias)
+        if (!empty($filters['duracao_min']) && (int)$filters['duracao_min'] > 0) {
+            $conditions[] = "CASE WHEN t.duration_unit = 'days' THEN CAST(t.duration AS UNSIGNED) ELSE CEIL(CAST(t.duration AS UNSIGNED) / 24) END >= ?";
+            $params[] = (int)$filters['duracao_min'];
+        }
+        if (!empty($filters['duracao_max']) && (int)$filters['duracao_max'] > 0) {
+            $conditions[] = "CASE WHEN t.duration_unit = 'days' THEN CAST(t.duration AS UNSIGNED) ELSE CEIL(CAST(t.duration AS UNSIGNED) / 24) END <= ?";
+            $params[] = (int)$filters['duracao_max'];
         }
 
-        // Filtro por preço (precisa de JOIN com packages)
-        $needsPriceFilter = (!empty($filters['preco_min']) && (int)$filters['preco_min'] > 0) || !empty($filters['preco_max']);
+        // Filtro por preço
+        $needsPriceFilter = (!empty($filters['preco_min']) && (int)$filters['preco_min'] > 0) || (!empty($filters['preco_max']) && (int)$filters['preco_max'] > 0);
         $needsPriceOrder = in_array($orderBy, ['preco_asc', 'preco_desc']);
         $needsPriceJoin = $needsPriceFilter || $needsPriceOrder;
 
@@ -345,7 +333,6 @@ class Trip extends Model
             }
         }
 
-        // Montar SQL
         $joinsSql = implode("\n", $joins);
         $conditionsSql = implode(' AND ', $conditions);
 
@@ -361,7 +348,7 @@ class Trip extends Model
             $orderSql = $orderMap[$orderBy] ?? 'ORDER BY t.sort_order ASC, t.created_at DESC';
         }
 
-        $sql = "SELECT DISTINCT t.*
+        $sql = "SELECT t.*
                 FROM `{$this->table}` t
                 {$joinsSql}
                 WHERE {$conditionsSql}
@@ -373,8 +360,8 @@ class Trip extends Model
 
         $items = $this->db->fetchAll($sql, $params);
 
-        // Count total (sem LIMIT)
-        $countParams = array_slice($params, 0, -2); // Remove perPage e offset
+        // Count
+        $countParams = array_slice($params, 0, -2);
         $countSql = "SELECT COUNT(DISTINCT t.id)
                      FROM `{$this->table}` t
                      {$joinsSql}

@@ -116,7 +116,6 @@ class TripsController extends Controller
             'duracao_min' => $request->query('duracao_min'),
             'duracao_max' => $request->query('duracao_max'),
             'atividade' => array_filter((array) ($request->query('atividade') ?? [])),
-            'tipo' => array_filter((array) ($request->query('tipo') ?? [])),
             'tag' => array_filter((array) ($request->query('tag') ?? [])),
             'data' => array_filter((array) ($request->query('data') ?? [])),
         ];
@@ -124,8 +123,7 @@ class TripsController extends Controller
         // Buscar passeios com filtros
         try {
             $trips = $this->tripModel->getFiltered((int) $cat['id'], $currentFilters, $orderBy, $page, 12);
-        } catch (\Exception $e) {
-            // Fallback se tabelas de tags não existem ainda
+        } catch (\Throwable $e) {
             $trips = $this->tripModel->getByCategory((int) $cat['id'], $page, 12, $orderBy);
         }
 
@@ -143,24 +141,19 @@ class TripsController extends Controller
 
         // Dados para os filtros da sidebar
         $categories = $this->categoryModel->getWithTripCount();
+        $priceRange = $this->tripModel->getPriceRange();
+        $durationRange = $this->tripModel->getDurationRange();
 
-        // Tags (podem não existir se a migration 017 ainda não foi rodada)
+        // Tags e datas (requerem migration 017)
         try {
             $destinations = $this->tripModel->getTagsWithCount('destino');
             $activities = $this->tripModel->getTagsWithCount('atividade');
             $tags = $this->tripModel->getTagsWithCount('tag');
-        } catch (\Exception $e) {
+            $availableDates = $this->tripModel->getAvailableMonths();
+        } catch (\Throwable $e) {
             $destinations = [];
             $activities = [];
             $tags = [];
-        }
-
-        $priceRange = $this->tripModel->getPriceRange();
-        $durationRange = $this->tripModel->getDurationRange();
-
-        try {
-            $availableDates = $this->tripModel->getAvailableMonths();
-        } catch (\Exception $e) {
             $availableDates = [];
         }
 

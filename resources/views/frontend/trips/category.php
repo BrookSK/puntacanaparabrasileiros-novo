@@ -116,37 +116,11 @@
                     </div>
                     <?php endif; ?>
 
-                    <!-- Tipos de Viagem -->
-                    <div class="filter-block" data-collapsible>
-                        <button type="button" class="filter-block-title" data-toggle-filter>
-                            <span>Tipos de Viagem</span>
-                            <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                        </button>
-                        <div class="filter-block-body filter-block-expandable">
-                            <?php $catIdx = 0; foreach ($categories as $cat): ?>
-                            <?php if ($cat['trip_count'] > 0): ?>
-                            <label class="filter-option <?= $catIdx >= 7 ? 'filter-option-hidden' : '' ?>">
-                                <input type="checkbox" name="tipo[]" value="<?= e($cat['slug']) ?>" <?= in_array($cat['slug'], $currentFilters['tipo'] ?? []) ? 'checked' : '' ?> <?= $cat['slug'] === $category['slug'] ? 'checked' : '' ?>>
-                                <span class="filter-option-check"></span>
-                                <span class="filter-option-label"><?= e($cat['name']) ?></span>
-                                <span class="filter-option-count"><?= (int)$cat['trip_count'] ?></span>
-                            </label>
-                            <?php $catIdx++; endif; ?>
-                            <?php endforeach; ?>
-                            <?php if ($catIdx > 7): ?>
-                            <button type="button" class="filter-expand-btn" data-expand>
-                                <span class="expand-text">Mostrar todos (<?= $catIdx ?>)</span>
-                                <svg class="expand-icon" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                            </button>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
-                    <!-- Tags -->
+                    <!-- Tipos de Viagem (Tags do tipo 'tag') -->
                     <?php if (!empty($tags)): ?>
                     <div class="filter-block" data-collapsible>
                         <button type="button" class="filter-block-title" data-toggle-filter>
-                            <span>Tags</span>
+                            <span>Tipos de Viagem</span>
                             <svg class="filter-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
                         </button>
                         <div class="filter-block-body filter-block-expandable">
