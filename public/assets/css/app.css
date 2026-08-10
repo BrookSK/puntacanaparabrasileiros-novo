@@ -6522,6 +6522,37 @@ img { max-width: 100%; height: auto; }
 }
 .bm-btn-checkout:hover { background: #000; }
 
+/* Hotel Selection Step */
+.bm-hotel-section { margin-bottom: 20px; }
+.bm-section-title { font-size: 16px; font-weight: 700; color: var(--dark); margin: 0 0 4px; }
+.bm-section-subtitle { font-size: 13px; color: var(--gray); margin: 0 0 14px; }
+.bm-hotel-search { position: relative; margin-bottom: 14px; }
+.bm-hotel-search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--gray); }
+.bm-hotel-search input { width: 100%; padding: 12px 14px 12px 40px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 14px; font-family: var(--font); outline: none; transition: border-color .2s; }
+.bm-hotel-search input:focus { border-color: var(--accent); }
+.bm-hotel-list { max-height: 220px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 10px; }
+.bm-hotel-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background .15s; }
+.bm-hotel-item:last-child { border-bottom: none; }
+.bm-hotel-item:hover { background: #f0f9ff; }
+.bm-hotel-item.selected { background: #e0f2fe; border-left: 3px solid var(--accent); }
+.bm-hotel-item svg { color: var(--accent); flex-shrink: 0; }
+.bm-hotel-name { flex: 1; font-size: 14px; font-weight: 500; color: var(--dark); }
+.bm-hotel-times-count { font-size: 11px; color: var(--gray); white-space: nowrap; }
+.bm-hotel-loading { padding: 30px; text-align: center; color: var(--gray); font-size: 13px; }
+.bm-hotel-empty { padding: 30px; text-align: center; color: var(--gray); font-size: 13px; }
+
+/* Pickup Times */
+.bm-pickup-section { margin-bottom: 16px; padding-top: 16px; border-top: 1px solid #f1f5f9; }
+.bm-pickup-times { display: flex; flex-wrap: wrap; gap: 8px; }
+.bm-pickup-time-btn { padding: 10px 20px; border: 2px solid #e2e8f0; border-radius: 10px; background: white; font-size: 15px; font-weight: 700; font-family: 'JetBrains Mono', monospace; color: var(--dark); cursor: pointer; transition: all .2s; }
+.bm-pickup-time-btn:hover { border-color: var(--accent); color: var(--accent); }
+.bm-pickup-time-btn.selected { background: var(--accent); border-color: var(--accent); color: white; }
+
+/* Sidebar Hotel */
+.bm-sidebar-hotel { margin-bottom: 12px; padding: 10px 12px; background: #e0f2fe; border-radius: 8px; font-size: 12px; }
+.bm-sidebar-hotel span { display: block; color: var(--dark); font-weight: 500; }
+.bm-sidebar-hotel span:last-child { color: var(--accent); font-weight: 700; margin-top: 2px; }
+
 @media (max-width: 768px) {
     .booking-modal-layout {
         grid-template-columns: 1fr;

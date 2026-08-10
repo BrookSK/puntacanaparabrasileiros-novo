@@ -73,6 +73,75 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/atualizar' : '/admin/pa
                 <div class="form-group"><label>Meta Title</label><input type="text" name="meta_title" value="<?= e($trip['meta_title'] ?? '') ?>" class="form-control" placeholder="Título para Google"></div>
                 <div class="form-group"><label>Meta Description</label><textarea name="meta_description" class="form-control" rows="2" placeholder="Descrição para Google"><?= e($trip['meta_description'] ?? '') ?></textarea></div>
             </div>
+
+            <?php if ($isEdit): ?>
+            <!-- Horários por Hotel -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon admin-card-icon-orange">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </div>
+                    <div>
+                        <h3>Horários por Hotel</h3>
+                        <p class="admin-card-subtitle">Hotéis e horários de pickup para este passeio</p>
+                    </div>
+                </div>
+
+                <div class="schedule-actions" style="display:flex;gap:10px;margin-bottom:16px;">
+                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/criar" class="btn btn-sm btn-primary">+ Adicionar Hotel</a>
+                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/importar" class="btn btn-sm btn-outline">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        Importar Planilha
+                    </a>
+                    <?php if (!empty($tripHotels ?? [])): ?>
+                    <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/limpar" class="inline-form" style="margin-left:auto;" onsubmit="return confirm('Remover todos os hotéis e horários deste passeio?')">
+                        <?= csrf_field() ?>
+                        <button class="btn btn-sm btn-danger">Limpar Tudo</button>
+                    </form>
+                    <?php endif; ?>
+                </div>
+
+                <?php if (empty($tripHotels ?? [])): ?>
+                <div style="text-align:center;padding:30px 10px;color:#94a3b8;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:8px;opacity:0.5;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <p style="margin:0;font-size:13px;">Nenhum hotel/horário cadastrado ainda.</p>
+                </div>
+                <?php else: ?>
+                <div class="hotels-schedule-list">
+                    <?php foreach ($tripHotels as $th): ?>
+                    <div class="hotel-schedule-row">
+                        <div class="hotel-schedule-row__info">
+                            <strong class="hotel-schedule-row__name">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;opacity:0.6;"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                                <?= e($th['hotel_name']) ?>
+                            </strong>
+                            <?php if (!$th['is_active']): ?>
+                            <span class="badge badge-secondary" style="font-size:10px;">Inativo</span>
+                            <?php endif; ?>
+                            <div class="hotel-schedule-row__times">
+                                <?php if (!empty($th['schedules'])): ?>
+                                    <?php foreach ($th['schedules'] as $sch): ?>
+                                    <span class="schedule-chip"><?= substr($sch['pickup_time'], 0, 5) ?></span>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <span style="font-size:12px;color:#94a3b8;">Sem horários</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="hotel-schedule-row__actions">
+                            <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/editar" class="btn btn-sm btn-outline">Editar</a>
+                            <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir este hotel e seus horários?')">
+                                <?= csrf_field() ?>
+                                <button class="btn btn-sm btn-danger">&times;</button>
+                            </form>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <p style="margin:12px 0 0;font-size:12px;color:#94a3b8;"><?= count($tripHotels) ?> hotel(éis) cadastrado(s)</p>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
         </div>
 
         <!-- Coluna Direita -->
@@ -148,3 +217,57 @@ document.getElementById('addPackageBtn')?.addEventListener('click', function() {
     }
 })();
 </script>
+
+<style>
+.hotels-schedule-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.hotel-schedule-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--bg-elevated, #f8fafc);
+    border: 1px solid var(--border, #e2e8f0);
+    border-radius: 8px;
+    gap: 12px;
+}
+.hotel-schedule-row__info {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+    flex: 1;
+}
+.hotel-schedule-row__name {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.hotel-schedule-row__times {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+.hotel-schedule-row__actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+.schedule-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 10px;
+    background: rgba(14, 165, 233, 0.08);
+    color: var(--primary, #0ea5e9);
+    border: 1px solid rgba(14, 165, 233, 0.18);
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+    letter-spacing: 0.3px;
+}
+</style>

@@ -125,6 +125,13 @@ class TripsController extends Controller
         $fixedDates = $this->tripModel->getFixedDates($id, false);
         $travelerCategories = $this->db->fetchAll("SELECT * FROM traveler_categories ORDER BY sort_order ASC");
 
+        // Hotéis e horários de pickup
+        $tripHotelModel = new \App\Models\TripHotel();
+        $tripHotels = $tripHotelModel->getByTripWithCount($id);
+        foreach ($tripHotels as &$th) {
+            $th['schedules'] = $tripHotelModel->getSchedules((int) $th['id']);
+        }
+
         $this->view('admin/trips/form', [
             'trip' => $trip,
             'categories' => $categories,
@@ -134,6 +141,7 @@ class TripsController extends Controller
             'extraServices' => $extraServices,
             'fixedDates' => $fixedDates,
             'travelerCategories' => $travelerCategories,
+            'tripHotels' => $tripHotels,
             'pageTitle' => 'Editar: ' . $trip['title'],
         ], 'admin');
     }

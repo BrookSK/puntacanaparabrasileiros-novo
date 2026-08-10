@@ -13,6 +13,7 @@ use App\Services\ExcelReaderService;
 
 /**
  * Controller para gerenciar horários de pickup por hotel nos passeios.
+ * Funciona como sub-recurso de /admin/passeios/{id}/horarios
  */
 class SchedulesController extends Controller
 {
@@ -29,33 +30,7 @@ class SchedulesController extends Controller
     }
 
     /**
-     * Lista passeios com contagem de hotéis/horários cadastrados.
-     */
-    public function index(Request $request, Response $response): void
-    {
-        $page = max(1, (int) $request->query('page', '1'));
-        $search = $request->query('busca');
-
-        if ($search) {
-            $trips = $this->tripModel->paginate($page, 20, "title LIKE ?", ['%' . $search . '%'], 'title ASC');
-        } else {
-            $trips = $this->tripModel->paginate($page, 20, '1=1', [], 'title ASC');
-        }
-
-        // Adicionar contagem de hotéis para cada passeio
-        foreach ($trips['items'] as &$trip) {
-            $trip['hotels_count'] = $this->hotelModel->countByTrip((int) $trip['id']);
-        }
-
-        $this->view('admin/schedules/index', [
-            'trips' => $trips,
-            'currentSearch' => $search,
-            'pageTitle' => 'Horários por Hotel',
-        ], 'admin');
-    }
-
-    /**
-     * Exibe horários de um passeio específico.
+     * Exibe horários de um passeio específico (página dedicada).
      */
     public function show(Request $request, Response $response): void
     {
@@ -67,8 +42,6 @@ class SchedulesController extends Controller
         }
 
         $hotels = $this->hotelModel->getByTripWithCount($tripId);
-
-        // Carregar horários de cada hotel
         foreach ($hotels as &$hotel) {
             $hotel['schedules'] = $this->scheduleModel->getByHotel((int) $hotel['id']);
         }
@@ -115,7 +88,7 @@ class SchedulesController extends Controller
         $hotelName = trim($request->input('hotel_name', ''));
         if (empty($hotelName)) {
             $this->flash('error', 'Nome do hotel é obrigatório.');
-            $this->redirect("/admin/horarios/{$tripId}/hotel/criar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/hotel/criar");
             return;
         }
 
@@ -123,7 +96,7 @@ class SchedulesController extends Controller
         $existing = $this->hotelModel->findByTripAndName($tripId, $hotelName);
         if ($existing) {
             $this->flash('error', 'Este hotel já está cadastrado para este passeio.');
-            $this->redirect("/admin/horarios/{$tripId}/hotel/criar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/hotel/criar");
             return;
         }
 
@@ -140,7 +113,7 @@ class SchedulesController extends Controller
         $this->saveSchedules($hotelId, $times);
 
         $this->flash('success', "Hotel \"{$hotelName}\" adicionado com sucesso!");
-        $this->redirect("/admin/horarios/{$tripId}");
+        $this->redirect("/admin/passeios/{$tripId}/editar");
     }
 
     /**
@@ -186,7 +159,7 @@ class SchedulesController extends Controller
         $hotelName = trim($request->input('hotel_name', ''));
         if (empty($hotelName)) {
             $this->flash('error', 'Nome do hotel é obrigatório.');
-            $this->redirect("/admin/horarios/{$tripId}/hotel/{$hotelId}/editar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/hotel/{$hotelId}/editar");
             return;
         }
 
@@ -194,7 +167,7 @@ class SchedulesController extends Controller
         $existing = $this->hotelModel->findByTripAndName($tripId, $hotelName);
         if ($existing && (int) $existing['id'] !== $hotelId) {
             $this->flash('error', 'Já existe outro hotel com este nome neste passeio.');
-            $this->redirect("/admin/horarios/{$tripId}/hotel/{$hotelId}/editar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/hotel/{$hotelId}/editar");
             return;
         }
 
@@ -210,7 +183,7 @@ class SchedulesController extends Controller
         $this->saveSchedules($hotelId, $times);
 
         $this->flash('success', "Hotel \"{$hotelName}\" atualizado com sucesso!");
-        $this->redirect("/admin/horarios/{$tripId}");
+        $this->redirect("/admin/passeios/{$tripId}/editar");
     }
 
     /**
@@ -226,13 +199,11 @@ class SchedulesController extends Controller
             $this->abort(404);
         }
 
-        // Remover horários primeiro
         $this->scheduleModel->deleteByHotel($hotelId);
-        // Remover hotel
         $this->hotelModel->delete($hotelId);
 
         $this->flash('success', "Hotel \"{$hotel['hotel_name']}\" removido com sucesso!");
-        $this->redirect("/admin/horarios/{$tripId}");
+        $this->redirect("/admin/passeios/{$tripId}/editar");
     }
 
     /**
@@ -265,33 +236,30 @@ class SchedulesController extends Controller
             $this->abort(404);
         }
 
-        // Verificar upload
         if (!$request->hasFile('schedule_file')) {
             $this->flash('error', 'Nenhum arquivo selecionado.');
-            $this->redirect("/admin/horarios/{$tripId}/importar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/importar");
             return;
         }
 
         $file = $request->file('schedule_file');
         if ($file['error'] !== UPLOAD_ERR_OK) {
             $this->flash('error', 'Erro no upload do arquivo.');
-            $this->redirect("/admin/horarios/{$tripId}/importar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/importar");
             return;
         }
 
-        // Validar extensão
         $allowedExtensions = ['xlsx', 'csv', 'txt'];
         $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         if (!in_array($extension, $allowedExtensions)) {
             $this->flash('error', 'Formato não suportado. Use .xlsx ou .csv');
-            $this->redirect("/admin/horarios/{$tripId}/importar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/importar");
             return;
         }
 
-        // Validar tamanho (máx 5MB)
         if ($file['size'] > 5 * 1024 * 1024) {
             $this->flash('error', 'Arquivo muito grande. Máximo: 5MB.');
-            $this->redirect("/admin/horarios/{$tripId}/importar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/importar");
             return;
         }
 
@@ -301,20 +269,18 @@ class SchedulesController extends Controller
 
             if (empty($rawData)) {
                 $this->flash('error', 'A planilha está vazia ou não foi possível ler os dados.');
-                $this->redirect("/admin/horarios/{$tripId}/importar");
+                $this->redirect("/admin/passeios/{$tripId}/horarios/importar");
                 return;
             }
 
-            // Interpretar dados como hotel/horários
             $parsedData = $reader->parseHotelSchedules($rawData);
 
             if (empty($parsedData)) {
                 $this->flash('error', 'Nenhum dado válido encontrado na planilha. Verifique o formato.');
-                $this->redirect("/admin/horarios/{$tripId}/importar");
+                $this->redirect("/admin/passeios/{$tripId}/horarios/importar");
                 return;
             }
 
-            // Importar
             $clearExisting = (bool) $request->input('clear_existing', '0');
             $stats = $this->hotelModel->importSchedules($tripId, $parsedData, $clearExisting);
 
@@ -324,11 +290,11 @@ class SchedulesController extends Controller
             }
 
             $this->flash('success', $message);
-            $this->redirect("/admin/horarios/{$tripId}");
+            $this->redirect("/admin/passeios/{$tripId}/editar");
 
         } catch (\Exception $e) {
             $this->flash('error', 'Erro ao processar arquivo: ' . $e->getMessage());
-            $this->redirect("/admin/horarios/{$tripId}/importar");
+            $this->redirect("/admin/passeios/{$tripId}/horarios/importar");
         }
     }
 
@@ -347,7 +313,7 @@ class SchedulesController extends Controller
         $this->hotelModel->deleteByTrip($tripId);
 
         $this->flash('success', 'Todos os hotéis e horários foram removidos.');
-        $this->redirect("/admin/horarios/{$tripId}");
+        $this->redirect("/admin/passeios/{$tripId}/editar");
     }
 
     /**
@@ -359,13 +325,12 @@ class SchedulesController extends Controller
             $time = trim($time);
             if (empty($time)) continue;
 
-            // Normalizar para HH:MM:SS
             if (preg_match('/^\d{1,2}:\d{2}$/', $time)) {
                 $time = sprintf('%02d:%02d:00', ...array_map('intval', explode(':', $time)));
             }
 
             if (!preg_match('/^\d{2}:\d{2}:\d{2}$/', $time)) {
-                continue; // Ignorar horários inválidos
+                continue;
             }
 
             if (!$this->scheduleModel->existsForHotel($hotelId, $time)) {
