@@ -44,6 +44,10 @@
             </td>
             <td class="actions-cell">
                 <a href="/admin/transfers/veiculos/<?= (int)$vehicle['id'] ?>/editar" class="btn btn-sm btn-outline">Editar</a>
+                <form method="POST" action="/admin/transfers/veiculos/<?= (int)$vehicle['id'] ?>/excluir" style="display:inline" onsubmit="return confirm('Excluir este veículo?')">
+                    <?= csrf_field() ?>
+                    <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
+                </form>
             </td>
         </tr>
         <?php endforeach; ?>

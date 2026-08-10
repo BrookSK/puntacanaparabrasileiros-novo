@@ -113,6 +113,20 @@ class TransfersController extends Controller
         $this->redirect('/admin/transfers/veiculos/' . $id . '/editar');
     }
 
+    public function deleteVehicle(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        // Excluir rotas e tarifas associadas
+        $routes = $this->db->fetchAll("SELECT id FROM transfer_routes WHERE vehicle_id = ?", [$id]);
+        foreach ($routes as $route) {
+            $this->db->delete('transfer_tariffs', 'route_id = ?', [(int) $route['id']]);
+        }
+        $this->db->delete('transfer_routes', 'vehicle_id = ?', [$id]);
+        $this->vehicleModel->delete($id);
+        $this->flash('success', 'Veículo excluído!');
+        $this->redirect('/admin/transfers/veiculos');
+    }
+
     public function locations(Request $request, Response $response): void
     {
         $locations = $this->locationModel->all('sort_order ASC, title ASC');
@@ -138,6 +152,14 @@ class TransfersController extends Controller
         $data = $request->only(['title', 'address', 'latitude', 'longitude', 'location_type', 'sort_order', 'status']);
         $this->locationModel->update($id, $data);
         $this->flash('success', 'Local atualizado!');
+        $this->redirect('/admin/transfers/locais');
+    }
+
+    public function deleteLocation(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $this->locationModel->delete($id);
+        $this->flash('success', 'Local excluído!');
         $this->redirect('/admin/transfers/locais');
     }
 
