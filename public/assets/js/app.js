@@ -1087,7 +1087,10 @@
 
     function renderTravelers() {
         const container = document.getElementById('bmTravelersList');
-        if (!selectedPackage || !selectedPackage.categories) return;
+        if (!selectedPackage || !selectedPackage.categories || selectedPackage.categories.length === 0) {
+            container.innerHTML = '<div style="padding:16px;text-align:center;color:#999;font-size:13px;">Nenhuma categoria de viajante configurada para este pacote.<br><small>Entre em contato para reservar.</small></div>';
+            return;
+        }
         travelerCounts = {};
         container.innerHTML = selectedPackage.categories.map(cat => {
             const defaultQty = cat.category_slug === 'adulto' ? 1 : 0;
