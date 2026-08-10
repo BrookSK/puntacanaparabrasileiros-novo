@@ -5,33 +5,45 @@
 </div>
 
 <div class="admin-card">
-    <h3>Adicionar Novo Local</h3>
-    <form method="POST" action="/admin/transfers/locais/criar" class="admin-form">
+    <h3 id="form-title">Adicionar Novo Local</h3>
+    <form method="POST" id="location-form" action="/admin/transfers/locais/criar" class="admin-form">
         <?= csrf_field() ?>
         <div class="form-row">
-            <div class="form-group col-4">
-                <label>Título *</label>
-                <input type="text" name="title" class="form-control" required>
-            </div>
             <div class="form-group col-3">
+                <label>Título *</label>
+                <input type="text" name="title" id="loc-title" class="form-control" required>
+            </div>
+            <div class="form-group col-2">
                 <label>Tipo</label>
-                <select name="location_type" class="form-control">
+                <select name="location_type" id="loc-type" class="form-control">
                     <option value="airport">Aeroporto</option>
                     <option value="hotel">Hotel</option>
+                    <option value="city">Cidade</option>
+                    <option value="resort">Resort</option>
                     <option value="zone">Zona</option>
                     <option value="other">Outro</option>
                 </select>
             </div>
             <div class="form-group col-3">
                 <label>Endereço</label>
-                <input type="text" name="address" class="form-control">
+                <input type="text" name="address" id="loc-address" class="form-control">
             </div>
-            <div class="form-group col-2">
+            <div class="form-group col-1">
                 <label>Ordem</label>
-                <input type="number" name="sort_order" class="form-control" value="0">
+                <input type="number" name="sort_order" id="loc-order" class="form-control" value="0">
+            </div>
+            <div class="form-group col-1" id="status-group" style="display:none">
+                <label>Status</label>
+                <select name="status" id="loc-status" class="form-control">
+                    <option value="1">Ativo</option>
+                    <option value="0">Inativo</option>
+                </select>
+            </div>
+            <div class="form-group col-2" style="display:flex;align-items:flex-end;gap:8px;">
+                <button type="submit" class="btn btn-primary" id="loc-submit-btn">Salvar Local</button>
+                <button type="button" class="btn btn-outline" id="loc-cancel-btn" style="display:none" onclick="cancelEdit()">Cancelar</button>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Salvar Local</button>
     </form>
 </div>
 
@@ -54,7 +66,7 @@
         </tr>
         <?php else: ?>
         <?php foreach ($locations as $loc): ?>
-        <tr>
+        <tr id="row-<?= (int)$loc['id'] ?>">
             <td><?= (int)$loc['id'] ?></td>
             <td><strong><?= e($loc['title']) ?></strong></td>
             <td><?= e($loc['location_type'] ?? '-') ?></td>
@@ -66,7 +78,7 @@
                 </span>
             </td>
             <td class="actions-cell">
-                <button type="button" class="btn btn-sm btn-outline" onclick="editLocation(<?= (int)$loc['id'] ?>, '<?= e(addslashes($loc['title'])) ?>', '<?= e($loc['address'] ?? '') ?>', '<?= e($loc['location_type'] ?? 'hotel') ?>', <?= (int)($loc['sort_order'] ?? 0) ?>, <?= (int)($loc['status'] ?? 1) ?>)">Editar</button>
+                <button type="button" class="btn btn-sm btn-outline" onclick="editLocation(<?= (int)$loc['id'] ?>, '<?= e(addslashes($loc['title'])) ?>', '<?= e(addslashes($loc['address'] ?? '')) ?>', '<?= e($loc['location_type'] ?? 'hotel') ?>', <?= (int)($loc['sort_order'] ?? 0) ?>, <?= (int)($loc['status'] ?? 1) ?>)">Editar</button>
                 <form method="POST" action="/admin/transfers/locais/<?= (int)$loc['id'] ?>/excluir" style="display:inline" onsubmit="return confirm('Excluir este local?')">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
@@ -78,61 +90,43 @@
     </tbody>
 </table>
 
-<!-- Modal de Edição -->
-<div id="edit-modal" class="admin-modal" style="display:none">
-    <div class="admin-modal-content">
-        <h3>Editar Local</h3>
-        <form method="POST" id="edit-form" class="admin-form">
-            <?= csrf_field() ?>
-            <input type="hidden" name="_method" value="PUT">
-            <div class="form-row">
-                <div class="form-group col-4">
-                    <label>Título *</label>
-                    <input type="text" name="title" id="edit-title" class="form-control" required>
-                </div>
-                <div class="form-group col-3">
-                    <label>Tipo</label>
-                    <select name="location_type" id="edit-type" class="form-control">
-                        <option value="airport">Aeroporto</option>
-                        <option value="hotel">Hotel</option>
-                        <option value="city">Cidade</option>
-                        <option value="resort">Resort</option>
-                        <option value="zone">Zona</option>
-                        <option value="other">Outro</option>
-                    </select>
-                </div>
-                <div class="form-group col-3">
-                    <label>Endereço</label>
-                    <input type="text" name="address" id="edit-address" class="form-control">
-                </div>
-                <div class="form-group col-1">
-                    <label>Ordem</label>
-                    <input type="number" name="sort_order" id="edit-order" class="form-control">
-                </div>
-                <div class="form-group col-1">
-                    <label>Status</label>
-                    <select name="status" id="edit-status" class="form-control">
-                        <option value="1">Ativo</option>
-                        <option value="0">Inativo</option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-actions">
-                <button type="submit" class="btn btn-primary">Salvar</button>
-                <button type="button" class="btn btn-outline" onclick="document.getElementById('edit-modal').style.display='none'">Cancelar</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 <script>
 function editLocation(id, title, address, type, order, status) {
-    document.getElementById('edit-form').action = '/admin/transfers/locais/' + id + '/editar';
-    document.getElementById('edit-title').value = title;
-    document.getElementById('edit-address').value = address;
-    document.getElementById('edit-type').value = type;
-    document.getElementById('edit-order').value = order;
-    document.getElementById('edit-status').value = status;
-    document.getElementById('edit-modal').style.display = 'flex';
+    // Mudar o formulário para modo edição
+    document.getElementById('form-title').textContent = 'Editar Local #' + id;
+    document.getElementById('location-form').action = '/admin/transfers/locais/' + id + '/editar';
+    document.getElementById('loc-title').value = title;
+    document.getElementById('loc-address').value = address;
+    document.getElementById('loc-type').value = type;
+    document.getElementById('loc-order').value = order;
+    document.getElementById('loc-status').value = status;
+    document.getElementById('status-group').style.display = 'block';
+    document.getElementById('loc-submit-btn').textContent = 'Atualizar';
+    document.getElementById('loc-cancel-btn').style.display = 'inline-block';
+
+    // Destacar a linha sendo editada
+    document.querySelectorAll('tr.editing').forEach(function(r) { r.classList.remove('editing'); });
+    var row = document.getElementById('row-' + id);
+    if (row) row.classList.add('editing');
+
+    // Scroll para o form
+    document.getElementById('form-title').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelEdit() {
+    document.getElementById('form-title').textContent = 'Adicionar Novo Local';
+    document.getElementById('location-form').action = '/admin/transfers/locais/criar';
+    document.getElementById('loc-title').value = '';
+    document.getElementById('loc-address').value = '';
+    document.getElementById('loc-type').value = 'airport';
+    document.getElementById('loc-order').value = '0';
+    document.getElementById('status-group').style.display = 'none';
+    document.getElementById('loc-submit-btn').textContent = 'Salvar Local';
+    document.getElementById('loc-cancel-btn').style.display = 'none';
+    document.querySelectorAll('tr.editing').forEach(function(r) { r.classList.remove('editing'); });
 }
 </script>
+
+<style>
+tr.editing { background: rgba(27, 111, 0, 0.08) !important; }
+</style>
