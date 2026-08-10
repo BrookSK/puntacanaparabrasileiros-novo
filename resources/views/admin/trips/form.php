@@ -88,15 +88,15 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 </div>
 
                 <div class="schedule-actions" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
-                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/criar" class="btn btn-primary" style="padding:10px 20px;font-size:13px;">+ Adicionar Hotel</a>
-                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/importar" class="btn btn-outline" style="padding:10px 20px;font-size:13px;">
+                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/criar" class="btn-schedule btn-schedule--primary">+ Adicionar Hotel</a>
+                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/importar" class="btn-schedule btn-schedule--default">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                         Importar Planilha
                     </a>
                     <?php if (!empty($tripHotels ?? [])): ?>
                     <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/limpar" class="inline-form" style="margin-left:auto;" onsubmit="return confirm('Remover todos os hotéis e horários deste passeio?')">
                         <?= csrf_field() ?>
-                        <button class="btn btn-danger" style="padding:10px 20px;font-size:13px;">Limpar Tudo</button>
+                        <button class="btn-schedule btn-schedule--danger">Limpar Tudo</button>
                     </form>
                     <?php endif; ?>
                 </div>
@@ -129,10 +129,10 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                             </div>
                         </div>
                         <div class="hotel-schedule-row__actions">
-                            <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/editar" class="btn btn-outline" style="padding:8px 18px;font-size:13px;">Editar</a>
+                            <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/editar" class="btn-schedule btn-schedule--default">Editar</a>
                             <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir este hotel e seus horários?')">
                                 <?= csrf_field() ?>
-                                <button class="btn btn-danger" style="padding:8px 14px;font-size:14px;">&#10005;</button>
+                                <button class="btn-schedule btn-schedule--danger">&#10005;</button>
                             </form>
                         </div>
                     </div>
@@ -270,5 +270,49 @@ document.getElementById('addPackageBtn')?.addEventListener('click', function() {
     font-weight: 700;
     font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
     letter-spacing: 0.3px;
+}
+
+/* Botões clean da seção de horários */
+.btn-schedule {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    line-height: 1.3;
+}
+.btn-schedule--primary {
+    background: transparent;
+    color: #0ea5e9;
+    border: 1.5px solid #0ea5e9;
+}
+.btn-schedule--primary:hover {
+    background: #0ea5e9;
+    color: #fff;
+}
+.btn-schedule--default {
+    background: transparent;
+    color: #64748b;
+    border: 1.5px solid #cbd5e1;
+}
+.btn-schedule--default:hover {
+    background: #f1f5f9;
+    color: #334155;
+    border-color: #94a3b8;
+}
+.btn-schedule--danger {
+    background: transparent;
+    color: #ef4444;
+    border: 1.5px solid #ef4444;
+}
+.btn-schedule--danger:hover {
+    background: #ef4444;
+    color: #fff;
 }
 </style>
