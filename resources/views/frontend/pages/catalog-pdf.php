@@ -2,265 +2,40 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Cat&aacute;logo de Passeios - Punta Cana para Brasileiros</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Catálogo de Experiências - Punta Cana para Brasileiros</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
+/* ===== RESET & BASE ===== */
 @page { size: A4; margin: 0; }
-* { margin: 0; padding: 0; box-sizing: border-box; }
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    --primary: #1C2011;
+    --text-green: #1B6F00;
+    --secondary: #E4B505;
+    --accent: #3772C0;
+    --dark: #1C2011;
+    --gray: #636e72;
+    --light-bg: #f7f8fa;
+    --white: #ffffff;
+    --shadow: 0 4px 20px rgba(0,0,0,0.08);
+    --shadow-hover: 0 12px 32px rgba(0,0,0,0.15);
+    --radius: 14px;
+}
+
 body {
     font-family: 'Poppins', sans-serif;
-    color: #1a1a1a;
-    background: #fff;
-    line-height: 1.5;
+    color: var(--dark);
+    background: var(--white);
+    line-height: 1.6;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
 }
 
-/* ===== COVER ===== */
-.cover {
-    width: 100%;
-    min-height: auto;
-    padding: 50px 40px;
-    background: linear-gradient(160deg, #0a2e0a 0%, #1B6F00 40%, #2d8a1e 70%, #1B6F00 100%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    position: relative;
-    page-break-after: always;
-}
-.cover::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, #E4B505, #f0d050, #E4B505);
-}
-.cover-logo {
-    width: 120px;
-    height: auto;
-    margin-bottom: 24px;
-    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
-}
-.cover-badge {
-    display: inline-block;
-    background: rgba(228,181,5,0.15);
-    border: 1px solid rgba(228,181,5,0.4);
-    color: #E4B505;
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    padding: 6px 20px;
-    border-radius: 30px;
-    margin-bottom: 16px;
-}
-.cover h1 {
-    font-size: 34px;
-    font-weight: 800;
-    color: #fff;
-    letter-spacing: -1px;
-    margin-bottom: 10px;
-    line-height: 1.1;
-}
-.cover h1 span {
-    color: #E4B505;
-}
-.cover-sub {
-    font-size: 14px;
-    color: rgba(255,255,255,0.75);
-    font-weight: 300;
-    max-width: 480px;
-    margin-bottom: 30px;
-}
-.cover-stats {
-    display: flex;
-    gap: 36px;
-    margin-bottom: 30px;
-}
-.cover-stat {
-    text-align: center;
-}
-.cover-stat-number {
-    font-size: 26px;
-    font-weight: 700;
-    color: #E4B505;
-    display: block;
-}
-.cover-stat-label {
-    font-size: 10px;
-    color: rgba(255,255,255,0.6);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-.cover-footer {
-    margin-top: 20px;
-    font-size: 11px;
-    color: rgba(255,255,255,0.5);
-}
-
-/* ===== CONTENT ===== */
-.content-page {
-    padding: 30px 35px;
-}
-.page-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 16px;
-    border-bottom: 2px solid #1B6F00;
-    margin-bottom: 24px;
-}
-.page-header-logo {
-    height: 36px;
-}
-.page-header-title {
-    font-size: 13px;
-    color: #1B6F00;
-    font-weight: 600;
-}
-
-/* Trip Card */
-.trip-card-pdf {
-    display: flex;
-    gap: 20px;
-    padding: 20px 0;
-    border-bottom: 1px solid #eee;
-    page-break-inside: avoid;
-}
-.trip-card-pdf:last-child {
-    border-bottom: none;
-}
-.trip-card-img {
-    width: 200px;
-    height: 130px;
-    border-radius: 10px;
-    object-fit: cover;
-    flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.trip-card-body {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-.trip-card-title {
-    font-size: 16px;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin-bottom: 5px;
-}
-.trip-card-desc {
-    font-size: 12px;
-    color: #555;
-    margin-bottom: 10px;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.trip-card-meta {
-    display: flex;
-    gap: 16px;
-    font-size: 11px;
-    color: #888;
-    margin-bottom: 10px;
-}
-.trip-card-meta span {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-}
-.trip-card-prices {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-.price-chip {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 12px;
-    border-radius: 12px;
-    display: inline-block;
-}
-.price-chip.adult {
-    background: #f0fdf4;
-    color: #166534;
-}
-.price-chip.child {
-    background: #eff6ff;
-    color: #1e40af;
-}
-.price-chip.free {
-    background: #fffbeb;
-    color: #92400e;
-}
-.trip-card-price-main {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    min-width: 90px;
-}
-.price-main-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: #1B6F00;
-}
-
-/* Page Footer */
-.page-footer {
-    text-align: center;
-    padding-top: 20px;
-    margin-top: 20px;
-    border-top: 1px solid #eee;
-    font-size: 9px;
-    color: #aaa;
-}
-
-/* PDF Footer Final */
-.final-footer {
-    page-break-before: auto;
-    text-align: center;
-    padding: 40px;
-    background: #fafafa;
-    border-top: 3px solid #E4B505;
-}
-.final-footer h3 {
-    font-size: 18px;
-    font-weight: 700;
-    color: #1B6F00;
-    margin-bottom: 8px;
-}
-.final-footer p {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 4px;
-}
-.final-footer .whatsapp-link {
-    display: inline-block;
-    margin-top: 16px;
-    background: #25D366;
-    color: #fff;
-    padding: 10px 24px;
-    border-radius: 30px;
-    font-weight: 600;
-    font-size: 13px;
-    text-decoration: none;
-}
-.final-footer .legal {
-    margin-top: 20px;
-    font-size: 10px;
-    color: #999;
-}
-
-/* Print Actions */
+/* ===== PRINT BAR (apenas tela) ===== */
 .print-bar {
     position: sticky;
     top: 0;
@@ -272,7 +47,8 @@ body {
     justify-content: center;
     gap: 12px;
 }
-.print-bar button, .print-bar a {
+.print-bar button,
+.print-bar a {
     padding: 10px 24px;
     border-radius: 8px;
     font-family: 'Poppins', sans-serif;
@@ -281,110 +57,470 @@ body {
     cursor: pointer;
     text-decoration: none;
     border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 .btn-print-pdf {
     background: #E4B505;
     color: #1C2011;
 }
-.btn-print-pdf:hover { background: #d4a505; }
 .btn-back-catalog {
     background: rgba(255,255,255,0.1);
     color: #fff;
     border: 1px solid rgba(255,255,255,0.2) !important;
 }
+
+/* ===== HEADER ===== */
+.header {
+    background: var(--white);
+    border-bottom: 1px solid #e8e8e8;
+}
+.header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 76px;
+    gap: 24px;
+}
+.header-logo img {
+    height: 56px;
+    width: auto;
+}
+.header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-green);
+    letter-spacing: 0.3px;
+}
+
+/* ===== HERO ===== */
+.hero {
+    position: relative;
+    background: linear-gradient(135deg, #1C2011 0%, #2d4a1e 50%, #1B6F00 100%);
+    padding: 60px 40px 80px;
+    text-align: center;
+    overflow: hidden;
+}
+.hero::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 700px;
+    margin: 0 auto;
+}
+.hero h1 {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+.hero p {
+    font-size: 16px;
+    color: rgba(255,255,255,0.8);
+    font-weight: 300;
+}
+.hero-stats {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-top: 32px;
+    position: relative;
+    z-index: 2;
+}
+.hero-stat-number {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--secondary);
+    display: block;
+}
+.hero-stat-label {
+    font-size: 11px;
+    color: rgba(255,255,255,0.6);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+.hero-wave {
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 40px;
+}
+.hero-wave svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* ===== SECTION INTRO ===== */
+.section-intro {
+    text-align: center;
+    padding: 48px 40px 24px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+.caveat-label {
+    font-family: 'Caveat', cursive;
+    font-size: 26px;
+    color: var(--secondary);
+    margin-bottom: 4px;
+    display: block;
+}
+.section-intro h2 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 16px;
+}
+.wave-divider {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 8px;
+}
+.wave-divider svg {
+    width: 120px;
+    height: 20px;
+}
+.wave-divider path {
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    fill: none;
+}
+
+/* ===== TRIPS GRID ===== */
+.catalog-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 40px 60px;
+}
+.trips-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+}
+
+/* ===== TRIP CARD ===== */
+.trip-card {
+    background: var(--white);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+.card-img-wrap {
+    position: relative;
+    aspect-ratio: 16/10;
+    overflow: hidden;
+    background: #e9ecef;
+}
+.card-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.card-badge {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--text-green);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+}
+.card-body {
+    padding: 18px 18px 12px;
+    flex: 1;
+}
+.card-body h3 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 6px;
+    line-height: 1.3;
+}
+.card-body .description {
+    font-size: 12px;
+    color: var(--gray);
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+.card-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 11px;
+    color: var(--gray);
+}
+.card-meta span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.card-meta svg {
+    width: 13px;
+    height: 13px;
+    stroke: var(--gray);
+    fill: none;
+    stroke-width: 1.8;
+}
+.card-meta .stars svg {
+    fill: var(--secondary);
+    stroke: var(--secondary);
+}
+.card-footer {
+    padding: 12px 18px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.card-price .label {
+    font-size: 10px;
+    color: var(--gray);
+    display: block;
+    line-height: 1;
+}
+.card-price .amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-green);
+    line-height: 1.2;
+}
+.card-prices {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+.price-chip {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 12px;
+    display: inline-block;
+}
+.price-chip.adult { background: #f0fdf4; color: #166534; }
+.price-chip.child { background: #eff6ff; color: #1e40af; }
+.price-chip.free  { background: #fffbeb; color: #92400e; }
+
+/* ===== FOOTER ===== */
+.catalog-footer {
+    background: var(--light-bg);
+    padding: 48px 40px;
+    text-align: center;
+    border-top: 3px solid var(--secondary);
+}
+.catalog-footer h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-green);
+    margin-bottom: 6px;
+}
+.catalog-footer p {
+    font-size: 14px;
+    color: var(--gray);
+    margin-bottom: 16px;
+}
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #25D366;
+    color: var(--white);
+    padding: 12px 28px;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: 0 4px 16px rgba(37,211,102,0.3);
+}
+.btn-whatsapp svg { width: 20px; height: 20px; fill: var(--white); }
+.catalog-footer .legal {
+    margin-top: 24px;
+    font-size: 11px;
+    color: #adb5bd;
+    line-height: 1.8;
+}
+
+/* ===== PRINT RULES ===== */
 @media print {
     .print-bar { display: none !important; }
     body { background: #fff; }
+    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .card-img-wrap { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .trips-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
 }
+
 @media screen {
     body { background: #2a2a2a; }
-    .cover { margin: 0 auto; max-width: 960px; }
-    .content-page { max-width: 960px; margin: 0 auto; background: #fff; }
-    .final-footer { max-width: 960px; margin: 0 auto; }
+    .header { max-width: 100%; }
+    .print-bar + .header,
+    .hero,
+    .section-intro,
+    .catalog-container,
+    .catalog-footer {
+        max-width: 1200px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .print-bar + .header { background: var(--white); max-width: 100%; }
 }
 </style>
 </head>
 <body>
 
+<!-- PRINT BAR -->
 <div class="print-bar">
-    <button class="btn-print-pdf" onclick="window.print()">&#128196; Imprimir / Salvar como PDF</button>
-    <a href="/catalogo" class="btn-back-catalog">&#8592; Voltar ao Cat&aacute;logo</a>
+    <button class="btn-print-pdf" onclick="window.print()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Imprimir / Salvar como PDF
+    </button>
+    <a href="/catalogo" class="btn-back-catalog">&#8592; Voltar ao Catálogo</a>
 </div>
 
-<!-- CAPA -->
-<div class="cover">
-    <img src="https://puntacananovo.lrvweb.com.br/assets/images/layout/PUNTA-CANA-1.png" alt="Punta Cana para Brasileiros" class="cover-logo">
-    <span class="cover-badge">Cat&aacute;logo Oficial <?= date('Y') ?></span>
-    <h1>Experi&ecirc;ncias em<br><span>Punta Cana</span></h1>
-    <p class="cover-sub">Passeios exclusivos, transfers privativos e aventuras inesquec&iacute;veis no Caribe dominicano.</p>
-    <div class="cover-stats">
-        <div class="cover-stat">
-            <span class="cover-stat-number"><?= count($trips) ?></span>
-            <span class="cover-stat-label">Passeios</span>
+<!-- HEADER -->
+<header class="header">
+    <div class="header-inner">
+        <a href="/" class="header-logo">
+            <img src="<?= asset('images/layout/PUNTA-CANA-1.png') ?>" alt="Punta Cana Para Brasileiros">
+        </a>
+        <span class="header-title">Catálogo de Passeios <?= date('Y') ?></span>
+    </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Nosso Catálogo de Experiências</h1>
+        <p>Passeios exclusivos e transfers privativos no Caribe dominicano</p>
+    </div>
+    <div class="hero-stats">
+        <div>
+            <span class="hero-stat-number"><?= count($trips) ?></span>
+            <span class="hero-stat-label">Passeios</span>
         </div>
-        <div class="cover-stat">
-            <span class="cover-stat-number">4.8</span>
-            <span class="cover-stat-label">Avalia&ccedil;&atilde;o</span>
+        <div>
+            <span class="hero-stat-number">4.8</span>
+            <span class="hero-stat-label">Avaliação</span>
         </div>
-        <div class="cover-stat">
-            <span class="cover-stat-number">1000+</span>
-            <span class="cover-stat-label">Clientes</span>
+        <div>
+            <span class="hero-stat-number">1000+</span>
+            <span class="hero-stat-label">Clientes</span>
         </div>
     </div>
-    <p class="cover-footer">+1 (829) 458-2170 | puntacanaparabrasileiros.com</p>
+    <div class="hero-wave">
+        <svg viewBox="0 0 1440 40" preserveAspectRatio="none">
+            <path d="M0,20 C360,40 720,0 1080,20 C1260,30 1380,35 1440,30 L1440,40 L0,40 Z" fill="#ffffff"/>
+            <path d="M0,25 C300,10 600,35 900,20 C1100,10 1300,30 1440,22 L1440,40 L0,40 Z" fill="#ffffff" opacity="0.5"/>
+        </svg>
+    </div>
+</section>
+
+<!-- SECTION INTRO -->
+<div class="section-intro">
+    <span class="caveat-label">Experiências Exclusivas</span>
+    <h2>Passeios em Punta Cana</h2>
+    <div class="wave-divider">
+        <svg viewBox="0 0 120 20">
+            <path d="M0,10 C20,0 40,20 60,10 C80,0 100,20 120,10" stroke-linecap="round"/>
+        </svg>
+    </div>
 </div>
 
-<!-- CONTEÚDO -->
-<div class="content-page">
-    <div class="page-header">
-        <img src="https://puntacananovo.lrvweb.com.br/assets/images/layout/PUNTA-CANA-1.png" alt="" class="page-header-logo">
-        <span class="page-header-title">Cat&aacute;logo de Passeios <?= date('Y') ?></span>
-    </div>
-
-    <?php foreach ($trips as $trip): ?>
-    <?php
-        $duration = $trip['duration'] . ($trip['duration_unit'] === 'hours' ? ' horas' : ' dias');
-        $price = $trip['min_price'] > 0 ? 'US$' . number_format($trip['min_price'], 0) : 'Consultar';
-        $categories = $trip['price_categories'] ?? [];
-    ?>
-    <div class="trip-card-pdf">
-        <img src="<?= e($trip['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($trip['title']) ?>" class="trip-card-img">
-        <div class="trip-card-body">
-            <div class="trip-card-title"><?= e($trip['title']) ?></div>
-            <p class="trip-card-desc"><?= e($trip['short_description'] ?? '') ?></p>
-            <div class="trip-card-meta">
-                <span>&#128205; Punta Cana</span>
-                <span>&#9201; <?= e($duration) ?></span>
+<!-- TRIPS GRID -->
+<div class="catalog-container">
+    <div class="trips-grid">
+        <?php foreach ($trips as $trip): ?>
+        <?php
+            $img = $trip['featured_image'] ?? '/assets/images/placeholder.jpg';
+            $duration = $trip['duration'] . ($trip['duration_unit'] === 'hours' ? 'h' : ' dias');
+            $price = $trip['min_price'] > 0 ? 'US$' . number_format($trip['min_price'], 0) : 'Consultar';
+            $rating = isset($trip['rating']) && $trip['rating'] > 0 ? $trip['rating'] : 4.5;
+            $badge = !empty($trip['featured']) ? 'Premium' : '';
+            $categories = $trip['price_categories'] ?? [];
+        ?>
+        <div class="trip-card">
+            <div class="card-img-wrap">
+                <img src="<?= e($img) ?>" alt="<?= e($trip['title']) ?>">
+                <?php if ($badge): ?>
+                <span class="card-badge"><?= e($badge) ?></span>
+                <?php endif; ?>
             </div>
-            <?php if (!empty($categories)): ?>
-            <div class="trip-card-prices">
-                <?php foreach ($categories as $cat): ?>
-                <?php $catPrice = (float)($cat['sale_price'] ?: $cat['price']); ?>
-                <span class="price-chip <?= $cat['category_slug'] === 'crianca' ? 'child' : ($catPrice == 0 ? 'free' : 'adult') ?>">
-                    <?= e($cat['category_name']) ?>: <?= $catPrice > 0 ? 'US$' . number_format($catPrice, 0) : 'Gr&aacute;tis' ?>
-                </span>
-                <?php endforeach; ?>
+            <div class="card-body">
+                <h3><?= e($trip['title']) ?></h3>
+                <p class="description"><?= e($trip['short_description'] ?? '') ?></p>
+                <div class="card-meta">
+                    <span>
+                        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                        Punta Cana
+                    </span>
+                    <span>
+                        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        <?= e($duration) ?>
+                    </span>
+                    <span class="stars">
+                        <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                        <?= $rating ?>
+                    </span>
+                </div>
+                <?php if (!empty($categories)): ?>
+                <div class="card-prices">
+                    <?php foreach ($categories as $cat): ?>
+                    <?php $catPrice = (float)($cat['sale_price'] ?: $cat['price']); ?>
+                    <span class="price-chip <?= $cat['category_slug'] === 'crianca' ? 'child' : ($catPrice == 0 ? 'free' : 'adult') ?>">
+                        <?= e($cat['category_name']) ?>: <?= $catPrice > 0 ? 'US$' . number_format($catPrice, 0) : 'Grátis' ?>
+                    </span>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
             </div>
-            <?php endif; ?>
+            <div class="card-footer">
+                <div class="card-price">
+                    <span class="label">Desde</span>
+                    <span class="amount"><?= $price ?></span>
+                </div>
+            </div>
         </div>
-        <div class="trip-card-price-main">
-            <span class="price-main-value"><?= $price ?></span>
-        </div>
-    </div>
-    <?php endforeach; ?>
-
-    <div class="page-footer">
-        Valores sujeitos a altera&ccedil;&atilde;o sem aviso pr&eacute;vio. Consulte disponibilidade.
+        <?php endforeach; ?>
     </div>
 </div>
 
-<!-- FOOTER FINAL -->
-<div class="final-footer">
-    <h3>Reserve sua Experi&ecirc;ncia</h3>
-    <p>Entre em contato conosco para reservar ou tirar d&uacute;vidas</p>
-    <a href="https://wa.me/18294582170" class="whatsapp-link">&#128172; WhatsApp: +1 (829) 458-2170</a>
-    <p class="legal">Punta Cana para Brasileiros | Oliveira &amp; Ramos SRL &mdash; RNC: 1-33-28776-5<br>Av. Barcel&oacute;, n&ordm; 01, Local 7 - Plaza Arrecife, Ver&oacute;n, Punta Cana, Rep&uacute;blica Dominicana</p>
-</div>
+<!-- FOOTER -->
+<footer class="catalog-footer">
+    <h3>Reserve sua Experiência</h3>
+    <p>Entre em contato para reservar ou tirar dúvidas</p>
+    <a href="https://api.whatsapp.com/send?phone=18294582170&text=Ol%C3%A1%2C%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es!" class="btn-whatsapp" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp: +1 (829) 458-2170
+    </a>
+    <p class="legal">
+        Punta Cana para Brasileiros | Oliveira &amp; Ramos SRL &mdash; RNC: 1-33-28776-5<br>
+        Av. Barceló, nº 01, Local 7 - Plaza Arrecife, Verón, Punta Cana, República Dominicana<br>
+        &copy; <?= date('Y') ?> Todos os direitos reservados.
+    </p>
+</footer>
 
 </body>
 </html>

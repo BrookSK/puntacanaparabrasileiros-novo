@@ -288,6 +288,7 @@ class PageController extends Controller
             } else {
                 $trip['price_categories'] = [];
             }
+            $trip['rating'] = $tripModel->getAverageRating((int) $trip['id']);
             $trip['gallery_images'] = $trip['gallery'] ? json_decode($trip['gallery'], true) : [];
         }
 
