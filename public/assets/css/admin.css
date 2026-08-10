@@ -187,9 +187,10 @@ a { color: var(--primary); text-decoration: none; }
 .alert-info { background: #dbeafe; color: #1e40af; }
 
 /* Pagination */
-.pagination { display: flex; gap: 4px; margin-top: 20px; }
-.page-link { padding: 6px 12px; border: 1px solid #e2e8f0; border-radius: 4px; font-size: 12px; }
-.page-link.active { background: var(--primary); color: white; border-color: var(--primary); }
+.pagination { display: flex; gap: 6px; margin-top: 20px; align-items: center; }
+.page-link { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 6px 12px; border: 1px solid var(--border, rgba(255,255,255,0.1)); border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--text-muted, #94a3b8); background: var(--bg-card, #1e293b); text-decoration: none; transition: all 0.2s; }
+.page-link:hover { border-color: var(--primary, #0ea5e9); color: var(--primary, #0ea5e9); background: rgba(14, 165, 233, 0.06); }
+.page-link.active { background: var(--primary, #0ea5e9); color: #fff; border-color: var(--primary, #0ea5e9); font-weight: 600; box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3); }
 
 /* Settings Tabs */
 .settings-tabs { display: flex; gap: 6px; background: #f1f5f9; border-radius: 12px; padding: 6px 8px; margin-bottom: 28px; overflow-x: auto; border: 1px solid #e2e8f0; }

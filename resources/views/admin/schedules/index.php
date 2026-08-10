@@ -55,9 +55,15 @@
 </table>
 
 <?php if (!empty($trips['total_pages']) && $trips['total_pages'] > 1): ?>
-<div class="pagination">
+<div class="pagination" style="margin-top:1.5rem;display:flex;align-items:center;gap:6px;">
+    <?php if ($trips['current_page'] > 1): ?>
+    <a href="?page=<?= $trips['current_page'] - 1 ?>&busca=<?= e($currentSearch ?? '') ?>" class="page-link">&laquo;</a>
+    <?php endif; ?>
     <?php for ($p = 1; $p <= $trips['total_pages']; $p++): ?>
-    <a href="?page=<?= $p ?>&busca=<?= e($currentSearch ?? '') ?>" class="pagination-btn <?= $p === ($trips['current_page'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
+    <a href="?page=<?= $p ?>&busca=<?= e($currentSearch ?? '') ?>" class="page-link <?= $p === ($trips['current_page'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
     <?php endfor; ?>
+    <?php if ($trips['current_page'] < $trips['total_pages']): ?>
+    <a href="?page=<?= $trips['current_page'] + 1 ?>&busca=<?= e($currentSearch ?? '') ?>" class="page-link">&raquo;</a>
+    <?php endif; ?>
 </div>
 <?php endif; ?>
