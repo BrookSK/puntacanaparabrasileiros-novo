@@ -208,6 +208,17 @@ body {
     grid-template-columns: repeat(3, 1fr);
     gap: 28px;
 }
+/* Cada grupo de 3 cards (linha) não deve ser cortado no meio */
+.trips-grid-row {
+    display: contents; /* mantém no grid mas permite page-break no elemento */
+}
+/* Wrapper de linha para controle de page-break */
+.trips-row-break {
+    grid-column: 1 / -1;
+    height: 0;
+    page-break-after: auto;
+    break-after: auto;
+}
 
 /* ===== TRIP CARD ===== */
 .trip-card {
@@ -219,18 +230,28 @@ body {
     flex-direction: column;
     page-break-inside: avoid;
     break-inside: avoid;
+    /* Força o card inteiro a caber na mesma página */
+    -webkit-column-break-inside: avoid;
 }
 .card-img-wrap {
     position: relative;
     aspect-ratio: 16/10;
     overflow: hidden;
     background: #e9ecef;
+    /* Impede que a imagem seja cortada sozinha */
+    page-break-inside: avoid;
+    break-inside: avoid;
+    page-break-after: avoid;
+    break-after: avoid;
 }
 .card-img-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    /* Evita corte da imagem em impressão */
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 .card-badge {
     position: absolute;
@@ -370,7 +391,11 @@ body {
     body { background: #fff; }
     .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
     .card-img-wrap { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .trips-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+    /* Cada linha de 3 cards não pode ser cortada */
+    .catalog-container > div {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
 }
 
 @media screen {
@@ -440,8 +465,12 @@ body {
 
 <!-- TRIPS GRID -->
 <div class="catalog-container">
-    <div class="trips-grid">
-        <?php foreach ($trips as $trip): ?>
+    <?php
+        $chunks = array_chunk($trips, 3);
+        foreach ($chunks as $row):
+    ?>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;page-break-inside:avoid;break-inside:avoid;margin-bottom:28px;">
+        <?php foreach ($row as $trip): ?>
         <?php
             $img = $trip['featured_image'] ?? '/assets/images/placeholder.jpg';
             $duration = $trip['duration'] . ($trip['duration_unit'] === 'hours' ? 'h' : ' dias');
@@ -493,7 +522,14 @@ body {
             </div>
         </div>
         <?php endforeach; ?>
+        <?php
+            // Preenche colunas vazias na última linha para manter o grid
+            $missing = 3 - count($row);
+            for ($i = 0; $i < $missing; $i++): ?>
+            <div></div>
+        <?php endfor; ?>
     </div>
+    <?php endforeach; ?>
 </div>
 
 <!-- FOOTER -->
