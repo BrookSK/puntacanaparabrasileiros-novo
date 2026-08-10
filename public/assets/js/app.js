@@ -1087,24 +1087,32 @@
 
     function renderTravelers() {
         const container = document.getElementById('bmTravelersList');
-        if (!selectedPackage || !selectedPackage.categories || selectedPackage.categories.length === 0) {
-            container.innerHTML = '<div style="padding:16px;text-align:center;color:#999;font-size:13px;">Nenhuma categoria de viajante configurada para este pacote.<br><small>Entre em contato para reservar.</small></div>';
-            return;
+        if (!selectedPackage) return;
+
+        // Se não tem categories configuradas, mostrar fallback com Adulto e Criança
+        let cats = selectedPackage.categories;
+        if (!cats || cats.length === 0) {
+            cats = [
+                { traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto', age_group: '12+', price: selectedPackage.base_price || '0', sale_price: null },
+                { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca', age_group: '3-11', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null }
+            ];
         }
+
         travelerCounts = {};
-        container.innerHTML = selectedPackage.categories.map(cat => {
+        container.innerHTML = cats.map(cat => {
+            const catId = cat.traveler_category_id || cat.id || 0;
             const defaultQty = cat.category_slug === 'adulto' ? 1 : 0;
-            travelerCounts[cat.traveler_category_id] = defaultQty;
-            const price = cat.sale_price || cat.price;
+            travelerCounts[catId] = defaultQty;
+            const price = parseFloat(cat.sale_price || cat.price || 0);
             return `<div class="bm-traveler-row">
                 <div class="bm-traveler-info">
-                    <span class="bm-traveler-name">${cat.category_name}: (${cat.age_group || ''})</span>
-                    <span class="bm-traveler-price">$${parseFloat(price).toFixed(2)} / Pessoa</span>
+                    <span class="bm-traveler-name">${cat.category_name}${cat.age_group ? ' (' + cat.age_group + ')' : ''}</span>
+                    <span class="bm-traveler-price">${price > 0 ? '$' + price.toFixed(2) + ' / Pessoa' : 'Consultar preço'}</span>
                 </div>
                 <div class="bm-traveler-counter">
-                    <button type="button" onclick="changeTraveler(${cat.traveler_category_id}, -1)">&#8722;</button>
-                    <input type="text" value="${defaultQty}" id="traveler_${cat.traveler_category_id}" readonly>
-                    <button type="button" onclick="changeTraveler(${cat.traveler_category_id}, 1)">&#43;</button>
+                    <button type="button" onclick="changeTraveler(${catId}, -1)">&#8722;</button>
+                    <input type="text" value="${defaultQty}" id="traveler_${catId}" readonly>
+                    <button type="button" onclick="changeTraveler(${catId}, 1)">&#43;</button>
                 </div>
             </div>`;
         }).join('');
@@ -1148,11 +1156,19 @@
         const totalEl = document.getElementById('bmSidebarTotal');
         let total = 0;
         let travHtml = '';
-        if (selectedPackage && selectedPackage.categories) {
-            selectedPackage.categories.forEach(cat => {
-                const qty = travelerCounts[cat.traveler_category_id] || 0;
+        if (selectedPackage) {
+            let cats = selectedPackage.categories;
+            if (!cats || cats.length === 0) {
+                cats = [
+                    { traveler_category_id: 0, category_name: 'Adulto', price: selectedPackage.base_price || '0', sale_price: null },
+                    { traveler_category_id: 1, category_name: 'Criança', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null }
+                ];
+            }
+            cats.forEach(cat => {
+                const catId = cat.traveler_category_id || cat.id || 0;
+                const qty = travelerCounts[catId] || 0;
                 if (qty > 0) {
-                    const price = parseFloat(cat.sale_price || cat.price);
+                    const price = parseFloat(cat.sale_price || cat.price || 0);
                     const line = price * qty;
                     total += line;
                     travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty} x $${price.toFixed(2)}</span><span>$${line.toFixed(2)}</span></div>`;
