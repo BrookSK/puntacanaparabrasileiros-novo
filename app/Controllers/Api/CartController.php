@@ -162,6 +162,17 @@ class CartController extends Controller
         $subscribed = $model->subscribe($email, null, 'blog_sidebar', $request->ip());
 
         if ($subscribed) {
+            // Enviar email de confirmação/boas-vindas
+            $emailService = new \App\Services\EmailService();
+            $siteUrl = setting('site_url', 'https://puntacanaparabrasileiros.com.br');
+            $emailService->sendTemplate(
+                $email,
+                '',
+                'Bem-vindo à Newsletter - Punta Cana para Brasileiros',
+                'newsletter-welcome',
+                ['siteUrl' => $siteUrl]
+            );
+
             $this->json(['success' => true, 'message' => 'Inscrição realizada com sucesso!']);
         } else {
             $this->json(['success' => true, 'message' => 'Este email já está inscrito.']);
