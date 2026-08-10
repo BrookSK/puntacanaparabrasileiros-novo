@@ -1040,16 +1040,10 @@
     function showTimeSlots(dateStr) {
         const container = document.getElementById('bmTimes');
         const list = document.getElementById('bmTimesList');
-        // Se tem pickup selecionado, mostra apenas esse horário como confirmação
-        let slots;
-        if (selectedPickupTime) {
-            slots = [selectedPickupTime];
-        } else {
-            slots = ['9:00 AM – 12:00 PM', '12:00 PM – 3:00 PM', '3:00 PM – 6:00 PM'];
-        }
+        // Horários do passeio (os mesmos de antes, independente do horário de busca no hotel)
+        const slots = ['9:00 AM – 12:00 PM', '12:00 PM – 3:00 PM', '3:00 PM – 6:00 PM'];
         list.innerHTML = slots.map(s => `<button type="button" class="bm-time-slot ${selectedTime === s ? 'selected' : ''}" onclick="selectBookingTime('${s}')">${s}</button>`).join('');
         container.style.display = 'block';
-        if (slots.length === 1) { selectedTime = slots[0]; list.querySelector('.bm-time-slot')?.classList.add('selected'); updateSidebar(); }
     }
 
     window.selectBookingTime = function(time) {

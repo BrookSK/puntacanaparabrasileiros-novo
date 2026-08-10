@@ -6314,10 +6314,15 @@ img { max-width: 100%; height: auto; }
 .bm-actions {
     display: flex;
     justify-content: center;
-    margin-top: 20px;
+    margin-top: 24px;
+    gap: 16px;
+    align-items: center;
 }
 .bm-actions-step2 {
     justify-content: space-between;
+}
+.bm-actions .bm-btn-back + .bm-btn-continue {
+    margin-left: auto;
 }
 .bm-btn-continue {
     padding: 14px 60px;
@@ -6339,12 +6344,19 @@ img { max-width: 100%; height: auto; }
 .bm-btn-continue:not(:disabled):hover { background: #2a5a9a; }
 .bm-btn-back {
     background: none;
-    border: none;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 12px 20px;
     font-size: 14px;
-    color: var(--accent);
+    color: var(--gray);
     font-weight: 600;
     cursor: pointer;
     font-family: var(--font);
+    transition: all .2s;
+}
+.bm-btn-back:hover {
+    border-color: var(--text-green, #1B6F00);
+    color: var(--text-green, #1B6F00);
 }
 .bm-btn-cart {
     padding: 14px 40px;
