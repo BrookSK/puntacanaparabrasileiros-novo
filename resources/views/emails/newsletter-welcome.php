@@ -1,57 +1,54 @@
-<!DOCTYPE html>
-<html><head><meta charset="UTF-8"></head>
-<body style="font-family:'Poppins',Arial,sans-serif;background:#f4f7f4;margin:0;padding:20px">
-<div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.06)">
-    <!-- Header com logo -->
-    <div style="background:linear-gradient(135deg,#1B6F00 0%,#228B22 100%);padding:35px 30px;text-align:center">
-        <img src="https://puntacanaparabrasileiros.com/wp-content/uploads/2025/05/punta_cana_para_brasileiros_logo.png" alt="Punta Cana para Brasileiros" style="height:60px;margin-bottom:15px" onerror="this.style.display='none'">
-        <h1 style="margin:0;font-size:22px;color:#ffffff;font-weight:600">Bem-vindo à nossa Newsletter!</h1>
+<div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#1a1a1a;">
+    <!-- Header -->
+    <div style="background:#f5f5f5;padding:30px;text-align:center;border-radius:10px 10px 0 0;border-bottom:2px solid #E4B505;">
+        <img src="https://puntacananovo.lrvweb.com.br/assets/images/layout/PUNTA-CANA-1.png" alt="Punta Cana para Brasileiros" style="max-height:60px;margin-bottom:12px;">
+        <h1 style="color:#1C2011;font-size:22px;margin:0;">Bem-vindo à nossa Newsletter!</h1>
     </div>
 
-    <!-- Conteúdo -->
-    <div style="padding:35px 30px">
-        <p style="font-size:16px;color:#333;line-height:1.6;margin:0 0 20px">
-            Olá! 👋
-        </p>
-        <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 15px">
+    <!-- Body -->
+    <div style="background:#fff;padding:30px 40px;border:1px solid #e5e7eb;border-top:none;">
+        <p style="font-size:16px;margin-bottom:6px;">Olá!</p>
+        <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:24px;">
             Sua inscrição na newsletter da <strong>Punta Cana para Brasileiros</strong> foi confirmada com sucesso!
         </p>
-        <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 25px">
-            A partir de agora você vai receber em primeira mão:
-        </p>
 
-        <div style="background:#f0faf0;border-left:4px solid #1B6F00;padding:15px 20px;border-radius:0 8px 8px 0;margin:0 0 25px">
-            <p style="margin:0 0 8px;font-size:14px;color:#333">✅ Dicas exclusivas de Punta Cana</p>
-            <p style="margin:0 0 8px;font-size:14px;color:#333">✅ Ofertas e promoções especiais</p>
-            <p style="margin:0 0 8px;font-size:14px;color:#333">✅ Roteiros e guias de viagem</p>
-            <p style="margin:0;font-size:14px;color:#333">✅ Novidades sobre passeios e experiências</p>
+        <!-- O que vai receber -->
+        <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:20px;margin-bottom:24px;">
+            <h3 style="font-size:14px;margin:0 0 12px;color:#1B6F00;text-transform:uppercase;letter-spacing:0.5px;">O que você vai receber</h3>
+            <table style="width:100%;font-size:14px;">
+                <tr><td style="padding:6px 0;color:#333;">✅ Dicas exclusivas de Punta Cana</td></tr>
+                <tr><td style="padding:6px 0;color:#333;">✅ Ofertas e promoções especiais</td></tr>
+                <tr><td style="padding:6px 0;color:#333;">✅ Roteiros e guias de viagem</td></tr>
+                <tr><td style="padding:6px 0;color:#333;">✅ Novidades sobre passeios e experiências</td></tr>
+            </table>
         </div>
 
-        <p style="font-size:15px;color:#444;line-height:1.7;margin:0 0 25px">
+        <p style="font-size:14px;color:#555;line-height:1.7;margin-bottom:24px;">
             Enquanto isso, explore nossos passeios e comece a planejar sua viagem dos sonhos para Punta Cana!
         </p>
 
-        <!-- CTA Button -->
-        <div style="text-align:center;margin:30px 0">
-            <a href="<?= e($siteUrl ?? 'https://puntacanaparabrasileiros.com') ?>/passeios" style="display:inline-block;background:#1B6F00;color:#ffffff;text-decoration:none;padding:14px 32px;border-radius:8px;font-size:15px;font-weight:600">
-                Ver Passeios em Punta Cana
-            </a>
+        <!-- CTA -->
+        <div style="text-align:center;margin-bottom:24px;">
+            <a href="<?= e($siteUrl ?? 'https://puntacananovo.lrvweb.com.br') ?>/passeios" style="display:inline-block;padding:10px 24px;background:#1B6F00;color:#fff;border-radius:6px;font-size:13px;font-weight:600;text-decoration:none;">Ver Passeios em Punta Cana</a>
         </div>
 
-        <p style="font-size:14px;color:#666;line-height:1.6;margin:25px 0 0">
-            Um abraço,<br>
-            <strong style="color:#1B6F00">Equipe Punta Cana para Brasileiros</strong>
+        <!-- Informação -->
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+            <p style="font-size:13px;color:#166534;margin:0;line-height:1.7;">
+                <strong>Dica:</strong> Adicione nosso email aos seus contatos para garantir que nossas mensagens não caiam no spam.
+            </p>
+        </div>
+
+        <p style="font-size:13px;color:#666;margin-top:20px;line-height:1.7;">
+            Dúvidas? Fale conosco pelo WhatsApp: <a href="https://api.whatsapp.com/send?phone=18294582170" style="color:#1B6F00;font-weight:600;">+1 (829) 458-2170</a>
         </p>
     </div>
 
     <!-- Footer -->
-    <div style="background:#f8f8f8;padding:20px 30px;text-align:center;border-top:1px solid #eee">
-        <p style="margin:0 0 8px;font-size:12px;color:#999">
-            Você recebeu este email porque se inscreveu em nossa newsletter.
-        </p>
-        <p style="margin:0;font-size:12px;color:#999">
-            © <?= date('Y') ?> Punta Cana para Brasileiros. Todos os direitos reservados.
-        </p>
+    <div style="background:#f8f8f8;padding:20px 40px;text-align:center;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;">
+        <p style="font-size:11px;color:#888;margin:2px 0;"><strong>Punta Cana para Brasileiros Oliveira & Ramos SRL</strong></p>
+        <p style="font-size:11px;color:#888;margin:2px 0;">RNC: 1-33-28776-5 | Punta Cana, República Dominicana</p>
+        <p style="font-size:11px;color:#888;margin:2px 0;">contato@puntacanaparabrasileiros.com | +1 (829) 458-2170</p>
+        <p style="font-size:11px;color:#aaa;margin:10px 0 0;">Você recebeu este email porque se inscreveu em nossa newsletter.</p>
     </div>
 </div>
-</body></html>
