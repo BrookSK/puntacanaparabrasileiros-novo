@@ -1,6 +1,6 @@
 <?php
 $isEdit = !empty($trip);
-$action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/atualizar' : '/admin/passeios/salvar';
+$action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passeios/criar';
 ?>
 
 <div class="card-header">
