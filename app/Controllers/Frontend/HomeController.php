@@ -74,14 +74,4 @@ class HomeController extends Controller
             'metaDescription' => $this->setting('meta_description', ''),
         ], 'app');
     }
-
-    /**
-     * Rota de teste para visualizar páginas de erro.
-     * Acessar: /teste-erro/404, /teste-erro/500, /teste-erro/403
-     */
-    public function testError(Request $request, Response $response): void
-    {
-        $code = (int) $request->param('code', '404');
-        $this->abort($code, "Página de teste do erro {$code}");
-    }
 }
