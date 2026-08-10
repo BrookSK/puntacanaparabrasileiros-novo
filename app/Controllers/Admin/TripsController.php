@@ -269,39 +269,53 @@ class TripsController extends Controller
     private function savePackages(int $tripId, Request $request): void
     {
         $packages = $request->input('packages', []);
-        // Remover pacotes antigos
-        $this->db->delete('trip_packages', 'trip_id = ?', [$tripId]);
+        $existingPackages = $this->db->fetchAll("SELECT * FROM trip_packages WHERE trip_id = ? ORDER BY sort_order ASC", [$tripId]);
+        $processedIds = [];
 
         foreach ($packages as $i => $pkg) {
             if (empty($pkg['title'])) continue;
-            $packageId = $this->db->insert('trip_packages', [
-                'trip_id' => $tripId,
-                'title' => $pkg['title'],
-                'description' => $pkg['description'] ?? null,
-                'sort_order' => $i,
-                'status' => 1,
-            ]);
 
-            // Categorias de preço do pacote
-            $pkgModel = new TripPackage();
-            if (!empty($pkg['categories'])) {
-                $pkgModel->syncCategories($packageId, $pkg['categories']);
+            // Verificar se já existe um pacote com esse título
+            $existingPkg = null;
+            foreach ($existingPackages as $ep) {
+                if ($ep['title'] === $pkg['title'] && !in_array((int)$ep['id'], $processedIds)) {
+                    $existingPkg = $ep;
+                    break;
+                }
+            }
+
+            // Se não encontrou por título, tentar por posição (mesmo index)
+            if (!$existingPkg && isset($existingPackages[$i]) && !in_array((int)$existingPackages[$i]['id'], $processedIds)) {
+                $existingPkg = $existingPackages[$i];
+            }
+
+            if ($existingPkg) {
+                // Atualizar pacote existente — NÃO toca nos preços
+                $packageId = (int) $existingPkg['id'];
+                $this->db->update('trip_packages', [
+                    'title' => $pkg['title'],
+                    'description' => $pkg['description'] ?? null,
+                    'sort_order' => $i,
+                ], 'id = ?', [$packageId]);
+                $processedIds[] = $packageId;
             } else {
-                // Se nenhuma categoria foi selecionada, vincular Adulto, Criança e Infantil por padrão
-                $defaultCats = $this->db->fetchAll(
-                    "SELECT * FROM traveler_categories WHERE slug IN ('adulto', 'crianca', 'infantil') ORDER BY sort_order ASC"
-                );
-                $defaultData = [];
-                foreach ($defaultCats as $dc) {
-                    $defaultData[] = [
-                        'traveler_category_id' => (int) $dc['id'],
-                        'price' => 0,
-                        'sale_price' => null,
-                    ];
-                }
-                if (!empty($defaultData)) {
-                    $pkgModel->syncCategories($packageId, $defaultData);
-                }
+                // Criar novo pacote
+                $packageId = $this->db->insert('trip_packages', [
+                    'trip_id' => $tripId,
+                    'title' => $pkg['title'],
+                    'description' => $pkg['description'] ?? null,
+                    'sort_order' => $i,
+                    'status' => 1,
+                ]);
+                $processedIds[] = $packageId;
+            }
+        }
+
+        // Remover pacotes que foram deletados pelo admin no form
+        foreach ($existingPackages as $ep) {
+            if (!in_array((int)$ep['id'], $processedIds)) {
+                $this->db->delete('trip_package_categories', 'package_id = ?', [(int)$ep['id']]);
+                $this->db->delete('trip_packages', 'id = ?', [(int)$ep['id']]);
             }
         }
     }
