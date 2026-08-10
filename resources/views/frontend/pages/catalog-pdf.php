@@ -9,11 +9,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ===== RESET & BASE ===== */
-@page { size: A4; margin: 0; }
+@page {
+    size: A4;
+    margin: 14mm 12mm; /* margens reais — dá respiro no topo/rodapé de cada página */
+}
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-    --primary: #1C2011;
     --text-green: #1B6F00;
     --secondary: #E4B505;
     --accent: #3772C0;
@@ -21,9 +23,7 @@
     --gray: #636e72;
     --light-bg: #f7f8fa;
     --white: #ffffff;
-    --shadow: 0 4px 20px rgba(0,0,0,0.08);
-    --shadow-hover: 0 12px 32px rgba(0,0,0,0.15);
-    --radius: 14px;
+    --radius: 12px;
 }
 
 body {
@@ -61,230 +61,186 @@ body {
     align-items: center;
     gap: 6px;
 }
-.btn-print-pdf {
-    background: #E4B505;
-    color: #1C2011;
-}
+.btn-print-pdf { background: #E4B505; color: #1C2011; }
 .btn-back-catalog {
     background: rgba(255,255,255,0.1);
     color: #fff;
     border: 1px solid rgba(255,255,255,0.2) !important;
 }
 
-/* ===== HEADER ===== */
-.header {
+/* ===== HEADER — não entra na @page margin, sai do fluxo de impressão ===== */
+.site-header {
     background: var(--white);
     border-bottom: 1px solid #e8e8e8;
+    /* Na impressão o header aparece uma só vez na primeira página */
 }
 .header-inner {
-    max-width: 1200px;
+    max-width: 860px;
     margin: 0 auto;
-    padding: 0 40px;
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    height: 76px;
-    gap: 24px;
+    height: 70px;
 }
-.header-logo img {
-    height: 56px;
-    width: auto;
-}
+.header-logo img { height: 48px; width: auto; }
 .header-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     color: var(--text-green);
-    letter-spacing: 0.3px;
 }
 
 /* ===== HERO ===== */
 .hero {
     position: relative;
     background: linear-gradient(135deg, #1C2011 0%, #2d4a1e 50%, #1B6F00 100%);
-    padding: 60px 40px 80px;
+    padding: 52px 24px 72px;
     text-align: center;
     overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
 }
 .hero::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
-.hero-content {
-    position: relative;
-    z-index: 2;
-    max-width: 700px;
-    margin: 0 auto;
-}
+.hero-content { position: relative; z-index: 2; max-width: 640px; margin: 0 auto; }
 .hero h1 {
-    font-size: 36px;
+    font-size: 32px;
     font-weight: 700;
     color: var(--white);
-    margin-bottom: 12px;
+    margin-bottom: 10px;
     letter-spacing: -0.5px;
 }
-.hero p {
-    font-size: 16px;
-    color: rgba(255,255,255,0.8);
-    font-weight: 300;
-}
+.hero p { font-size: 15px; color: rgba(255,255,255,0.8); font-weight: 300; }
 .hero-stats {
     display: flex;
     justify-content: center;
     gap: 48px;
-    margin-top: 32px;
+    margin-top: 28px;
     position: relative;
     z-index: 2;
 }
 .hero-stat-number {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--secondary);
     display: block;
 }
 .hero-stat-label {
-    font-size: 11px;
+    font-size: 10px;
     color: rgba(255,255,255,0.6);
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 .hero-wave {
     position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 100%;
-    height: 40px;
+    bottom: -2px; left: 0;
+    width: 100%; height: 40px;
 }
-.hero-wave svg {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
+.hero-wave svg { width: 100%; height: 100%; display: block; }
 
 /* ===== SECTION INTRO ===== */
 .section-intro {
     text-align: center;
-    padding: 48px 40px 24px;
-    max-width: 700px;
+    padding: 36px 24px 20px;
+    max-width: 600px;
     margin: 0 auto;
 }
 .caveat-label {
     font-family: 'Caveat', cursive;
-    font-size: 26px;
+    font-size: 24px;
     color: var(--secondary);
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     display: block;
 }
 .section-intro h2 {
-    font-size: 28px;
+    font-size: 26px;
     font-weight: 700;
     color: var(--dark);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
-.wave-divider {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 8px;
-}
-.wave-divider svg {
-    width: 120px;
-    height: 20px;
-}
-.wave-divider path {
-    stroke: var(--accent);
-    stroke-width: 2.5;
-    fill: none;
+.wave-divider { display: flex; justify-content: center; margin-bottom: 6px; }
+.wave-divider svg { width: 110px; height: 18px; }
+.wave-divider path { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+
+/* ===== GRID DE CARDS
+   2 colunas: cada linha é menor, menor risco de corte.
+   Cada card tem break-inside:avoid — o browser pula a linha inteira
+   para a próxima página em vez de cortar a imagem.
+===== */
+.catalog-container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 24px 48px;
 }
 
-/* ===== TRIPS GRID ===== */
-.catalog-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 40px 60px;
-}
 .trips-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 28px;
-}
-/* Cada grupo de 3 cards (linha) não deve ser cortado no meio */
-.trips-grid-row {
-    display: contents; /* mantém no grid mas permite page-break no elemento */
-}
-/* Wrapper de linha para controle de page-break */
-.trips-row-break {
-    grid-column: 1 / -1;
-    height: 0;
-    page-break-after: auto;
-    break-after: auto;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 22px;
 }
 
 /* ===== TRIP CARD ===== */
 .trip-card {
     background: var(--white);
     border-radius: var(--radius);
-    box-shadow: var(--shadow);
+    border: 1px solid #e8e8e8;
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    /* A chave: nunca cortar este elemento */
     page-break-inside: avoid;
     break-inside: avoid;
-    /* Força o card inteiro a caber na mesma página */
     -webkit-column-break-inside: avoid;
 }
 .card-img-wrap {
     position: relative;
-    aspect-ratio: 16/10;
+    width: 100%;
+    /* Altura fixa em px é mais previsível que aspect-ratio para impressão */
+    height: 170px;
     overflow: hidden;
     background: #e9ecef;
-    /* Impede que a imagem seja cortada sozinha */
-    page-break-inside: avoid;
-    break-inside: avoid;
-    page-break-after: avoid;
-    break-after: avoid;
+    flex-shrink: 0;
 }
 .card-img-wrap img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
-    /* Evita corte da imagem em impressão */
-    page-break-inside: avoid;
-    break-inside: avoid;
 }
 .card-badge {
     position: absolute;
-    top: 12px;
-    left: 12px;
+    top: 10px; left: 10px;
     background: var(--text-green);
     color: var(--white);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 600;
-    padding: 4px 12px;
+    padding: 3px 10px;
     border-radius: 20px;
-    letter-spacing: 0.3px;
 }
 .card-body {
-    padding: 18px 18px 12px;
+    padding: 14px 16px 10px;
     flex: 1;
 }
 .card-body h3 {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 600;
     color: var(--dark);
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     line-height: 1.3;
 }
 .card-body .description {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--gray);
     line-height: 1.5;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    margin-bottom: 12px;
+    margin-bottom: 10px;
 }
 .card-meta {
     display: flex;
@@ -293,29 +249,32 @@ body {
     flex-wrap: wrap;
     font-size: 11px;
     color: var(--gray);
+    margin-bottom: 8px;
 }
-.card-meta span {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
+.card-meta span { display: flex; align-items: center; gap: 3px; }
 .card-meta svg {
-    width: 13px;
-    height: 13px;
-    stroke: var(--gray);
-    fill: none;
-    stroke-width: 1.8;
+    width: 12px; height: 12px;
+    stroke: var(--gray); fill: none; stroke-width: 1.8;
 }
-.card-meta .stars svg {
-    fill: var(--secondary);
-    stroke: var(--secondary);
-}
-.card-footer {
-    padding: 12px 18px;
-    border-top: 1px solid #f0f0f0;
+.card-meta .stars svg { fill: var(--secondary); stroke: var(--secondary); }
+.card-prices {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+.price-chip {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    display: inline-block;
+}
+.price-chip.adult { background: #f0fdf4; color: #166534; }
+.price-chip.child { background: #eff6ff; color: #1e40af; }
+.price-chip.free  { background: #fffbeb; color: #92400e; }
+.card-footer {
+    padding: 10px 16px;
+    border-top: 1px solid #f0f0f0;
 }
 .card-price .label {
     font-size: 10px;
@@ -324,82 +283,75 @@ body {
     line-height: 1;
 }
 .card-price .amount {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
     color: var(--text-green);
-    line-height: 1.2;
 }
-.card-prices {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-top: 6px;
-}
-.price-chip {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 3px 10px;
-    border-radius: 12px;
-    display: inline-block;
-}
-.price-chip.adult { background: #f0fdf4; color: #166534; }
-.price-chip.child { background: #eff6ff; color: #1e40af; }
-.price-chip.free  { background: #fffbeb; color: #92400e; }
 
 /* ===== FOOTER ===== */
 .catalog-footer {
     background: var(--light-bg);
-    padding: 48px 40px;
+    padding: 40px 24px;
     text-align: center;
     border-top: 3px solid var(--secondary);
+    page-break-inside: avoid;
+    break-inside: avoid;
 }
 .catalog-footer h3 {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 700;
     color: var(--text-green);
     margin-bottom: 6px;
 }
-.catalog-footer p {
-    font-size: 14px;
+.catalog-footer > p {
+    font-size: 13px;
     color: var(--gray);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
 }
 .btn-whatsapp {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     background: #25D366;
     color: var(--white);
-    padding: 12px 28px;
+    padding: 11px 24px;
     border-radius: 50px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 14px;
-    box-shadow: 0 4px 16px rgba(37,211,102,0.3);
+    font-size: 13px;
 }
-.btn-whatsapp svg { width: 20px; height: 20px; fill: var(--white); }
+.btn-whatsapp svg { width: 18px; height: 18px; fill: var(--white); }
 .catalog-footer .legal {
-    margin-top: 24px;
-    font-size: 11px;
+    margin-top: 20px;
+    font-size: 10px;
     color: #adb5bd;
     line-height: 1.8;
 }
 
-/* ===== PRINT RULES ===== */
+/* ===== PRINT ===== */
 @media print {
     .print-bar { display: none !important; }
+    .site-header {
+        /* Repete o header no topo de cada página impressa */
+        position: running(header);
+    }
     body { background: #fff; }
-    .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    .card-img-wrap { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    /* Cada linha de 3 cards não pode ser cortada */
-    .catalog-container > div {
+    .hero,
+    .card-img-wrap,
+    .catalog-footer {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    /* Hero e intro ficam na primeira página — não quebrar */
+    .hero { page-break-after: avoid; break-after: avoid; }
+    .section-intro { page-break-after: avoid; break-after: avoid; }
+    /* Cada card nunca é cortado */
+    .trip-card {
         page-break-inside: avoid !important;
         break-inside: avoid !important;
     }
-}
-
-@media screen {
-    body { background: var(--white); }
+    /* Footer nunca orphão no topo de página */
+    .catalog-footer { page-break-before: avoid; break-before: avoid; }
 }
 </style>
 </head>
@@ -415,7 +367,7 @@ body {
 </div>
 
 <!-- HEADER -->
-<header class="header">
+<header class="site-header">
     <div class="header-inner">
         <a href="/" class="header-logo">
             <img src="<?= asset('images/layout/PUNTA-CANA-1.png') ?>" alt="Punta Cana Para Brasileiros">
@@ -465,18 +417,14 @@ body {
 
 <!-- TRIPS GRID -->
 <div class="catalog-container">
-    <?php
-        $chunks = array_chunk($trips, 3);
-        foreach ($chunks as $row):
-    ?>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:28px;page-break-inside:avoid;break-inside:avoid;margin-bottom:28px;">
-        <?php foreach ($row as $trip): ?>
+    <div class="trips-grid">
+        <?php foreach ($trips as $trip): ?>
         <?php
-            $img = $trip['featured_image'] ?? '/assets/images/placeholder.jpg';
-            $duration = $trip['duration'] . ($trip['duration_unit'] === 'hours' ? 'h' : ' dias');
-            $price = $trip['min_price'] > 0 ? 'US$' . number_format($trip['min_price'], 0) : 'Consultar';
-            $rating = isset($trip['rating']) && $trip['rating'] > 0 ? $trip['rating'] : 4.5;
-            $badge = !empty($trip['featured']) ? 'Premium' : '';
+            $img       = $trip['featured_image'] ?? '/assets/images/placeholder.jpg';
+            $duration  = $trip['duration'] . ($trip['duration_unit'] === 'hours' ? 'h' : ' dias');
+            $price     = $trip['min_price'] > 0 ? 'US$' . number_format($trip['min_price'], 0) : 'Consultar';
+            $rating    = isset($trip['rating']) && $trip['rating'] > 0 ? $trip['rating'] : 4.5;
+            $badge     = !empty($trip['featured']) ? 'Premium' : '';
             $categories = $trip['price_categories'] ?? [];
         ?>
         <div class="trip-card">
@@ -522,14 +470,7 @@ body {
             </div>
         </div>
         <?php endforeach; ?>
-        <?php
-            // Preenche colunas vazias na última linha para manter o grid
-            $missing = 3 - count($row);
-            for ($i = 0; $i < $missing; $i++): ?>
-            <div></div>
-        <?php endfor; ?>
     </div>
-    <?php endforeach; ?>
 </div>
 
 <!-- FOOTER -->
