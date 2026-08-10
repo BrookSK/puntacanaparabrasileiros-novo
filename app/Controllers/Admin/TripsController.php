@@ -283,9 +283,25 @@ class TripsController extends Controller
             ]);
 
             // Categorias de preço do pacote
+            $pkgModel = new TripPackage();
             if (!empty($pkg['categories'])) {
-                $pkgModel = new TripPackage();
                 $pkgModel->syncCategories($packageId, $pkg['categories']);
+            } else {
+                // Se nenhuma categoria foi selecionada, vincular Adulto, Criança e Infantil por padrão
+                $defaultCats = $this->db->fetchAll(
+                    "SELECT * FROM traveler_categories WHERE slug IN ('adulto', 'crianca', 'infantil') ORDER BY sort_order ASC"
+                );
+                $defaultData = [];
+                foreach ($defaultCats as $dc) {
+                    $defaultData[] = [
+                        'traveler_category_id' => (int) $dc['id'],
+                        'price' => 0,
+                        'sale_price' => null,
+                    ];
+                }
+                if (!empty($defaultData)) {
+                    $pkgModel->syncCategories($packageId, $defaultData);
+                }
             }
         }
     }

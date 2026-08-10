@@ -297,22 +297,11 @@
                         <span class="price-from">De</span>
                         <span class="trip-price-value">
                             <?php
-                            $adultPrice = 0;
+                            $basePrice = 0;
                             if (!empty($packages)) {
-                                // Buscar preço do adulto no primeiro pacote
-                                foreach ($packages[0]['categories'] as $cat) {
-                                    $slug = strtolower($cat['category_slug'] ?? '');
-                                    if ($slug === 'adulto') {
-                                        $adultPrice = (float) ($cat['sale_price'] ?: $cat['price']);
-                                        break;
-                                    }
-                                }
-                                // Fallback para base_price
-                                if ($adultPrice <= 0) {
-                                    $adultPrice = (float) ($packages[0]['base_price'] ?? 0);
-                                }
+                                $basePrice = $packages[0]['base_price'] ?? 0;
                             }
-                            echo money($adultPrice);
+                            echo money($basePrice);
                             ?>
                         </span>
                         <span class="price-per">/ Adulto</span>

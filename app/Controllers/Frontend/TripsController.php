@@ -218,28 +218,6 @@ class TripsController extends Controller
         foreach ($packages as &$pkg) {
             $pkg['categories'] = $this->packageModel->getCategories((int) $pkg['id']);
             $pkg['base_price'] = $this->packageModel->getBasePrice((int) $pkg['id']);
-
-            // Se não tem categorias configuradas, usar categorias padrão do sistema
-            if (empty($pkg['categories'])) {
-                $defaultCats = $this->db->fetchAll("SELECT * FROM traveler_categories ORDER BY sort_order ASC");
-                foreach ($defaultCats as $dc) {
-                    $pkg['categories'][] = [
-                        'traveler_category_id' => (int) $dc['id'],
-                        'category_name' => $dc['name'],
-                        'category_slug' => $dc['slug'],
-                        'age_group' => $dc['age_group'] ?? '',
-                        'price' => '0.00',
-                        'sale_price' => null,
-                    ];
-                }
-            }
-
-            // Filtrar para mostrar apenas Adulto, Criança e Infantil
-            $allowedSlugs = ['adulto', 'crianca', 'infantil'];
-            $pkg['categories'] = array_values(array_filter($pkg['categories'], function ($cat) use ($allowedSlugs) {
-                $slug = strtolower($cat['category_slug'] ?? '');
-                return in_array($slug, $allowedSlugs);
-            }));
         }
 
         $categories = $this->tripModel->getCategories($tripId);
