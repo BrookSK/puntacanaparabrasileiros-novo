@@ -374,18 +374,7 @@ body {
 }
 
 @media screen {
-    body { background: #2a2a2a; }
-    .header { max-width: 100%; }
-    .print-bar + .header,
-    .hero,
-    .section-intro,
-    .catalog-container,
-    .catalog-footer {
-        max-width: 1200px;
-        margin-left: auto;
-        margin-right: auto;
-    }
-    .print-bar + .header { background: var(--white); max-width: 100%; }
+    body { background: var(--white); }
 }
 </style>
 </head>
