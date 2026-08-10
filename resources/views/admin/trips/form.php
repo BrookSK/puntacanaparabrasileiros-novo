@@ -87,16 +87,16 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                     </div>
                 </div>
 
-                <div class="schedule-actions" style="display:flex;gap:10px;margin-bottom:16px;">
-                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/criar" class="btn btn-sm btn-primary">+ Adicionar Hotel</a>
-                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/importar" class="btn btn-sm btn-outline">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div class="schedule-actions" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;">
+                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/criar" class="btn btn-primary" style="padding:10px 20px;font-size:13px;">+ Adicionar Hotel</a>
+                    <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/importar" class="btn btn-outline" style="padding:10px 20px;font-size:13px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                         Importar Planilha
                     </a>
                     <?php if (!empty($tripHotels ?? [])): ?>
                     <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/limpar" class="inline-form" style="margin-left:auto;" onsubmit="return confirm('Remover todos os hotéis e horários deste passeio?')">
                         <?= csrf_field() ?>
-                        <button class="btn btn-sm btn-danger">Limpar Tudo</button>
+                        <button class="btn btn-danger" style="padding:10px 20px;font-size:13px;">Limpar Tudo</button>
                     </form>
                     <?php endif; ?>
                 </div>
@@ -112,11 +112,11 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                     <div class="hotel-schedule-row">
                         <div class="hotel-schedule-row__info">
                             <strong class="hotel-schedule-row__name">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;opacity:0.6;"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;opacity:0.6;"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
                                 <?= e($th['hotel_name']) ?>
                             </strong>
                             <?php if (!$th['is_active']): ?>
-                            <span class="badge badge-secondary" style="font-size:10px;">Inativo</span>
+                            <span class="badge badge-secondary">Inativo</span>
                             <?php endif; ?>
                             <div class="hotel-schedule-row__times">
                                 <?php if (!empty($th['schedules'])): ?>
@@ -124,15 +124,15 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                                     <span class="schedule-chip"><?= substr($sch['pickup_time'], 0, 5) ?></span>
                                     <?php endforeach; ?>
                                 <?php else: ?>
-                                    <span style="font-size:12px;color:#94a3b8;">Sem horários</span>
+                                    <span style="font-size:13px;color:#94a3b8;">Sem horários</span>
                                 <?php endif; ?>
                             </div>
                         </div>
                         <div class="hotel-schedule-row__actions">
-                            <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/editar" class="btn btn-sm btn-outline">Editar</a>
+                            <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/editar" class="btn btn-outline" style="padding:8px 18px;font-size:13px;">Editar</a>
                             <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir este hotel e seus horários?')">
                                 <?= csrf_field() ?>
-                                <button class="btn btn-sm btn-danger">&times;</button>
+                                <button class="btn btn-danger" style="padding:8px 14px;font-size:14px;">&#10005;</button>
                             </form>
                         </div>
                     </div>
@@ -222,27 +222,28 @@ document.getElementById('addPackageBtn')?.addEventListener('click', function() {
 .hotels-schedule-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 .hotel-schedule-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 14px;
+    padding: 16px 18px;
     background: var(--bg-elevated, #f8fafc);
     border: 1px solid var(--border, #e2e8f0);
-    border-radius: 8px;
-    gap: 12px;
+    border-radius: 10px;
+    gap: 16px;
 }
 .hotel-schedule-row__info {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
     min-width: 0;
     flex: 1;
 }
 .hotel-schedule-row__name {
-    font-size: 13px;
+    font-size: 15px;
+    font-weight: 600;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -250,22 +251,22 @@ document.getElementById('addPackageBtn')?.addEventListener('click', function() {
 .hotel-schedule-row__times {
     display: flex;
     flex-wrap: wrap;
-    gap: 5px;
+    gap: 6px;
 }
 .hotel-schedule-row__actions {
     display: flex;
-    gap: 6px;
+    gap: 8px;
     flex-shrink: 0;
 }
 .schedule-chip {
     display: inline-flex;
     align-items: center;
-    padding: 3px 10px;
+    padding: 5px 14px;
     background: rgba(14, 165, 233, 0.08);
     color: var(--primary, #0ea5e9);
     border: 1px solid rgba(14, 165, 233, 0.18);
-    border-radius: 12px;
-    font-size: 12px;
+    border-radius: 14px;
+    font-size: 13px;
     font-weight: 700;
     font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
     letter-spacing: 0.3px;
