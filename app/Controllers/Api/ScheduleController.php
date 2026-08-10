@@ -50,35 +50,39 @@ class ScheduleController extends Controller
             return;
         }
 
-        $hotels = $this->hotelModel->getByTrip($tripId, true);
+        try {
+            $hotels = $this->hotelModel->getByTrip($tripId, true);
 
-        // Formatar para resposta JSON limpa
-        $result = [];
-        foreach ($hotels as $hotel) {
-            $schedules = [];
-            foreach ($hotel['schedules'] as $schedule) {
-                $schedules[] = [
-                    'id' => (int) $schedule['id'],
-                    'time' => substr($schedule['pickup_time'], 0, 5),
-                    'notes' => $schedule['notes'] ?? null,
-                ];
+            // Formatar para resposta JSON limpa
+            $result = [];
+            foreach ($hotels as $hotel) {
+                $schedules = [];
+                foreach ($hotel['schedules'] as $schedule) {
+                    $schedules[] = [
+                        'id' => (int) $schedule['id'],
+                        'time' => substr($schedule['pickup_time'], 0, 5),
+                        'notes' => $schedule['notes'] ?? null,
+                    ];
+                }
+
+                // Só incluir hotéis que têm pelo menos 1 horário
+                if (!empty($schedules)) {
+                    $result[] = [
+                        'id' => (int) $hotel['id'],
+                        'hotel_name' => $hotel['hotel_name'],
+                        'schedules' => $schedules,
+                    ];
+                }
             }
 
-            // Só incluir hotéis que têm pelo menos 1 horário
-            if (!empty($schedules)) {
-                $result[] = [
-                    'id' => (int) $hotel['id'],
-                    'hotel_name' => $hotel['hotel_name'],
-                    'schedules' => $schedules,
-                ];
-            }
+            $this->json([
+                'success' => true,
+                'hotels' => $result,
+                'total_hotels' => count($result),
+            ]);
+        } catch (\Exception $e) {
+            $this->json(['success' => false, 'error' => 'Erro interno: ' . $e->getMessage()], 500);
         }
-
-        $this->json([
-            'success' => true,
-            'hotels' => $result,
-            'total_hotels' => count($result),
-        ]);
     }
 
     /**

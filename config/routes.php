@@ -141,8 +141,8 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->post('/webhook/stripe', [WebhookController::class, 'handleStripe'], [], 'api.webhook.stripe');
     $router->post('/webhook/pix-status', [WebhookController::class, 'pixStatus'], [], 'api.webhook.pix_status');
     $router->post('/webhooks/pagbank', [WebhookController::class, 'handlePagBank'], [], 'api.webhook.pagbank');
-    $router->get('/schedules/{trip_id}', [ApiScheduleController::class, 'getByTrip'], [], 'api.schedules.trip');
     $router->get('/schedules/hotel/{hotel_id}', [ApiScheduleController::class, 'getByHotel'], [], 'api.schedules.hotel');
+    $router->get('/schedules/{trip_id}', [ApiScheduleController::class, 'getByTrip'], [], 'api.schedules.trip');
 });
 
 // ============================================================
