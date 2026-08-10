@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=3.2">
+    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=3.3">
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 </head>
 <body class="admin-body">
@@ -84,13 +84,22 @@
 
             <!-- Flash Messages -->
             <?php if (has_flash('success')): ?>
-            <div class="alert alert-success"><?= e(flash('success')) ?></div>
+            <div class="alert alert-success">
+                <span><?= e(flash('success')) ?></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
             <?php endif; ?>
             <?php if (has_flash('error')): ?>
-            <div class="alert alert-danger"><?= e(flash('error')) ?></div>
+            <div class="alert alert-danger">
+                <span><?= e(flash('error')) ?></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
             <?php endif; ?>
             <?php if (has_flash('info')): ?>
-            <div class="alert alert-info"><?= e(flash('info')) ?></div>
+            <div class="alert alert-info">
+                <span><?= e(flash('info')) ?></span>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()">&times;</button>
+            </div>
             <?php endif; ?>
 
             <!-- Page Content -->
