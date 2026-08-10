@@ -29,6 +29,9 @@
                 <a href="/admin/passeios" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/passeios') ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 010 20 14.5 14.5 0 010-20"/><path d="M2 12h20"/></svg></span> Passeios
                 </a>
+                <a href="/admin/horarios" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/horarios') ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span> Horários
+                </a>
                 <a href="/admin/categorias" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/categorias') ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></span> Categorias
                 </a>

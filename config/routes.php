@@ -22,7 +22,9 @@ use App\Controllers\Admin\UsersController as AdminUsersController;
 use App\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Controllers\Admin\NewsletterController as AdminNewsletterController;
 use App\Controllers\Admin\CancellationsController as AdminCancellationsController;
+use App\Controllers\Admin\SchedulesController as AdminSchedulesController;
 use App\Controllers\Api\TransferSearchController;
+use App\Controllers\Api\ScheduleController as ApiScheduleController;
 use App\Controllers\Api\PricingController;
 use App\Controllers\Api\CartController as ApiCartController;
 use App\Controllers\Api\WebhookController;
@@ -139,6 +141,8 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->post('/webhook/stripe', [WebhookController::class, 'handleStripe'], [], 'api.webhook.stripe');
     $router->post('/webhook/pix-status', [WebhookController::class, 'pixStatus'], [], 'api.webhook.pix_status');
     $router->post('/webhooks/pagbank', [WebhookController::class, 'handlePagBank'], [], 'api.webhook.pagbank');
+    $router->get('/schedules/{trip_id}', [ApiScheduleController::class, 'getByTrip'], [], 'api.schedules.trip');
+    $router->get('/schedules/hotel/{hotel_id}', [ApiScheduleController::class, 'getByHotel'], [], 'api.schedules.hotel');
 });
 
 // ============================================================
@@ -228,4 +232,16 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/cancelamentos/{id}/aprovar', [AdminCancellationsController::class, 'approve'], [CsrfMiddleware::class], 'admin.cancellations.approve');
     $router->post('/cancelamentos/{id}/rejeitar', [AdminCancellationsController::class, 'reject'], [CsrfMiddleware::class], 'admin.cancellations.reject');
     $router->post('/cancelamentos/{id}/reembolsar', [AdminCancellationsController::class, 'refund'], [CsrfMiddleware::class], 'admin.cancellations.refund');
+
+    // Horários por Hotel
+    $router->get('/horarios', [AdminSchedulesController::class, 'index'], [], 'admin.schedules.index');
+    $router->get('/horarios/{id}', [AdminSchedulesController::class, 'show'], [], 'admin.schedules.show');
+    $router->get('/horarios/{id}/hotel/criar', [AdminSchedulesController::class, 'createHotel'], [], 'admin.schedules.hotel.create');
+    $router->post('/horarios/{id}/hotel/criar', [AdminSchedulesController::class, 'storeHotel'], [CsrfMiddleware::class], 'admin.schedules.hotel.store');
+    $router->get('/horarios/{id}/hotel/{hotel_id}/editar', [AdminSchedulesController::class, 'editHotel'], [], 'admin.schedules.hotel.edit');
+    $router->post('/horarios/{id}/hotel/{hotel_id}/editar', [AdminSchedulesController::class, 'updateHotel'], [CsrfMiddleware::class], 'admin.schedules.hotel.update');
+    $router->post('/horarios/{id}/hotel/{hotel_id}/excluir', [AdminSchedulesController::class, 'deleteHotel'], [CsrfMiddleware::class], 'admin.schedules.hotel.delete');
+    $router->get('/horarios/{id}/importar', [AdminSchedulesController::class, 'importForm'], [], 'admin.schedules.import');
+    $router->post('/horarios/{id}/importar', [AdminSchedulesController::class, 'import'], [CsrfMiddleware::class], 'admin.schedules.import.post');
+    $router->post('/horarios/{id}/limpar', [AdminSchedulesController::class, 'clearAll'], [CsrfMiddleware::class], 'admin.schedules.clear');
 });
