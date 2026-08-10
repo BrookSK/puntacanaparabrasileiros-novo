@@ -926,23 +926,23 @@
     document.getElementById('bookingModalClose')?.addEventListener('click', () => { modal.style.display = 'none'; });
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
 
-    // ===== STEP 1: Hotel & Pickup =====
+    // ===== STEP 1: Hotel & Horário de Busca =====
     function loadHotels() {
         if (typeof TRIP_ID === 'undefined') return;
+        if (hotelsData.length > 0) return; // já carregou
         const loading = document.getElementById('bmHotelLoading');
-        const list = document.getElementById('bmHotelList');
-        if (hotelsData.length > 0) { renderHotelList(hotelsData); return; }
-        loading.innerHTML = '<span>Carregando hot\u00E9is dispon\u00EDveis...</span>';
         loading.style.display = 'block';
+        document.getElementById('bmHotelHint').style.display = 'none';
         fetch('/api/schedules/' + TRIP_ID, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' } })
             .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
             .then(data => {
                 loading.style.display = 'none';
-                if (data.success && data.hotels && data.hotels.length > 0) { hotelsData = data.hotels; renderHotelList(hotelsData); }
-                else { list.innerHTML = '<div class="bm-hotel-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:8px;color:#999;display:block;margin:0 auto 8px;"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>Nenhum hotel cadastrado para este passeio.<br><small style="color:#aaa;">Entre em contato para mais informa\u00E7\u00F5es.</small></div>'; }
+                document.getElementById('bmHotelHint').style.display = 'block';
+                if (data.success && data.hotels && data.hotels.length > 0) { hotelsData = data.hotels; }
+                else { hotelsData = []; }
             }).catch(err => {
                 loading.style.display = 'none';
-                list.innerHTML = '<div class="bm-hotel-empty"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 8px;display:block;color:#e74c3c;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Erro ao carregar hot\u00E9is.<br><small style="color:#aaa;">' + err.message + '</small></div>';
+                document.getElementById('bmHotelHint').innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 8px;display:block;color:#e74c3c;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Erro ao carregar hot\u00E9is. ' + err.message;
             });
     }
 
@@ -952,12 +952,24 @@
             list.innerHTML = '<div class="bm-hotel-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;color:#bbb;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Nenhum hotel encontrado com esse nome.</div>';
             return;
         }
-        list.innerHTML = hotels.map(h => `<div class="bm-hotel-item ${selectedHotel && selectedHotel.id === h.id ? 'selected' : ''}" data-hotel-id="${h.id}" onclick="selectHotel(${h.id})"><div class="bm-hotel-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><div class="bm-hotel-item-content"><span class="bm-hotel-name">${h.hotel_name}</span><span class="bm-hotel-times-count">${h.schedules.length} hor\u00E1rio(s) de pickup</span></div><div class="bm-hotel-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>`).join('');
+        list.innerHTML = hotels.map(h => `<div class="bm-hotel-item ${selectedHotel && selectedHotel.id === h.id ? 'selected' : ''}" data-hotel-id="${h.id}" onclick="selectHotel(${h.id})"><div class="bm-hotel-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><div class="bm-hotel-item-content"><span class="bm-hotel-name">${h.hotel_name}</span><span class="bm-hotel-times-count">${h.schedules.length} hor\u00E1rio(s) de busca</span></div><div class="bm-hotel-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>`).join('');
     }
 
     document.getElementById('bmHotelSearch')?.addEventListener('input', function() {
         const q = this.value.toLowerCase().trim();
-        renderHotelList(hotelsData.filter(h => h.hotel_name.toLowerCase().includes(q)));
+        const hint = document.getElementById('bmHotelHint');
+        if (q.length < 2) {
+            // Esconde resultados e mostra hint
+            hint.style.display = 'block';
+            hint.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;color:#bbb;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Digite pelo menos 2 letras para buscar';
+            // Limpar lista renderizada
+            const items = document.querySelectorAll('.bm-hotel-item');
+            items.forEach(el => el.remove());
+            return;
+        }
+        hint.style.display = 'none';
+        const filtered = hotelsData.filter(h => h.hotel_name.toLowerCase().includes(q));
+        renderHotelList(filtered);
     });
 
     window.selectHotel = function(hotelId) {
@@ -1118,7 +1130,7 @@
         if (selectedHotel) {
             hotelEl.style.display = 'block';
             hotelNameEl.textContent = 'Hotel: ' + selectedHotel.hotel_name;
-            pickupEl.textContent = selectedPickupTime ? 'Pickup: ' + selectedPickupTime : '';
+            pickupEl.textContent = selectedPickupTime ? 'Busca: ' + selectedPickupTime : '';
         }
         // Date
         const dateEl = document.getElementById('bmSidebarDate');

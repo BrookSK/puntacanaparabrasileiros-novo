@@ -1,6 +1,6 @@
 <div class="card-header">
     <div class="header-actions">
-        <p style="margin:0;color:#94a3b8;font-size:0.9rem;">Selecione um passeio para gerenciar os horários de pickup por hotel</p>
+        <p style="margin:0;color:#94a3b8;font-size:0.9rem;">Selecione um passeio para gerenciar os horários de busca por hotel</p>
     </div>
     <form method="GET" class="filter-form">
         <input type="text" name="busca" value="<?= e($currentSearch ?? '') ?>" placeholder="Buscar passeio..." class="form-control">

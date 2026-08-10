@@ -83,7 +83,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                     </div>
                     <div>
                         <h3>Horários por Hotel</h3>
-                        <p class="admin-card-subtitle">Hotéis e horários de pickup para este passeio</p>
+                        <p class="admin-card-subtitle">Hotéis e horários de busca para este passeio</p>
                     </div>
                 </div>
 
