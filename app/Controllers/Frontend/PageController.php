@@ -284,7 +284,20 @@ class PageController extends Controller
             $trip['min_price'] = 0;
             if (!empty($packages)) {
                 $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
-                $trip['price_categories'] = $packageModel->getCategories((int) $packages[0]['id']);
+
+                // Coleta categorias de todos os pacotes e deduplica por slug,
+                // mantendo o menor preço por categoria (evita repetições no PDF)
+                $allCategories = [];
+                foreach ($packages as $pkg) {
+                    foreach ($packageModel->getCategories((int) $pkg['id']) as $cat) {
+                        $slug = $cat['category_slug'];
+                        $catPrice = (float) ($cat['sale_price'] ?: $cat['price']);
+                        if (!isset($allCategories[$slug]) || $catPrice < (float) ($allCategories[$slug]['sale_price'] ?: $allCategories[$slug]['price'])) {
+                            $allCategories[$slug] = $cat;
+                        }
+                    }
+                }
+                $trip['price_categories'] = array_values($allCategories);
             } else {
                 $trip['price_categories'] = [];
             }
