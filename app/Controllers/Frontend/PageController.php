@@ -280,24 +280,14 @@ class PageController extends Controller
 
         $trips = $tripModel->getPublished(1, 50, 'sort_order ASC');
         foreach ($trips['items'] as &$trip) {
+            // Usa o mesmo pacote base (sort_order ASC) que a página /catalogo
             $packages = $packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
             if (!empty($packages)) {
-                $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
-
-                // Coleta categorias de todos os pacotes e deduplica por slug,
-                // mantendo o menor preço por categoria (evita repetições no PDF)
-                $allCategories = [];
-                foreach ($packages as $pkg) {
-                    foreach ($packageModel->getCategories((int) $pkg['id']) as $cat) {
-                        $slug = $cat['category_slug'];
-                        $catPrice = (float) ($cat['sale_price'] ?: $cat['price']);
-                        if (!isset($allCategories[$slug]) || $catPrice < (float) ($allCategories[$slug]['sale_price'] ?: $allCategories[$slug]['price'])) {
-                            $allCategories[$slug] = $cat;
-                        }
-                    }
-                }
-                $trip['price_categories'] = array_values($allCategories);
+                // Pacote base = primeiro por sort_order (igual ao catalog())
+                $basePackageId = (int) $packages[0]['id'];
+                $trip['min_price'] = $packageModel->getBasePrice($basePackageId);
+                $trip['price_categories'] = $packageModel->getCategories($basePackageId);
             } else {
                 $trip['price_categories'] = [];
             }
