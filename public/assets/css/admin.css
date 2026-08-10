@@ -181,7 +181,7 @@ a { color: var(--primary); text-decoration: none; }
 .badge-secondary { background: #f1f5f9; color: #475569; }
 
 /* Alerts */
-.alert { padding: 18px 24px; border-radius: 12px; margin-bottom: 24px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 14px; animation: alertSlideIn 0.35s ease; position: relative; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+.alert { padding: 18px 24px; border-radius: 0; margin-bottom: 24px; font-size: 15px; font-weight: 600; display: flex; align-items: center; gap: 14px; animation: alertSlideIn 0.35s ease; position: relative; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
 .alert span { flex: 1; }
 .alert::before { content: ''; flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; font-weight: 800; }
 .alert-success { background: #16a34a; color: #fff; border: none; }
