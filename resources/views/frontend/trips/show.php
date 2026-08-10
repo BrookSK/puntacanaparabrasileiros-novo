@@ -297,18 +297,25 @@
                         <span class="price-from">De</span>
                         <span class="trip-price-value">
                             <?php
-                            $basePrice = 0;
+                            $adultPrice = 0;
                             if (!empty($packages)) {
-                                $basePrice = $packages[0]['base_price'] ?? 0;
+                                // Buscar preço do adulto no primeiro pacote
+                                foreach ($packages[0]['categories'] as $cat) {
+                                    $slug = strtolower($cat['category_slug'] ?? '');
+                                    if ($slug === 'adulto') {
+                                        $adultPrice = (float) ($cat['sale_price'] ?: $cat['price']);
+                                        break;
+                                    }
+                                }
+                                // Fallback para base_price
+                                if ($adultPrice <= 0) {
+                                    $adultPrice = (float) ($packages[0]['base_price'] ?? 0);
+                                }
                             }
-                            if ($basePrice > 0) {
-                                echo money($basePrice);
-                            } else {
-                                echo '<span style="font-size:0.6em;color:#636e72;">Consulte</span>';
-                            }
+                            echo money($adultPrice);
                             ?>
                         </span>
-                        <span class="price-per">/ Adulto: 12-85</span>
+                        <span class="price-per">/ Adulto</span>
                     </div>
                     <a href="#booking-section" class="btn-verificar">Verificar Disponibilidade</a>
                     <?php if (current_user()): ?>

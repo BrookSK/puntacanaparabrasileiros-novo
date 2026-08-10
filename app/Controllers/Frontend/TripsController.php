@@ -233,6 +233,13 @@ class TripsController extends Controller
                     ];
                 }
             }
+
+            // Filtrar para mostrar apenas Adulto, Criança e Infantil
+            $allowedSlugs = ['adulto', 'crianca', 'infantil'];
+            $pkg['categories'] = array_values(array_filter($pkg['categories'], function ($cat) use ($allowedSlugs) {
+                $slug = strtolower($cat['category_slug'] ?? '');
+                return in_array($slug, $allowedSlugs);
+            }));
         }
 
         $categories = $this->tripModel->getCategories($tripId);

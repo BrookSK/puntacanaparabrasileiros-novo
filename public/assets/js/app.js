@@ -1089,14 +1089,30 @@
         const container = document.getElementById('bmTravelersList');
         if (!selectedPackage) return;
 
-        // Se não tem categories configuradas, mostrar fallback com Adulto, Criança e Infantil
+        // Se não tem categories configuradas, usar fallback
         let cats = selectedPackage.categories;
         if (!cats || cats.length === 0) {
             cats = [
                 { traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto', age_group: '12+', price: selectedPackage.base_price || '0', sale_price: null },
-                { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca', age_group: '3-11', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null },
-                { traveler_category_id: 2, category_name: 'Infantil', category_slug: 'infantil', age_group: '0-2', price: '0', sale_price: null }
+                { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca', age_group: '4-11', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null },
+                { traveler_category_id: 2, category_name: 'Infantil', category_slug: 'infantil', age_group: '0-3', price: '0', sale_price: null }
             ];
+        } else {
+            // Filtrar para mostrar apenas Adulto, Criança e Infantil
+            const allowedSlugs = ['adulto', 'crianca', 'criança', 'infantil'];
+            cats = cats.filter(c => {
+                const slug = (c.category_slug || '').toLowerCase();
+                const name = (c.category_name || '').toLowerCase();
+                return allowedSlugs.some(s => slug.includes(s) || name.includes(s));
+            });
+            // Se após filtro ficou vazio, usar fallback
+            if (cats.length === 0) {
+                cats = [
+                    { traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto', age_group: '12+', price: selectedPackage.base_price || '0', sale_price: null },
+                    { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca', age_group: '4-11', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null },
+                    { traveler_category_id: 2, category_name: 'Infantil', category_slug: 'infantil', age_group: '0-3', price: '0', sale_price: null }
+                ];
+            }
         }
 
         travelerCounts = {};
@@ -1165,6 +1181,13 @@
                     { traveler_category_id: 1, category_name: 'Criança', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null },
                     { traveler_category_id: 2, category_name: 'Infantil', price: '0', sale_price: null }
                 ];
+            } else {
+                const allowedSlugs = ['adulto', 'crianca', 'criança', 'infantil'];
+                cats = cats.filter(c => {
+                    const slug = (c.category_slug || '').toLowerCase();
+                    const name = (c.category_name || '').toLowerCase();
+                    return allowedSlugs.some(s => slug.includes(s) || name.includes(s));
+                });
             }
             cats.forEach(cat => {
                 const catId = cat.traveler_category_id || cat.id || 0;
