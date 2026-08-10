@@ -1089,12 +1089,13 @@
         const container = document.getElementById('bmTravelersList');
         if (!selectedPackage) return;
 
-        // Se não tem categories configuradas, mostrar fallback com Adulto e Criança
+        // Se não tem categories configuradas, mostrar fallback com Adulto, Criança e Infantil
         let cats = selectedPackage.categories;
         if (!cats || cats.length === 0) {
             cats = [
                 { traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto', age_group: '12+', price: selectedPackage.base_price || '0', sale_price: null },
-                { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca', age_group: '3-11', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null }
+                { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca', age_group: '3-11', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null },
+                { traveler_category_id: 2, category_name: 'Infantil', category_slug: 'infantil', age_group: '0-2', price: '0', sale_price: null }
             ];
         }
 
@@ -1107,7 +1108,7 @@
             return `<div class="bm-traveler-row">
                 <div class="bm-traveler-info">
                     <span class="bm-traveler-name">${cat.category_name}${cat.age_group ? ' (' + cat.age_group + ')' : ''}</span>
-                    <span class="bm-traveler-price">${price > 0 ? '$' + price.toFixed(2) + ' / Pessoa' : 'Consultar preço'}</span>
+                    <span class="bm-traveler-price">${price > 0 ? '$' + price.toFixed(2) + ' / Pessoa' : 'Gratuito'}</span>
                 </div>
                 <div class="bm-traveler-counter">
                     <button type="button" onclick="changeTraveler(${catId}, -1)">&#8722;</button>
@@ -1161,7 +1162,8 @@
             if (!cats || cats.length === 0) {
                 cats = [
                     { traveler_category_id: 0, category_name: 'Adulto', price: selectedPackage.base_price || '0', sale_price: null },
-                    { traveler_category_id: 1, category_name: 'Criança', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null }
+                    { traveler_category_id: 1, category_name: 'Criança', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null },
+                    { traveler_category_id: 2, category_name: 'Infantil', price: '0', sale_price: null }
                 ];
             }
             cats.forEach(cat => {

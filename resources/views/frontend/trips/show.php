@@ -301,7 +301,11 @@
                             if (!empty($packages)) {
                                 $basePrice = $packages[0]['base_price'] ?? 0;
                             }
-                            echo money($basePrice);
+                            if ($basePrice > 0) {
+                                echo money($basePrice);
+                            } else {
+                                echo '<span style="font-size:0.6em;color:#636e72;">Consulte</span>';
+                            }
                             ?>
                         </span>
                         <span class="price-per">/ Adulto: 12-85</span>
