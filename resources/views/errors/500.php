@@ -52,6 +52,14 @@
         <div class="error-footer">
             Precisa de ajuda? <a href="/contato">Entre em contato conosco</a>
         </div>
+
+        <?php if (!empty($debug) && !empty($trace)): ?>
+        <div style="margin-top:24px;padding:16px;background:#1e293b;border-radius:8px;text-align:left;overflow-x:auto;">
+            <p style="margin:0 0 8px;font-size:12px;color:#f87171;font-weight:600;">DEBUG (visível apenas em desenvolvimento):</p>
+            <p style="margin:0 0 8px;font-size:13px;color:#fbbf24;word-break:break-word;"><?= htmlspecialchars($message ?? '') ?></p>
+            <pre style="margin:0;font-size:11px;color:#94a3b8;white-space:pre-wrap;word-break:break-all;"><?= htmlspecialchars($trace ?? '') ?></pre>
+        </div>
+        <?php endif; ?>
     </div>
 </body>
 </html>

@@ -40,6 +40,9 @@ use App\Middleware\CsrfMiddleware;
 // ============================================================
 // FRONTEND - Páginas Públicas
 // ============================================================
+// Rota de teste para páginas de erro (remover em produção)
+$router->get('/teste-erro/{code}', [HomeController::class, 'testError'], [], 'test.error');
+
 $router->get('/', [HomeController::class, 'index'], [], 'home');
 $router->get('/passeios', [TripsController::class, 'index'], [], 'trips.index');
 $router->get('/passeios/categoria/{slug}', [TripsController::class, 'category'], [], 'trips.category');

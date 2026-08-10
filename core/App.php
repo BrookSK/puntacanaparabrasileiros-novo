@@ -114,20 +114,30 @@ class App
     {
         $code = $e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 500;
 
-        if (defined('APP_DEBUG') && APP_DEBUG) {
-            $this->response->setStatusCode($code);
-            $this->response->setBody(
-                '<h1>Erro ' . $code . '</h1>' .
-                '<p>' . htmlspecialchars($e->getMessage()) . '</p>' .
-                '<pre>' . htmlspecialchars($e->getTraceAsString()) . '</pre>'
-            );
-        } else {
-            $this->response->setStatusCode($code);
-            $this->response->setBody(
-                View::renderStatic('errors/' . $code, ['message' => $e->getMessage()])
-                ?? '<h1>Erro ' . $code . '</h1><p>Ocorreu um erro inesperado.</p>'
-            );
+        $this->response->setStatusCode($code);
+
+        // Tentar renderizar view de erro estilizada
+        $errorView = View::renderStatic('errors/' . $code, [
+            'message' => $e->getMessage(),
+            'debug' => defined('APP_DEBUG') && APP_DEBUG,
+            'trace' => $e->getTraceAsString(),
+        ]);
+
+        // Fallback genérico para erros sem view específica
+        if (!$errorView) {
+            $errorView = View::renderStatic('errors/500', [
+                'message' => $e->getMessage(),
+                'debug' => defined('APP_DEBUG') && APP_DEBUG,
+                'trace' => $e->getTraceAsString(),
+            ]);
         }
+
+        // Último fallback se nenhuma view existir
+        if (!$errorView) {
+            $errorView = '<h1>Erro ' . $code . '</h1><p>Ocorreu um erro inesperado.</p>';
+        }
+
+        $this->response->setBody($errorView);
         $this->response->send();
     }
 }
