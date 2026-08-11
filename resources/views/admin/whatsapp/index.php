@@ -215,9 +215,35 @@ async function connectInstance(id) {
             qrImg.src = 'data:image/png;base64,' + json.qrcode;
         }
         qrDiv.style.display = 'block';
+        // Iniciar polling para detectar conexão
+        startConnectionPolling(id);
     } else if (json.connected) {
         location.reload();
     } else { alert(json.error || 'Erro ao conectar'); }
+}
+
+let connectionPollTimer = null;
+function startConnectionPolling(id) {
+    // Limpar polling anterior se houver
+    if (connectionPollTimer) clearInterval(connectionPollTimer);
+    // Verificar a cada 3 segundos se conectou
+    connectionPollTimer = setInterval(async () => {
+        try {
+            const res = await fetch(`/whatsapp/status/${id}`);
+            const json = await res.json();
+            if (json.status === 'open' || json.status === 'connected') {
+                clearInterval(connectionPollTimer);
+                location.reload();
+            }
+        } catch (e) {}
+    }, 3000);
+    // Parar após 2 minutos (timeout do QR)
+    setTimeout(() => {
+        if (connectionPollTimer) {
+            clearInterval(connectionPollTimer);
+            connectionPollTimer = null;
+        }
+    }, 120000);
 }
 
 async function disconnectInstance(id) {
@@ -271,4 +297,13 @@ async function registerWebhook(id) {
     const json = await res.json();
     alert(json.success ? 'Webhook registrado!' : 'Erro ao registrar webhook.');
 }
+
+// Auto-iniciar polling se há instância com status "connecting"
+document.addEventListener('DOMContentLoaded', () => {
+    <?php foreach ($instances as $inst): ?>
+    <?php if ($inst['connection_status'] === 'connecting'): ?>
+    startConnectionPolling(<?= $inst['id'] ?>);
+    <?php endif; ?>
+    <?php endforeach; ?>
+});
 </script>
