@@ -34,8 +34,8 @@ class AffiliatesController extends Controller
         $page = max(1, (int) $request->query('page', '1'));
 
         $pendingCount = $this->requestModel->countByStatus('pending');
-        $activeCount = $this->affiliateModel->count("status = 'active'");
-        $blockedCount = $this->affiliateModel->count("status IN ('rejected', 'suspended')");
+        $activeCount = $this->affiliateModel->count("status = ?", ['active']);
+        $blockedCount = $this->affiliateModel->count("status = ? OR status = ?", ['rejected', 'suspended']);
 
         $data = [
             'tab' => $tab,
@@ -54,7 +54,7 @@ class AffiliatesController extends Controller
             $items = $this->db->fetchAll(
                 "SELECT a.*, u.first_name, u.last_name, u.email
                  FROM affiliates a
-                 INNER JOIN users u ON a.user_id = u.id
+                 LEFT JOIN users u ON a.user_id = u.id
                  WHERE a.status IN ('rejected', 'suspended')
                  ORDER BY a.updated_at DESC
                  LIMIT 20 OFFSET ?",
