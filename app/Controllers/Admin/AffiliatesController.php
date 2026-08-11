@@ -36,9 +36,9 @@ class AffiliatesController extends Controller
         // Contadores baseados no status real do banco
         $pendingCount = $this->requestModel->countByStatus('pending');
         $activeCount = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliates WHERE status = 'active'");
-        // Bloqueados = afiliados inativos + solicitações rejeitadas
-        $blockedAffiliates = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliates WHERE status = 'inactive'");
-        $blockedRequests = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliate_requests WHERE status = 'rejected'");
+        // Bloqueados = afiliados não-ativos + solicitações que não são pending/approved
+        $blockedAffiliates = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliates WHERE status != 'active'");
+        $blockedRequests = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliate_requests WHERE status NOT IN ('pending', 'approved')");
         $blockedCount = $blockedAffiliates + $blockedRequests;
 
         $data = [
@@ -61,31 +61,36 @@ class AffiliatesController extends Controller
     }
 
     /**
-     * Retorna lista combinada de bloqueados: afiliados inativos + solicitações rejeitadas.
+     * Retorna lista combinada de bloqueados:
+     * - Afiliados que não estão ativos (inativos/bloqueados)
+     * - Solicitações que não são pending nem approved (rejeitadas/bloqueadas/qualquer outro status)
      */
     private function getBlockedItems(int $page = 1, int $perPage = 20): array
     {
-        // Buscar afiliados inativos (já foram aprovados e depois bloqueados)
+        // Buscar afiliados que não estão ativos (bloqueados/inativos)
         $blockedAffiliates = $this->db->fetchAll(
-            "SELECT a.id, u.first_name, u.last_name, u.email, 'affiliate' AS source, a.created_at, a.updated_at
+            "SELECT a.id, u.first_name, u.last_name, u.email, 'affiliate' AS source, a.status, a.created_at, a.updated_at
              FROM affiliates a
              LEFT JOIN users u ON a.user_id = u.id
-             WHERE a.status = 'inactive'
+             WHERE a.status != 'active'
              ORDER BY a.updated_at DESC"
         );
 
-        // Buscar solicitações rejeitadas (nunca foram aprovadas)
+        // Buscar solicitações que NÃO são pending nem approved (captura rejected, vazio, ou qualquer valor)
         $blockedRequests = $this->db->fetchAll(
-            "SELECT id, first_name, last_name, email, 'request' AS source, created_at, rejected_at AS updated_at
+            "SELECT id, first_name, last_name, email, 'request' AS source, status,
+                    created_at, COALESCE(rejected_at, updated_at, created_at) AS updated_at
              FROM affiliate_requests
-             WHERE status = 'rejected'
-             ORDER BY rejected_at DESC"
+             WHERE status NOT IN ('pending', 'approved')
+             ORDER BY COALESCE(rejected_at, updated_at, created_at) DESC"
         );
 
-        // Combinar e ordenar por data de bloqueio (mais recente primeiro)
+        // Combinar e ordenar por data mais recente primeiro
         $allBlocked = array_merge($blockedAffiliates, $blockedRequests);
         usort($allBlocked, function ($a, $b) {
-            return strtotime($b['updated_at'] ?? $b['created_at']) - strtotime($a['updated_at'] ?? $a['created_at']);
+            $dateA = $a['updated_at'] ?? $a['created_at'] ?? '1970-01-01';
+            $dateB = $b['updated_at'] ?? $b['created_at'] ?? '1970-01-01';
+            return strtotime($dateB) - strtotime($dateA);
         });
 
         // Paginação manual
@@ -209,21 +214,34 @@ class AffiliatesController extends Controller
     }
 
     /**
-     * Recusar solicitação.
+     * Recusar/bloquear solicitação.
      */
     public function rejectRequest(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
         $req = $this->requestModel->find($id);
 
-        if (!$req || $req['status'] !== 'pending') {
-            $this->flash('error', 'Solicitação não encontrada ou já processada.');
+        if (!$req) {
+            $this->flash('error', 'Solicitação não encontrada.');
+            $this->redirect('/admin/afiliados');
+            return;
+        }
+
+        // Só permite recusar se não está aprovada
+        if ($req['status'] === 'approved') {
+            $this->flash('error', 'Esta solicitação já foi aprovada e não pode ser recusada.');
             $this->redirect('/admin/afiliados');
             return;
         }
 
         $adminNotes = $request->input('admin_notes', '');
-        $this->requestModel->reject($id, $adminNotes);
+
+        // Usar query SQL direta para garantir que o status seja atualizado
+        // independente de problemas com ENUM ou model fillable
+        $this->db->query(
+            "UPDATE affiliate_requests SET status = 'rejected', rejected_at = ?, admin_notes = ? WHERE id = ?",
+            [date('Y-m-d H:i:s'), $adminNotes, $id]
+        );
 
         // Enviar email de recusa ao solicitante
         try {
@@ -243,7 +261,7 @@ class AffiliatesController extends Controller
             // Silenciar erro de email - não impedir o fluxo
         }
 
-        $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi recusada.');
+        $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi bloqueada.');
         $this->redirect('/admin/afiliados?tab=bloqueados');
     }
 
@@ -259,15 +277,22 @@ class AffiliatesController extends Controller
     }
 
     /**
-     * Excluir solicitação rejeitada permanentemente.
+     * Excluir solicitação bloqueada/rejeitada permanentemente.
      */
     public function deleteRequest(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
         $req = $this->requestModel->find($id);
 
-        if (!$req || $req['status'] !== 'rejected') {
-            $this->flash('error', 'Solicitação não encontrada ou não está rejeitada.');
+        if (!$req) {
+            $this->flash('error', 'Solicitação não encontrada.');
+            $this->redirect('/admin/afiliados?tab=bloqueados');
+            return;
+        }
+
+        // Não permitir excluir solicitações pendentes ou aprovadas (só bloqueadas)
+        if (in_array($req['status'], ['pending', 'approved'])) {
+            $this->flash('error', 'Apenas solicitações bloqueadas/recusadas podem ser excluídas.');
             $this->redirect('/admin/afiliados?tab=bloqueados');
             return;
         }
