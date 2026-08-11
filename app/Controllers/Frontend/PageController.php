@@ -153,35 +153,42 @@ class PageController extends Controller
         }
 
         // Criar usuário com role affiliate
-        $userId = $userModel->createUser([
-            'first_name' => $data['first_name'],
-            'last_name' => $data['last_name'],
-            'email' => strtolower(trim($data['email'])),
-            'password' => $data['password'],
-            'phone' => $data['phone'],
-            'role' => 'customer',
-            'status' => 'active',
-            'email_verified_at' => date('Y-m-d H:i:s'),
-        ]);
+        try {
+            $userId = $userModel->createUser([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'email' => strtolower(trim($data['email'])),
+                'password' => $data['password'],
+                'phone' => $data['phone'],
+                'role' => 'customer',
+                'status' => 'active',
+                'email_verified_at' => date('Y-m-d H:i:s'),
+            ]);
 
-        // Criar registro de afiliado (pendente aprovação)
-        $affiliateModel = new \App\Models\Affiliate();
-        $affiliateModel->create([
-            'user_id' => $userId,
-            'status' => 'pending',
-            'commission_rate' => 20.00,
-            'cookie_days' => 30,
-            'payment_email' => $data['payment_email'] ?? $data['email'],
-            'notes' => json_encode([
-                'username' => $data['username'],
-                'pix' => $data['pix'],
-                'website' => $data['website'],
-                'followers_count' => $data['followers_count'],
-                'niche' => $data['niche'],
-                'content_type' => $data['content_type'],
-                'promotion_strategy' => $data['promotion_strategy'],
-            ]),
-        ]);
+            // Criar registro de afiliado (pendente aprovação)
+            $affiliateModel = new \App\Models\Affiliate();
+            $affiliateModel->create([
+                'user_id' => $userId,
+                'status' => 'pending',
+                'commission_rate' => 20.00,
+                'cookie_days' => 30,
+                'payment_email' => $data['payment_email'] ?? $data['email'],
+                'notes' => json_encode([
+                    'username' => $data['username'],
+                    'pix' => $data['pix'],
+                    'website' => $data['website'],
+                    'followers_count' => $data['followers_count'],
+                    'niche' => $data['niche'],
+                    'content_type' => $data['content_type'],
+                    'promotion_strategy' => $data['promotion_strategy'],
+                ]),
+            ]);
+        } catch (\Exception $e) {
+            $this->flash('error', 'Erro ao criar cadastro: ' . $e->getMessage());
+            $this->flash('old', $data);
+            $this->redirect('/cadastro-afiliado');
+            return;
+        }
 
         // Notificar admin
         $emailService = new \App\Services\EmailService();
