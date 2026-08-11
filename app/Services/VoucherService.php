@@ -141,6 +141,98 @@ class VoucherService
     }
 
     /**
+     * Envia email de confirmação de transfer ao cliente.
+     *
+     * Detecta automaticamente o tipo de reserva (ida e volta, somente ida,
+     * múltiplos) e monta as variáveis adequadas para o template
+     * resources/views/emails/transfer-confirmation.php.
+     */
+    public function sendTransferConfirmationEmail(int $bookingId): bool
+    {
+        $booking = $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [$bookingId]);
+        if (!$booking) return false;
+
+        // Busca todos os transfers deste booking com dados de localização e veículo
+        $transfers = $this->db->fetchAll(
+            "SELECT tb.*, tv.title as vehicle_title,
+                    tlo.title as origin_title, tld.title as destination_title
+             FROM transfer_bookings tb
+             INNER JOIN transfer_vehicles tv ON tb.vehicle_id = tv.id
+             INNER JOIN transfer_locations tlo ON tb.origin_id = tlo.id
+             INNER JOIN transfer_locations tld ON tb.destination_id = tld.id
+             WHERE tb.booking_id = ?
+             ORDER BY tb.date ASC, tb.time ASC",
+            [$bookingId]
+        );
+
+        if (empty($transfers)) return false;
+
+        // Determina o tipo de transfer para o template
+        $count = count($transfers);
+        if ($count >= 3) {
+            $transferType = 'multiple';
+        } elseif ($count === 2) {
+            // Dois trechos = ida e volta
+            $transferType = 'round_trip';
+        } else {
+            $transferType = 'one_way';
+        }
+
+        // Usa o group_id para separar grupos se disponível:
+        // se houver exatamente 2 trechos com group_id iguais, é ida e volta
+        if ($count === 2 && !empty($transfers[0]['group_id']) && $transfers[0]['group_id'] === $transfers[1]['group_id']) {
+            $transferType = 'round_trip';
+        }
+
+        // Monta links dos vouchers já gerados para este booking
+        $vouchers = $this->voucherModel->getByBooking($bookingId);
+        $voucherLinks = [];
+        foreach ($vouchers as $v) {
+            if ($v['type'] !== 'transfer') continue;
+            // Busca origin/destination a partir do transfer_booking_id
+            $tb = null;
+            if (!empty($v['transfer_booking_id'])) {
+                $tb = $this->db->fetchOne(
+                    "SELECT tlo.title as origin_title, tld.title as destination_title
+                     FROM transfer_bookings tb
+                     INNER JOIN transfer_locations tlo ON tb.origin_id = tlo.id
+                     INNER JOIN transfer_locations tld ON tb.destination_id = tld.id
+                     WHERE tb.id = ?",
+                    [(int) $v['transfer_booking_id']]
+                );
+            }
+            $voucherLinks[] = [
+                'reference_code' => $v['reference_code'],
+                'origin'         => $tb['origin_title'] ?? '',
+                'destination'    => $tb['destination_title'] ?? '',
+            ];
+        }
+
+        // Calcula total dos transfers
+        $totalAmount = array_sum(array_column($transfers, 'price'));
+
+        // Tipo de serviço predominante
+        $serviceType = $transfers[0]['service_type'] ?? 'private';
+
+        $emailService = new EmailService();
+        return $emailService->sendTemplate(
+            $booking['billing_email'],
+            $booking['billing_first_name'] . ' ' . $booking['billing_last_name'],
+            'Seu Transfer Confirmado — Punta Cana para Brasileiros',
+            'transfer-confirmation',
+            [
+                'clientName'    => $booking['billing_first_name'] . ' ' . $booking['billing_last_name'],
+                'bookingNumber' => $booking['booking_number'],
+                'transferType'  => $transferType,
+                'totalAmount'   => $totalAmount,
+                'serviceType'   => $serviceType,
+                'transfers'     => $transfers,
+                'voucherLinks'  => $voucherLinks,
+            ]
+        );
+    }
+
+    /**
      * Envia vouchers por email ao cliente.
      */
     public function sendVouchersByEmail(int $bookingId): bool
