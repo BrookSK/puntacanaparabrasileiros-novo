@@ -366,33 +366,36 @@
     }
 
     window.changePaxTransfer = function(field, delta) {
-        const input = document.getElementById('transfer' + field.charAt(0).toUpperCase() + field.slice(1));
+        const input = document.getElementById('transfer_' + field);
         if (input) {
             let v = parseInt(input.value) + delta;
             if (v < parseInt(input.min)) v = parseInt(input.min);
+            if (v > parseInt(input.max)) v = parseInt(input.max);
             input.value = v;
-            // Update total display
-            const adults = parseInt(document.getElementById('transferAdults')?.value || 1);
-            const children = parseInt(document.getElementById('transferChildren')?.value || 0);
-            const infants = parseInt(document.getElementById('transferInfants')?.value || 0);
+            // Update total display - sum all pax inputs in this dropdown
+            let total = 0;
+            document.querySelectorAll('#paxDropdown .pax-input-sm').forEach(function(inp) {
+                total += parseInt(inp.value) || 0;
+            });
             const totalEl = document.getElementById('paxTotal');
-            if (totalEl) totalEl.textContent = adults + children + infants;
+            if (totalEl) totalEl.textContent = total;
         }
     };
 
     // Pax counter for multiple transfers tab
     window.changePaxMulti = function(field, delta) {
-        const fieldMap = { adults: 'multiAdults', children: 'multiChildren', infants: 'multiInfants' };
-        const input = document.getElementById(fieldMap[field]);
+        const input = document.getElementById('multi_' + field);
         if (input) {
             let v = parseInt(input.value) + delta;
             if (v < parseInt(input.min)) v = parseInt(input.min);
+            if (v > parseInt(input.max)) v = parseInt(input.max);
             input.value = v;
-            const adults = parseInt(document.getElementById('multiAdults')?.value || 1);
-            const children = parseInt(document.getElementById('multiChildren')?.value || 0);
-            const infants = parseInt(document.getElementById('multiInfants')?.value || 0);
+            let total = 0;
+            document.querySelectorAll('#paxDropdownMulti .pax-input-sm').forEach(function(inp) {
+                total += parseInt(inp.value) || 0;
+            });
             const totalEl = document.getElementById('paxTotalMulti');
-            if (totalEl) totalEl.textContent = adults + children + infants;
+            if (totalEl) totalEl.textContent = total;
         }
     };
 
@@ -458,9 +461,9 @@
     function searchMultipleTransfers() {
         const container = document.getElementById('multipleRoutesContainer');
         const routes = container.querySelectorAll('.multiple-route-item');
-        const adults = document.getElementById('multiAdults')?.value || '1';
-        const children = document.getElementById('multiChildren')?.value || '0';
-        const infants = document.getElementById('multiInfants')?.value || '0';
+        const adults = document.getElementById('multi_adults')?.value || '1';
+        const children = document.getElementById('multi_children')?.value || '0';
+        const infants = document.getElementById('multi_infants')?.value || '0';
         const serviceType = document.getElementById('multiServiceType')?.value || 'private';
 
         const routesData = [];
@@ -561,9 +564,9 @@
     function searchTransfers() {
         const origin = document.getElementById('originSelect')?.value;
         const destination = document.getElementById('destinationSelect')?.value;
-        const adults = document.getElementById('transferAdults')?.value || '1';
-        const children = document.getElementById('transferChildren')?.value || '0';
-        const infants = document.getElementById('transferInfants')?.value || '0';
+        const adults = document.getElementById('transfer_adults')?.value || '1';
+        const children = document.getElementById('transfer_children')?.value || '0';
+        const infants = document.getElementById('transfer_infants')?.value || '0';
         const serviceType = document.getElementById('serviceType')?.value || 'private';
 
         if (!origin || !destination) { toast('Selecione origem e destino.', 'warning'); return; }
@@ -732,9 +735,9 @@
         const originId = document.getElementById('originSelect').value;
         const destinationId = document.getElementById('destinationSelect').value;
         const serviceType = document.getElementById('serviceType').value;
-        const adults = document.getElementById('transferAdults').value;
-        const children = document.getElementById('transferChildren').value;
-        const infants = document.getElementById('transferInfants').value;
+        const adults = document.getElementById('transfer_adults').value;
+        const children = document.getElementById('transfer_children').value;
+        const infants = document.getElementById('transfer_infants').value;
 
         // Add arrival
         const arrivalPayload = {

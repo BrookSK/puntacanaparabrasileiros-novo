@@ -194,6 +194,10 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/transfers/locais/{id}/editar', [AdminTransfersController::class, 'updateLocation'], [CsrfMiddleware::class], 'admin.transfers.locations.update');
     $router->post('/transfers/locais/{id}/excluir', [AdminTransfersController::class, 'deleteLocation'], [CsrfMiddleware::class], 'admin.transfers.locations.delete');
     $router->get('/transfers/reservas', [AdminTransfersController::class, 'bookings'], [], 'admin.transfers.bookings');
+    $router->get('/transfers/passageiros', [AdminTransfersController::class, 'passengerCategories'], [], 'admin.transfers.passengers');
+    $router->post('/transfers/passageiros/criar', [AdminTransfersController::class, 'storePassengerCategory'], [CsrfMiddleware::class], 'admin.transfers.passengers.store');
+    $router->post('/transfers/passageiros/{id}/editar', [AdminTransfersController::class, 'updatePassengerCategory'], [CsrfMiddleware::class], 'admin.transfers.passengers.update');
+    $router->post('/transfers/passageiros/{id}/excluir', [AdminTransfersController::class, 'deletePassengerCategory'], [CsrfMiddleware::class], 'admin.transfers.passengers.delete');
 
     // Bookings
     $router->get('/reservas', [AdminBookingsController::class, 'index'], [], 'admin.bookings.index');

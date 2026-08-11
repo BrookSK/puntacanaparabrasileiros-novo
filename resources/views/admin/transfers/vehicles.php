@@ -2,6 +2,7 @@
     <div class="header-actions">
         <a href="/admin/transfers/veiculos/criar" class="btn btn-primary">+ Novo Veículo</a>
         <a href="/admin/transfers/locais" class="btn btn-outline">Gerenciar Locais</a>
+        <a href="/admin/transfers/passageiros" class="btn btn-outline">Passageiros</a>
         <a href="/admin/transfers/reservas" class="btn btn-outline">Reservas</a>
     </div>
 </div>

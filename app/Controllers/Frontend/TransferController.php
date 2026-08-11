@@ -7,6 +7,7 @@ use Core\Controller;
 use Core\Request;
 use Core\Response;
 use App\Models\TransferLocation;
+use App\Models\TransferPassengerCategory;
 
 class TransferController extends Controller
 {
@@ -18,9 +19,13 @@ class TransferController extends Controller
         $vehicleModel = new \App\Models\TransferVehicle();
         $vehicles = $vehicleModel->getActive();
 
+        $passengerCategoryModel = new TransferPassengerCategory();
+        $passengerCategories = $passengerCategoryModel->getActive();
+
         $this->view('frontend/transfers/search', [
             'locations' => $locations,
             'vehicles' => $vehicles,
+            'passengerCategories' => $passengerCategories,
             'pageTitle' => 'Transfers em Punta Cana',
             'metaDescription' => 'Reserve seu transfer do aeroporto para o hotel em Punta Cana. Serviço privado ou compartilhado.',
         ], 'app');

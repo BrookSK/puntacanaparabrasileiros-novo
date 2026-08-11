@@ -406,6 +406,37 @@ CREATE TABLE IF NOT EXISTS `transfer_tariffs` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================
+-- TABELA: transfer_passenger_categories
+-- Categorias de passageiros para transfers (editável pelo admin)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `transfer_passenger_categories` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(100) NOT NULL,
+    `slug` VARCHAR(100) NOT NULL,
+    `age_min` INT UNSIGNED NOT NULL DEFAULT 0,
+    `age_max` INT UNSIGNED NOT NULL DEFAULT 99,
+    `age_label` VARCHAR(50) DEFAULT NULL COMMENT 'Ex: +12 ANOS, 2-11 ANOS',
+    `field_name` VARCHAR(50) NOT NULL COMMENT 'Nome do campo no formulário: adults, children, infants, etc.',
+    `min_quantity` INT UNSIGNED NOT NULL DEFAULT 0,
+    `max_quantity` INT UNSIGNED NOT NULL DEFAULT 50,
+    `default_quantity` INT UNSIGNED NOT NULL DEFAULT 0,
+    `sort_order` INT NOT NULL DEFAULT 0,
+    `status` ENUM('active','inactive') NOT NULL DEFAULT 'active',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_tpc_slug` (`slug`),
+    UNIQUE KEY `uk_tpc_field` (`field_name`),
+    KEY `idx_tpc_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dados iniciais de categorias de passageiros para transfers
+INSERT IGNORE INTO `transfer_passenger_categories` (`name`, `slug`, `age_min`, `age_max`, `age_label`, `field_name`, `min_quantity`, `max_quantity`, `default_quantity`, `sort_order`, `status`) VALUES
+('Adultos', 'adultos', 12, 99, '+12 ANOS', 'adults', 1, 50, 1, 1, 'active'),
+('Crianças', 'criancas', 2, 11, '2-11 ANOS', 'children', 0, 20, 0, 2, 'active'),
+('Bebês', 'bebes', 0, 1, '0-1 ANO', 'infants', 0, 10, 0, 3, 'active');
+
+-- ============================================================
 -- TABELA: bookings
 -- Reservas/pedidos principais
 -- ============================================================

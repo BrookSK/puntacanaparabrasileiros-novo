@@ -72,30 +72,16 @@
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
                             </button>
                             <div class="pax-dropdown" id="paxDropdown">
+                                <?php foreach ($passengerCategories as $pcat): ?>
                                 <div class="pax-dropdown-row">
-                                    <div><strong>ADULTOS</strong><span>(+12 ANOS)</span></div>
+                                    <div><strong><?= e(mb_strtoupper($pcat['name'])) ?></strong><?php if (!empty($pcat['age_label'])): ?><span>(<?= e($pcat['age_label']) ?>)</span><?php endif; ?></div>
                                     <div class="pax-counter">
-                                        <button type="button" class="pax-btn" onclick="changePaxTransfer('adults', -1)">-</button>
-                                        <input type="number" name="adults" id="transferAdults" value="1" min="1" max="50" class="pax-input-sm">
-                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxTransfer('adults', 1)">+</button>
+                                        <button type="button" class="pax-btn" onclick="changePaxTransfer('<?= e($pcat['field_name']) ?>', -1)">-</button>
+                                        <input type="number" name="<?= e($pcat['field_name']) ?>" id="transfer_<?= e($pcat['field_name']) ?>" value="<?= (int)$pcat['default_quantity'] ?>" min="<?= (int)$pcat['min_quantity'] ?>" max="<?= (int)$pcat['max_quantity'] ?>" class="pax-input-sm">
+                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxTransfer('<?= e($pcat['field_name']) ?>', 1)">+</button>
                                     </div>
                                 </div>
-                                <div class="pax-dropdown-row">
-                                    <div><strong>CRIANÇAS</strong><span>(2-11 ANOS)</span></div>
-                                    <div class="pax-counter">
-                                        <button type="button" class="pax-btn" onclick="changePaxTransfer('children', -1)">-</button>
-                                        <input type="number" name="children" id="transferChildren" value="0" min="0" max="20" class="pax-input-sm">
-                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxTransfer('children', 1)">+</button>
-                                    </div>
-                                </div>
-                                <div class="pax-dropdown-row">
-                                    <div><strong>BEBÊS</strong><span>(0-1 ANO)</span></div>
-                                    <div class="pax-counter">
-                                        <button type="button" class="pax-btn" onclick="changePaxTransfer('infants', -1)">-</button>
-                                        <input type="number" name="infants" id="transferInfants" value="0" min="0" max="10" class="pax-input-sm">
-                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxTransfer('infants', 1)">+</button>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>
@@ -204,30 +190,16 @@
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
                             </button>
                             <div class="pax-dropdown" id="paxDropdownMulti">
+                                <?php foreach ($passengerCategories as $pcat): ?>
                                 <div class="pax-dropdown-row">
-                                    <div><strong>ADULTOS</strong><span>(+12 ANOS)</span></div>
+                                    <div><strong><?= e(mb_strtoupper($pcat['name'])) ?></strong><?php if (!empty($pcat['age_label'])): ?><span>(<?= e($pcat['age_label']) ?>)</span><?php endif; ?></div>
                                     <div class="pax-counter">
-                                        <button type="button" class="pax-btn" onclick="changePaxMulti('adults', -1)">-</button>
-                                        <input type="number" name="multi_adults" id="multiAdults" value="1" min="1" max="50" class="pax-input-sm">
-                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxMulti('adults', 1)">+</button>
+                                        <button type="button" class="pax-btn" onclick="changePaxMulti('<?= e($pcat['field_name']) ?>', -1)">-</button>
+                                        <input type="number" name="multi_<?= e($pcat['field_name']) ?>" id="multi_<?= e($pcat['field_name']) ?>" value="<?= (int)$pcat['default_quantity'] ?>" min="<?= (int)$pcat['min_quantity'] ?>" max="<?= (int)$pcat['max_quantity'] ?>" class="pax-input-sm">
+                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxMulti('<?= e($pcat['field_name']) ?>', 1)">+</button>
                                     </div>
                                 </div>
-                                <div class="pax-dropdown-row">
-                                    <div><strong>CRIANÇAS</strong><span>(2-11 ANOS)</span></div>
-                                    <div class="pax-counter">
-                                        <button type="button" class="pax-btn" onclick="changePaxMulti('children', -1)">-</button>
-                                        <input type="number" name="multi_children" id="multiChildren" value="0" min="0" max="20" class="pax-input-sm">
-                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxMulti('children', 1)">+</button>
-                                    </div>
-                                </div>
-                                <div class="pax-dropdown-row">
-                                    <div><strong>BEBÊS</strong><span>(0-1 ANO)</span></div>
-                                    <div class="pax-counter">
-                                        <button type="button" class="pax-btn" onclick="changePaxMulti('infants', -1)">-</button>
-                                        <input type="number" name="multi_infants" id="multiInfants" value="0" min="0" max="10" class="pax-input-sm">
-                                        <button type="button" class="pax-btn pax-btn-plus" onclick="changePaxMulti('infants', 1)">+</button>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     </div>

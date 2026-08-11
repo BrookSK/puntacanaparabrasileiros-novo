@@ -9,6 +9,7 @@ use Core\Response;
 use App\Models\TransferVehicle;
 use App\Models\TransferLocation;
 use App\Models\TransferBooking;
+use App\Models\TransferPassengerCategory;
 
 class TransfersController extends Controller
 {
@@ -173,6 +174,82 @@ class TransfersController extends Controller
             'bookings' => $bookings,
             'pageTitle' => 'Reservas de Transfer',
         ], 'admin');
+    }
+
+    // ============================================================
+    // Categorias de Passageiros
+    // ============================================================
+
+    public function passengerCategories(Request $request, Response $response): void
+    {
+        $categoryModel = new TransferPassengerCategory();
+        $categories = $categoryModel->all('sort_order ASC');
+
+        $this->view('admin/transfers/passenger-categories', [
+            'categories' => $categories,
+            'pageTitle' => 'Categorias de Passageiros',
+        ], 'admin');
+    }
+
+    public function storePassengerCategory(Request $request, Response $response): void
+    {
+        $categoryModel = new TransferPassengerCategory();
+
+        $data = $request->only([
+            'name', 'age_min', 'age_max', 'age_label',
+            'field_name', 'min_quantity', 'max_quantity', 'default_quantity',
+            'sort_order', 'status',
+        ]);
+
+        $data['slug'] = $categoryModel->generateSlug($data['name']);
+        $data['age_min'] = (int) ($data['age_min'] ?? 0);
+        $data['age_max'] = (int) ($data['age_max'] ?? 99);
+        $data['min_quantity'] = (int) ($data['min_quantity'] ?? 0);
+        $data['max_quantity'] = (int) ($data['max_quantity'] ?? 50);
+        $data['default_quantity'] = (int) ($data['default_quantity'] ?? 0);
+        $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+
+        $categoryModel->create($data);
+        $this->flash('success', 'Categoria de passageiro criada!');
+        $this->redirect('/admin/transfers/passageiros');
+    }
+
+    public function updatePassengerCategory(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $categoryModel = new TransferPassengerCategory();
+        $category = $categoryModel->find($id);
+        if (!$category) $this->abort(404);
+
+        $data = $request->only([
+            'name', 'age_min', 'age_max', 'age_label',
+            'field_name', 'min_quantity', 'max_quantity', 'default_quantity',
+            'sort_order', 'status',
+        ]);
+
+        if ($data['name'] !== $category['name']) {
+            $data['slug'] = $categoryModel->generateSlug($data['name'], $id);
+        }
+
+        $data['age_min'] = (int) ($data['age_min'] ?? 0);
+        $data['age_max'] = (int) ($data['age_max'] ?? 99);
+        $data['min_quantity'] = (int) ($data['min_quantity'] ?? 0);
+        $data['max_quantity'] = (int) ($data['max_quantity'] ?? 50);
+        $data['default_quantity'] = (int) ($data['default_quantity'] ?? 0);
+        $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+
+        $categoryModel->update($id, $data);
+        $this->flash('success', 'Categoria atualizada!');
+        $this->redirect('/admin/transfers/passageiros');
+    }
+
+    public function deletePassengerCategory(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $categoryModel = new TransferPassengerCategory();
+        $categoryModel->delete($id);
+        $this->flash('success', 'Categoria excluída!');
+        $this->redirect('/admin/transfers/passageiros');
     }
 
     private function saveRoutes(int $vehicleId, Request $request): void
