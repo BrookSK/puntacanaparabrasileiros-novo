@@ -274,7 +274,7 @@ class EvolutionApi
      */
     public function fetchAllGroups(): ?array
     {
-        return $this->get("/group/fetchAllGroups/{$this->instanceName}");
+        return $this->get("/group/fetchAllGroups/{$this->instanceName}", ['getParticipants' => 'false']);
     }
 
     // ─────────────────────────────────────────────
