@@ -125,18 +125,18 @@
             </td>
             <td>
                 <?php if (!empty($aff['block_reason'])): ?>
-                    <button type="button" class="btn btn-sm btn-outline" onclick="showReason(this)" data-reason="<?= e($aff['block_reason']) ?>">Ver motivo</button>
+                    <span style="font-size:13px;color:#334155;"><?= e($aff['block_reason']) ?></span>
                 <?php else: ?>
                     <span style="color:#94a3b8;font-size:12px;">Sem motivo registrado</span>
                 <?php endif; ?>
             </td>
             <td class="actions-cell" style="display:flex;gap:6px;">
-                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form">
+                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form" onsubmit="return confirm('Reativar este registro?')">
                     <?= csrf_field() ?>
                     <input type="hidden" name="source" value="<?= e($aff['source'] ?? 'request') ?>">
                     <button class="btn btn-sm btn-primary">Reativar</button>
                 </form>
-                <form method="POST" action="/admin/afiliados/solicitacao/<?= (int)$aff['id'] ?>/excluir" class="inline-form">
+                <form method="POST" action="/admin/afiliados/solicitacao/<?= (int)$aff['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir permanentemente este registro?')">
                     <?= csrf_field() ?>
                     <input type="hidden" name="source" value="<?= e($aff['source'] ?? 'request') ?>">
                     <button class="btn btn-sm btn-danger">Excluir</button>
