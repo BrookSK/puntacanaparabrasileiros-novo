@@ -8,6 +8,7 @@ use Core\Request;
 use Core\Response;
 use App\Models\TransferVehicle;
 use App\Models\TransferLocation;
+use App\Models\TransferPassengerCategory;
 
 class TransferSearchController extends Controller
 {
@@ -15,10 +16,6 @@ class TransferSearchController extends Controller
     {
         $originId = (int) $request->input('origin_id');
         $destinationId = (int) $request->input('destination_id');
-        $adults = (int) $request->input('adults', '1');
-        $children = (int) $request->input('children', '0');
-        $infants = (int) $request->input('infants', '0');
-        $wheelchair = (int) $request->input('wheelchair', '0');
         $serviceType = $request->input('service_type', 'private');
         $date = $request->input('date', '');
         $time = $request->input('time', '');
@@ -34,14 +31,37 @@ class TransferSearchController extends Controller
             return;
         }
 
-        $totalPax = $adults + $children + $infants + $wheelchair;
+        // Buscar categorias de passageiros e calcular totais
+        $categoryModel = new TransferPassengerCategory();
+        $categories = $categoryModel->getActive();
+
+        $totalPax = 0;
+        $needsWheelchair = false;
+
+        foreach ($categories as $cat) {
+            $fieldName = $cat['field_name'];
+            $qty = (int) $request->input($fieldName, '0');
+            $totalPax += $qty;
+
+            // Detectar se precisa de acessibilidade (slug contém 'cadeirante')
+            if ($qty > 0 && stripos($cat['slug'], 'cadeirante') !== false) {
+                $needsWheelchair = true;
+            }
+        }
+
+        // Fallback: tentar campos legados
+        if ($totalPax < 1) {
+            $totalPax = (int) $request->input('adults', '1')
+                      + (int) $request->input('children', '0')
+                      + (int) $request->input('infants', '0');
+        }
+
         if ($totalPax < 1) {
             $this->json(['error' => 'Pelo menos 1 passageiro é necessário.'], 400);
             return;
         }
 
         // Buscar veículos disponíveis
-        $needsWheelchair = $wheelchair > 0;
         $vehicleModel = new TransferVehicle();
         $vehicles = $vehicleModel->searchAvailable($originId, $destinationId, $totalPax, $serviceType, $needsWheelchair);
 

@@ -430,11 +430,19 @@
     function searchMultipleTransfers() {
         const container = document.getElementById('multipleRoutesContainer');
         const routes = container.querySelectorAll('.multiple-route-item');
-        const adults = document.getElementById('multi_adults')?.value || '1';
-        const children = document.getElementById('multi_children')?.value || '0';
-        const infants = document.getElementById('multi_infants')?.value || '0';
-        const wheelchair = document.getElementById('multi_wheelchair')?.value || '0';
         const serviceType = document.getElementById('multiServiceType')?.value || 'private';
+
+        // Coletar todos os valores de passageiros do dropdown multi
+        var paxPayload = {};
+        var paxInputs = document.querySelectorAll('#paxDropdownMulti .pax-input-sm');
+        for (var i = 0; i < paxInputs.length; i++) {
+            var name = paxInputs[i].getAttribute('name');
+            if (name) {
+                // Remover prefixo 'multi_' para enviar ao backend
+                var cleanName = name.replace(/^multi_/, '');
+                paxPayload[cleanName] = paxInputs[i].value || '0';
+            }
+        }
 
         const routesData = [];
         let hasError = false;
@@ -461,12 +469,11 @@
         // Search for all routes in parallel
         const promises = routesData.map(route =>
             ajax('/api/transfers/buscar', {
-                body: JSON.stringify({
+                body: JSON.stringify(Object.assign({}, paxPayload, {
                     origin_id: route.origin_id,
                     destination_id: route.destination_id,
-                    adults, children, infants, wheelchair,
                     service_type: serviceType
-                })
+                }))
             })
         );
 
@@ -534,19 +541,24 @@
     function searchTransfers() {
         const origin = document.getElementById('originSelect')?.value;
         const destination = document.getElementById('destinationSelect')?.value;
-        const adults = document.getElementById('transfer_adults')?.value || '1';
-        const children = document.getElementById('transfer_children')?.value || '0';
-        const infants = document.getElementById('transfer_infants')?.value || '0';
-        const wheelchair = document.getElementById('transfer_wheelchair')?.value || '0';
         const serviceType = document.getElementById('serviceType')?.value || 'private';
 
         if (!origin || !destination) { toast('Selecione origem e destino.', 'warning'); return; }
+
+        // Coletar todos os valores de passageiros do dropdown
+        var paxPayload = {};
+        var paxInputs = document.querySelectorAll('#paxDropdown .pax-input-sm');
+        for (var i = 0; i < paxInputs.length; i++) {
+            var name = paxInputs[i].getAttribute('name');
+            if (name) paxPayload[name] = paxInputs[i].value || '0';
+        }
 
         document.getElementById('transferLoading').style.display = 'block';
         document.getElementById('transferResults').style.display = 'none';
         document.getElementById('transferEmptyState').style.display = 'none';
 
-        ajax('/api/transfers/buscar', { body: JSON.stringify({ origin_id: origin, destination_id: destination, adults, children, infants, wheelchair, service_type: serviceType }) })
+        var payload = Object.assign({}, paxPayload, { origin_id: origin, destination_id: destination, service_type: serviceType });
+        ajax('/api/transfers/buscar', { body: JSON.stringify(payload) })
             .then(data => {
                 document.getElementById('transferLoading').style.display = 'none';
                 if (data.success && data.results && data.results.length > 0) {
@@ -706,13 +718,17 @@
         const originId = document.getElementById('originSelect').value;
         const destinationId = document.getElementById('destinationSelect').value;
         const serviceType = document.getElementById('serviceType').value;
-        const adults = document.getElementById('transfer_adults').value;
-        const children = document.getElementById('transfer_children').value;
-        const infants = document.getElementById('transfer_infants').value;
-        const wheelchair = document.getElementById('transfer_wheelchair')?.value || '0';
+
+        // Coletar passageiros dinamicamente
+        var paxData = {};
+        var paxInputs = document.querySelectorAll('#paxDropdown .pax-input-sm');
+        for (var i = 0; i < paxInputs.length; i++) {
+            var name = paxInputs[i].getAttribute('name');
+            if (name) paxData[name] = paxInputs[i].value || '0';
+        }
 
         // Add arrival
-        const arrivalPayload = {
+        const arrivalPayload = Object.assign({}, paxData, {
             vehicle_id: sel.arrival.id,
             origin_id: originId,
             destination_id: destinationId,
@@ -720,14 +736,13 @@
             time: document.querySelector('[name="arrival_time"]').value,
             type: 'arrival',
             service_type: serviceType,
-            adults, children, infants, wheelchair,
             group_id: groupId,
-        };
+        });
 
         const addArrival = ajax('/api/cart/add-transfer', { body: JSON.stringify(arrivalPayload) });
 
         if (isRoundtrip && sel.departure) {
-            const departurePayload = {
+            const departurePayload = Object.assign({}, paxData, {
                 vehicle_id: sel.departure.id,
                 origin_id: destinationId,
                 destination_id: originId,
@@ -735,9 +750,8 @@
                 time: document.querySelector('[name="departure_time"]').value,
                 type: 'departure',
                 service_type: serviceType,
-                adults, children, infants, wheelchair,
                 group_id: groupId,
-            };
+            });
             addArrival.then(() => ajax('/api/cart/add-transfer', { body: JSON.stringify(departurePayload) }))
                 .then(d => { if (d.success) { toast('Transfers adicionados ao carrinho!', 'success'); updateCartBadge(); } else { toast(d.error || 'Erro.', 'error'); } })
                 .catch(() => toast('Erro de conexão.', 'error'));
