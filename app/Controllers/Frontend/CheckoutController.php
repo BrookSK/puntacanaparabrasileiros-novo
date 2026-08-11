@@ -335,8 +335,10 @@ class CheckoutController extends Controller
 
     /**
      * Ações pós-pagamento: vouchers, emails, WhatsApp, comissões.
+     * Método público para poder ser chamado pelo WebhookController
+     * após confirmação de pagamento via PayPal/Stripe/PagBank.
      */
-    private function postPaymentActions(int $bookingId): void
+    public function postPaymentActions(int $bookingId): void
     {
         $booking = $this->bookingModel->find($bookingId);
         if (!$booking || $booking['status'] === 'pending') return;
@@ -350,54 +352,104 @@ class CheckoutController extends Controller
 
         // Gerar vouchers para cada item de trip
         $voucherService = new VoucherService();
-        $items = $this->bookingModel->getItems($bookingId);
+        $items    = $this->bookingModel->getItems($bookingId);
+        $transfers = $this->bookingModel->getTransferBookings($bookingId);
+
         foreach ($items as $item) {
             try {
                 $voucherService->generateTripVoucher($bookingId, (int) $item['id']);
-            } catch (\Throwable $e) {
-                // Log error but continue
-            }
+            } catch (\Throwable $e) { /* continua */ }
         }
 
         // Gerar vouchers para transfers
-        $transfers = $this->bookingModel->getTransferBookings($bookingId);
         foreach ($transfers as $transfer) {
             try {
                 $voucherService->generateTransferVoucher((int) $transfer['id']);
-            } catch (\Throwable $e) {
-                // Log error but continue
-            }
+            } catch (\Throwable $e) { /* continua */ }
         }
 
-        // Enviar vouchers por email
+        // ── EMAILS AO CLIENTE ──────────────────────────────────────────────
+
+        $emailService = new EmailService();
+
+        // 1. Email de vouchers gerais (passeios + transfers misturados)
         $voucherService->sendVouchersByEmail($bookingId);
 
-        // Enviar notificação admin
-        $emailService = new EmailService();
+        // 2. Email dedicado de confirmação de transfer (Somente Ida, Ida e Volta, Múltiplos)
+        if (!empty($transfers)) {
+            try {
+                $voucherService->sendTransferConfirmationEmail($bookingId);
+            } catch (\Throwable $e) { /* não bloqueia */ }
+        }
+
+        // ── NOTIFICAÇÃO ADMIN ──────────────────────────────────────────────
+
         $adminEmail = $this->setting('admin_email', '');
         if ($adminEmail) {
             $emailService->sendTemplate(
                 $adminEmail, 'Admin',
                 'Nova Reserva: ' . $booking['booking_number'],
                 'admin-notification',
-                ['booking' => $booking, 'items' => $items, 'transfers' => $transfers, 'siteUrl' => $this->setting('site_url', '')]
+                [
+                    'booking'   => $booking,
+                    'items'     => $items,
+                    'transfers' => $transfers,
+                    'siteUrl'   => $this->setting('site_url', ''),
+                ]
             );
         }
 
+<<<<<<< HEAD
+        // ── WHATSAPP ───────────────────────────────────────────────────────
+
+        $whatsappService = new WhatsAppService();
+
+        // WhatsApp para passeios
+=======
         // WhatsApp — Notificações via Evolution API (com fallback para webhook legado)
         $whatsappService = new WhatsAppService();
 
         // 1. Confirmação para o cliente (passeio)
+>>>>>>> 45ac2a0ac7224d0957d4654d57eb526b1dca960b
         if (!empty($items)) {
-            $whatsappService->sendTripConfirmation($booking, [
-                'title' => $items[0]['trip_title'] ?? '',
-                'date' => $items[0]['trip_date'] ?? '',
-                'time' => $items[0]['trip_time'] ?? '',
-                'pax_info' => '',
-                'reference' => $booking['booking_number'],
-            ]);
+            try {
+                $whatsappService->sendTripConfirmation($booking, [
+                    'title'     => $items[0]['trip_title'] ?? '',
+                    'date'      => $items[0]['trip_date'] ?? '',
+                    'time'      => $items[0]['trip_time'] ?? '',
+                    'pax_info'  => '',
+                    'reference' => $booking['booking_number'],
+                ]);
+            } catch (\Throwable $e) { /* continua */ }
         }
 
+<<<<<<< HEAD
+        // WhatsApp para transfers (todos os tipos)
+        if (!empty($transfers)) {
+            foreach ($transfers as $tr) {
+                try {
+                    // Detecta tipo para label amigável
+                    $trType = match(strtolower($tr['type'] ?? '')) {
+                        'arrival'   => 'Chegada',
+                        'departure' => 'Partida',
+                        default     => 'Transfer',
+                    };
+                    $trTitle = $trType . ': ' . ($tr['origin_title'] ?? '') . ' → ' . ($tr['destination_title'] ?? '');
+
+                    $whatsappService->sendTripConfirmation($booking, [
+                        'title'     => $trTitle,
+                        'date'      => $tr['date'] ?? '',
+                        'time'      => $tr['time'] ?? '',
+                        'pax_info'  => ($tr['adults'] ?? 1) . ' adulto(s)',
+                        'reference' => $booking['booking_number'],
+                    ]);
+                } catch (\Throwable $e) { /* continua */ }
+            }
+        }
+
+        // ── COMISSÃO DE AFILIADO ───────────────────────────────────────────
+
+=======
         // 2. Confirmação para o cliente (transfer)
         if (!empty($transfers)) {
             foreach ($transfers as $transfer) {
@@ -419,6 +471,7 @@ class CheckoutController extends Controller
         $whatsappService->notifyNewBooking($booking, $items, $transfers);
 
         // Comissão de afiliado
+>>>>>>> 45ac2a0ac7224d0957d4654d57eb526b1dca960b
         if ($booking['affiliate_id']) {
             $affiliateService = new AffiliateService();
             $affiliateService->createCommission(
