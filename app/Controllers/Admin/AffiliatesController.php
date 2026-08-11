@@ -33,9 +33,10 @@ class AffiliatesController extends Controller
         $tab = $request->query('tab', 'solicitacoes');
         $page = max(1, (int) $request->query('page', '1'));
 
+        // Contadores baseados no status real do banco
         $pendingCount = $this->requestModel->countByStatus('pending');
-        $activeCount = $this->affiliateModel->count("status = ?", ['active']);
-        $blockedCount = $this->affiliateModel->count("status = ? OR status = ?", ['rejected', 'suspended']);
+        $activeCount = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliates WHERE status = 'active'");
+        $blockedCount = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliates WHERE status = 'blocked'");
 
         $data = [
             'tab' => $tab,
@@ -48,19 +49,9 @@ class AffiliatesController extends Controller
         if ($tab === 'solicitacoes') {
             $data['requests'] = $this->requestModel->getPending($page);
         } elseif ($tab === 'ativos') {
-            $data['affiliates'] = $this->affiliateModel->getWithUserData($page, 20);
+            $data['affiliates'] = $this->affiliateModel->getWithUserData($page, 20, 'active');
         } elseif ($tab === 'bloqueados') {
-            $offset = ($page - 1) * 20;
-            $items = $this->db->fetchAll(
-                "SELECT a.*, u.first_name, u.last_name, u.email
-                 FROM affiliates a
-                 LEFT JOIN users u ON a.user_id = u.id
-                 WHERE a.status IN ('rejected', 'suspended')
-                 ORDER BY a.updated_at DESC
-                 LIMIT 20 OFFSET ?",
-                [$offset]
-            );
-            $data['blocked'] = $items;
+            $data['blocked'] = $this->affiliateModel->getWithUserData($page, 20, 'blocked');
         }
 
         $this->view('admin/affiliates/index', $data, 'admin');
@@ -181,7 +172,7 @@ class AffiliatesController extends Controller
     public function suspend(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
-        $this->db->update('affiliates', ['status' => 'suspended'], 'id = ?', [$id]);
+        $this->db->update('affiliates', ['status' => 'blocked'], 'id = ?', [$id]);
         $this->flash('success', 'Afiliado bloqueado.');
         $this->redirect('/admin/afiliados?tab=bloqueados');
     }

@@ -23,18 +23,19 @@ class Affiliate extends Model
         return $this->where("status = 'active'", [], 'created_at DESC');
     }
 
-    public function getWithUserData(int $page = 1, int $perPage = 20): array
+    public function getWithUserData(int $page = 1, int $perPage = 20, string $status = 'active'): array
     {
-        $total = $this->count();
+        $total = $this->count("status = ?", [$status]);
         $offset = ($page - 1) * $perPage;
 
         $items = $this->db->fetchAll(
             "SELECT a.*, u.first_name, u.last_name, u.email
              FROM affiliates a
-             INNER JOIN users u ON a.user_id = u.id
+             LEFT JOIN users u ON a.user_id = u.id
+             WHERE a.status = ?
              ORDER BY a.created_at DESC
              LIMIT ? OFFSET ?",
-            [$perPage, $offset]
+            [$status, $perPage, $offset]
         );
 
         return [

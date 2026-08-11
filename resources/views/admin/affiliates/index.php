@@ -110,14 +110,14 @@
         </tr>
     </thead>
     <tbody>
-        <?php if (empty($blocked)): ?>
+        <?php if (empty($blocked['items'])): ?>
         <tr><td colspan="4" class="text-center" style="padding:30px;color:#94a3b8;">Nenhum afiliado bloqueado.</td></tr>
         <?php else: ?>
-        <?php foreach ($blocked as $aff): ?>
+        <?php foreach ($blocked['items'] as $aff): ?>
         <tr>
             <td><strong><?= e(($aff['first_name'] ?? '') . ' ' . ($aff['last_name'] ?? '')) ?></strong></td>
             <td><?= e($aff['email'] ?? '') ?></td>
-            <td><span class="badge badge-danger"><?= e(ucfirst($aff['status'])) ?></span></td>
+            <td><span class="badge badge-danger">Bloqueado</span></td>
             <td class="actions-cell">
                 <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form">
                     <?= csrf_field() ?>
