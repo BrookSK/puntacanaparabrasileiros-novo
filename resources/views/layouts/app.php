@@ -71,7 +71,7 @@
     </a>
 
     <!-- JavaScript -->
-    <script src="<?= asset('js/app.js') ?>?v=5.1"></script>
+    <script src="<?= asset('js/app.js') ?>?v=5.2"></script>
 
     <!-- Body Scripts from settings -->
     <?= setting('body_scripts', '') ?>

@@ -201,18 +201,21 @@ class TransfersController extends Controller
         $categoryModel = new TransferPassengerCategory();
 
         $data = $request->only([
-            'name', 'age_min', 'age_max', 'age_label',
-            'field_name', 'min_quantity', 'max_quantity', 'default_quantity',
-            'sort_order', 'status',
+            'name', 'age_min', 'age_max', 'age_label', 'default_quantity', 'status',
         ]);
 
         $data['slug'] = $categoryModel->generateSlug($data['name']);
+        // field_name gerado automaticamente a partir do slug
+        $data['field_name'] = str_replace('-', '_', $data['slug']);
         $data['age_min'] = (int) ($data['age_min'] ?? 0);
         $data['age_max'] = (int) ($data['age_max'] ?? 99);
-        $data['min_quantity'] = (int) ($data['min_quantity'] ?? 0);
-        $data['max_quantity'] = (int) ($data['max_quantity'] ?? 50);
+        $data['min_quantity'] = 0;
+        $data['max_quantity'] = 50;
         $data['default_quantity'] = (int) ($data['default_quantity'] ?? 0);
-        $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
+        // sort_order automático: próximo após o último
+        $lastOrder = $this->db->fetchOne("SELECT MAX(sort_order) as max_order FROM transfer_passenger_categories");
+        $data['sort_order'] = ($lastOrder ? (int) $lastOrder['max_order'] : 0) + 1;
+        if (empty($data['status'])) $data['status'] = 'active';
 
         $categoryModel->create($data);
         $this->flash('success', 'Categoria de passageiro criada!');
@@ -227,21 +230,17 @@ class TransfersController extends Controller
         if (!$category) $this->abort(404);
 
         $data = $request->only([
-            'name', 'age_min', 'age_max', 'age_label',
-            'field_name', 'min_quantity', 'max_quantity', 'default_quantity',
-            'sort_order', 'status',
+            'name', 'age_min', 'age_max', 'age_label', 'default_quantity', 'status',
         ]);
 
         if ($data['name'] !== $category['name']) {
             $data['slug'] = $categoryModel->generateSlug($data['name'], $id);
+            $data['field_name'] = str_replace('-', '_', $data['slug']);
         }
 
         $data['age_min'] = (int) ($data['age_min'] ?? 0);
         $data['age_max'] = (int) ($data['age_max'] ?? 99);
-        $data['min_quantity'] = (int) ($data['min_quantity'] ?? 0);
-        $data['max_quantity'] = (int) ($data['max_quantity'] ?? 50);
         $data['default_quantity'] = (int) ($data['default_quantity'] ?? 0);
-        $data['sort_order'] = (int) ($data['sort_order'] ?? 0);
 
         $categoryModel->update($id, $data);
         $this->flash('success', 'Categoria atualizada!');

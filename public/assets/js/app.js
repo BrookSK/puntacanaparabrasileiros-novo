@@ -328,7 +328,6 @@
         const paxDrop = document.getElementById('paxDropdown');
         if (paxBtn && paxDrop) {
             paxBtn.addEventListener('click', (e) => { e.stopPropagation(); paxDrop.classList.toggle('active'); });
-            paxDrop.addEventListener('click', (e) => { e.stopPropagation(); });
             document.addEventListener('click', (e) => { if (!paxDrop.contains(e.target) && e.target !== paxBtn) paxDrop.classList.remove('active'); });
         }
 
@@ -362,48 +361,12 @@
         const paxDropMulti = document.getElementById('paxDropdownMulti');
         if (paxBtnMulti && paxDropMulti) {
             paxBtnMulti.addEventListener('click', (e) => { e.stopPropagation(); paxDropMulti.classList.toggle('active'); });
-            paxDropMulti.addEventListener('click', (e) => { e.stopPropagation(); });
             document.addEventListener('click', (e) => { if (!paxDropMulti.contains(e.target) && e.target !== paxBtnMulti) paxDropMulti.classList.remove('active'); });
         }
     }
 
-    window.changePaxTransfer = function(field, delta) {
-        var input = document.getElementById('transfer_' + field);
-        if (!input) return;
-        var v = parseInt(input.value || 0) + delta;
-        var min = parseInt(input.getAttribute('min') || 0);
-        var max = parseInt(input.getAttribute('max') || 99);
-        if (v < min) v = min;
-        if (v > max) v = max;
-        input.value = v;
-        // Update total display
-        var total = 0;
-        var inputs = document.querySelectorAll('#paxDropdown .pax-input-sm');
-        for (var i = 0; i < inputs.length; i++) {
-            total += parseInt(inputs[i].value) || 0;
-        }
-        var totalEl = document.getElementById('paxTotal');
-        if (totalEl) totalEl.textContent = total;
-    };
-
-    // Pax counter for multiple transfers tab
-    window.changePaxMulti = function(field, delta) {
-        var input = document.getElementById('multi_' + field);
-        if (!input) return;
-        var v = parseInt(input.value || 0) + delta;
-        var min = parseInt(input.getAttribute('min') || 0);
-        var max = parseInt(input.getAttribute('max') || 99);
-        if (v < min) v = min;
-        if (v > max) v = max;
-        input.value = v;
-        var total = 0;
-        var inputs = document.querySelectorAll('#paxDropdownMulti .pax-input-sm');
-        for (var i = 0; i < inputs.length; i++) {
-            total += parseInt(inputs[i].value) || 0;
-        }
-        var totalEl = document.getElementById('paxTotalMulti');
-        if (totalEl) totalEl.textContent = total;
-    };
+    window.changePaxTransfer = function() {};
+    window.changePaxMulti = function() {};
 
     // Multiple transfers - add route
     window.addRoute = function() {
