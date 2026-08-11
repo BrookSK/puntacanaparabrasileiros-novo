@@ -52,10 +52,12 @@ class TransfersController extends Controller
     {
         $data = $request->only([
             'title', 'description', 'vehicle_type', 'max_passengers',
-            'max_adults', 'max_children', 'max_infants', 'max_luggage', 'sort_order', 'status',
+            'max_adults', 'max_children', 'max_infants', 'max_luggage',
+            'wheelchair_accessible', 'sort_order', 'status',
         ]);
 
         $data['slug'] = $this->vehicleModel->generateSlug($data['title']);
+        $data['wheelchair_accessible'] = (int) ($data['wheelchair_accessible'] ?? 0);
 
         if ($request->hasFile('image')) {
             $data['image'] = $this->uploadImage($request->file('image'));
@@ -96,8 +98,11 @@ class TransfersController extends Controller
 
         $data = $request->only([
             'title', 'description', 'vehicle_type', 'max_passengers',
-            'max_adults', 'max_children', 'max_infants', 'max_luggage', 'sort_order', 'status',
+            'max_adults', 'max_children', 'max_infants', 'max_luggage',
+            'wheelchair_accessible', 'sort_order', 'status',
         ]);
+
+        $data['wheelchair_accessible'] = (int) ($data['wheelchair_accessible'] ?? 0);
 
         if ($data['title'] !== $vehicle['title']) {
             $data['slug'] = $this->vehicleModel->generateSlug($data['title'], $id);

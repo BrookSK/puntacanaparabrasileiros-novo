@@ -353,6 +353,7 @@ CREATE TABLE IF NOT EXISTS `transfer_vehicles` (
     `max_children` INT UNSIGNED NOT NULL DEFAULT 2,
     `max_infants` INT UNSIGNED NOT NULL DEFAULT 1,
     `max_luggage` INT UNSIGNED NOT NULL DEFAULT 4,
+    `wheelchair_accessible` TINYINT(1) NOT NULL DEFAULT 0 COMMENT '1 = adaptado para cadeirantes',
     `amenities` JSON DEFAULT NULL,
     `sort_order` INT NOT NULL DEFAULT 0,
     `status` ENUM('active','inactive') NOT NULL DEFAULT 'active',

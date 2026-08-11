@@ -84,6 +84,17 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
                         <input type="number" name="max_luggage" class="form-control" value="<?= (int)($vehicle['max_luggage'] ?? 0) ?>" min="0" placeholder="0">
                     </div>
                 </div>
+
+                <div class="form-row">
+                    <div class="form-group col-6">
+                        <label>Acessível para Cadeirantes</label>
+                        <select name="wheelchair_accessible" class="form-control">
+                            <option value="0" <?= (int)($vehicle['wheelchair_accessible'] ?? 0) === 0 ? 'selected' : '' ?>>Não</option>
+                            <option value="1" <?= (int)($vehicle['wheelchair_accessible'] ?? 0) === 1 ? 'selected' : '' ?>>Sim - Adaptado para cadeirantes</option>
+                        </select>
+                        <small class="form-hint">Veículos marcados como acessíveis serão exibidos quando houver passageiros cadeirantes.</small>
+                    </div>
+                </div>
             </div>
 
             <?php if ($isEdit): ?>

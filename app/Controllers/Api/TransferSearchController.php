@@ -18,6 +18,7 @@ class TransferSearchController extends Controller
         $adults = (int) $request->input('adults', '1');
         $children = (int) $request->input('children', '0');
         $infants = (int) $request->input('infants', '0');
+        $wheelchair = (int) $request->input('wheelchair', '0');
         $serviceType = $request->input('service_type', 'private');
         $date = $request->input('date', '');
         $time = $request->input('time', '');
@@ -33,15 +34,16 @@ class TransferSearchController extends Controller
             return;
         }
 
-        $totalPax = $adults + $children + $infants;
+        $totalPax = $adults + $children + $infants + $wheelchair;
         if ($totalPax < 1) {
             $this->json(['error' => 'Pelo menos 1 passageiro é necessário.'], 400);
             return;
         }
 
         // Buscar veículos disponíveis
+        $needsWheelchair = $wheelchair > 0;
         $vehicleModel = new TransferVehicle();
-        $vehicles = $vehicleModel->searchAvailable($originId, $destinationId, $totalPax, $serviceType);
+        $vehicles = $vehicleModel->searchAvailable($originId, $destinationId, $totalPax, $serviceType, $needsWheelchair);
 
         // Buscar nomes dos locais
         $locationModel = new TransferLocation();

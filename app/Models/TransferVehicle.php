@@ -11,7 +11,7 @@ class TransferVehicle extends Model
     protected array $fillable = [
         'title', 'slug', 'description', 'image', 'vehicle_type',
         'max_passengers', 'max_adults', 'max_children', 'max_infants',
-        'max_luggage', 'amenities', 'sort_order', 'status',
+        'max_luggage', 'wheelchair_accessible', 'amenities', 'sort_order', 'status',
     ];
 
     public function getActive(): array
@@ -48,14 +48,16 @@ class TransferVehicle extends Model
     /**
      * Busca veículos disponíveis para uma rota específica.
      */
-    public function searchAvailable(int $originId, int $destinationId, int $totalPax, string $serviceType): array
+    public function searchAvailable(int $originId, int $destinationId, int $totalPax, string $serviceType, bool $needsWheelchair = false): array
     {
+        $wheelchairCondition = $needsWheelchair ? ' AND tv.wheelchair_accessible = 1' : '';
+
         $sql = "SELECT tv.*, tr.id as route_id, tr.base_price, tr.duration, tr.distance_km
                 FROM transfer_vehicles tv
                 INNER JOIN transfer_routes tr ON tv.id = tr.vehicle_id
                 WHERE tr.origin_id = ? AND tr.destination_id = ?
                 AND tv.status = 'active' AND tr.status = 1
-                AND tv.max_passengers >= ?
+                AND tv.max_passengers >= ?{$wheelchairCondition}
                 ORDER BY tv.sort_order ASC";
 
         $vehicles = $this->db->fetchAll($sql, [$originId, $destinationId, $totalPax]);

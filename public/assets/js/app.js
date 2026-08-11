@@ -464,6 +464,7 @@
         const adults = document.getElementById('multi_adults')?.value || '1';
         const children = document.getElementById('multi_children')?.value || '0';
         const infants = document.getElementById('multi_infants')?.value || '0';
+        const wheelchair = document.getElementById('multi_wheelchair')?.value || '0';
         const serviceType = document.getElementById('multiServiceType')?.value || 'private';
 
         const routesData = [];
@@ -494,7 +495,7 @@
                 body: JSON.stringify({
                     origin_id: route.origin_id,
                     destination_id: route.destination_id,
-                    adults, children, infants,
+                    adults, children, infants, wheelchair,
                     service_type: serviceType
                 })
             })
@@ -567,6 +568,7 @@
         const adults = document.getElementById('transfer_adults')?.value || '1';
         const children = document.getElementById('transfer_children')?.value || '0';
         const infants = document.getElementById('transfer_infants')?.value || '0';
+        const wheelchair = document.getElementById('transfer_wheelchair')?.value || '0';
         const serviceType = document.getElementById('serviceType')?.value || 'private';
 
         if (!origin || !destination) { toast('Selecione origem e destino.', 'warning'); return; }
@@ -575,7 +577,7 @@
         document.getElementById('transferResults').style.display = 'none';
         document.getElementById('transferEmptyState').style.display = 'none';
 
-        ajax('/api/transfers/buscar', { body: JSON.stringify({ origin_id: origin, destination_id: destination, adults, children, infants, service_type: serviceType }) })
+        ajax('/api/transfers/buscar', { body: JSON.stringify({ origin_id: origin, destination_id: destination, adults, children, infants, wheelchair, service_type: serviceType }) })
             .then(data => {
                 document.getElementById('transferLoading').style.display = 'none';
                 if (data.success && data.results && data.results.length > 0) {
@@ -738,6 +740,7 @@
         const adults = document.getElementById('transfer_adults').value;
         const children = document.getElementById('transfer_children').value;
         const infants = document.getElementById('transfer_infants').value;
+        const wheelchair = document.getElementById('transfer_wheelchair')?.value || '0';
 
         // Add arrival
         const arrivalPayload = {
@@ -748,7 +751,7 @@
             time: document.querySelector('[name="arrival_time"]').value,
             type: 'arrival',
             service_type: serviceType,
-            adults, children, infants,
+            adults, children, infants, wheelchair,
             group_id: groupId,
         };
 
@@ -763,7 +766,7 @@
                 time: document.querySelector('[name="departure_time"]').value,
                 type: 'departure',
                 service_type: serviceType,
-                adults, children, infants,
+                adults, children, infants, wheelchair,
                 group_id: groupId,
             };
             addArrival.then(() => ajax('/api/cart/add-transfer', { body: JSON.stringify(departurePayload) }))
