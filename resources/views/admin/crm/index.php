@@ -11,7 +11,7 @@
 <div class="crm-boards-grid">
     <?php if (empty($boards)): ?>
     <div class="empty-state">
-        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <p>Nenhum board CRM criado ainda.</p>
         <button class="btn btn-primary" onclick="document.getElementById('modal-new-board').style.display='flex'">Criar primeiro board</button>
     </div>

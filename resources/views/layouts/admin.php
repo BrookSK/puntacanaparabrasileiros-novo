@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=3.8">
+    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=4.0">
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 </head>
 <body class="admin-body">
@@ -59,7 +59,7 @@
                 </a>
                 <?php endif; ?>
                 <hr class="nav-divider">
-                <a href="/whatsapp/chat" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp') ? 'active' : '' ?>">
+                <a href="/whatsapp" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp') ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span> WhatsApp
                 </a>
                 <a href="/crm" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/crm') ? 'active' : '' ?>">

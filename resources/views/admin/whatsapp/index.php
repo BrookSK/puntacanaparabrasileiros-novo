@@ -1,12 +1,15 @@
 <div class="admin-page-header">
     <h2>WhatsApp — Instâncias</h2>
-    <button class="btn btn-primary" onclick="openNewInstanceModal()">+ Nova Instância</button>
+    <div>
+        <a href="/whatsapp/chat" class="btn btn-outline">💬 Abrir Chat</a>
+        <button class="btn btn-primary" onclick="openNewInstanceModal()">+ Nova Instância</button>
+    </div>
 </div>
 
 <div class="instances-grid">
     <?php if (empty($instances)): ?>
     <div class="empty-state">
-        <svg width="48" height="48" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+        <svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
         <p>Nenhuma instância configurada.</p>
         <button class="btn btn-primary" onclick="openNewInstanceModal()">Criar primeira instância</button>
     </div>
