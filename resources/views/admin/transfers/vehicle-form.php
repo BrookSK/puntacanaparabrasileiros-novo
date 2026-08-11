@@ -244,6 +244,11 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
             .routes-actions-bar{display:flex;align-items:center;gap:8px}
             .routes-counter{font-size:11px;color:#64748b;padding:5px 10px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-weight:500}
             .routes-counter strong{color:#1e293b}
+            #routesContainer{max-height:620px;overflow-y:auto;padding-right:4px}
+            #routesContainer::-webkit-scrollbar{width:6px}
+            #routesContainer::-webkit-scrollbar-track{background:#f1f5f9;border-radius:3px}
+            #routesContainer::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+            #routesContainer::-webkit-scrollbar-thumb:hover{background:#94a3b8}
             .route-block{border:1px solid #e2e8f0;border-radius:10px;margin-bottom:12px;overflow:hidden;transition:all .2s}
             .route-block.hidden{display:none}
             .route-block-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;background:#fafbfc;border-bottom:1px solid transparent;transition:all .15s;user-select:none}
