@@ -178,7 +178,25 @@
 
             <h4 style="margin: 24px 0 12px; font-size: 14px; color: #475569;">Notificações em Grupo</h4>
             <div class="form-group"><label><input type="checkbox" name="whatsapp_group_notify_enabled" value="1" <?= ($settings['whatsapp']['whatsapp_group_notify_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar notificações em grupo WhatsApp</label></div>
-            <div class="form-group"><label>JID do Grupo Padrão</label><input type="text" name="whatsapp_default_group_jid" class="form-control" value="<?= e($settings['whatsapp']['whatsapp_default_group_jid']['setting_value'] ?? '') ?>" placeholder="123456789@g.us"><small style="color:#6b7280;">Formato: numerodogrupo@g.us (visível na lista de contatos do chat)</small></div>
+            <div class="form-group">
+                <label>Grupo padrão para notificações</label>
+                <select name="whatsapp_default_group_jid" class="form-control">
+                    <option value="">— Selecione um grupo —</option>
+                    <?php
+                    $groups = \Core\Database::getInstance()->fetchAll(
+                        "SELECT remote_jid, contact_name, push_name FROM whatsapp_contacts WHERE is_group = 1 ORDER BY contact_name ASC"
+                    );
+                    $currentGroupJid = $settings['whatsapp']['whatsapp_default_group_jid']['setting_value'] ?? '';
+                    foreach ($groups as $group):
+                        $groupName = $group['contact_name'] ?: $group['push_name'] ?: $group['remote_jid'];
+                    ?>
+                    <option value="<?= e($group['remote_jid']) ?>" <?= $currentGroupJid === $group['remote_jid'] ? 'selected' : '' ?>><?= e($groupName) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <?php if (empty($groups)): ?>
+                <small style="color:#6b7280;">Nenhum grupo encontrado. Conecte uma instância e sincronize os grupos primeiro em <a href="/whatsapp">WhatsApp → Instâncias</a>.</small>
+                <?php endif; ?>
+            </div>
 
             <h4 style="margin: 24px 0 12px; font-size: 14px; color: #475569;">OpenAI (Transcrição de Áudio)</h4>
             <div class="form-group"><label>API Key OpenAI</label><input type="text" name="openai_api_key" class="form-control" value="<?= e($settings['integrations']['openai_api_key']['setting_value'] ?? $settings['whatsapp']['openai_api_key']['setting_value'] ?? '') ?>" placeholder="sk-..."><small style="color:#6b7280;">Usada para transcrever áudios com Whisper (modelo whisper-1)</small></div>
