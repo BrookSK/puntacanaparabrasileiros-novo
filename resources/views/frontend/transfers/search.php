@@ -414,7 +414,14 @@ const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['i
         input.addEventListener('input', function() {
             const q = this.value.toLowerCase().trim();
             hidden.value = '';
-            if (q.length < 1) { list.style.display = 'none'; return; }
+            if (q.length === 0) {
+                // Mostrar todos quando campo vazio e focado
+                list.innerHTML = TRANSFER_LOCATIONS.map(l => 
+                    `<div class="tf-autocomplete-item" data-id="${l.id}" data-title="${l.title}">${l.title}</div>`
+                ).join('');
+                list.style.display = 'block';
+                return;
+            }
 
             const filtered = TRANSFER_LOCATIONS.filter(l => l.title.toLowerCase().includes(q));
             if (filtered.length === 0) {
@@ -428,7 +435,15 @@ const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['i
         });
 
         input.addEventListener('focus', function() {
-            if (this.value.length >= 1) this.dispatchEvent(new Event('input'));
+            // Ao clicar/focar, mostrar lista completa ou filtrada
+            if (this.value.length === 0) {
+                list.innerHTML = TRANSFER_LOCATIONS.map(l => 
+                    `<div class="tf-autocomplete-item" data-id="${l.id}" data-title="${l.title}">${l.title}</div>`
+                ).join('');
+                list.style.display = 'block';
+            } else {
+                this.dispatchEvent(new Event('input'));
+            }
         });
 
         list.addEventListener('click', function(e) {
