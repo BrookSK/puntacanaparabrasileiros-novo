@@ -111,6 +111,15 @@ class PageController extends Controller
 
     public function affiliateLogin(Request $request, Response $response): void
     {
+        // Se já está logado como afiliado, redireciona direto para o painel
+        if ($this->isAuthenticated()) {
+            $user = $this->currentUser();
+            if (($user['role'] ?? '') === 'affiliate') {
+                $this->redirect('/painel-afiliado');
+                return;
+            }
+        }
+
         $this->view('frontend/pages/affiliate-login', [
             'pageTitle' => 'Login Afiliado - Punta Cana para Brasileiros',
             'metaDescription' => 'Acesse sua conta de afiliado para gerenciar links e acompanhar comissões.',

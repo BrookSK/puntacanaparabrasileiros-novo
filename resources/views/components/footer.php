@@ -47,7 +47,7 @@
                         <li><a href="/passeios">Passeios</a></li>
                         <li><a href="/pesquisa">Busca</a></li>
                         <li><a href="/minha-conta">Minha Conta</a></li>
-                        <li><a href="/painel-afiliado">Conta de Afiliado</a></li>
+                        <li><a href="/login-afiliado">Conta de Afiliado</a></li>
                         <li><a href="/minha-conta/wishlist">Lista de Desejos</a></li>
                         <li><a href="/catalogo.html" target="_blank">Baixe Nosso Catálogo</a></li>
                     </ul>

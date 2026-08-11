@@ -190,6 +190,9 @@ class LoginController extends Controller
         if (in_array($user['role'] ?? '', ['superadmin', 'admin', 'editor'])) {
             return '/admin';
         }
+        if (($user['role'] ?? '') === 'affiliate') {
+            return '/painel-afiliado';
+        }
         return '/minha-conta';
     }
 
