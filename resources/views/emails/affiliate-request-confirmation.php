@@ -1,6 +1,6 @@
 <div style="max-width:600px;margin:0 auto;font-family:'Segoe UI',Arial,sans-serif;color:#1a1a1a;">
     <!-- Header -->
-    <div style="background:#f5f5f5;padding:30px;text-align:center;border-radius:10px 10px 0 0;border-bottom:2px solid #E4B505;">
+    <div style="background:#f0fdf4;padding:30px;text-align:center;border-radius:10px 10px 0 0;border-bottom:2px solid #1B6F00;">
         <img src="https://puntacananovo.lrvweb.com.br/assets/images/layout/PUNTA-CANA-1.png" alt="Punta Cana para Brasileiros" style="max-height:60px;margin-bottom:12px;">
         <h1 style="color:#1C2011;font-size:22px;margin:0;">Solicitação de Afiliação Recebida!</h1>
     </div>
