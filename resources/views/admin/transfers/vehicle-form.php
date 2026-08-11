@@ -173,13 +173,20 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
                             </div>
 
                             <?php if (!empty($route['tariffs'])): ?>
-                            <div class="tariffs-block">
-                                <p class="tariffs-block-label">Tarifas por faixa de passageiros</p>
+                            <div class="tariffs-block" data-route-index="<?= $i ?>">
+                                <div class="tariffs-block-header">
+                                    <p class="tariffs-block-label">Tarifas por faixa de passageiros</p>
+                                    <button type="button" class="btn-add-tariff" onclick="addTariff(<?= $i ?>, this)">+ Nova Tarifa</button>
+                                </div>
+                                <div class="tariffs-list">
                                 <?php foreach ($route['tariffs'] as $j => $tariff): ?>
                                 <div class="tariff-card">
                                     <div class="tariff-card-header">
-                                        <span class="tariff-card-badge">Faixa <?= $j + 1 ?></span>
-                                        <span class="tariff-card-summary"><?= ($tariff['service_type'] ?? 'private') === 'private' ? 'Privado' : 'Compartilhado' ?> &bull; <?= (int)($tariff['min_pax'] ?? 1) ?>-<?= (int)($tariff['max_pax'] ?? 10) ?> passageiros &bull; $<?= number_format((float)($tariff['price'] ?? 0), 2) ?></span>
+                                        <div class="tariff-card-left">
+                                            <span class="tariff-card-badge">Faixa <?= $j + 1 ?></span>
+                                            <span class="tariff-card-summary"><?= ($tariff['service_type'] ?? 'private') === 'private' ? 'Privado' : 'Compartilhado' ?> &bull; <?= (int)($tariff['min_pax'] ?? 1) ?>-<?= (int)($tariff['max_pax'] ?? 10) ?> passageiros &bull; $<?= number_format((float)($tariff['price'] ?? 0), 2) ?></span>
+                                        </div>
+                                        <button type="button" class="btn-remove-tariff" onclick="removeTariff(this)" title="Excluir esta tarifa">&times;</button>
                                     </div>
                                     <div class="tariff-card-body">
                                         <div class="form-row form-row-4">
@@ -209,6 +216,15 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php else: ?>
+                            <div class="tariffs-block" data-route-index="<?= $i ?>">
+                                <div class="tariffs-block-header">
+                                    <p class="tariffs-block-label">Tarifas por faixa de passageiros</p>
+                                    <button type="button" class="btn-add-tariff" onclick="addTariff(<?= $i ?>, this)">+ Nova Tarifa</button>
+                                </div>
+                                <div class="tariffs-list"></div>
                             </div>
                             <?php endif; ?>
                         </div>
@@ -218,13 +234,15 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
             </div>
 
             <style>
-            .routes-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
-            .routes-search-box{display:flex;align-items:center;gap:8px;flex:1;max-width:360px;background:#f8f9fa;border:1px solid #e2e8f0;border-radius:8px;padding:0 12px}
+            .routes-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;padding:14px 16px;background:#1e293b;border-radius:8px;flex-wrap:wrap}
+            .routes-search-box{display:flex;align-items:center;gap:8px;flex:1;max-width:320px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:0 10px}
             .routes-search-box svg{flex-shrink:0;color:#94a3b8}
-            .routes-search-box .form-control{border:none;background:transparent;padding:9px 0;box-shadow:none}
+            .routes-search-box .form-control{border:none;background:transparent;padding:8px 0;box-shadow:none;color:#fff;font-size:12px}
+            .routes-search-box .form-control::placeholder{color:#94a3b8}
             .routes-search-box .form-control:focus{box-shadow:none;border:none}
             .routes-actions-bar{display:flex;align-items:center;gap:8px}
-            .routes-counter{font-size:12px;color:#64748b;padding:4px 10px;background:#f1f5f9;border-radius:10px}
+            .routes-counter{font-size:11px;color:#94a3b8;padding:4px 10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px}
+            .routes-counter strong{color:#fff}
             .route-block{border:1px solid #e2e8f0;border-radius:10px;margin-bottom:12px;overflow:hidden;transition:all .2s}
             .route-block.hidden{display:none}
             .route-block-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;background:#fafbfc;border-bottom:1px solid transparent;transition:all .15s;user-select:none}
@@ -242,11 +260,17 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
             .route-block-body{display:none;padding:18px;background:#fff;border-top:1px solid #f1f5f9}
             .route-block.open .route-block-body{display:block}
             .tariffs-block{margin-top:16px;padding-top:16px;border-top:1px dashed #e2e8f0}
-            .tariffs-block-label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.3px;margin-bottom:14px}
+            .tariffs-block-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+            .tariffs-block-label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.3px;margin:0}
+            .btn-add-tariff{font-size:12px;font-weight:600;color:#3b82f6;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .15s}
+            .btn-add-tariff:hover{background:rgba(59,130,246,0.15);border-color:#3b82f6}
             .tariff-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;overflow:hidden}
-            .tariff-card-header{padding:10px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:10px}
+            .tariff-card-header{padding:10px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
+            .tariff-card-left{display:flex;align-items:center;gap:10px}
             .tariff-card-badge{font-size:10px;font-weight:700;color:#3b82f6;background:rgba(59,130,246,0.1);padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}
             .tariff-card-summary{font-size:11px;color:#64748b}
+            .btn-remove-tariff{width:24px;height:24px;border-radius:50%;border:1px solid #fecaca;background:rgba(239,68,68,0.05);color:#ef4444;font-size:16px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+            .btn-remove-tariff:hover{background:#fef2f2;border-color:#ef4444}
             .tariff-card-body{padding:14px}
             .tariff-card-body .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
             .tariff-card-body .form-group{margin-bottom:0}
@@ -340,6 +364,50 @@ function filterRoutes(query) {
             block.classList.add('hidden');
         }
     });
+}
+
+function addTariff(routeIdx, btn) {
+    var block = btn.closest('.tariffs-block');
+    var list = block.querySelector('.tariffs-list');
+    var count = list.querySelectorAll('.tariff-card').length;
+    list.insertAdjacentHTML('beforeend', `
+    <div class="tariff-card">
+        <div class="tariff-card-header">
+            <div class="tariff-card-left">
+                <span class="tariff-card-badge">Nova Faixa</span>
+                <span class="tariff-card-summary">Configure os valores abaixo</span>
+            </div>
+            <button type="button" class="btn-remove-tariff" onclick="removeTariff(this)" title="Excluir esta tarifa">&times;</button>
+        </div>
+        <div class="tariff-card-body">
+            <div class="form-row form-row-4">
+                <div class="form-group">
+                    <label>Tipo de Serviço</label>
+                    <select name="routes[${routeIdx}][tariffs][${count}][service_type]" class="form-control">
+                        <option value="private">Privado</option>
+                        <option value="shared">Compartilhado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Mínimo de Passageiros</label>
+                    <input type="number" name="routes[${routeIdx}][tariffs][${count}][min_pax]" class="form-control" value="1">
+                </div>
+                <div class="form-group">
+                    <label>Máximo de Passageiros</label>
+                    <input type="number" name="routes[${routeIdx}][tariffs][${count}][max_pax]" class="form-control" value="4">
+                </div>
+                <div class="form-group">
+                    <label>Preço (USD)</label>
+                    <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number" step="0.01" name="routes[${routeIdx}][tariffs][${count}][price]" class="form-control input-with-prefix" value="0.00"></div>
+                </div>
+            </div>
+        </div>
+    </div>`);
+}
+
+function removeTariff(btn) {
+    if (!confirm('Excluir esta tarifa?')) return;
+    btn.closest('.tariff-card').remove();
 }
 
 function addRoute() {
