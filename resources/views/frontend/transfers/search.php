@@ -455,7 +455,18 @@ const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['i
         });
 
         document.addEventListener('click', function(e) {
-            if (!e.target.closest('.tf-autocomplete')) list.style.display = 'none';
+            if (!e.target.closest('#' + inputId) && !e.target.closest('#' + listId)) {
+                list.style.display = 'none';
+            }
+        });
+
+        // Fechar esta lista quando outro autocomplete recebe foco
+        document.querySelectorAll('.tf-autocomplete-input').forEach(function(otherInput) {
+            if (otherInput.id !== inputId) {
+                otherInput.addEventListener('focus', function() {
+                    list.style.display = 'none';
+                });
+            }
         });
     }
 
