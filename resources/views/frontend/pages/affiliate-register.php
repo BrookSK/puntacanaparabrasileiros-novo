@@ -12,12 +12,6 @@
 <section class="section section-affiliate-register">
     <div class="container">
         <div class="affiliate-register-card">
-            <?php if (has_flash('success')): ?>
-            <div style="padding:16px;background:#d1fae5;color:#065f46;border-radius:8px;margin-bottom:20px;font-weight:600;"><?= e(flash('success')) ?></div>
-            <?php endif; ?>
-            <?php if (has_flash('error')): ?>
-            <div style="padding:16px;background:#fee2e2;color:#991b1b;border-radius:8px;margin-bottom:20px;font-weight:600;"><?= e(flash('error')) ?></div>
-            <?php endif; ?>
             <h2>Preencha seus dados</h2>
             <p class="affiliate-register-desc">Campos marcados com <span class="required">*</span> são obrigatórios.</p>
 
