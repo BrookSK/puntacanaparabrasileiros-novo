@@ -214,6 +214,7 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/afiliados/solicitacao/{id}', [AdminAffiliatesController::class, 'showRequest'], [], 'admin.affiliates.request.show');
     $router->post('/afiliados/solicitacao/{id}/aprovar', [AdminAffiliatesController::class, 'approveRequest'], [CsrfMiddleware::class], 'admin.affiliates.request.approve');
     $router->post('/afiliados/solicitacao/{id}/recusar', [AdminAffiliatesController::class, 'rejectRequest'], [CsrfMiddleware::class], 'admin.affiliates.request.reject');
+    $router->post('/afiliados/solicitacao/{id}/excluir', [AdminAffiliatesController::class, 'deleteRequest'], [CsrfMiddleware::class], 'admin.affiliates.request.delete');
     $router->post('/afiliados/{id}/suspender', [AdminAffiliatesController::class, 'suspend'], [CsrfMiddleware::class], 'admin.affiliates.suspend');
     $router->post('/afiliados/{id}/reativar', [AdminAffiliatesController::class, 'reactivate'], [CsrfMiddleware::class], 'admin.affiliates.reactivate');
     $router->get('/afiliados/comissoes', [AdminAffiliatesController::class, 'commissions'], [], 'admin.affiliates.commissions');

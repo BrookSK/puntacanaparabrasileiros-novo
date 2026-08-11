@@ -105,30 +105,53 @@
         <tr>
             <th>Afiliado</th>
             <th>Email</th>
+            <th>Origem</th>
             <th>Status</th>
             <th>Ações</th>
         </tr>
     </thead>
     <tbody>
         <?php if (empty($blocked['items'])): ?>
-        <tr><td colspan="4" class="text-center" style="padding:30px;color:#94a3b8;">Nenhum afiliado bloqueado.</td></tr>
+        <tr><td colspan="5" class="text-center" style="padding:30px;color:#94a3b8;">Nenhum afiliado bloqueado.</td></tr>
         <?php else: ?>
         <?php foreach ($blocked['items'] as $aff): ?>
         <tr>
             <td><strong><?= e(($aff['first_name'] ?? '') . ' ' . ($aff['last_name'] ?? '')) ?></strong></td>
             <td><?= e($aff['email'] ?? '') ?></td>
+            <td>
+                <?php if (($aff['source'] ?? '') === 'affiliate'): ?>
+                    <span class="badge badge-warning">Afiliado Bloqueado</span>
+                <?php else: ?>
+                    <span class="badge badge-secondary">Solicitação Recusada</span>
+                <?php endif; ?>
+            </td>
             <td><span class="badge badge-danger">Bloqueado</span></td>
             <td class="actions-cell">
+                <?php if (($aff['source'] ?? '') === 'affiliate'): ?>
                 <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form">
                     <?= csrf_field() ?>
                     <button class="btn btn-sm btn-primary">Reativar</button>
                 </form>
+                <?php else: ?>
+                <form method="POST" action="/admin/afiliados/solicitacao/<?= (int)$aff['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir permanentemente esta solicitação?')">
+                    <?= csrf_field() ?>
+                    <button class="btn btn-sm btn-danger">Excluir</button>
+                </form>
+                <?php endif; ?>
             </td>
         </tr>
         <?php endforeach; ?>
         <?php endif; ?>
     </tbody>
 </table>
+
+<?php if (!empty($blocked['total_pages']) && $blocked['total_pages'] > 1): ?>
+<div class="pagination">
+    <?php for ($p = 1; $p <= $blocked['total_pages']; $p++): ?>
+    <a href="?tab=bloqueados&page=<?= $p ?>" class="page-link <?= $p === ($blocked['current_page'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
+    <?php endfor; ?>
+</div>
+<?php endif; ?>
 <?php endif; ?>
 
 <style>
