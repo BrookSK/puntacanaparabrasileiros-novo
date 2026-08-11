@@ -131,12 +131,12 @@
                 <?php endif; ?>
             </td>
             <td class="actions-cell" style="display:flex;gap:6px;">
-                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form" onsubmit="return confirm('Reativar este registro?')">
+                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form js-confirm" data-msg="Reativar este registro?">
                     <?= csrf_field() ?>
                     <input type="hidden" name="source" value="<?= e($aff['source'] ?? 'request') ?>">
                     <button class="btn btn-sm btn-primary">Reativar</button>
                 </form>
-                <form method="POST" action="/admin/afiliados/solicitacao/<?= (int)$aff['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir permanentemente este registro?')">
+                <form method="POST" action="/admin/afiliados/solicitacao/<?= (int)$aff['id'] ?>/excluir" class="inline-form js-confirm" data-msg="Excluir permanentemente este registro?">
                     <?= csrf_field() ?>
                     <input type="hidden" name="source" value="<?= e($aff['source'] ?? 'request') ?>">
                     <button class="btn btn-sm btn-danger">Excluir</button>
@@ -283,5 +283,16 @@ document.addEventListener('keydown', function(e) {
         closeBlockModal();
         closeReasonModal();
     }
+});
+
+// Confirmação única para forms com classe js-confirm
+document.querySelectorAll('.js-confirm').forEach(function(form) {
+    form.addEventListener('submit', function(e) {
+        var msg = form.getAttribute('data-msg') || 'Tem certeza?';
+        if (!confirm(msg)) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+        }
+    });
 });
 </script>
