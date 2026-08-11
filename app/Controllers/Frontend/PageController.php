@@ -196,6 +196,27 @@ class PageController extends Controller
             // Silenciar erro de email
         }
 
+        // Enviar email de confirmação ao solicitante
+        try {
+            $emailService = $emailService ?? new \App\Services\EmailService();
+            $emailService->sendTemplate(
+                $data['email'],
+                $data['first_name'] . ' ' . $data['last_name'],
+                'Recebemos sua solicitação de afiliação - Punta Cana para Brasileiros',
+                'affiliate-request-confirmation',
+                [
+                    'firstName' => $data['first_name'],
+                    'lastName' => $data['last_name'],
+                    'email' => $data['email'],
+                    'phone' => $data['phone'],
+                    'niche' => $data['niche'],
+                    'siteUrl' => $this->setting('site_url', 'https://puntacananovo.lrvweb.com.br'),
+                ]
+            );
+        } catch (\Exception $e) {
+            // Silenciar erro de email - não impedir o fluxo
+        }
+
         $this->flash('success', 'Solicitação enviada com sucesso! Nossa equipe analisará seu perfil e entrará em contato em até 48 horas.');
         $this->redirect('/cadastro-afiliado');
     }
