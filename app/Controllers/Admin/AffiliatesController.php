@@ -137,6 +137,24 @@ class AffiliatesController extends Controller
             // 3. Marcar solicitação como aprovada
             $this->requestModel->approve($id, $adminNotes);
 
+            // 4. Enviar email de aprovação ao afiliado
+            try {
+                $emailService = new \App\Services\EmailService();
+                $emailService->sendTemplate(
+                    $req['email'],
+                    $req['first_name'] . ' ' . $req['last_name'],
+                    'Parabéns! Sua afiliação foi aprovada - Punta Cana para Brasileiros',
+                    'affiliate-approved',
+                    [
+                        'firstName' => $req['first_name'],
+                        'email' => $req['email'],
+                        'siteUrl' => $this->setting('site_url', 'https://puntacananovo.lrvweb.com.br'),
+                    ]
+                );
+            } catch (\Exception $e) {
+                // Silenciar erro de email - não impedir o fluxo
+            }
+
             $this->flash('success', 'Afiliado aprovado com sucesso! ' . $req['first_name'] . ' ' . $req['last_name'] . ' agora tem acesso ao painel.');
         } catch (\Exception $e) {
             $this->flash('error', 'Erro ao aprovar: ' . $e->getMessage());
@@ -161,6 +179,24 @@ class AffiliatesController extends Controller
 
         $adminNotes = $request->input('admin_notes', '');
         $this->requestModel->reject($id, $adminNotes);
+
+        // Enviar email de recusa ao solicitante
+        try {
+            $emailService = new \App\Services\EmailService();
+            $emailService->sendTemplate(
+                $req['email'],
+                $req['first_name'] . ' ' . $req['last_name'],
+                'Atualização sobre sua solicitação de afiliação - Punta Cana para Brasileiros',
+                'affiliate-rejected',
+                [
+                    'firstName' => $req['first_name'],
+                    'adminNotes' => $adminNotes,
+                    'siteUrl' => $this->setting('site_url', 'https://puntacananovo.lrvweb.com.br'),
+                ]
+            );
+        } catch (\Exception $e) {
+            // Silenciar erro de email - não impedir o fluxo
+        }
 
         $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi recusada.');
         $this->redirect('/admin/afiliados');
