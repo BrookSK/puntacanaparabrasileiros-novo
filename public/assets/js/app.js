@@ -328,6 +328,7 @@
         const paxDrop = document.getElementById('paxDropdown');
         if (paxBtn && paxDrop) {
             paxBtn.addEventListener('click', (e) => { e.stopPropagation(); paxDrop.classList.toggle('active'); });
+            paxDrop.addEventListener('click', (e) => { e.stopPropagation(); });
             document.addEventListener('click', (e) => { if (!paxDrop.contains(e.target) && e.target !== paxBtn) paxDrop.classList.remove('active'); });
         }
 
@@ -361,6 +362,7 @@
         const paxDropMulti = document.getElementById('paxDropdownMulti');
         if (paxBtnMulti && paxDropMulti) {
             paxBtnMulti.addEventListener('click', (e) => { e.stopPropagation(); paxDropMulti.classList.toggle('active'); });
+            paxDropMulti.addEventListener('click', (e) => { e.stopPropagation(); });
             document.addEventListener('click', (e) => { if (!paxDropMulti.contains(e.target) && e.target !== paxBtnMulti) paxDropMulti.classList.remove('active'); });
         }
     }
