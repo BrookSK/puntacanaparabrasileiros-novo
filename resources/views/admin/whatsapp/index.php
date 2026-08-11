@@ -87,40 +87,42 @@
             <button class="modal-close" onclick="closeModal('modal-new-instance')">&times;</button>
         </div>
         <form id="form-new-instance" onsubmit="return createInstance(event)">
-            <div class="form-group">
-                <label>Nome da instância *</label>
-                <input type="text" name="instance_name" class="form-control" placeholder="minha-empresa (sem espaços)" required pattern="[a-z0-9\-]+">
-                <small>Minúsculas, sem espaços ou caracteres especiais</small>
-            </div>
-            <div class="form-group">
-                <label>Nome de exibição</label>
-                <input type="text" name="display_name" class="form-control" placeholder="WhatsApp Empresa">
-            </div>
-            <div class="form-group">
-                <label class="checkbox-label">
-                    <input type="checkbox" name="use_default_credentials" value="1" checked onchange="toggleCredentials(this)">
-                    Usar URL e API Key da instância padrão
-                </label>
-            </div>
-            <div id="custom-credentials" style="display:none;">
+            <div class="modal-body-scroll">
                 <div class="form-group">
-                    <label>URL da Evolution API</label>
-                    <input type="url" name="api_url" class="form-control" placeholder="https://evo.exemplo.com">
+                    <label>Nome da instância *</label>
+                    <input type="text" name="instance_name" class="form-control" placeholder="minha-empresa (sem espaços)" required pattern="[a-z0-9\-]+">
+                    <small>Minúsculas, sem espaços ou caracteres especiais</small>
                 </div>
                 <div class="form-group">
-                    <label>API Key</label>
-                    <input type="text" name="api_key" class="form-control" placeholder="sua-api-key">
+                    <label>Nome de exibição</label>
+                    <input type="text" name="display_name" class="form-control" placeholder="WhatsApp Empresa">
                 </div>
-            </div>
-            <div class="form-group">
-                <label>Vincular ao usuário (opcional)</label>
-                <select name="user_id" class="form-control">
-                    <option value="">Sem vínculo (disponível para todos)</option>
-                    <?php foreach ($users as $u): ?>
-                    <option value="<?= $u['id'] ?>"><?= e($u['first_name'] . ' ' . $u['last_name']) ?> (<?= e($u['role']) ?>)</option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="use_default_credentials" value="1" checked onchange="toggleCredentials(this)">
+                        Usar URL e API Key da instância padrão
+                    </label>
+                </div>
+                <div id="custom-credentials" style="display:none;">
+                    <div class="form-group">
+                        <label>URL da Evolution API</label>
+                        <input type="url" name="api_url" class="form-control" placeholder="https://evo.exemplo.com">
+                    </div>
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" name="api_key" class="form-control" placeholder="sua-api-key">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Vincular ao usuário (opcional)</label>
+                    <select name="user_id" class="form-control">
+                        <option value="">Sem vínculo (disponível para todos)</option>
+                        <?php foreach ($users as $u): ?>
+                        <option value="<?= $u['id'] ?>"><?= e($u['first_name'] . ' ' . $u['last_name']) ?> (<?= e($u['role']) ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div><!-- /modal-body-scroll -->
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-new-instance')">Cancelar</button>
                 <button type="submit" class="btn btn-primary">Criar Instância</button>
@@ -138,26 +140,28 @@
         </div>
         <form id="form-edit-instance" onsubmit="return updateInstance(event)">
             <input type="hidden" name="id" id="edit-instance-id">
-            <div class="form-group">
-                <label>Nome de exibição</label>
-                <input type="text" name="display_name" id="edit-display-name" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>URL da Evolution API</label>
-                <input type="url" name="api_url" id="edit-api-url" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>API Key</label>
-                <input type="text" name="api_key" id="edit-api-key" class="form-control">
-            </div>
-            <div class="form-group">
-                <label>Vincular ao usuário</label>
-                <select name="user_id" id="edit-user-id" class="form-control">
-                    <option value="">Sem vínculo</option>
-                    <?php foreach ($users as $u): ?>
-                    <option value="<?= $u['id'] ?>"><?= e($u['first_name'] . ' ' . $u['last_name']) ?></option>
-                    <?php endforeach; ?>
-                </select>
+            <div class="modal-body-scroll">
+                <div class="form-group">
+                    <label>Nome de exibição</label>
+                    <input type="text" name="display_name" id="edit-display-name" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>URL da Evolution API</label>
+                    <input type="url" name="api_url" id="edit-api-url" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>API Key</label>
+                    <input type="text" name="api_key" id="edit-api-key" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label>Vincular ao usuário</label>
+                    <select name="user_id" id="edit-user-id" class="form-control">
+                        <option value="">Sem vínculo</option>
+                        <?php foreach ($users as $u): ?>
+                        <option value="<?= $u['id'] ?>"><?= e($u['first_name'] . ' ' . $u['last_name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-edit-instance')">Cancelar</button>

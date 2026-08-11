@@ -642,6 +642,16 @@ a { color: var(--primary); text-decoration: none; }
     gap: 8px;
 }
 
+/* Modal sem body-scroll (form direto dentro do modal-box) */
+.modal-box > form { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.modal-box > form > .form-group,
+.modal-box > form > .form-row,
+.modal-box > form > div:not(.modal-header):not(.modal-footer) {
+    padding: 0 24px;
+}
+.modal-box > form > .form-group:first-of-type { padding-top: 24px; }
+.modal-box > form > .modal-footer { margin-top: auto; }
+
 /* ─── Form enhancements ─── */
 .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
 .form-help { font-size: 11px; color: #94a3b8; margin-top: 6px; font-style: italic; }
@@ -653,6 +663,56 @@ a { color: var(--primary); text-decoration: none; }
 /* ─── Additional button styles for modules ─── */
 .btn-danger-outline { background: transparent; border: 1.5px solid #ef4444; color: #ef4444; }
 .btn-danger-outline:hover { background: #ef4444; color: #fff; }
+
+/* ─── Modal form overrides (sobrescreve estilos admin padrão dentro de modais) ─── */
+.modal-overlay .form-group { margin-bottom: 16px; }
+.modal-overlay .form-group label {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    margin-bottom: 6px !important;
+}
+.modal-overlay .form-control {
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.modal-overlay .form-control:focus {
+    border-color: var(--primary, #0077b6);
+    box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.08);
+}
+.modal-overlay .checkbox-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+    color: #374151 !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+.modal-overlay .checkbox-label:hover {
+    background: transparent !important;
+    border-color: transparent !important;
+}
+.modal-overlay .checkbox-label input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    accent-color: var(--primary, #0077b6) !important;
+}
+.modal-overlay .checkbox-label:has(input:checked) {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #374151 !important;
+}
+.modal-overlay .form-row { gap: 12px; margin-bottom: 16px; }
+.modal-overlay small { font-size: 11px; color: #6b7280; display: block; margin-top: 4px; }
+.modal-overlay select.form-control { appearance: auto; }
 
 /* ─── Filters row ─── */
 .filters-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
