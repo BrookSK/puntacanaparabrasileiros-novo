@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS affiliates (
     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     user_id INT UNSIGNED NOT NULL,
-    status ENUM('pending', 'active', 'rejected', 'suspended') NOT NULL DEFAULT 'pending',
+    status ENUM('pending', 'active', 'inactive', 'rejected') NOT NULL DEFAULT 'pending',
     commission_rate DECIMAL(5,2) NOT NULL DEFAULT 20.00,
     cookie_days INT NOT NULL DEFAULT 30,
     payment_email VARCHAR(255) NULL,

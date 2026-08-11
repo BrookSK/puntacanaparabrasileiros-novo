@@ -36,7 +36,7 @@ class AffiliatesController extends Controller
         // Contadores baseados no status real do banco
         $pendingCount = $this->requestModel->countByStatus('pending');
         $activeCount = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliates WHERE status = 'active'");
-        $blockedCount = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliates WHERE status = 'suspended'");
+        $blockedCount = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliates WHERE status = 'inactive'");
 
         $data = [
             'tab' => $tab,
@@ -51,7 +51,7 @@ class AffiliatesController extends Controller
         } elseif ($tab === 'ativos') {
             $data['affiliates'] = $this->affiliateModel->getWithUserData($page, 20, 'active');
         } elseif ($tab === 'bloqueados') {
-            $data['blocked'] = $this->affiliateModel->getWithUserData($page, 20, 'suspended');
+            $data['blocked'] = $this->affiliateModel->getWithUserData($page, 20, 'inactive');
         }
 
         $this->view('admin/affiliates/index', $data, 'admin');
@@ -208,7 +208,7 @@ class AffiliatesController extends Controller
     public function suspend(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
-        $this->db->update('affiliates', ['status' => 'suspended'], 'id = ?', [$id]);
+        $this->db->update('affiliates', ['status' => 'inactive'], 'id = ?', [$id]);
         $this->flash('success', 'Afiliado bloqueado.');
         $this->redirect('/admin/afiliados?tab=bloqueados');
     }
