@@ -1,30 +1,54 @@
-<section class="passeios-hero"><div class="container"><div class="passeios-hero-content"><h1>Painel do Afiliado</h1></div></div></section>
-<section class="section section-affiliate-panel">
+<section class="aff-panel">
     <div class="container">
-        <?= partial('affiliate-nav', ['active' => 'visitas']) ?>
-        <div class="affiliate-panel-content">
-            <div class="affiliate-period">
-                <span class="period-badge">Todos os tempos</span>
-                <button class="btn btn-primary btn-sm">Aplicar</button>
-            </div>
-            <table class="table">
-                <thead><tr><th>ID</th><th>Landing URL</th><th>URL referenciador</th><th>Data</th></tr></thead>
-                <tbody>
-                <?php if (!empty($visits)): ?>
-                <?php foreach ($visits as $v): ?>
-                <tr>
-                    <td><?= (int)$v['id'] ?></td>
-                    <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis"><?= e($v['page_url'] ?? '') ?></td>
-                    <td style="max-width:300px;overflow:hidden;text-overflow:ellipsis"><?= e($v['referrer'] ?? '') ?></td>
-                    <td><?= format_datetime($v['created_at']) ?></td>
-                </tr>
-                <?php endforeach; ?>
-                <?php else: ?>
-                <tr><td colspan="4" class="text-center text-muted" style="padding:30px">Nenhuma visita registrada.</td></tr>
-                <?php endif; ?>
-                </tbody>
-            </table>
-            <p class="text-right text-muted" style="font-size:12px;margin-top:10px"><?= count($visits ?? []) ?> resultados</p>
+        <div class="aff-layout">
+            <?= partial('affiliate-nav', ['active' => 'visitas']) ?>
+
+            <main class="aff-main">
+                <div class="aff-page-header">
+                    <div>
+                        <h1 class="aff-page-title">Visitas</h1>
+                        <p class="aff-page-subtitle">Rastreamento de todas as visitas geradas pelos seus links</p>
+                    </div>
+                    <div class="aff-header-stat">
+                        <span class="aff-header-stat-value"><?= number_format((int)($affiliate['total_visits'] ?? 0)) ?></span>
+                        <span class="aff-header-stat-label">Total de visitas</span>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="aff-card">
+                    <div class="aff-table-header">
+                        <h3 class="aff-card-title">Histórico de Visitas</h3>
+                        <span class="aff-table-count"><?= count($visits ?? []) ?> registro<?= count($visits ?? []) !== 1 ? 's' : '' ?></span>
+                    </div>
+                    <div class="aff-table-wrap">
+                        <table class="aff-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Página Visitada</th>
+                                    <th>Referenciador</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            <?php if (!empty($visits)): ?>
+                                <?php foreach ($visits as $v): ?>
+                                <tr>
+                                    <td class="aff-td-id">#<?= (int)$v['id'] ?></td>
+                                    <td class="aff-td-url"><span class="aff-url-text"><?= e($v['page_url'] ?? '-') ?></span></td>
+                                    <td class="aff-td-url"><span class="aff-url-text"><?= e($v['referrer'] ?? '-') ?></span></td>
+                                    <td><?= format_datetime($v['created_at']) ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <tr><td colspan="4" class="aff-table-empty">Nenhuma visita registrada ainda.</td></tr>
+                            <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </main>
         </div>
     </div>
 </section>
