@@ -137,6 +137,7 @@ class PageController extends Controller
         if (empty($data['followers_count'])) $errors['followers_count'] = 'Quantidade de seguidores é obrigatória.';
         if (empty($data['niche'])) $errors['niche'] = 'Nicho é obrigatório.';
         if (empty($data['content_type'])) $errors['content_type'] = 'Tipo de conteúdo é obrigatório.';
+        if (empty($data['how_found'])) $errors['how_found'] = 'Informe como nos conheceu.';
 
         // Verificar se já existe solicitação com esse email
         $requestModel = new \App\Models\AffiliateRequest();

@@ -129,6 +129,22 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Como nos conheceu? <span class="required">*</span></label>
+                    <select name="how_found" class="form-control <?= has_error('how_found') ? 'is-invalid' : '' ?>" required>
+                        <option value="">Selecione</option>
+                        <option value="instagram" <?= old('how_found') === 'instagram' ? 'selected' : '' ?>>Instagram</option>
+                        <option value="tiktok" <?= old('how_found') === 'tiktok' ? 'selected' : '' ?>>TikTok</option>
+                        <option value="youtube" <?= old('how_found') === 'youtube' ? 'selected' : '' ?>>YouTube</option>
+                        <option value="google" <?= old('how_found') === 'google' ? 'selected' : '' ?>>Google / Pesquisa</option>
+                        <option value="facebook" <?= old('how_found') === 'facebook' ? 'selected' : '' ?>>Facebook</option>
+                        <option value="indicacao" <?= old('how_found') === 'indicacao' ? 'selected' : '' ?>>Indicação de amigo/conhecido</option>
+                        <option value="blog" <?= old('how_found') === 'blog' ? 'selected' : '' ?>>Blog / Artigo</option>
+                        <option value="outro" <?= old('how_found') === 'outro' ? 'selected' : '' ?>>Outro</option>
+                    </select>
+                    <?php if (has_error('how_found')): ?><span class="invalid-feedback"><?= e(error('how_found')) ?></span><?php endif; ?>
+                </div>
+
+                <div class="form-group">
                     <label>Como você vai nos promover?</label>
                     <textarea name="promotion_strategy" class="form-control" rows="4" placeholder="Descreva brevemente como pretende divulgar nossos passeios e transfers para sua audiência..."><?= old('promotion_strategy') ?></textarea>
                 </div>
