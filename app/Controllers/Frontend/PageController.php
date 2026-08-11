@@ -152,18 +152,43 @@ class PageController extends Controller
         $requestModel = new \App\Models\AffiliateRequest();
         if (empty($errors['email'])) {
             $existingRequest = $requestModel->findByEmail($data['email']);
-            // Só bloqueia se a solicitação existente está pendente ou aprovada
             if ($existingRequest && in_array($existingRequest['status'], ['pending', 'approved'])) {
-                $errors['email'] = 'Já existe uma solicitação com este email.';
+                // Se está como 'approved', verificar se o afiliado realmente existe
+                if ($existingRequest['status'] === 'approved') {
+                    $userModel = new \App\Models\User();
+                    $existingUser = $userModel->findByEmail($data['email']);
+                    $hasAffiliate = false;
+                    if ($existingUser) {
+                        $hasAffiliate = (bool) $this->db->fetchOne(
+                            "SELECT id FROM affiliates WHERE user_id = ?",
+                            [(int)$existingUser['id']]
+                        );
+                    }
+                    if (!$hasAffiliate) {
+                        // O afiliado foi excluído — limpar registros residuais
+                        $this->db->delete('affiliate_requests', 'id = ?', [(int)$existingRequest['id']]);
+                        if ($existingUser) {
+                            $this->db->delete('users', 'id = ?', [(int)$existingUser['id']]);
+                        }
+                        // Não adicionar erro — permitir novo cadastro
+                    } else {
+                        $errors['email'] = 'Este email já possui um afiliado ativo.';
+                    }
+                } else {
+                    // Status pending — realmente tem uma solicitação em andamento
+                    $errors['email'] = 'Já existe uma solicitação pendente com este email.';
+                }
+            } elseif ($existingRequest && !in_array($existingRequest['status'], ['pending', 'approved'])) {
+                // Solicitação rejeitada/bloqueada — limpar para permitir novo cadastro
+                $this->db->delete('affiliate_requests', 'id = ?', [(int)$existingRequest['id']]);
             }
         }
 
         // Verificar se email já é de um user existente COM afiliado ativo
-        $userModel = new \App\Models\User();
+        if (!isset($userModel)) $userModel = new \App\Models\User();
         if (empty($errors['email'])) {
             $existingUser = $userModel->findByEmail($data['email']);
             if ($existingUser) {
-                // Verificar se esse user tem um afiliado ativo
                 $hasActiveAffiliate = $this->db->fetchOne(
                     "SELECT id FROM affiliates WHERE user_id = ? AND status = 'active'",
                     [(int)$existingUser['id']]
@@ -171,18 +196,11 @@ class PageController extends Controller
                 if ($hasActiveAffiliate) {
                     $errors['email'] = 'Este email já está cadastrado como afiliado ativo.';
                 } else {
-                    // User existe mas sem afiliado ativo — limpar registros residuais para permitir novo cadastro
+                    // User existe mas sem afiliado ativo — limpar registros residuais
                     $this->db->delete('affiliates', 'user_id = ?', [(int)$existingUser['id']]);
+                    $this->db->delete('affiliate_requests', 'email = ?', [$existingUser['email']]);
                     $this->db->delete('users', 'id = ?', [(int)$existingUser['id']]);
                 }
-            }
-        }
-
-        // Limpar solicitação antiga rejeitada/bloqueada se existir (permite recadastro)
-        if (empty($errors['email'])) {
-            $existingRequest = $requestModel->findByEmail($data['email']);
-            if ($existingRequest && !in_array($existingRequest['status'], ['pending', 'approved'])) {
-                $this->db->delete('affiliate_requests', 'id = ?', [(int)$existingRequest['id']]);
             }
         }
 
