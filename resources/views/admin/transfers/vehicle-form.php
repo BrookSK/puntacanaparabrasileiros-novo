@@ -99,84 +99,144 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
                     </div>
                 </div>
 
+                <!-- Barra de busca e contador -->
+                <div class="routes-toolbar">
+                    <div class="routes-search-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="text" id="routeSearchInput" class="form-control" placeholder="Buscar rota por origem ou destino..." oninput="filterRoutes(this.value)">
+                    </div>
+                    <div class="routes-actions-bar">
+                        <span class="routes-counter"><strong><?= count($routes) ?></strong> rota<?= count($routes) !== 1 ? 's' : '' ?></span>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="toggleAllRoutes(true)">Expandir Todas</button>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="toggleAllRoutes(false)">Recolher Todas</button>
+                    </div>
+                </div>
+
                 <div id="routesContainer">
                     <?php foreach ($routes as $i => $route): ?>
-                    <div class="route-block" data-index="<?= $i ?>">
-                        <div class="route-block-label">Rota <?= $i + 1 ?></div>
-                        <div class="form-row">
-                            <div class="form-group col-6">
-                                <label>Origem</label>
-                                <select name="routes[<?= $i ?>][origin_id]" class="form-control">
-                                    <option value="">Selecione</option>
-                                    <?php foreach ($locations as $loc): ?>
-                                    <option value="<?= (int)$loc['id'] ?>" <?= (int)($route['origin_id'] ?? 0) === (int)$loc['id'] ? 'selected' : '' ?>><?= e($loc['title']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="form-group col-6">
-                                <label>Destino</label>
-                                <select name="routes[<?= $i ?>][destination_id]" class="form-control">
-                                    <option value="">Selecione</option>
-                                    <?php foreach ($locations as $loc): ?>
-                                    <option value="<?= (int)$loc['id'] ?>" <?= (int)($route['destination_id'] ?? 0) === (int)$loc['id'] ? 'selected' : '' ?>><?= e($loc['title']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-6">
-                                <label>Preço Base (USD)</label>
-                                <div class="input-prefix-wrapper">
-                                    <span class="input-prefix">$</span>
-                                    <input type="number" step="0.01" name="routes[<?= $i ?>][base_price]" class="form-control input-with-prefix" value="<?= number_format((float)($route['base_price'] ?? 0), 2, '.', '') ?>">
+                    <div class="route-block" data-index="<?= $i ?>" data-search="<?= e(strtolower(($route['origin_title'] ?? '') . ' ' . ($route['destination_title'] ?? ''))) ?>">
+                        <div class="route-block-header" onclick="toggleRoute(this)">
+                            <div class="route-block-info">
+                                <span class="route-block-number"><?= $i + 1 ?></span>
+                                <div class="route-block-summary">
+                                    <span class="route-block-title">
+                                        <?= e($route['origin_title'] ?? 'Origem') ?>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                                        <?= e($route['destination_title'] ?? 'Destino') ?>
+                                    </span>
+                                    <span class="route-block-meta">
+                                        Base: $<?= number_format((float)($route['base_price'] ?? 0), 2) ?>
+                                        <?php if (!empty($route['duration'])): ?> &bull; <?= (int)$route['duration'] ?> min<?php endif; ?>
+                                        <?php if (!empty($route['tariffs'])): ?> &bull; <?= count($route['tariffs']) ?> tarifa<?= count($route['tariffs']) !== 1 ? 's' : '' ?><?php endif; ?>
+                                    </span>
                                 </div>
                             </div>
-                            <div class="form-group col-6">
-                                <label>Duração (minutos)</label>
-                                <input type="number" name="routes[<?= $i ?>][duration]" class="form-control" value="<?= (int)($route['duration'] ?? 0) ?>">
-                            </div>
+                            <svg class="route-block-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
                         </div>
-
-                        <?php if (!empty($route['tariffs'])): ?>
-                        <div class="tariffs-block">
-                            <p class="tariffs-block-label">Tarifas por faixa de passageiros:</p>
-                            <?php foreach ($route['tariffs'] as $j => $tariff): ?>
-                            <div class="form-row form-row-4">
-                                <div class="form-group">
-                                    <label>Serviço</label>
-                                    <select name="routes[<?= $i ?>][tariffs][<?= $j ?>][service_type]" class="form-control">
-                                        <option value="private" <?= ($tariff['service_type'] ?? '') === 'private' ? 'selected' : '' ?>>Privado</option>
-                                        <option value="shared" <?= ($tariff['service_type'] ?? '') === 'shared' ? 'selected' : '' ?>>Compartilhado</option>
+                        <div class="route-block-body">
+                            <div class="form-row">
+                                <div class="form-group col-6">
+                                    <label>Origem</label>
+                                    <select name="routes[<?= $i ?>][origin_id]" class="form-control">
+                                        <option value="">Selecione</option>
+                                        <?php foreach ($locations as $loc): ?>
+                                        <option value="<?= (int)$loc['id'] ?>" <?= (int)($route['origin_id'] ?? 0) === (int)$loc['id'] ? 'selected' : '' ?>><?= e($loc['title']) ?></option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
-                                <div class="form-group">
-                                    <label>Min Pax</label>
-                                    <input type="number" name="routes[<?= $i ?>][tariffs][<?= $j ?>][min_pax]" class="form-control" value="<?= (int)($tariff['min_pax'] ?? 1) ?>">
-                                </div>
-                                <div class="form-group">
-                                    <label>Max Pax</label>
-                                    <input type="number" name="routes[<?= $i ?>][tariffs][<?= $j ?>][max_pax]" class="form-control" value="<?= (int)($tariff['max_pax'] ?? 10) ?>">
-                                </div>
-                                <div class="form-group">
-                                    <label>Preço (USD)</label>
-                                    <div class="input-prefix-wrapper">
-                                        <span class="input-prefix">$</span>
-                                        <input type="number" step="0.01" name="routes[<?= $i ?>][tariffs][<?= $j ?>][price]" class="form-control input-with-prefix" value="<?= number_format((float)($tariff['price'] ?? 0), 2, '.', '') ?>">
-                                    </div>
+                                <div class="form-group col-6">
+                                    <label>Destino</label>
+                                    <select name="routes[<?= $i ?>][destination_id]" class="form-control">
+                                        <option value="">Selecione</option>
+                                        <?php foreach ($locations as $loc): ?>
+                                        <option value="<?= (int)$loc['id'] ?>" <?= (int)($route['destination_id'] ?? 0) === (int)$loc['id'] ? 'selected' : '' ?>><?= e($loc['title']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
                                 </div>
                             </div>
-                            <?php endforeach; ?>
+                            <div class="form-row">
+                                <div class="form-group col-6">
+                                    <label>Preço Base (USD)</label>
+                                    <div class="input-prefix-wrapper">
+                                        <span class="input-prefix">$</span>
+                                        <input type="number" step="0.01" name="routes[<?= $i ?>][base_price]" class="form-control input-with-prefix" value="<?= number_format((float)($route['base_price'] ?? 0), 2, '.', '') ?>">
+                                    </div>
+                                </div>
+                                <div class="form-group col-6">
+                                    <label>Duração (minutos)</label>
+                                    <input type="number" name="routes[<?= $i ?>][duration]" class="form-control" value="<?= (int)($route['duration'] ?? 0) ?>">
+                                </div>
+                            </div>
+
+                            <?php if (!empty($route['tariffs'])): ?>
+                            <div class="tariffs-block">
+                                <p class="tariffs-block-label">Tarifas por faixa de passageiros:</p>
+                                <?php foreach ($route['tariffs'] as $j => $tariff): ?>
+                                <div class="form-row form-row-4">
+                                    <div class="form-group">
+                                        <label>Serviço</label>
+                                        <select name="routes[<?= $i ?>][tariffs][<?= $j ?>][service_type]" class="form-control">
+                                            <option value="private" <?= ($tariff['service_type'] ?? '') === 'private' ? 'selected' : '' ?>>Privado</option>
+                                            <option value="shared" <?= ($tariff['service_type'] ?? '') === 'shared' ? 'selected' : '' ?>>Compartilhado</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Min Pax</label>
+                                        <input type="number" name="routes[<?= $i ?>][tariffs][<?= $j ?>][min_pax]" class="form-control" value="<?= (int)($tariff['min_pax'] ?? 1) ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Max Pax</label>
+                                        <input type="number" name="routes[<?= $i ?>][tariffs][<?= $j ?>][max_pax]" class="form-control" value="<?= (int)($tariff['max_pax'] ?? 10) ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Preço (USD)</label>
+                                        <div class="input-prefix-wrapper">
+                                            <span class="input-prefix">$</span>
+                                            <input type="number" step="0.01" name="routes[<?= $i ?>][tariffs][<?= $j ?>][price]" class="form-control input-with-prefix" value="<?= number_format((float)($tariff['price'] ?? 0), 2, '.', '') ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                            </div>
+                            <?php endif; ?>
                         </div>
-                        <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
                 </div>
 
-                <button type="button" class="btn btn-outline" onclick="addRoute()" style="margin-top:10px;">
+                <button type="button" class="btn btn-outline" onclick="addRoute()" style="margin-top:16px;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                     Adicionar Rota
                 </button>
             </div>
+
+            <style>
+            .routes-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+            .routes-search-box{display:flex;align-items:center;gap:8px;flex:1;max-width:360px;background:#f8f9fa;border:1px solid #e2e8f0;border-radius:8px;padding:0 12px}
+            .routes-search-box svg{flex-shrink:0;color:#94a3b8}
+            .routes-search-box .form-control{border:none;background:transparent;padding:9px 0;box-shadow:none}
+            .routes-search-box .form-control:focus{box-shadow:none;border:none}
+            .routes-actions-bar{display:flex;align-items:center;gap:8px}
+            .routes-counter{font-size:12px;color:#64748b;padding:4px 10px;background:#f1f5f9;border-radius:10px}
+            .route-block{border:1px solid #e2e8f0;border-radius:10px;margin-bottom:12px;overflow:hidden;transition:all .2s}
+            .route-block.hidden{display:none}
+            .route-block-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;background:#fafbfc;border-bottom:1px solid transparent;transition:all .15s;user-select:none}
+            .route-block-header:hover{background:#f1f5f9}
+            .route-block.open .route-block-header{background:#f0f9ff;border-bottom-color:#e2e8f0}
+            .route-block-info{display:flex;align-items:center;gap:12px}
+            .route-block-number{width:28px;height:28px;border-radius:50%;background:#e2e8f0;color:#475569;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+            .route-block.open .route-block-number{background:#3b82f6;color:#fff}
+            .route-block-summary{display:flex;flex-direction:column;gap:2px}
+            .route-block-title{font-size:13px;font-weight:600;color:#1e293b;display:flex;align-items:center;gap:6px}
+            .route-block-title svg{color:#94a3b8}
+            .route-block-meta{font-size:11px;color:#64748b}
+            .route-block-chevron{transition:transform .2s;color:#94a3b8;flex-shrink:0}
+            .route-block.open .route-block-chevron{transform:rotate(180deg)}
+            .route-block-body{display:none;padding:18px;background:#fff;border-top:1px solid #f1f5f9}
+            .route-block.open .route-block-body{display:block}
+            .tariffs-block{margin-top:16px;padding-top:16px;border-top:1px dashed #e2e8f0}
+            .tariffs-block-label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.3px;margin-bottom:12px}
+            </style>
             <?php endif; ?>
         </div>
 
@@ -237,54 +297,97 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
 
 <script>
 let routeIndex = <?= count($routes ?? []) ?>;
+
+function toggleRoute(header) {
+    const block = header.closest('.route-block');
+    block.classList.toggle('open');
+}
+
+function toggleAllRoutes(open) {
+    document.querySelectorAll('.route-block').forEach(function(block) {
+        if (block.classList.contains('hidden')) return;
+        if (open) block.classList.add('open');
+        else block.classList.remove('open');
+    });
+}
+
+function filterRoutes(query) {
+    const q = query.toLowerCase().trim();
+    document.querySelectorAll('.route-block').forEach(function(block) {
+        if (!q) {
+            block.classList.remove('hidden');
+            return;
+        }
+        const searchText = block.getAttribute('data-search') || '';
+        if (searchText.includes(q)) {
+            block.classList.remove('hidden');
+        } else {
+            block.classList.add('hidden');
+        }
+    });
+}
+
 function addRoute() {
     const container = document.getElementById('routesContainer');
     const locOptions = `<?php foreach ($locations as $loc): ?><option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option><?php endforeach; ?>`;
     container.insertAdjacentHTML('beforeend', `
-    <div class="route-block" data-index="${routeIndex}">
-        <div class="route-block-label">Rota ${routeIndex + 1}</div>
-        <div class="form-row">
-            <div class="form-group col-6">
-                <label>Origem</label>
-                <select name="routes[${routeIndex}][origin_id]" class="form-control"><option value="">Selecione</option>${locOptions}</select>
+    <div class="route-block open" data-index="${routeIndex}" data-search="">
+        <div class="route-block-header" onclick="toggleRoute(this)">
+            <div class="route-block-info">
+                <span class="route-block-number">${routeIndex + 1}</span>
+                <div class="route-block-summary">
+                    <span class="route-block-title">Nova Rota</span>
+                    <span class="route-block-meta">Configure origem e destino</span>
+                </div>
             </div>
-            <div class="form-group col-6">
-                <label>Destino</label>
-                <select name="routes[${routeIndex}][destination_id]" class="form-control"><option value="">Selecione</option>${locOptions}</select>
-            </div>
+            <svg class="route-block-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
-        <div class="form-row">
-            <div class="form-group col-6">
-                <label>Preço Base (USD)</label>
-                <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number" step="0.01" name="routes[${routeIndex}][base_price]" class="form-control input-with-prefix" value="0"></div>
+        <div class="route-block-body">
+            <div class="form-row">
+                <div class="form-group col-6">
+                    <label>Origem</label>
+                    <select name="routes[${routeIndex}][origin_id]" class="form-control"><option value="">Selecione</option>${locOptions}</select>
+                </div>
+                <div class="form-group col-6">
+                    <label>Destino</label>
+                    <select name="routes[${routeIndex}][destination_id]" class="form-control"><option value="">Selecione</option>${locOptions}</select>
+                </div>
             </div>
-            <div class="form-group col-6">
-                <label>Duração (minutos)</label>
-                <input type="number" name="routes[${routeIndex}][duration]" class="form-control" value="0">
+            <div class="form-row">
+                <div class="form-group col-6">
+                    <label>Preço Base (USD)</label>
+                    <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number" step="0.01" name="routes[${routeIndex}][base_price]" class="form-control input-with-prefix" value="0"></div>
+                </div>
+                <div class="form-group col-6">
+                    <label>Duração (minutos)</label>
+                    <input type="number" name="routes[${routeIndex}][duration]" class="form-control" value="0">
+                </div>
             </div>
-        </div>
-        <div class="tariffs-block">
-            <p class="tariffs-block-label">Tarifas por faixa de passageiros:</p>
-            <div class="form-row form-row-4">
-                <div class="form-group">
-                    <label>Serviço</label>
-                    <select name="routes[${routeIndex}][tariffs][0][service_type]" class="form-control"><option value="private">Privado</option><option value="shared">Compartilhado</option></select>
-                </div>
-                <div class="form-group">
-                    <label>Min Pax</label>
-                    <input type="number" name="routes[${routeIndex}][tariffs][0][min_pax]" class="form-control" value="1">
-                </div>
-                <div class="form-group">
-                    <label>Max Pax</label>
-                    <input type="number" name="routes[${routeIndex}][tariffs][0][max_pax]" class="form-control" value="10">
-                </div>
-                <div class="form-group">
-                    <label>Preço (USD)</label>
-                    <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number" step="0.01" name="routes[${routeIndex}][tariffs][0][price]" class="form-control input-with-prefix" value="0"></div>
+            <div class="tariffs-block">
+                <p class="tariffs-block-label">Tarifas por faixa de passageiros:</p>
+                <div class="form-row form-row-4">
+                    <div class="form-group">
+                        <label>Serviço</label>
+                        <select name="routes[${routeIndex}][tariffs][0][service_type]" class="form-control"><option value="private">Privado</option><option value="shared">Compartilhado</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Min Pax</label>
+                        <input type="number" name="routes[${routeIndex}][tariffs][0][min_pax]" class="form-control" value="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Pax</label>
+                        <input type="number" name="routes[${routeIndex}][tariffs][0][max_pax]" class="form-control" value="4">
+                    </div>
+                    <div class="form-group">
+                        <label>Preço (USD)</label>
+                        <div class="input-prefix-wrapper"><span class="input-prefix">$</span><input type="number" step="0.01" name="routes[${routeIndex}][tariffs][0][price]" class="form-control input-with-prefix" value="0"></div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>`);
     routeIndex++;
+    // Scroll to new route
+    container.lastElementChild.scrollIntoView({behavior: 'smooth', block: 'center'});
 }
 </script>
