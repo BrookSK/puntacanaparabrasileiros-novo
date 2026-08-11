@@ -87,9 +87,9 @@
             <td><?= money((float)($aff['total_earnings'] ?? 0)) ?></td>
             <td><?= money((float)($aff['total_paid'] ?? 0)) ?></td>
             <td class="actions-cell">
-                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/suspender" class="inline-form" onsubmit="return confirm('Suspender este afiliado?')">
+                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/suspender" class="inline-form" onsubmit="return confirm('Bloquear este afiliado?')">
                     <?= csrf_field() ?>
-                    <button class="btn btn-sm btn-danger">Suspender</button>
+                    <button class="btn btn-sm btn-danger">Bloquear</button>
                 </form>
             </td>
         </tr>

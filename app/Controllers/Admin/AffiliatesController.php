@@ -182,8 +182,8 @@ class AffiliatesController extends Controller
     {
         $id = (int) $request->param('id');
         $this->db->update('affiliates', ['status' => 'suspended'], 'id = ?', [$id]);
-        $this->flash('success', 'Afiliado suspenso.');
-        $this->redirect('/admin/afiliados?tab=ativos');
+        $this->flash('success', 'Afiliado bloqueado.');
+        $this->redirect('/admin/afiliados?tab=bloqueados');
     }
 
     /**
