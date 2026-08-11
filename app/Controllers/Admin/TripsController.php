@@ -86,7 +86,7 @@ class TripsController extends Controller
         }
 
         // Gallery
-        $gallery = $request->input('gallery_images', []);
+        $gallery = $this->processGalleryUploads($request);
         $data['gallery'] = !empty($gallery) ? json_encode($gallery) : null;
 
         $tripId = $this->tripModel->create($data);
@@ -177,7 +177,7 @@ class TripsController extends Controller
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));
         }
 
-        $gallery = $request->input('gallery_images', []);
+        $gallery = $this->processGalleryUploads($request);
         if (!empty($gallery)) {
             $data['gallery'] = json_encode($gallery);
         }
@@ -372,14 +372,52 @@ class TripsController extends Controller
 
     private function uploadImage(array $file): ?string
     {
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/bmp', 'image/avif'];
         if (!in_array($file['type'], $allowedTypes)) return null;
         if ($file['size'] > 10 * 1024 * 1024) return null;
 
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $filename = 'trip-' . uniqid() . '.' . $ext;
         $destination = BASE_PATH . '/public/uploads/' . $filename;
         move_uploaded_file($file['tmp_name'], $destination);
         return '/uploads/' . $filename;
+    }
+
+    /**
+     * Processa uploads de galeria (múltiplos arquivos).
+     */
+    private function processGalleryUploads(Request $request): array
+    {
+        $urls = [];
+
+        // URLs informadas manualmente
+        $manualUrls = $request->input('gallery_images', []);
+        foreach ($manualUrls as $url) {
+            $url = trim($url);
+            if (!empty($url)) {
+                $urls[] = $url;
+            }
+        }
+
+        // Arquivos enviados por upload
+        if (isset($_FILES['gallery_files'])) {
+            $files = $_FILES['gallery_files'];
+            $count = is_array($files['name']) ? count($files['name']) : 0;
+            for ($i = 0; $i < $count; $i++) {
+                if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
+                $uploaded = $this->uploadImage([
+                    'name' => $files['name'][$i],
+                    'type' => $files['type'][$i],
+                    'tmp_name' => $files['tmp_name'][$i],
+                    'error' => $files['error'][$i],
+                    'size' => $files['size'][$i],
+                ]);
+                if ($uploaded) {
+                    $urls[] = $uploaded;
+                }
+            }
+        }
+
+        return $urls;
     }
 }
