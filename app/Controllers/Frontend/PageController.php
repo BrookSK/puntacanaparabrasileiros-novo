@@ -241,6 +241,66 @@ class PageController extends Controller
         ], 'app');
     }
 
+    /**
+     * Deduplica categorias de preço por slug.
+     * - Para cada slug, mantém o registro de maior preço efetivo (sale_price ?: price).
+     * - Categorias de infantil sempre aparecem, mesmo com preço zero.
+     * - Categorias de adulto/criança com preço zero são removidas quando há
+     *   outra entrada com preço real para o mesmo slug.
+     */
+    private function deduplicateCategories(array $categories): array
+    {
+        $bySlug = [];
+        foreach ($categories as $cat) {
+            $slug     = $cat['category_slug'];
+            $price    = (float) ($cat['sale_price'] ?: $cat['price']);
+            $isInfant = str_contains(strtolower($slug), 'infant') || str_contains(strtolower($cat['category_name'] ?? ''), 'infant');
+
+            if (!isset($bySlug[$slug])) {
+                $bySlug[$slug] = $cat;
+                continue;
+            }
+
+            $existing      = $bySlug[$slug];
+            $existingPrice = (float) ($existing['sale_price'] ?: $existing['price']);
+
+            // Para infantil: não sobrescreve (qualquer entrada já é válida)
+            if ($isInfant) {
+                continue;
+            }
+
+            // Para as demais: mantém o de maior preço (o zero indica "grátis"
+            // num pacote complementar, o preço real está no registro maior)
+            if ($price > $existingPrice) {
+                $bySlug[$slug] = $cat;
+            }
+        }
+
+        // Remove adulto/criança com preço zero SE existir alguma categoria paga
+        $hasPaid = false;
+        foreach ($bySlug as $cat) {
+            $p = (float) ($cat['sale_price'] ?: $cat['price']);
+            $isInfant = str_contains(strtolower($cat['category_slug']), 'infant')
+                     || str_contains(strtolower($cat['category_name'] ?? ''), 'infant');
+            if (!$isInfant && $p > 0) {
+                $hasPaid = true;
+                break;
+            }
+        }
+
+        if ($hasPaid) {
+            $bySlug = array_filter($bySlug, function ($cat) {
+                $p        = (float) ($cat['sale_price'] ?: $cat['price']);
+                $isInfant = str_contains(strtolower($cat['category_slug']), 'infant')
+                         || str_contains(strtolower($cat['category_name'] ?? ''), 'infant');
+                // Mantém infantil sempre; remove as demais se preço for zero
+                return $isInfant || $p > 0;
+            });
+        }
+
+        return array_values($bySlug);
+    }
+
     public function catalog(Request $request, Response $response): void
     {
         // Buscar passeios publicados
@@ -253,7 +313,8 @@ class PageController extends Controller
             $trip['min_price'] = 0;
             if (!empty($packages)) {
                 $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
-                $trip['price_categories'] = $packageModel->getCategories((int) $packages[0]['id']);
+                $raw = $packageModel->getCategories((int) $packages[0]['id']);
+                $trip['price_categories'] = $this->deduplicateCategories($raw);
             } else {
                 $trip['price_categories'] = [];
             }
@@ -287,7 +348,8 @@ class PageController extends Controller
                 // Pacote base = primeiro por sort_order (igual ao catalog())
                 $basePackageId = (int) $packages[0]['id'];
                 $trip['min_price'] = $packageModel->getBasePrice($basePackageId);
-                $trip['price_categories'] = $packageModel->getCategories($basePackageId);
+                $raw = $packageModel->getCategories($basePackageId);
+                $trip['price_categories'] = $this->deduplicateCategories($raw);
             } else {
                 $trip['price_categories'] = [];
             }
