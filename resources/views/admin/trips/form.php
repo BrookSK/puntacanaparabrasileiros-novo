@@ -165,9 +165,10 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                 Escolher Imagens
                             </label>
-                            <input type="file" name="gallery_files[]" id="galleryFiles" multiple accept="image/*" style="display:none;" onchange="document.getElementById('galleryCount').textContent = this.files.length + ' arquivo(s) selecionado(s)'">
+                            <input type="file" name="gallery_files[]" id="galleryFiles" multiple accept="image/*" style="display:none;" onchange="previewGalleryFiles(this)">
                             <span id="galleryCount" style="font-size:12px;color:#94a3b8;margin-left:10px;"></span>
                             <p style="font-size:10px;color:#94a3b8;margin-top:6px;">JPG, PNG, WebP, GIF, SVG, AVIF — Máx. 10MB cada</p>
+                            <div id="galleryPreviews" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
                         </div>
 
                         <!-- URLs existentes -->
@@ -208,6 +209,24 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
 
 <script>
 function addRepeater(listId, fieldName, placeholder) { const list = document.getElementById(listId); const div = document.createElement('div'); div.className = 'repeater-item'; div.innerHTML = `<input type="text" name="${fieldName}" value="" class="form-control" placeholder="${placeholder}"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button>`; list.appendChild(div); }
+
+function previewGalleryFiles(input) {
+    const container = document.getElementById('galleryPreviews');
+    const countEl = document.getElementById('galleryCount');
+    container.innerHTML = '';
+    countEl.textContent = input.files.length + ' arquivo(s) selecionado(s)';
+    for (let i = 0; i < input.files.length; i++) {
+        const file = input.files[i];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const thumb = document.createElement('div');
+            thumb.style.cssText = 'width:64px;height:64px;border-radius:8px;overflow:hidden;border:2px solid #e2e8f0;flex-shrink:0;';
+            thumb.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">';
+            container.appendChild(thumb);
+        };
+        reader.readAsDataURL(file);
+    }
+}
 document.addEventListener('click', function(e) { if (e.target.classList.contains('repeater-remove')) { e.target.closest('.repeater-item, .package-item').remove(); } });
 document.getElementById('addPackageBtn')?.addEventListener('click', function() { const list = document.getElementById('packages-list'), i = list.children.length; const cats = <?= json_encode($travelerCategories ?? []) ?>; let ch = ''; cats.forEach(tc => { ch += `<label class="checkbox-label"><input type="checkbox" name="packages[${i}][categories][]" value="${tc.id}"> ${tc.name}</label>`; }); const d = document.createElement('div'); d.className = 'package-item card-inner'; d.innerHTML = `<div class="form-row"><div class="form-group col-6"><label>Nome</label><input type="text" name="packages[${i}][title]" class="form-control"></div><div class="form-group col-6"><label>Descrição</label><input type="text" name="packages[${i}][description]" class="form-control"></div></div><div class="form-group"><label>Categorias</label><div class="checkbox-grid">${ch}</div></div><button type="button" class="btn btn-sm btn-danger repeater-remove">&times; Remover</button>`; list.appendChild(d); });
 
