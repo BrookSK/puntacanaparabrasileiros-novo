@@ -154,6 +154,28 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                     <div class="form-group"><label>Ordem</label><input type="number" name="sort_order" value="<?= e($trip['sort_order'] ?? '0') ?>" class="form-control" min="0"></div>
                     <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="featured" <?= !empty($trip['featured']) ? 'checked' : '' ?>> Passeio em Destaque</label></div>
                     <div class="form-group"><label>Imagem Destacada</label><div class="file-upload-area"><input type="file" name="featured_image" id="featImg" class="file-input-hidden" accept="image/*"><label for="featImg" class="file-upload-label"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Escolher imagem</span></label><?php if ($isEdit && !empty($trip['featured_image'])): ?><div class="file-upload-preview"><img src="<?= e($trip['featured_image']) ?>" alt=""></div><?php endif; ?></div></div>
+                    <div class="form-group">
+                        <label>Galeria de Fotos</label>
+                        <p style="font-size:11px;color:#94a3b8;margin-bottom:8px;">Adicione URLs das imagens para o carrossel do passeio</p>
+                        <div id="gallery-list" class="repeater-list">
+                            <?php
+                            $galleryImages = ($isEdit && !empty($trip['gallery'])) ? json_decode($trip['gallery'], true) : [];
+                            if (!empty($galleryImages)):
+                                foreach ($galleryImages as $gImg):
+                            ?>
+                            <div class="repeater-item">
+                                <input type="text" name="gallery_images[]" value="<?= e($gImg) ?>" class="form-control" placeholder="URL da imagem">
+                                <button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button>
+                            </div>
+                            <?php endforeach; else: ?>
+                            <div class="repeater-item">
+                                <input type="text" name="gallery_images[]" value="" class="form-control" placeholder="URL da imagem">
+                                <button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('gallery-list', 'gallery_images[]', 'URL da imagem')">+ Adicionar Imagem</button>
+                    </div>
                     <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="partial_payment_enabled" <?= !empty($trip['partial_payment_enabled']) ? 'checked' : '' ?>> Pagamento Parcial</label></div>
                     <div class="form-group"><label>% Depósito</label><input type="number" name="partial_payment_percent" value="<?= e($trip['partial_payment_percent'] ?? '50') ?>" class="form-control" min="1" max="99"></div>
                 </div>
