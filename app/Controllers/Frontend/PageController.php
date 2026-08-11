@@ -148,16 +148,42 @@ class PageController extends Controller
         if (empty($data['content_type'])) $errors['content_type'] = 'Tipo de conteúdo é obrigatório.';
         if (empty($data['how_found'])) $errors['how_found'] = 'Informe como nos conheceu.';
 
-        // Verificar se já existe solicitação com esse email
+        // Verificar se já existe solicitação PENDENTE ou APROVADA com esse email
         $requestModel = new \App\Models\AffiliateRequest();
-        if (empty($errors['email']) && $requestModel->findByEmail($data['email'])) {
-            $errors['email'] = 'Já existe uma solicitação com este email.';
+        if (empty($errors['email'])) {
+            $existingRequest = $requestModel->findByEmail($data['email']);
+            // Só bloqueia se a solicitação existente está pendente ou aprovada
+            if ($existingRequest && in_array($existingRequest['status'], ['pending', 'approved'])) {
+                $errors['email'] = 'Já existe uma solicitação com este email.';
+            }
         }
 
-        // Verificar se email já é de um user existente
+        // Verificar se email já é de um user existente COM afiliado ativo
         $userModel = new \App\Models\User();
-        if (empty($errors['email']) && $userModel->findByEmail($data['email'])) {
-            $errors['email'] = 'Este email já está cadastrado no sistema.';
+        if (empty($errors['email'])) {
+            $existingUser = $userModel->findByEmail($data['email']);
+            if ($existingUser) {
+                // Verificar se esse user tem um afiliado ativo
+                $hasActiveAffiliate = $this->db->fetchOne(
+                    "SELECT id FROM affiliates WHERE user_id = ? AND status = 'active'",
+                    [(int)$existingUser['id']]
+                );
+                if ($hasActiveAffiliate) {
+                    $errors['email'] = 'Este email já está cadastrado como afiliado ativo.';
+                } else {
+                    // User existe mas sem afiliado ativo — limpar registros residuais para permitir novo cadastro
+                    $this->db->delete('affiliates', 'user_id = ?', [(int)$existingUser['id']]);
+                    $this->db->delete('users', 'id = ?', [(int)$existingUser['id']]);
+                }
+            }
+        }
+
+        // Limpar solicitação antiga rejeitada/bloqueada se existir (permite recadastro)
+        if (empty($errors['email'])) {
+            $existingRequest = $requestModel->findByEmail($data['email']);
+            if ($existingRequest && !in_array($existingRequest['status'], ['pending', 'approved'])) {
+                $this->db->delete('affiliate_requests', 'id = ?', [(int)$existingRequest['id']]);
+            }
         }
 
         if (!empty($errors)) {
