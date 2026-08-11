@@ -52,6 +52,7 @@ class EvolutionApi
             'instanceName' => $instanceName,
             'integration' => 'WHATSAPP-BAILEYS',
             'webhook' => [
+                'enabled' => true,
                 'url' => $webhookUrl,
                 'byEvents' => false,
                 'base64' => true,
@@ -287,6 +288,7 @@ class EvolutionApi
     {
         return $this->post("/webhook/set/{$this->instanceName}", [
             'webhook' => [
+                'enabled' => true,
                 'url' => $webhookUrl,
                 'byEvents' => false,
                 'base64' => true,
