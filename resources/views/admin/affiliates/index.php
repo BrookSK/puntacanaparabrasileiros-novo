@@ -131,12 +131,12 @@
                 <?php endif; ?>
             </td>
             <td class="actions-cell" style="display:flex;gap:6px;">
-                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form" onsubmit="return confirm('Reativar este registro? Ele voltará para a lista anterior.')">
+                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form">
                     <?= csrf_field() ?>
                     <input type="hidden" name="source" value="<?= e($aff['source'] ?? 'request') ?>">
                     <button class="btn btn-sm btn-primary">Reativar</button>
                 </form>
-                <form method="POST" action="/admin/afiliados/solicitacao/<?= (int)$aff['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('EXCLUIR PERMANENTEMENTE este registro? Esta ação não pode ser desfeita. O e-mail ficará disponível para novo cadastro.')">
+                <form method="POST" action="/admin/afiliados/solicitacao/<?= (int)$aff['id'] ?>/excluir" class="inline-form">
                     <?= csrf_field() ?>
                     <input type="hidden" name="source" value="<?= e($aff['source'] ?? 'request') ?>">
                     <button class="btn btn-sm btn-danger">Excluir</button>
