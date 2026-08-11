@@ -368,37 +368,41 @@
     }
 
     window.changePaxTransfer = function(field, delta) {
-        const input = document.getElementById('transfer_' + field);
-        if (input) {
-            let v = parseInt(input.value) + delta;
-            if (v < parseInt(input.min)) v = parseInt(input.min);
-            if (v > parseInt(input.max)) v = parseInt(input.max);
-            input.value = v;
-            // Update total display - sum all pax inputs in this dropdown
-            let total = 0;
-            document.querySelectorAll('#paxDropdown .pax-input-sm').forEach(function(inp) {
-                total += parseInt(inp.value) || 0;
-            });
-            const totalEl = document.getElementById('paxTotal');
-            if (totalEl) totalEl.textContent = total;
+        var input = document.getElementById('transfer_' + field);
+        if (!input) return;
+        var v = parseInt(input.value || 0) + delta;
+        var min = parseInt(input.getAttribute('min') || 0);
+        var max = parseInt(input.getAttribute('max') || 99);
+        if (v < min) v = min;
+        if (v > max) v = max;
+        input.value = v;
+        // Update total display
+        var total = 0;
+        var inputs = document.querySelectorAll('#paxDropdown .pax-input-sm');
+        for (var i = 0; i < inputs.length; i++) {
+            total += parseInt(inputs[i].value) || 0;
         }
+        var totalEl = document.getElementById('paxTotal');
+        if (totalEl) totalEl.textContent = total;
     };
 
     // Pax counter for multiple transfers tab
     window.changePaxMulti = function(field, delta) {
-        const input = document.getElementById('multi_' + field);
-        if (input) {
-            let v = parseInt(input.value) + delta;
-            if (v < parseInt(input.min)) v = parseInt(input.min);
-            if (v > parseInt(input.max)) v = parseInt(input.max);
-            input.value = v;
-            let total = 0;
-            document.querySelectorAll('#paxDropdownMulti .pax-input-sm').forEach(function(inp) {
-                total += parseInt(inp.value) || 0;
-            });
-            const totalEl = document.getElementById('paxTotalMulti');
-            if (totalEl) totalEl.textContent = total;
+        var input = document.getElementById('multi_' + field);
+        if (!input) return;
+        var v = parseInt(input.value || 0) + delta;
+        var min = parseInt(input.getAttribute('min') || 0);
+        var max = parseInt(input.getAttribute('max') || 99);
+        if (v < min) v = min;
+        if (v > max) v = max;
+        input.value = v;
+        var total = 0;
+        var inputs = document.querySelectorAll('#paxDropdownMulti .pax-input-sm');
+        for (var i = 0; i < inputs.length; i++) {
+            total += parseInt(inputs[i].value) || 0;
         }
+        var totalEl = document.getElementById('paxTotalMulti');
+        if (totalEl) totalEl.textContent = total;
     };
 
     // Multiple transfers - add route

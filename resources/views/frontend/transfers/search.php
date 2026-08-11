@@ -453,6 +453,84 @@ const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['i
 })();
 </script>
 
+<script>
+// Pax counter functions - definidas diretamente para garantir funcionamento
+window.changePaxTransfer = function(field, delta) {
+    var input = document.getElementById('transfer_' + field);
+    if (!input) return;
+    var v = parseInt(input.value || 0) + delta;
+    var min = parseInt(input.getAttribute('min') || 0);
+    var max = parseInt(input.getAttribute('max') || 99);
+    if (v < min) v = min;
+    if (v > max) v = max;
+    input.value = v;
+    var total = 0;
+    var inputs = document.querySelectorAll('#paxDropdown .pax-input-sm');
+    for (var i = 0; i < inputs.length; i++) { total += parseInt(inputs[i].value) || 0; }
+    var totalEl = document.getElementById('paxTotal');
+    if (totalEl) totalEl.textContent = total;
+};
+
+window.changePaxMulti = function(field, delta) {
+    var input = document.getElementById('multi_' + field);
+    if (!input) return;
+    var v = parseInt(input.value || 0) + delta;
+    var min = parseInt(input.getAttribute('min') || 0);
+    var max = parseInt(input.getAttribute('max') || 99);
+    if (v < min) v = min;
+    if (v > max) v = max;
+    input.value = v;
+    var total = 0;
+    var inputs = document.querySelectorAll('#paxDropdownMulti .pax-input-sm');
+    for (var i = 0; i < inputs.length; i++) { total += parseInt(inputs[i].value) || 0; }
+    var totalEl = document.getElementById('paxTotalMulti');
+    if (totalEl) totalEl.textContent = total;
+};
+
+// Event delegation nos dropdowns para capturar cliques nos botões +/-
+(function() {
+    var paxDrop = document.getElementById('paxDropdown');
+    var paxDropMulti = document.getElementById('paxDropdownMulti');
+
+    function handlePaxClick(e, prefix, totalId, dropdownId) {
+        var btn = e.target.closest('.pax-btn');
+        if (!btn) return;
+        e.preventDefault();
+        e.stopPropagation();
+        var row = btn.closest('.pax-counter');
+        if (!row) return;
+        var input = row.querySelector('.pax-input-sm');
+        if (!input) return;
+        var delta = btn.classList.contains('pax-btn-plus') ? 1 : -1;
+        var v = parseInt(input.value || 0) + delta;
+        var min = parseInt(input.getAttribute('min') || 0);
+        var max = parseInt(input.getAttribute('max') || 99);
+        if (v < min) v = min;
+        if (v > max) v = max;
+        input.value = v;
+        // Update total
+        var total = 0;
+        var allInputs = document.querySelectorAll('#' + dropdownId + ' .pax-input-sm');
+        for (var i = 0; i < allInputs.length; i++) { total += parseInt(allInputs[i].value) || 0; }
+        var totalEl = document.getElementById(totalId);
+        if (totalEl) totalEl.textContent = total;
+    }
+
+    if (paxDrop) {
+        paxDrop.addEventListener('click', function(e) {
+            e.stopPropagation();
+            handlePaxClick(e, 'transfer_', 'paxTotal', 'paxDropdown');
+        });
+    }
+    if (paxDropMulti) {
+        paxDropMulti.addEventListener('click', function(e) {
+            e.stopPropagation();
+            handlePaxClick(e, 'multi_', 'paxTotalMulti', 'paxDropdownMulti');
+        });
+    }
+})();
+</script>
+
 <style>
 .tf-autocomplete { position: relative; }
 .tf-autocomplete-input { width: 100%; }
