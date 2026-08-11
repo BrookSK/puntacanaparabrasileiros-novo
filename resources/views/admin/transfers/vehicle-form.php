@@ -99,7 +99,7 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
                     </div>
                 </div>
 
-                <!-- Barra de busca e contador -->
+                <!-- Barra de busca, botão adicionar e contador -->
                 <div class="routes-toolbar">
                     <div class="routes-search-box">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -109,6 +109,10 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
                         <span class="routes-counter"><strong><?= count($routes) ?></strong> rota<?= count($routes) !== 1 ? 's' : '' ?></span>
                         <button type="button" class="btn btn-sm btn-outline" onclick="toggleAllRoutes(true)">Expandir Todas</button>
                         <button type="button" class="btn btn-sm btn-outline" onclick="toggleAllRoutes(false)">Recolher Todas</button>
+                        <button type="button" class="btn btn-sm btn-primary" onclick="addRoute()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            Adicionar Rota
+                        </button>
                     </div>
                 </div>
 
@@ -170,29 +174,37 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
 
                             <?php if (!empty($route['tariffs'])): ?>
                             <div class="tariffs-block">
-                                <p class="tariffs-block-label">Tarifas por faixa de passageiros:</p>
+                                <p class="tariffs-block-label">Tarifas por faixa de passageiros</p>
                                 <?php foreach ($route['tariffs'] as $j => $tariff): ?>
-                                <div class="form-row form-row-4">
-                                    <div class="form-group">
-                                        <label>Serviço</label>
-                                        <select name="routes[<?= $i ?>][tariffs][<?= $j ?>][service_type]" class="form-control">
-                                            <option value="private" <?= ($tariff['service_type'] ?? '') === 'private' ? 'selected' : '' ?>>Privado</option>
-                                            <option value="shared" <?= ($tariff['service_type'] ?? '') === 'shared' ? 'selected' : '' ?>>Compartilhado</option>
-                                        </select>
+                                <div class="tariff-card">
+                                    <div class="tariff-card-header">
+                                        <span class="tariff-card-badge">Faixa <?= $j + 1 ?></span>
+                                        <span class="tariff-card-summary"><?= ($tariff['service_type'] ?? 'private') === 'private' ? 'Privado' : 'Compartilhado' ?> &bull; <?= (int)($tariff['min_pax'] ?? 1) ?>-<?= (int)($tariff['max_pax'] ?? 10) ?> passageiros &bull; $<?= number_format((float)($tariff['price'] ?? 0), 2) ?></span>
                                     </div>
-                                    <div class="form-group">
-                                        <label>Min Pax</label>
-                                        <input type="number" name="routes[<?= $i ?>][tariffs][<?= $j ?>][min_pax]" class="form-control" value="<?= (int)($tariff['min_pax'] ?? 1) ?>">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Max Pax</label>
-                                        <input type="number" name="routes[<?= $i ?>][tariffs][<?= $j ?>][max_pax]" class="form-control" value="<?= (int)($tariff['max_pax'] ?? 10) ?>">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Preço (USD)</label>
-                                        <div class="input-prefix-wrapper">
-                                            <span class="input-prefix">$</span>
-                                            <input type="number" step="0.01" name="routes[<?= $i ?>][tariffs][<?= $j ?>][price]" class="form-control input-with-prefix" value="<?= number_format((float)($tariff['price'] ?? 0), 2, '.', '') ?>">
+                                    <div class="tariff-card-body">
+                                        <div class="form-row form-row-4">
+                                            <div class="form-group">
+                                                <label>Tipo de Serviço</label>
+                                                <select name="routes[<?= $i ?>][tariffs][<?= $j ?>][service_type]" class="form-control">
+                                                    <option value="private" <?= ($tariff['service_type'] ?? '') === 'private' ? 'selected' : '' ?>>Privado</option>
+                                                    <option value="shared" <?= ($tariff['service_type'] ?? '') === 'shared' ? 'selected' : '' ?>>Compartilhado</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Mínimo de Passageiros</label>
+                                                <input type="number" name="routes[<?= $i ?>][tariffs][<?= $j ?>][min_pax]" class="form-control" value="<?= (int)($tariff['min_pax'] ?? 1) ?>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Máximo de Passageiros</label>
+                                                <input type="number" name="routes[<?= $i ?>][tariffs][<?= $j ?>][max_pax]" class="form-control" value="<?= (int)($tariff['max_pax'] ?? 10) ?>">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Preço (USD)</label>
+                                                <div class="input-prefix-wrapper">
+                                                    <span class="input-prefix">$</span>
+                                                    <input type="number" step="0.01" name="routes[<?= $i ?>][tariffs][<?= $j ?>][price]" class="form-control input-with-prefix" value="<?= number_format((float)($tariff['price'] ?? 0), 2, '.', '') ?>">
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -203,11 +215,6 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
                     </div>
                     <?php endforeach; ?>
                 </div>
-
-                <button type="button" class="btn btn-outline" onclick="addRoute()" style="margin-top:16px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Adicionar Rota
-                </button>
             </div>
 
             <style>
@@ -235,7 +242,15 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
             .route-block-body{display:none;padding:18px;background:#fff;border-top:1px solid #f1f5f9}
             .route-block.open .route-block-body{display:block}
             .tariffs-block{margin-top:16px;padding-top:16px;border-top:1px dashed #e2e8f0}
-            .tariffs-block-label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.3px;margin-bottom:12px}
+            .tariffs-block-label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.3px;margin-bottom:14px}
+            .tariff-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;overflow:hidden}
+            .tariff-card-header{padding:10px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;gap:10px}
+            .tariff-card-badge{font-size:10px;font-weight:700;color:#3b82f6;background:rgba(59,130,246,0.1);padding:3px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.3px}
+            .tariff-card-summary{font-size:11px;color:#64748b}
+            .tariff-card-body{padding:14px}
+            .tariff-card-body .form-row-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+            .tariff-card-body .form-group{margin-bottom:0}
+            .tariff-card-body .form-group label{font-size:11px;font-weight:600;color:#475569;margin-bottom:4px}
             </style>
             <?php endif; ?>
         </div>
