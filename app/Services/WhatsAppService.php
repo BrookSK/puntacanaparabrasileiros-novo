@@ -6,19 +6,34 @@ namespace App\Services;
 use Core\App;
 
 /**
- * Serviço de notificações WhatsApp via webhook.
- * Envia mensagens automáticas após confirmação de reserva.
+ * Serviço de notificações WhatsApp para o sistema.
+ * 
+ * Usa o WhatsappNotifier (Evolution API) como motor de envio principal.
+ * Mantém compatibilidade com webhook legado como fallback.
+ * 
+ * Responsável por montar mensagens a partir de templates e dados de reservas,
+ * delegando o envio efetivo para o WhatsappNotifier.
  */
 class WhatsAppService
 {
-    private string $webhookUrl;
+    private ?WhatsappNotifier $notifier = null;
+    private string $legacyWebhookUrl;
     private bool $enabled;
+    private App $app;
 
     public function __construct()
     {
-        $app = App::getInstance();
-        $this->webhookUrl = $app->setting('whatsapp_webhook_url', '');
-        $this->enabled = $app->setting('whatsapp_enabled', '0') === '1';
+        $this->app = App::getInstance();
+        $this->enabled = $this->app->setting('whatsapp_enabled', '0') === '1';
+        $this->legacyWebhookUrl = $this->app->setting('whatsapp_webhook_url', '');
+
+        // Inicializa o notifier (pode falhar silenciosamente se tabelas não existem ainda)
+        try {
+            $this->notifier = new WhatsappNotifier();
+        } catch (\Throwable $e) {
+            // Notifier indisponível — fallback para webhook legado
+            $this->notifier = null;
+        }
     }
 
     /**
@@ -26,16 +41,18 @@ class WhatsAppService
      */
     public function sendTripConfirmation(array $booking, array $tripData): bool
     {
-        if (!$this->enabled || !$this->webhookUrl) {
+        if (!$this->enabled) {
             return false;
         }
 
         $phone = $this->formatPhone($booking['billing_phone'] ?? '');
         if (!$phone) return false;
 
-        $template = App::getInstance()->setting('whatsapp_trip_template', '');
+        $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
+
+        $template = $this->app->setting('whatsapp_trip_template', '');
         $message = $this->replaceVariables($template, [
-            'customer_name' => $booking['billing_first_name'] . ' ' . $booking['billing_last_name'],
+            'customer_name' => $customerName,
             'trip_name' => $tripData['title'] ?? '',
             'trip_date' => $tripData['date'] ?? '',
             'trip_time' => $tripData['time'] ?? '',
@@ -44,7 +61,12 @@ class WhatsAppService
             'reference' => $tripData['reference'] ?? $booking['booking_number'] ?? '',
         ]);
 
-        return $this->sendMessage($phone, $message);
+        if (empty($message)) {
+            // Mensagem padrão se template não configurado
+            $message = $this->buildDefaultTripMessage($customerName, $tripData, $booking);
+        }
+
+        return $this->send($phone, $message, $customerName);
     }
 
     /**
@@ -52,16 +74,18 @@ class WhatsAppService
      */
     public function sendTransferConfirmation(array $transferData): bool
     {
-        if (!$this->enabled || !$this->webhookUrl) {
+        if (!$this->enabled) {
             return false;
         }
 
         $phone = $this->formatPhone($transferData['customer_phone'] ?? '');
         if (!$phone) return false;
 
-        $template = App::getInstance()->setting('whatsapp_transfer_template', '');
+        $customerName = $transferData['customer_name'] ?? '';
+
+        $template = $this->app->setting('whatsapp_transfer_template', '');
         $message = $this->replaceVariables($template, [
-            'customer_name' => $transferData['customer_name'] ?? '',
+            'customer_name' => $customerName,
             'vehicle_name' => $transferData['vehicle_title'] ?? '',
             'origin' => $transferData['origin_title'] ?? '',
             'destination' => $transferData['destination_title'] ?? '',
@@ -71,20 +95,106 @@ class WhatsAppService
             'reference' => $transferData['reference'] ?? '',
         ]);
 
-        return $this->sendMessage($phone, $message);
+        if (empty($message)) {
+            $message = $this->buildDefaultTransferMessage($customerName, $transferData);
+        }
+
+        return $this->send($phone, $message, $customerName);
     }
 
     /**
-     * Envia mensagem genérica via webhook.
+     * Envia notificação para o grupo padrão (ex: nova reserva).
      */
-    public function sendMessage(string $phone, string $message): bool
+    public function notifyGroup(string $message): bool
     {
+        if (!$this->enabled) {
+            return false;
+        }
+
+        // Usar WhatsappNotifier se disponível
+        if ($this->notifier && $this->notifier->isGroupNotifyEnabled()) {
+            return $this->notifier->sendToDefaultGroup($message);
+        }
+
+        return false;
+    }
+
+    /**
+     * Envia notificação de nova reserva para o grupo do admin.
+     */
+    public function notifyNewBooking(array $booking, array $items = [], array $transfers = []): bool
+    {
+        $message = "🎉 *Nova Reserva!*\n\n";
+        $message .= "📋 *Pedido:* #{$booking['booking_number']}\n";
+        $message .= "👤 *Cliente:* {$booking['billing_first_name']} {$booking['billing_last_name']}\n";
+        $message .= "📱 *Telefone:* {$booking['billing_phone']}\n";
+        $message .= "💰 *Total:* $" . number_format((float) ($booking['total'] ?? 0), 2) . "\n";
+
+        if (!empty($items)) {
+            $message .= "\n*Passeios:*\n";
+            foreach ($items as $item) {
+                $message .= "• {$item['trip_title']} — {$item['trip_date']}\n";
+            }
+        }
+
+        if (!empty($transfers)) {
+            $message .= "\n*Transfers:*\n";
+            foreach ($transfers as $transfer) {
+                $origin = $transfer['origin_title'] ?? 'Origem';
+                $dest = $transfer['destination_title'] ?? 'Destino';
+                $message .= "• {$origin} → {$dest} — {$transfer['date']}\n";
+            }
+        }
+
+        return $this->notifyGroup($message);
+    }
+
+    /**
+     * Envia mensagem genérica para um número.
+     * Método unificado que tenta Evolution API primeiro, fallback para webhook legado.
+     */
+    public function sendMessage(string $phone, string $message, ?string $contactName = null): bool
+    {
+        return $this->send($phone, $message, $contactName);
+    }
+
+    // ─────────────────────────────────────────────
+    // PRIVADO
+    // ─────────────────────────────────────────────
+
+    /**
+     * Envia mensagem usando WhatsappNotifier (Evolution API) com fallback para webhook legado.
+     */
+    private function send(string $phone, string $message, ?string $contactName = null): bool
+    {
+        if (empty($phone) || empty($message)) {
+            return false;
+        }
+
+        // Tentar via WhatsappNotifier (Evolution API) primeiro
+        if ($this->notifier && $this->notifier->isAvailable()) {
+            return $this->notifier->sendToPhone($phone, $message, $contactName);
+        }
+
+        // Fallback: webhook legado
+        return $this->sendViaLegacyWebhook($phone, $message);
+    }
+
+    /**
+     * Envio via webhook legado (método original do sistema).
+     */
+    private function sendViaLegacyWebhook(string $phone, string $message): bool
+    {
+        if (empty($this->legacyWebhookUrl)) {
+            return false;
+        }
+
         $payload = json_encode([
             'numero' => $phone,
             'message' => $message,
         ]);
 
-        $ch = curl_init($this->webhookUrl);
+        $ch = curl_init($this->legacyWebhookUrl);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST => true,
@@ -104,24 +214,71 @@ class WhatsAppService
     }
 
     /**
+     * Monta mensagem padrão de confirmação de passeio (quando template não configurado).
+     */
+    private function buildDefaultTripMessage(string $customerName, array $tripData, array $booking): string
+    {
+        $message = "✅ *Reserva Confirmada!*\n\n";
+        $message .= "Olá, *{$customerName}*! 🎉\n\n";
+        $message .= "Sua reserva foi confirmada:\n\n";
+        $message .= "🎯 *Passeio:* {$tripData['title']}\n";
+
+        if (!empty($tripData['date'])) {
+            $message .= "📅 *Data:* {$tripData['date']}\n";
+        }
+        if (!empty($tripData['time'])) {
+            $message .= "⏰ *Horário:* {$tripData['time']}\n";
+        }
+        if (!empty($tripData['pax_info'])) {
+            $message .= "👥 *Passageiros:* {$tripData['pax_info']}\n";
+        }
+
+        $total = '$' . number_format((float) ($booking['total'] ?? 0), 2);
+        $message .= "💰 *Total:* {$total}\n";
+        $message .= "📋 *Referência:* {$booking['booking_number']}\n\n";
+        $message .= "Obrigado pela preferência! 🌴";
+
+        return $message;
+    }
+
+    /**
+     * Monta mensagem padrão de confirmação de transfer (quando template não configurado).
+     */
+    private function buildDefaultTransferMessage(string $customerName, array $transferData): string
+    {
+        $message = "✅ *Transfer Confirmado!*\n\n";
+        $message .= "Olá, *{$customerName}*! 🚗\n\n";
+        $message .= "Seu transfer foi confirmado:\n\n";
+        $message .= "🚗 *Veículo:* {$transferData['vehicle_title']}\n";
+        $message .= "📍 *Origem:* {$transferData['origin_title']}\n";
+        $message .= "📍 *Destino:* {$transferData['destination_title']}\n";
+
+        if (!empty($transferData['date'])) {
+            $message .= "📅 *Data:* {$transferData['date']}\n";
+        }
+        if (!empty($transferData['time'])) {
+            $message .= "⏰ *Horário:* {$transferData['time']}\n";
+        }
+
+        $adults = $transferData['adults'] ?? 0;
+        $message .= "👥 *Passageiros:* {$adults} adulto(s)\n";
+
+        if (!empty($transferData['reference'])) {
+            $message .= "📋 *Referência:* {$transferData['reference']}\n";
+        }
+
+        $message .= "\nObrigado pela preferência! 🌴";
+
+        return $message;
+    }
+
+    /**
      * Formata número de telefone para formato internacional.
      */
     private function formatPhone(string $phone): string
     {
-        // Remove tudo exceto dígitos
-        $phone = preg_replace('/[^0-9]/', '', $phone);
-
-        // Se começa com 0, assumir Brasil e adicionar 55
-        if (str_starts_with($phone, '0')) {
-            $phone = '55' . substr($phone, 1);
-        }
-
-        // Se tem menos de 10 dígitos, inválido
-        if (strlen($phone) < 10) {
-            return '';
-        }
-
-        return $phone;
+        // Usar a normalização do EvolutionApi (padrão unificado)
+        return EvolutionApi::normalizePhone($phone);
     }
 
     /**
@@ -129,9 +286,14 @@ class WhatsAppService
      */
     private function replaceVariables(string $template, array $variables): string
     {
+        if (empty($template)) {
+            return '';
+        }
+
         foreach ($variables as $key => $value) {
             $template = str_replace('{' . $key . '}', (string) $value, $template);
         }
+
         return $template;
     }
 }

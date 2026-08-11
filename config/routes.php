@@ -253,3 +253,107 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/cancelamentos/{id}/reembolsar', [AdminCancellationsController::class, 'refund'], [CsrfMiddleware::class], 'admin.cancellations.refund');
 
 });
+
+// ============================================================
+// WHATSAPP (módulo de chat e instâncias)
+// ============================================================
+use App\Controllers\Admin\WhatsAppController;
+use App\Controllers\Admin\CrmController;
+use App\Middleware\WhatsAppMiddleware;
+
+$router->group(['prefix' => '/whatsapp', 'middleware' => [AuthMiddleware::class, WhatsAppMiddleware::class]], function ($router) {
+    // Instâncias (tela de configuração)
+    $router->get('', [WhatsAppController::class, 'index'], [], 'whatsapp.index');
+    $router->post('/createInstance', [WhatsAppController::class, 'createInstance'], [], 'whatsapp.instance.create');
+    $router->get('/connect/{id}', [WhatsAppController::class, 'connect'], [], 'whatsapp.instance.connect');
+    $router->get('/status/{id}', [WhatsAppController::class, 'status'], [], 'whatsapp.instance.status');
+    $router->post('/disconnect/{id}', [WhatsAppController::class, 'disconnect'], [], 'whatsapp.instance.disconnect');
+    $router->post('/setDefault/{id}', [WhatsAppController::class, 'setDefault'], [], 'whatsapp.instance.default');
+    $router->post('/updateInstance/{id}', [WhatsAppController::class, 'updateInstance'], [], 'whatsapp.instance.update');
+    $router->post('/deleteInstance/{id}', [WhatsAppController::class, 'deleteInstance'], [], 'whatsapp.instance.delete');
+    $router->post('/registerWebhookEvents/{id}', [WhatsAppController::class, 'registerWebhook'], [], 'whatsapp.instance.webhook');
+
+    // Chat
+    $router->get('/chat', [WhatsAppController::class, 'chat'], [], 'whatsapp.chat');
+    $router->get('/chat/{id}', [WhatsAppController::class, 'chat'], [], 'whatsapp.chat.contact');
+
+    // API: Contatos e mensagens
+    $router->get('/contacts', [WhatsAppController::class, 'contacts'], [], 'whatsapp.contacts');
+    $router->get('/messages/{id}', [WhatsAppController::class, 'messages'], [], 'whatsapp.messages');
+    $router->get('/poll/{id}', [WhatsAppController::class, 'poll'], [], 'whatsapp.poll');
+    $router->get('/messageStatuses/{id}', [WhatsAppController::class, 'messageStatuses'], [], 'whatsapp.statuses');
+
+    // API: Envio
+    $router->post('/send', [WhatsAppController::class, 'send'], [], 'whatsapp.send');
+    $router->post('/sendMedia', [WhatsAppController::class, 'sendMedia'], [], 'whatsapp.sendMedia');
+    $router->post('/sendQuickReply', [WhatsAppController::class, 'sendQuickReply'], [], 'whatsapp.sendQuickReply');
+
+    // API: Contatos
+    $router->get('/contactDetail/{id}', [WhatsAppController::class, 'contactDetail'], [], 'whatsapp.contact.detail');
+    $router->post('/updateContact/{id}', [WhatsAppController::class, 'updateContact'], [], 'whatsapp.contact.update');
+    $router->post('/updateServiceStatus/{id}', [WhatsAppController::class, 'updateServiceStatus'], [], 'whatsapp.contact.status');
+    $router->post('/toggleLabel', [WhatsAppController::class, 'toggleLabel'], [], 'whatsapp.label.toggle');
+    $router->post('/createLabel', [WhatsAppController::class, 'createLabel'], [], 'whatsapp.label.create');
+    $router->post('/startConversation', [WhatsAppController::class, 'startConversation'], [], 'whatsapp.conversation.start');
+    $router->post('/deleteContact/{id}', [WhatsAppController::class, 'deleteContact'], [], 'whatsapp.contact.delete');
+
+    // API: Briefing
+    $router->get('/getBriefing/{id}', [WhatsAppController::class, 'getBriefing'], [], 'whatsapp.briefing.get');
+    $router->post('/saveBriefing/{id}', [WhatsAppController::class, 'saveBriefing'], [], 'whatsapp.briefing.save');
+
+    // API: CRM
+    $router->post('/addToCrm', [WhatsAppController::class, 'addToCrm'], [], 'whatsapp.crm.add');
+
+    // API: Respostas rápidas
+    $router->get('/quickReplies', [WhatsAppController::class, 'quickReplies'], [], 'whatsapp.replies.list');
+    $router->post('/saveQuickReply', [WhatsAppController::class, 'saveQuickReply'], [], 'whatsapp.replies.save');
+    $router->post('/deleteQuickReply/{id}', [WhatsAppController::class, 'deleteQuickReply'], [], 'whatsapp.replies.delete');
+
+    // API: Transcrição
+    $router->post('/transcribeAudio/{id}', [WhatsAppController::class, 'transcribeAudio'], [], 'whatsapp.transcribe');
+
+    // API: Sincronização
+    $router->post('/syncGroups', [WhatsAppController::class, 'syncGroups'], [], 'whatsapp.sync.groups');
+    $router->post('/syncPhotos', [WhatsAppController::class, 'syncPhotos'], [], 'whatsapp.sync.photos');
+});
+
+// Webhook WhatsApp (público, sem autenticação)
+$router->post('/whatsapp/webhook', [WhatsAppController::class, 'webhook'], [], 'whatsapp.webhook');
+
+// ============================================================
+// CRM (módulo de gestão de leads)
+// ============================================================
+$router->group(['prefix' => '/crm', 'middleware' => [AuthMiddleware::class, WhatsAppMiddleware::class]], function ($router) {
+    // Boards
+    $router->get('', [CrmController::class, 'index'], [], 'crm.index');
+    $router->post('/createBoard', [CrmController::class, 'createBoard'], [], 'crm.board.create');
+    $router->post('/deleteBoard/{id}', [CrmController::class, 'deleteBoard'], [], 'crm.board.delete');
+    $router->get('/listBoards', [CrmController::class, 'listBoards'], [], 'crm.boards.list');
+
+    // Kanban
+    $router->get('/board/{id}', [CrmController::class, 'board'], [], 'crm.board.view');
+
+    // Colunas
+    $router->post('/createColumn', [CrmController::class, 'createColumn'], [], 'crm.column.create');
+    $router->post('/updateColumn/{id}', [CrmController::class, 'updateColumn'], [], 'crm.column.update');
+    $router->post('/deleteColumn/{id}', [CrmController::class, 'deleteColumn'], [], 'crm.column.delete');
+
+    // Cards
+    $router->post('/createCard', [CrmController::class, 'createCard'], [], 'crm.card.create');
+    $router->post('/updateCard/{id}', [CrmController::class, 'updateCard'], [], 'crm.card.update');
+    $router->post('/moveCard', [CrmController::class, 'moveCard'], [], 'crm.card.move');
+    $router->post('/deleteCard/{id}', [CrmController::class, 'deleteCard'], [], 'crm.card.delete');
+    $router->get('/cardDetail/{id}', [CrmController::class, 'cardDetail'], [], 'crm.card.detail');
+    $router->post('/addNote/{id}', [CrmController::class, 'addNote'], [], 'crm.card.note');
+    $router->post('/convertLead/{id}', [CrmController::class, 'convertLead'], [], 'crm.card.convert');
+    $router->post('/lostLead/{id}', [CrmController::class, 'lostLead'], [], 'crm.card.lost');
+    $router->post('/setFollowUp/{id}', [CrmController::class, 'setFollowUp'], [], 'crm.card.followup');
+    $router->post('/runFollowUps', [CrmController::class, 'runFollowUps'], [], 'crm.followups.run');
+
+    // Dashboard
+    $router->get('/dashboard', [CrmController::class, 'dashboard'], [], 'crm.dashboard');
+
+    // Comissões
+    $router->get('/commissions', [CrmController::class, 'commissions'], [], 'crm.commissions');
+    $router->get('/commissionLeads/{id}', [CrmController::class, 'commissionLeads'], [], 'crm.commissions.leads');
+});

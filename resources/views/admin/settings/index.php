@@ -166,12 +166,28 @@
                 <div class="admin-card-icon admin-card-icon-green">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
                 </div>
-                <div><h3>WhatsApp</h3><p class="admin-card-subtitle">Notificações via WhatsApp</p></div>
+                <div><h3>WhatsApp</h3><p class="admin-card-subtitle">Configurações da Evolution API e notificações</p></div>
             </div>
-            <div class="form-group"><label><input type="checkbox" name="whatsapp_enabled" value="1" <?= ($settings['whatsapp']['whatsapp_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar Notificações WhatsApp</label></div>
-            <div class="form-group"><label>URL do Webhook</label><input type="url" name="whatsapp_webhook_url" class="form-control" value="<?= e($settings['whatsapp']['whatsapp_webhook_url']['setting_value'] ?? '') ?>"></div>
-            <div class="form-group"><label>Template - Passeio</label><textarea name="whatsapp_trip_template" class="form-control" rows="4"><?= e($settings['whatsapp']['whatsapp_trip_template']['setting_value'] ?? '') ?></textarea></div>
-            <div class="form-group"><label>Template - Transfer</label><textarea name="whatsapp_transfer_template" class="form-control" rows="4"><?= e($settings['whatsapp']['whatsapp_transfer_template']['setting_value'] ?? '') ?></textarea></div>
+
+            <h4 style="margin: 20px 0 12px; font-size: 14px; color: #475569;">Evolution API (Chat)</h4>
+            <div class="form-row">
+                <div class="form-group"><label>URL da Evolution API</label><input type="url" name="evolution_api_url" class="form-control" value="<?= e($settings['whatsapp']['evolution_api_url']['setting_value'] ?? '') ?>" placeholder="https://evo.seudominio.com"></div>
+                <div class="form-group"><label>API Key da Evolution API</label><input type="text" name="evolution_api_key" class="form-control" value="<?= e($settings['whatsapp']['evolution_api_key']['setting_value'] ?? '') ?>" placeholder="sua-api-key-aqui"></div>
+            </div>
+            <div class="form-group"><label>Nome da Instância Padrão</label><input type="text" name="evolution_instance_name" class="form-control" value="<?= e($settings['whatsapp']['evolution_instance_name']['setting_value'] ?? '') ?>" placeholder="minha-instancia"></div>
+
+            <h4 style="margin: 24px 0 12px; font-size: 14px; color: #475569;">Notificações em Grupo</h4>
+            <div class="form-group"><label><input type="checkbox" name="whatsapp_group_notify_enabled" value="1" <?= ($settings['whatsapp']['whatsapp_group_notify_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar notificações em grupo WhatsApp</label></div>
+            <div class="form-group"><label>JID do Grupo Padrão</label><input type="text" name="whatsapp_default_group_jid" class="form-control" value="<?= e($settings['whatsapp']['whatsapp_default_group_jid']['setting_value'] ?? '') ?>" placeholder="123456789@g.us"><small style="color:#6b7280;">Formato: numerodogrupo@g.us (visível na lista de contatos do chat)</small></div>
+
+            <h4 style="margin: 24px 0 12px; font-size: 14px; color: #475569;">OpenAI (Transcrição de Áudio)</h4>
+            <div class="form-group"><label>API Key OpenAI</label><input type="text" name="openai_api_key" class="form-control" value="<?= e($settings['integrations']['openai_api_key']['setting_value'] ?? $settings['whatsapp']['openai_api_key']['setting_value'] ?? '') ?>" placeholder="sk-..."><small style="color:#6b7280;">Usada para transcrever áudios com Whisper (modelo whisper-1)</small></div>
+
+            <h4 style="margin: 24px 0 12px; font-size: 14px; color: #475569;">Notificações de Reservas (Legado)</h4>
+            <div class="form-group"><label><input type="checkbox" name="whatsapp_enabled" value="1" <?= ($settings['whatsapp']['whatsapp_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar Notificações WhatsApp para reservas</label></div>
+            <div class="form-group"><label>URL do Webhook (legado)</label><input type="url" name="whatsapp_webhook_url" class="form-control" value="<?= e($settings['whatsapp']['whatsapp_webhook_url']['setting_value'] ?? '') ?>" placeholder="https://n8n.seusite.com/webhook/..."><small style="color:#6b7280;">Usado como fallback se a Evolution API não estiver conectada</small></div>
+            <div class="form-group"><label>Template - Passeio</label><textarea name="whatsapp_trip_template" class="form-control" rows="4"><?= e($settings['whatsapp']['whatsapp_trip_template']['setting_value'] ?? '') ?></textarea><small style="color:#6b7280;">Variáveis: {customer_name}, {trip_name}, {trip_date}, {trip_time}, {pax_info}, {total}, {reference}</small></div>
+            <div class="form-group"><label>Template - Transfer</label><textarea name="whatsapp_transfer_template" class="form-control" rows="4"><?= e($settings['whatsapp']['whatsapp_transfer_template']['setting_value'] ?? '') ?></textarea><small style="color:#6b7280;">Variáveis: {customer_name}, {vehicle_name}, {origin}, {destination}, {date}, {time}, {pax_info}, {reference}</small></div>
         </div>
     </div>
 

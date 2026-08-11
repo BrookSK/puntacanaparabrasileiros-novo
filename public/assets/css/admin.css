@@ -426,3 +426,300 @@ a { color: var(--primary); text-decoration: none; }
     .booking-voucher-item { flex-direction: column; align-items: flex-start; gap: 10px; }
     .booking-status-controls { flex-direction: column; }
 }
+
+/* ═══════════════════════════════════════════════
+   CRM MODULE — Kanban, Cards, Dashboard
+   ═══════════════════════════════════════════════ */
+
+/* ─── Boards Grid ─── */
+.crm-boards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.crm-board-card {
+    background: #fff; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    text-decoration: none; color: inherit; transition: transform .15s, box-shadow .15s;
+}
+.crm-board-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,.1); }
+.crm-board-card h3 { font-size: 16px; margin-bottom: 6px; }
+.crm-board-card p { font-size: 13px; color: #666; margin: 8px 0; }
+.crm-board-card small { font-size: 11px; color: #999; }
+
+/* ─── Kanban ─── */
+.kanban-wrapper {
+    display: flex; gap: 12px; overflow-x: auto; padding: 4px 0 16px;
+    min-height: calc(100vh - 200px);
+}
+.kanban-column {
+    min-width: 280px; max-width: 280px; background: #f4f5f7; border-radius: 8px;
+    display: flex; flex-direction: column; max-height: calc(100vh - 200px);
+}
+.kanban-column-header {
+    display: flex; align-items: center; gap: 6px; padding: 10px 12px;
+    border-bottom: 1px solid #e0e0e0; position: relative;
+}
+.kanban-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.kanban-column-header strong { font-size: 13px; flex: 1; }
+.kanban-col-menu { position: relative; }
+.kanban-col-dropdown {
+    position: absolute; right: 0; top: 100%; background: #fff; border: 1px solid #ddd;
+    border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,.15); z-index: 10; min-width: 120px;
+}
+.kanban-col-dropdown button {
+    display: block; width: 100%; text-align: left; padding: 8px 12px; border: none;
+    background: none; cursor: pointer; font-size: 12px;
+}
+.kanban-col-dropdown button:hover { background: #f5f5f5; }
+.kanban-col-dropdown button.text-danger { color: #c62828; }
+
+.kanban-cards { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.kanban-cards.drag-over { background: rgba(0,191,166,.1); border-radius: 4px; }
+
+/* ─── Kanban Card ─── */
+.kanban-card {
+    background: #fff; border-radius: 6px; padding: 10px 12px; cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08); transition: box-shadow .15s, opacity .2s;
+    position: relative;
+}
+.kanban-card:hover { box-shadow: 0 3px 8px rgba(0,0,0,.12); }
+.kanban-card.dragging { opacity: .5; }
+.kanban-card-title { font-size: 13px; font-weight: 500; margin-bottom: 4px; }
+.kanban-card-meta { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 4px; }
+.kanban-card-phone, .kanban-card-value, .kanban-card-assigned { display: block; font-size: 11px; color: #666; }
+.kanban-card-value { color: #2e7d32; font-weight: 500; }
+
+.badge-mini { font-size: 9px; padding: 1px 5px; border-radius: 3px; color: #fff; display: inline-block; }
+.badge-mini.badge-success { background: #2e7d32; }
+.badge-mini.badge-danger { background: #c62828; }
+.badge-mini.badge-purple { background: #7e57c2; }
+
+.temp-dot { position: absolute; top: 10px; right: 10px; width: 8px; height: 8px; border-radius: 50%; }
+.temp-dot.temp-frio { background: #3b82f6; }
+.temp-dot.temp-morno { background: #f59e0b; }
+.temp-dot.temp-quente { background: #ef4444; }
+
+/* ─── Card Detail ─── */
+.card-detail-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 20px; }
+.card-detail-main .form-group { margin-bottom: 10px; }
+.card-detail-actions { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.card-detail-aside h5 { font-size: 14px; margin-bottom: 8px; }
+.activities-list { max-height: 250px; overflow-y: auto; }
+.activity-item { padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 12px; }
+.activity-item .activity-type { background: #eee; padding: 1px 5px; border-radius: 3px; font-size: 10px; margin-right: 4px; }
+.activity-item small { display: block; color: #999; margin-top: 2px; }
+
+/* ─── Dashboard Stats ─── */
+.stats-grid { display: grid; gap: 12px; }
+.stats-3 { grid-template-columns: repeat(3, 1fr); }
+.stats-5 { grid-template-columns: repeat(5, 1fr); }
+.stat-card { background: #fff; border-radius: 8px; padding: 16px; box-shadow: 0 2px 6px rgba(0,0,0,.05); text-align: center; }
+.stat-value { font-size: 22px; font-weight: 700; color: #333; }
+.stat-label { font-size: 12px; color: #666; margin-top: 4px; }
+.stat-card.stat-success .stat-value { color: #2e7d32; }
+.stat-card.stat-danger .stat-value { color: #c62828; }
+.stat-card.stat-warning .stat-value { color: #e65100; }
+.stat-card.stat-purple .stat-value { color: #7e57c2; }
+.stat-card.stat-info .stat-value { color: #1565c0; }
+
+.dashboard-charts { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; }
+.chart-pie-wrapper, .chart-line-wrapper { padding: 20px; }
+.chart-pie-wrapper h4, .chart-line-wrapper h4 { font-size: 14px; margin-bottom: 12px; }
+
+/* ─── Commissions ─── */
+.filters-row { display: flex; gap: 12px; align-items: flex-end; }
+.commission-row { cursor: pointer; transition: background .15s; }
+.commission-row:hover { background: #f9f9f9; }
+.commission-detail td { padding: 0 !important; }
+.commission-leads-list { padding: 12px 16px; background: #fafafa; }
+.commission-leads-list .table-sm { font-size: 12px; }
+.commission-leads-list .table-sm td, .commission-leads-list .table-sm th { padding: 4px 8px; }
+
+@media (max-width: 768px) {
+    .stats-5 { grid-template-columns: repeat(2, 1fr); }
+    .stats-3 { grid-template-columns: 1fr; }
+    .dashboard-charts { grid-template-columns: 1fr; }
+    .card-detail-grid { grid-template-columns: 1fr; }
+    .kanban-wrapper { min-height: auto; }
+}
+
+/* ═══════════════════════════════════════════════
+   WHATSAPP MODULE — Instâncias, Modals, Shared
+   ═══════════════════════════════════════════════ */
+
+/* ─── Page Header ─── */
+.admin-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+.admin-page-header h2 { font-size: 20px; font-weight: 700; color: #1e293b; margin: 0; }
+.admin-page-header > div { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* ─── Instances Grid ─── */
+.instances-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+}
+.instance-card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
+    border: 1px solid #e2e8f0;
+}
+.instance-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+.instance-name strong { font-size: 15px; display: block; color: #1e293b; }
+.instance-technical { font-size: 11px; color: #94a3b8; font-family: monospace; }
+.instance-badges { display: flex; gap: 6px; flex-wrap: wrap; }
+.instance-info { margin-bottom: 12px; color: #64748b; font-size: 13px; }
+.instance-info p { margin: 4px 0; }
+.instance-qr { text-align: center; margin: 16px 0; }
+.instance-qr img { max-width: 200px; border-radius: 8px; border: 1px solid #e2e8f0; }
+.instance-actions { display: flex; flex-wrap: wrap; gap: 6px; padding-top: 12px; border-top: 1px solid #f1f5f9; }
+
+/* ─── Empty State ─── */
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #94a3b8;
+    grid-column: 1 / -1;
+}
+.empty-state svg { margin-bottom: 16px; opacity: .5; color: #94a3b8; }
+.empty-state p { font-size: 14px; margin-bottom: 16px; }
+
+/* ─── Modals ─── */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+.modal-box {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 85vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+.modal-box.modal-sm { max-width: 400px; }
+.modal-box.modal-lg { max-width: 700px; }
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 24px;
+    border-bottom: 1px solid #f1f5f9;
+}
+.modal-header h3 { font-size: 16px; font-weight: 600; color: #1e293b; margin: 0; }
+.modal-close {
+    background: none; border: none; font-size: 24px; cursor: pointer;
+    color: #94a3b8; width: 32px; height: 32px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all .15s;
+}
+.modal-close:hover { background: #f1f5f9; color: #1e293b; }
+.modal-body-scroll { padding: 24px; overflow-y: auto; flex: 1; }
+.modal-footer {
+    padding: 16px 24px;
+    border-top: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+/* Modal sem body-scroll (form direto dentro do modal-box) */
+.modal-box > form { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+.modal-box > form > .form-group,
+.modal-box > form > .form-row,
+.modal-box > form > div:not(.modal-header):not(.modal-footer) {
+    padding: 0 24px;
+}
+.modal-box > form > .form-group:first-of-type { padding-top: 24px; }
+.modal-box > form > .modal-footer { margin-top: auto; }
+
+/* ─── Form enhancements ─── */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.form-help { font-size: 11px; color: #94a3b8; margin-top: 6px; font-style: italic; }
+.checkbox-label {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer; color: #475569;
+}
+.checkbox-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--primary, #0077b6); }
+
+/* ─── Additional button styles for modules ─── */
+.btn-danger-outline { background: transparent; border: 1.5px solid #ef4444; color: #ef4444; }
+.btn-danger-outline:hover { background: #ef4444; color: #fff; }
+
+/* ─── Modal form overrides (sobrescreve estilos admin padrão dentro de modais) ─── */
+.modal-overlay .form-group { margin-bottom: 16px; }
+.modal-overlay .form-group label {
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    margin-bottom: 6px !important;
+}
+.modal-overlay .form-control {
+    padding: 10px 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.modal-overlay .form-control:focus {
+    border-color: var(--primary, #0077b6);
+    box-shadow: 0 0 0 3px rgba(0, 119, 182, 0.08);
+}
+.modal-overlay .checkbox-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    font-size: 13px !important;
+    color: #374151 !important;
+    cursor: pointer !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+.modal-overlay .checkbox-label:hover {
+    background: transparent !important;
+    border-color: transparent !important;
+}
+.modal-overlay .checkbox-label input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    accent-color: var(--primary, #0077b6) !important;
+}
+.modal-overlay .checkbox-label:has(input:checked) {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: #374151 !important;
+}
+.modal-overlay .form-row { gap: 12px; margin-bottom: 16px; }
+.modal-overlay small { font-size: 11px; color: #6b7280; display: block; margin-top: 4px; }
+.modal-overlay select.form-control { appearance: auto; }
+
+/* ─── Filters row ─── */
+.filters-row { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
+.filters-row .form-group { margin-bottom: 0; }
+
+@media (max-width: 768px) {
+    .instances-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .admin-page-header { flex-direction: column; align-items: flex-start; }
+}
