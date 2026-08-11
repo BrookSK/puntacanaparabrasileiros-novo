@@ -234,15 +234,16 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
             </div>
 
             <style>
-            .routes-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;padding:14px 16px;background:#1e293b;border-radius:8px;flex-wrap:wrap}
-            .routes-search-box{display:flex;align-items:center;gap:8px;flex:1;max-width:320px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:6px;padding:0 10px}
+            .routes-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;padding:12px 0;border-bottom:1px solid #e2e8f0;flex-wrap:wrap}
+            .routes-search-box{display:flex;align-items:center;gap:8px;flex:1;max-width:320px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:0 12px;transition:border-color .15s}
+            .routes-search-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 3px rgba(0,119,182,0.08)}
             .routes-search-box svg{flex-shrink:0;color:#94a3b8}
-            .routes-search-box .form-control{border:none;background:transparent;padding:8px 0;box-shadow:none;color:#fff;font-size:12px}
+            .routes-search-box .form-control{border:none;background:transparent;padding:9px 0;box-shadow:none;color:#1e293b;font-size:13px}
             .routes-search-box .form-control::placeholder{color:#94a3b8}
             .routes-search-box .form-control:focus{box-shadow:none;border:none}
             .routes-actions-bar{display:flex;align-items:center;gap:8px}
-            .routes-counter{font-size:11px;color:#94a3b8;padding:4px 10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:6px}
-            .routes-counter strong{color:#fff}
+            .routes-counter{font-size:11px;color:#64748b;padding:5px 10px;background:#f1f5f9;border:1px solid #e2e8f0;border-radius:6px;font-weight:500}
+            .routes-counter strong{color:#1e293b}
             .route-block{border:1px solid #e2e8f0;border-radius:10px;margin-bottom:12px;overflow:hidden;transition:all .2s}
             .route-block.hidden{display:none}
             .route-block-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;background:#fafbfc;border-bottom:1px solid transparent;transition:all .15s;user-select:none}
@@ -262,8 +263,8 @@ $action = $isEdit ? '/admin/transfers/veiculos/' . $vehicle['id'] . '/editar' : 
             .tariffs-block{margin-top:16px;padding-top:16px;border-top:1px dashed #e2e8f0}
             .tariffs-block-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
             .tariffs-block-label{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.3px;margin:0}
-            .btn-add-tariff{font-size:12px;font-weight:600;color:#3b82f6;background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .15s}
-            .btn-add-tariff:hover{background:rgba(59,130,246,0.15);border-color:#3b82f6}
+            .btn-add-tariff{font-size:12px;font-weight:600;color:#fff;background:var(--primary);border:none;padding:7px 14px;border-radius:8px;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px}
+            .btn-add-tariff:hover{background:#005f8d;box-shadow:0 2px 8px rgba(0,119,182,0.2)}
             .tariff-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:12px;overflow:hidden}
             .tariff-card-header{padding:10px 14px;background:#f1f5f9;border-bottom:1px solid #e2e8f0;display:flex;align-items:center;justify-content:space-between}
             .tariff-card-left{display:flex;align-items:center;gap:10px}
