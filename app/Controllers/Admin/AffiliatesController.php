@@ -69,21 +69,36 @@ class AffiliatesController extends Controller
     {
         // Buscar afiliados que não estão ativos (bloqueados/inativos)
         $blockedAffiliates = $this->db->fetchAll(
-            "SELECT a.id, u.first_name, u.last_name, u.email, 'affiliate' AS source, a.status, a.created_at, a.updated_at
+            "SELECT a.id, u.first_name, u.last_name, u.email, 'affiliate' AS source, a.status, a.notes AS admin_notes, a.created_at, a.updated_at
              FROM affiliates a
              LEFT JOIN users u ON a.user_id = u.id
              WHERE a.status != 'active'
              ORDER BY a.updated_at DESC"
         );
 
-        // Buscar solicitações que NÃO são pending nem approved (captura rejected, vazio, ou qualquer valor)
+        // Extrair block_reason do campo notes JSON para afiliados
+        foreach ($blockedAffiliates as &$aff) {
+            $notes = json_decode($aff['admin_notes'] ?? '', true);
+            $aff['block_reason'] = $notes['block_reason'] ?? '';
+            unset($aff['admin_notes']);
+        }
+        unset($aff);
+
+        // Buscar solicitações que NÃO são pending nem approved
         $blockedRequests = $this->db->fetchAll(
-            "SELECT id, first_name, last_name, email, 'request' AS source, status,
+            "SELECT id, first_name, last_name, email, 'request' AS source, status, admin_notes,
                     created_at, COALESCE(rejected_at, updated_at, created_at) AS updated_at
              FROM affiliate_requests
              WHERE status NOT IN ('pending', 'approved')
              ORDER BY COALESCE(rejected_at, updated_at, created_at) DESC"
         );
+
+        // Para solicitações, o motivo está em admin_notes
+        foreach ($blockedRequests as &$req) {
+            $req['block_reason'] = $req['admin_notes'] ?? '';
+            unset($req['admin_notes']);
+        }
+        unset($req);
 
         // Combinar e ordenar por data mais recente primeiro
         $allBlocked = array_merge($blockedAffiliates, $blockedRequests);
@@ -214,7 +229,7 @@ class AffiliatesController extends Controller
     }
 
     /**
-     * Recusar/bloquear solicitação.
+     * Recusar/bloquear solicitação (com motivo obrigatório).
      */
     public function rejectRequest(Request $request, Response $response): void
     {
@@ -227,20 +242,24 @@ class AffiliatesController extends Controller
             return;
         }
 
-        // Só permite recusar se não está aprovada
         if ($req['status'] === 'approved') {
-            $this->flash('error', 'Esta solicitação já foi aprovada e não pode ser recusada.');
+            $this->flash('error', 'Esta solicitação já foi aprovada e não pode ser bloqueada.');
             $this->redirect('/admin/afiliados');
             return;
         }
 
-        $adminNotes = $request->input('admin_notes', '');
+        $reason = trim($request->input('block_reason', ''));
+
+        if (empty($reason)) {
+            $this->flash('error', 'O motivo do bloqueio é obrigatório.');
+            $this->redirect('/admin/afiliados?tab=solicitacoes');
+            return;
+        }
 
         // Usar query SQL direta para garantir que o status seja atualizado
-        // independente de problemas com ENUM ou model fillable
         $this->db->query(
             "UPDATE affiliate_requests SET status = 'rejected', rejected_at = ?, admin_notes = ? WHERE id = ?",
-            [date('Y-m-d H:i:s'), $adminNotes, $id]
+            [date('Y-m-d H:i:s'), $reason, $id]
         );
 
         // Enviar email de recusa ao solicitante
@@ -253,12 +272,12 @@ class AffiliatesController extends Controller
                 'affiliate-rejected',
                 [
                     'firstName' => $req['first_name'],
-                    'adminNotes' => $adminNotes,
+                    'adminNotes' => $reason,
                     'siteUrl' => $this->setting('site_url', 'https://puntacananovo.lrvweb.com.br'),
                 ]
             );
         } catch (\Exception $e) {
-            // Silenciar erro de email - não impedir o fluxo
+            // Silenciar erro de email
         }
 
         $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi bloqueada.');
@@ -266,51 +285,116 @@ class AffiliatesController extends Controller
     }
 
     /**
-     * Bloquear/suspender afiliado ativo.
+     * Bloquear afiliado ativo (com motivo obrigatório).
      */
     public function suspend(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
-        $this->db->update('affiliates', ['status' => 'inactive'], 'id = ?', [$id]);
+        $reason = trim($request->input('block_reason', ''));
+
+        if (empty($reason)) {
+            $this->flash('error', 'O motivo do bloqueio é obrigatório.');
+            $this->redirect('/admin/afiliados?tab=ativos');
+            return;
+        }
+
+        // Salvar o motivo no campo notes (preservando dados existentes)
+        $affiliate = $this->affiliateModel->find($id);
+        $notes = json_decode($affiliate['notes'] ?? '{}', true) ?: [];
+        $notes['block_reason'] = $reason;
+        $notes['blocked_at'] = date('Y-m-d H:i:s');
+        $notes['previous_status'] = $affiliate['status'] ?? 'active';
+
+        $this->db->update('affiliates', [
+            'status' => 'inactive',
+            'notes' => json_encode($notes, JSON_UNESCAPED_UNICODE),
+        ], 'id = ?', [$id]);
+
         $this->flash('success', 'Afiliado bloqueado.');
         $this->redirect('/admin/afiliados?tab=bloqueados');
     }
 
     /**
-     * Excluir solicitação bloqueada/rejeitada permanentemente.
+     * Excluir solicitação/afiliado bloqueado permanentemente.
      */
     public function deleteRequest(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
-        $req = $this->requestModel->find($id);
+        $source = $request->input('source', 'request');
 
-        if (!$req) {
-            $this->flash('error', 'Solicitação não encontrada.');
-            $this->redirect('/admin/afiliados?tab=bloqueados');
-            return;
+        if ($source === 'affiliate') {
+            // Excluir afiliado bloqueado
+            $affiliate = $this->affiliateModel->find($id);
+            if (!$affiliate || $affiliate['status'] === 'active') {
+                $this->flash('error', 'Afiliado não encontrado ou está ativo.');
+                $this->redirect('/admin/afiliados?tab=bloqueados');
+                return;
+            }
+            // Excluir afiliado e o user associado (se quiser manter o user, remova esta linha)
+            $this->db->delete('affiliates', 'id = ?', [$id]);
+            $this->flash('success', 'Afiliado excluído permanentemente.');
+        } else {
+            // Excluir solicitação bloqueada
+            $req = $this->requestModel->find($id);
+            if (!$req) {
+                $this->flash('error', 'Solicitação não encontrada.');
+                $this->redirect('/admin/afiliados?tab=bloqueados');
+                return;
+            }
+            if (in_array($req['status'], ['pending', 'approved'])) {
+                $this->flash('error', 'Apenas solicitações bloqueadas podem ser excluídas.');
+                $this->redirect('/admin/afiliados?tab=bloqueados');
+                return;
+            }
+            $this->db->delete('affiliate_requests', 'id = ?', [$id]);
+            $this->flash('success', 'Solicitação excluída permanentemente.');
         }
 
-        // Não permitir excluir solicitações pendentes ou aprovadas (só bloqueadas)
-        if (in_array($req['status'], ['pending', 'approved'])) {
-            $this->flash('error', 'Apenas solicitações bloqueadas/recusadas podem ser excluídas.');
-            $this->redirect('/admin/afiliados?tab=bloqueados');
-            return;
-        }
-
-        $this->db->delete('affiliate_requests', 'id = ?', [$id]);
-        $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi excluída permanentemente.');
         $this->redirect('/admin/afiliados?tab=bloqueados');
     }
 
     /**
-     * Reativar afiliado bloqueado.
+     * Reativar afiliado/solicitação bloqueada (retorna ao estado anterior).
      */
     public function reactivate(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
-        $this->db->update('affiliates', ['status' => 'active'], 'id = ?', [$id]);
-        $this->flash('success', 'Afiliado reativado.');
-        $this->redirect('/admin/afiliados?tab=ativos');
+        $source = $request->input('source', 'affiliate');
+
+        if ($source === 'request') {
+            // Reativar solicitação: voltar para pending
+            $req = $this->requestModel->find($id);
+            if (!$req) {
+                $this->flash('error', 'Solicitação não encontrada.');
+                $this->redirect('/admin/afiliados?tab=bloqueados');
+                return;
+            }
+            $this->db->query(
+                "UPDATE affiliate_requests SET status = 'pending', rejected_at = NULL, admin_notes = NULL WHERE id = ?",
+                [$id]
+            );
+            $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi reativada e voltou para Solicitações.');
+            $this->redirect('/admin/afiliados?tab=solicitacoes');
+        } else {
+            // Reativar afiliado: voltar para active
+            $affiliate = $this->affiliateModel->find($id);
+            if (!$affiliate) {
+                $this->flash('error', 'Afiliado não encontrado.');
+                $this->redirect('/admin/afiliados?tab=bloqueados');
+                return;
+            }
+            // Limpar motivo do bloqueio
+            $notes = json_decode($affiliate['notes'] ?? '{}', true) ?: [];
+            unset($notes['block_reason'], $notes['blocked_at'], $notes['previous_status']);
+
+            $this->db->update('affiliates', [
+                'status' => 'active',
+                'notes' => json_encode($notes, JSON_UNESCAPED_UNICODE),
+            ], 'id = ?', [$id]);
+
+            $this->flash('success', 'Afiliado reativado com sucesso.');
+            $this->redirect('/admin/afiliados?tab=ativos');
+        }
     }
 
     /**
