@@ -286,24 +286,36 @@ function renderMessage(m) {
 
     switch (m.message_type) {
         case 'image':
-            content = `<div class="wpp-msg-image"><img src="${m.media_url}" onclick="openLightbox('${m.media_url}')"></div>`;
+            if (m.media_url) {
+                content = `<div class="wpp-msg-image"><img src="${m.media_url}" onclick="openLightbox('${m.media_url}')"></div>`;
+            } else {
+                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;">🖼 Imagem não disponível</div>`;
+            }
             if (m.message_text) content += `<div class="wpp-msg-text">${formatWhatsApp(m.message_text)}</div>`;
             break;
         case 'audio':
             content = renderAudioPlayer(m);
             break;
         case 'video':
-            content = `<div class="wpp-msg-video"><video src="${m.media_url}" controls></video></div>`;
+            if (m.media_url) {
+                content = `<div class="wpp-msg-video"><video src="${m.media_url}" controls></video></div>`;
+            } else {
+                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;">🎥 Vídeo não disponível</div>`;
+            }
             if (m.message_text) content += `<div class="wpp-msg-text">${formatWhatsApp(m.message_text)}</div>`;
             break;
         case 'document':
             content = renderDocument(m);
             break;
         case 'sticker':
-            content = `<div class="wpp-msg-sticker"><img src="${m.media_url}"></div>`;
+            if (m.media_url) {
+                content = `<div class="wpp-msg-sticker"><img src="${m.media_url}"></div>`;
+            } else {
+                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;">🏷 Figurinha</div>`;
+            }
             break;
         case 'location':
-            content = `<div class="wpp-msg-text">${m.message_text || '📍 Localização'}</div>`;
+            content = `<div class="wpp-msg-text">${m.message_text || 'Localização compartilhada'}</div>`;
             break;
         default:
             content = `<div class="wpp-msg-text">${formatWhatsApp(m.message_text || '')}</div>`;
@@ -317,6 +329,11 @@ function renderMessage(m) {
 }
 
 function renderAudioPlayer(m) {
+    if (!m.media_url) {
+        let html = `<div class="wpp-msg-text" style="color:#999;font-style:italic;">Áudio não disponível</div>`;
+        if (m.transcription) html += `<div class="wpp-transcription">${escapeHtml(m.transcription)}</div>`;
+        return html;
+    }
     let html = `<div class="wpp-msg-audio">
         <button class="wpp-audio-play" onclick="event.stopPropagation();playAudio(this,'${m.media_url}')">▶</button>
         <div class="wpp-audio-wave"><div class="wpp-audio-progress"></div></div>
@@ -325,12 +342,15 @@ function renderAudioPlayer(m) {
     if (m.transcription) {
         html += `<div class="wpp-transcription">${escapeHtml(m.transcription)}</div>`;
     } else {
-        html += `<button class="wpp-transcribe-btn" onclick="event.stopPropagation();transcribeAudio(${m.id},this)">🎙️ Transcrever</button>`;
+        html += `<button class="wpp-transcribe-btn" onclick="event.stopPropagation();transcribeAudio(${m.id},this)">Transcrever</button>`;
     }
     return html;
 }
 
 function renderDocument(m) {
+    if (!m.media_url) {
+        return `<div class="wpp-msg-text" style="color:#999;font-style:italic;">Documento: ${escapeHtml(m.media_filename || 'arquivo')}</div>`;
+    }
     const icons = { 'application/pdf': '📕', 'application/msword': '📘', 'application/vnd.ms-excel': '📗' };
     const icon = icons[m.media_mime_type] || '📄';
     return `<div class="wpp-msg-document">
@@ -338,7 +358,6 @@ function renderDocument(m) {
         <div class="doc-info"><strong>${escapeHtml(m.media_filename || 'Documento')}</strong><br><small>${m.media_mime_type || ''}</small></div>
         <div class="doc-actions"><a href="${m.media_url}" target="_blank">Ver</a> <a href="${m.media_url}" download>Baixar</a></div>
     </div>`;
-    // Note: "Ver" opens inline viewer, "Baixar" downloads
 }
 
 function ackIcon(status) {

@@ -1346,8 +1346,25 @@ class WhatsAppController extends Controller
 
         // Download mídia se necessário
         $mediaUrl = null;
-        if ($mediaData && !empty($mediaData['base64'])) {
-            $mediaUrl = $this->saveMediaFromBase64($mediaData);
+        if ($mediaData) {
+            if (!empty($mediaData['base64'])) {
+                $mediaUrl = $this->saveMediaFromBase64($mediaData);
+            } else {
+                // Fallback: tentar buscar mídia via API getBase64FromMediaMessage
+                try {
+                    $api = EvolutionApi::fromInstance($instance);
+                    $mediaResult = $api->getBase64FromMedia([
+                        'key' => $key,
+                        'message' => $msgContent,
+                    ]);
+                    if ($mediaResult && !empty($mediaResult['base64'])) {
+                        $mediaData['base64'] = $mediaResult['base64'];
+                        $mediaUrl = $this->saveMediaFromBase64($mediaData);
+                    }
+                } catch (\Throwable $e) {
+                    // Mídia não disponível — mensagem será salva sem ela
+                }
+            }
         }
 
         // Salvar mensagem
