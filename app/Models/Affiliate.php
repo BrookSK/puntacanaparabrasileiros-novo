@@ -34,8 +34,8 @@ class Affiliate extends Model
              LEFT JOIN users u ON a.user_id = u.id
              WHERE a.status = ?
              ORDER BY a.created_at DESC
-             LIMIT ? OFFSET ?",
-            [$status, $perPage, $offset]
+             LIMIT " . (int) $perPage . " OFFSET " . (int) $offset,
+            [$status]
         );
 
         return [
