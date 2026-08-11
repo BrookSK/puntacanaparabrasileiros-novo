@@ -48,8 +48,12 @@
             <p><small>👤 <?= $inst['user_name'] ? e($inst['user_name'] . ' ' . $inst['user_last_name']) : 'Sem usuário vinculado' ?></small></p>
         </div>
 
-        <div class="instance-qr" id="qr-<?= $inst['id'] ?>" style="display:none;">
+        <div class="instance-qr" id="qr-<?= $inst['id'] ?>" style="<?= ($inst['connection_status'] === 'connecting' && !empty($inst['qr_code'])) ? '' : 'display:none;' ?>">
+            <?php if ($inst['connection_status'] === 'connecting' && !empty($inst['qr_code'])): ?>
+            <img src="data:image/png;base64,<?= $inst['qr_code'] ?>" alt="QR Code" id="qr-img-<?= $inst['id'] ?>">
+            <?php else: ?>
             <img src="" alt="QR Code" id="qr-img-<?= $inst['id'] ?>">
+            <?php endif; ?>
         </div>
 
         <div class="instance-actions">
@@ -202,8 +206,15 @@ async function connectInstance(id) {
     const res = await fetch(`/whatsapp/connect/${id}`);
     const json = await res.json();
     if (json.qrcode) {
-        document.getElementById(`qr-${id}`).style.display = 'block';
-        document.getElementById(`qr-img-${id}`).src = 'data:image/png;base64,' + json.qrcode;
+        const qrDiv = document.getElementById(`qr-${id}`);
+        const qrImg = document.getElementById(`qr-img-${id}`);
+        // Verificar se já é uma data URL completa ou só base64
+        if (json.qrcode.startsWith('data:')) {
+            qrImg.src = json.qrcode;
+        } else {
+            qrImg.src = 'data:image/png;base64,' + json.qrcode;
+        }
+        qrDiv.style.display = 'block';
     } else if (json.connected) {
         location.reload();
     } else { alert(json.error || 'Erro ao conectar'); }

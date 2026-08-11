@@ -125,14 +125,36 @@ class WhatsAppController extends Controller
         $api = EvolutionApi::fromInstance($instance);
         $result = $api->connect();
 
-        if ($result && isset($result['base64'])) {
-            $this->instanceModel->updateStatus($id, 'connecting', $result['base64']);
-            $this->json(['success' => true, 'qrcode' => $result['base64']]);
-        } elseif ($result && isset($result['instance']['state']) && $result['instance']['state'] === 'open') {
+        if (!$result) {
+            $this->json(['success' => false, 'error' => 'Não foi possível conectar à Evolution API.'], 500);
+            return;
+        }
+
+        // Extrair QR Code - a Evolution API pode retornar em diferentes formatos
+        $qrCode = $result['base64'] 
+            ?? $result['qrcode']['base64'] 
+            ?? $result['qrcode'] 
+            ?? $result['code'] 
+            ?? null;
+
+        // Verificar se já está conectada
+        $state = $result['instance']['state'] ?? $result['state'] ?? null;
+        if ($state === 'open' || $state === 'connected') {
             $this->instanceModel->updateStatus($id, 'open');
             $this->json(['success' => true, 'connected' => true]);
+            return;
+        }
+
+        if ($qrCode) {
+            // Remover prefixo data:image se já veio com ele (salvar só o base64 puro)
+            $qrCodeClean = $qrCode;
+            if (str_contains($qrCode, ',')) {
+                $qrCodeClean = explode(',', $qrCode, 2)[1] ?? $qrCode;
+            }
+            $this->instanceModel->updateStatus($id, 'connecting', $qrCodeClean);
+            $this->json(['success' => true, 'qrcode' => $qrCodeClean]);
         } else {
-            $this->json(['success' => false, 'error' => 'Não foi possível gerar QR Code.'], 500);
+            $this->json(['success' => false, 'error' => 'QR Code não retornado pela API. Resposta: ' . json_encode(array_keys($result))], 500);
         }
     }
 
