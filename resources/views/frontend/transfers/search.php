@@ -32,21 +32,19 @@
                 <div class="transfer-form-row">
                     <div class="tf-field">
                         <label>ORIGEM</label>
-                        <select name="origin_id" id="originSelect" class="tf-input">
-                            <option value="">Digite para buscar...</option>
-                            <?php foreach ($locations as $loc): ?>
-                            <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="tf-autocomplete">
+                            <input type="text" class="tf-input tf-autocomplete-input" id="originInput" placeholder="Digite para buscar..." autocomplete="off">
+                            <input type="hidden" name="origin_id" id="originSelect">
+                            <div class="tf-autocomplete-list" id="originList"></div>
+                        </div>
                     </div>
                     <div class="tf-field">
                         <label>DESTINO</label>
-                        <select name="destination_id" id="destinationSelect" class="tf-input">
-                            <option value="">Digite para buscar...</option>
-                            <?php foreach ($locations as $loc): ?>
-                            <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <div class="tf-autocomplete">
+                            <input type="text" class="tf-input tf-autocomplete-input" id="destinationInput" placeholder="Digite para buscar..." autocomplete="off">
+                            <input type="hidden" name="destination_id" id="destinationSelect">
+                            <div class="tf-autocomplete-list" id="destinationList"></div>
+                        </div>
                     </div>
                     <div class="tf-field">
                         <label>DATA CHEGADA</label>
@@ -401,3 +399,71 @@
         </div>
     </div>
 </section>
+
+
+<script>
+const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['id' => (int)$loc['id'], 'title' => $loc['title']]; }, $locations)) ?>;
+
+(function() {
+    function setupAutocomplete(inputId, hiddenId, listId) {
+        const input = document.getElementById(inputId);
+        const hidden = document.getElementById(hiddenId);
+        const list = document.getElementById(listId);
+        if (!input || !hidden || !list) return;
+
+        input.addEventListener('input', function() {
+            const q = this.value.toLowerCase().trim();
+            hidden.value = '';
+            if (q.length < 1) { list.style.display = 'none'; return; }
+
+            const filtered = TRANSFER_LOCATIONS.filter(l => l.title.toLowerCase().includes(q));
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="tf-autocomplete-empty">Nenhum resultado encontrado</div>';
+            } else {
+                list.innerHTML = filtered.map(l => 
+                    `<div class="tf-autocomplete-item" data-id="${l.id}" data-title="${l.title}">${highlightMatch(l.title, q)}</div>`
+                ).join('');
+            }
+            list.style.display = 'block';
+        });
+
+        input.addEventListener('focus', function() {
+            if (this.value.length >= 1) this.dispatchEvent(new Event('input'));
+        });
+
+        list.addEventListener('click', function(e) {
+            const item = e.target.closest('.tf-autocomplete-item');
+            if (!item) return;
+            input.value = item.dataset.title;
+            hidden.value = item.dataset.id;
+            list.style.display = 'none';
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.tf-autocomplete')) list.style.display = 'none';
+        });
+    }
+
+    function highlightMatch(text, query) {
+        const idx = text.toLowerCase().indexOf(query);
+        if (idx === -1) return text;
+        return text.substring(0, idx) + '<strong>' + text.substring(idx, idx + query.length) + '</strong>' + text.substring(idx + query.length);
+    }
+
+    setupAutocomplete('originInput', 'originSelect', 'originList');
+    setupAutocomplete('destinationInput', 'destinationSelect', 'destinationList');
+})();
+</script>
+
+<style>
+.tf-autocomplete { position: relative; }
+.tf-autocomplete-input { width: 100%; }
+.tf-autocomplete-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1.5px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+.tf-autocomplete-item { padding: 12px 16px; font-size: 14px; cursor: pointer; border-bottom: 1px solid #f5f5f5; color: #1C2011; transition: background 0.15s; }
+.tf-autocomplete-item:last-child { border-bottom: none; }
+.tf-autocomplete-item:hover { background: #f0fdf4; }
+.tf-autocomplete-item strong { color: #1B6F00; font-weight: 700; }
+.tf-autocomplete-empty { padding: 16px; text-align: center; color: #999; font-size: 13px; }
+.tf-autocomplete-list::-webkit-scrollbar { width: 5px; }
+.tf-autocomplete-list::-webkit-scrollbar-thumb { background: #d4d4d4; border-radius: 3px; }
+</style>
