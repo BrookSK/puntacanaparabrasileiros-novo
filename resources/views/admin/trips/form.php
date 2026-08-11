@@ -213,19 +213,38 @@ function addRepeater(listId, fieldName, placeholder) { const list = document.get
 function previewGalleryFiles(input) {
     const container = document.getElementById('galleryPreviews');
     const countEl = document.getElementById('galleryCount');
-    container.innerHTML = '';
-    countEl.textContent = input.files.length + ' arquivo(s) selecionado(s)';
+    // Acumular arquivos em um DataTransfer para permitir adicionar mais
+    if (!window._galleryDT) window._galleryDT = new DataTransfer();
     for (let i = 0; i < input.files.length; i++) {
-        const file = input.files[i];
+        window._galleryDT.items.add(input.files[i]);
+    }
+    input.files = window._galleryDT.files;
+    countEl.textContent = window._galleryDT.files.length + ' arquivo(s) selecionado(s)';
+    // Renderizar previews
+    container.innerHTML = '';
+    for (let i = 0; i < window._galleryDT.files.length; i++) {
+        const file = window._galleryDT.files[i];
         const reader = new FileReader();
+        const idx = i;
         reader.onload = function(e) {
             const thumb = document.createElement('div');
-            thumb.style.cssText = 'width:64px;height:64px;border-radius:8px;overflow:hidden;border:2px solid #e2e8f0;flex-shrink:0;';
-            thumb.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">';
+            thumb.style.cssText = 'position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:2px solid #e2e8f0;flex-shrink:0;';
+            thumb.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;"><button type="button" onclick="removeGalleryFile(' + idx + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>';
             container.appendChild(thumb);
         };
         reader.readAsDataURL(file);
     }
+}
+
+function removeGalleryFile(idx) {
+    const input = document.getElementById('galleryFiles');
+    const dt = new DataTransfer();
+    for (let i = 0; i < window._galleryDT.files.length; i++) {
+        if (i !== idx) dt.items.add(window._galleryDT.files[i]);
+    }
+    window._galleryDT = dt;
+    input.files = dt.files;
+    previewGalleryFiles(input);
 }
 document.addEventListener('click', function(e) { if (e.target.classList.contains('repeater-remove')) { e.target.closest('.repeater-item, .package-item').remove(); } });
 document.getElementById('addPackageBtn')?.addEventListener('click', function() { const list = document.getElementById('packages-list'), i = list.children.length; const cats = <?= json_encode($travelerCategories ?? []) ?>; let ch = ''; cats.forEach(tc => { ch += `<label class="checkbox-label"><input type="checkbox" name="packages[${i}][categories][]" value="${tc.id}"> ${tc.name}</label>`; }); const d = document.createElement('div'); d.className = 'package-item card-inner'; d.innerHTML = `<div class="form-row"><div class="form-group col-6"><label>Nome</label><input type="text" name="packages[${i}][title]" class="form-control"></div><div class="form-group col-6"><label>Descrição</label><input type="text" name="packages[${i}][description]" class="form-control"></div></div><div class="form-group"><label>Categorias</label><div class="checkbox-grid">${ch}</div></div><button type="button" class="btn btn-sm btn-danger repeater-remove">&times; Remover</button>`; list.appendChild(d); });
