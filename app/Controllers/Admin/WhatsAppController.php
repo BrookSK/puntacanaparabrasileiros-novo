@@ -275,8 +275,23 @@ class WhatsAppController extends Controller
         $instance = $this->instanceModel->getUserInstance((int) $user['id']);
 
         if (!$instance) {
-            $this->flash('error', 'Nenhuma instância WhatsApp disponível.');
-            $this->redirect('/whatsapp');
+            // Tentar qualquer instância conectada como fallback
+            $instance = $this->db->fetchOne(
+                "SELECT * FROM whatsapp_instances WHERE connection_status = 'open' LIMIT 1"
+            );
+        }
+
+        if (!$instance) {
+            // Mostrar chat vazio com mensagem para configurar
+            $this->view('admin/whatsapp/chat', [
+                'instance' => null,
+                'contactId' => null,
+                'labels' => [],
+                'teamMembers' => [],
+                'currentUser' => $user,
+                'noInstance' => true,
+                'pageTitle' => 'WhatsApp',
+            ], 'admin');
             return;
         }
 
@@ -295,8 +310,8 @@ class WhatsAppController extends Controller
             'labels' => $labels,
             'teamMembers' => $teamMembers,
             'currentUser' => $user,
-            'pageTitle' => 'Chat WhatsApp',
-        ], 'whatsapp');
+            'pageTitle' => 'WhatsApp',
+        ], 'admin');
     }
 
     /**

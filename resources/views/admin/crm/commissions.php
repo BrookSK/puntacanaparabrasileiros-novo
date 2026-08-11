@@ -1,8 +1,8 @@
 <div class="admin-page-header">
     <h2>CRM — Comissões</h2>
     <div>
-        <a href="/crm" class="btn btn-outline btn-sm">← Boards</a>
-        <a href="/crm/dashboard" class="btn btn-outline btn-sm">📊 Dashboard</a>
+        <a href="/crm" class="btn btn-outline btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg> Boards</a>
+        <a href="/crm/dashboard" class="btn btn-outline btn-sm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg> Dashboard</a>
     </div>
 </div>
 

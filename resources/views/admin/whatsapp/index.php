@@ -1,7 +1,7 @@
 <div class="admin-page-header">
     <h2>WhatsApp — Instâncias</h2>
     <div>
-        <a href="/whatsapp/chat" class="btn btn-outline">💬 Abrir Chat</a>
+        <a href="/whatsapp/chat" class="btn btn-outline">← Voltar ao Chat</a>
         <button class="btn btn-primary" onclick="openNewInstanceModal()">+ Nova Instância</button>
     </div>
 </div>
@@ -43,9 +43,9 @@
 
         <div class="instance-info">
             <?php if ($inst['owner_phone']): ?>
-            <p><small>📱 <?= e($inst['owner_phone']) ?></small></p>
+            <p><small><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg> <?= e($inst['owner_phone']) ?></small></p>
             <?php endif; ?>
-            <p><small>👤 <?= $inst['user_name'] ? e($inst['user_name'] . ' ' . $inst['user_last_name']) : 'Sem usuário vinculado' ?></small></p>
+            <p><small><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <?= $inst['user_name'] ? e($inst['user_name'] . ' ' . $inst['user_last_name']) : 'Sem usuário vinculado' ?></small></p>
         </div>
 
         <div class="instance-qr" id="qr-<?= $inst['id'] ?>" style="<?= ($inst['connection_status'] === 'connecting' && !empty($inst['qr_code'])) ? '' : 'display:none;' ?>">
@@ -67,15 +67,15 @@
             <?php endif; ?>
             <?php endif; ?>
 
-            <button class="btn btn-sm btn-outline" onclick="refreshStatus(<?= $inst['id'] ?>)" title="Atualizar status">↻</button>
+            <button class="btn btn-sm btn-outline" onclick="refreshStatus(<?= $inst['id'] ?>)" title="Atualizar status"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg></button>
 
             <?php if (is_superadmin()): ?>
-            <button class="btn btn-sm btn-outline" onclick="editInstance(<?= $inst['id'] ?>, '<?= e($inst['display_name']) ?>', '<?= e($inst['api_url']) ?>', '<?= e($inst['api_key']) ?>', '<?= e($inst['user_id'] ?? '') ?>')" title="Editar">✏️</button>
+            <button class="btn btn-sm btn-outline" onclick="editInstance(<?= $inst['id'] ?>, '<?= e($inst['display_name']) ?>', '<?= e($inst['api_url']) ?>', '<?= e($inst['api_key']) ?>', '<?= e($inst['user_id'] ?? '') ?>')" title="Editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></button>
             <?php if (!$inst['is_default']): ?>
-            <button class="btn btn-sm btn-outline" onclick="setDefault(<?= $inst['id'] ?>)" title="Definir como padrão">⭐</button>
+            <button class="btn btn-sm btn-outline" onclick="setDefault(<?= $inst['id'] ?>)" title="Definir como padrão"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></button>
             <?php endif; ?>
-            <button class="btn btn-sm btn-outline" onclick="registerWebhook(<?= $inst['id'] ?>)" title="Re-registrar webhook">🔗</button>
-            <button class="btn btn-sm btn-danger-outline" onclick="deleteInstance(<?= $inst['id'] ?>)" title="Excluir">🗑️</button>
+            <button class="btn btn-sm btn-outline" onclick="registerWebhook(<?= $inst['id'] ?>)" title="Re-registrar webhook"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg></button>
+            <button class="btn btn-sm btn-danger-outline" onclick="deleteInstance(<?= $inst['id'] ?>)" title="Excluir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></button>
             <?php endif; ?>
         </div>
     </div>

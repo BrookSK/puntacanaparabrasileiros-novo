@@ -36,6 +36,14 @@
     width: 100%;
 }
 
+/* Quando dentro do layout admin, ajustar altura */
+.admin-content .wpp-chat-wrapper {
+    height: calc(100vh - 70px);
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+}
+
 /* ─── Sidebar (Contatos) ─── */
 .wpp-sidebar {
     width: var(--wpp-sidebar-w);
