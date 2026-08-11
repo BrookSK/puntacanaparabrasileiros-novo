@@ -161,8 +161,13 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                         <!-- Upload de arquivos -->
                         <div style="margin-bottom:14px;">
                             <label style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:6px;display:block;text-transform:uppercase;">Enviar novas imagens</label>
-                            <input type="file" name="gallery_files[]" multiple accept="image/*" class="form-control" style="padding:8px;">
-                            <small style="font-size:10px;color:#94a3b8;">JPG, PNG, WebP, GIF, SVG, AVIF — Máx. 10MB cada</small>
+                            <label for="galleryFiles" class="btn btn-outline" style="cursor:pointer;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                                Escolher Imagens
+                            </label>
+                            <input type="file" name="gallery_files[]" id="galleryFiles" multiple accept="image/*" style="display:none;" onchange="document.getElementById('galleryCount').textContent = this.files.length + ' arquivo(s) selecionado(s)'">
+                            <span id="galleryCount" style="font-size:12px;color:#94a3b8;margin-left:10px;"></span>
+                            <p style="font-size:10px;color:#94a3b8;margin-top:6px;">JPG, PNG, WebP, GIF, SVG, AVIF — Máx. 10MB cada</p>
                         </div>
 
                         <!-- URLs existentes -->
