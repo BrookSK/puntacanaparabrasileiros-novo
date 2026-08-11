@@ -99,9 +99,11 @@ a { color: var(--primary); text-decoration: none; }
 .tariffs-block-label { font-size: 12px; font-weight: 600; color: #64748b; margin-bottom: 12px; }
 
 /* Repeater */
-.repeater-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
+.repeater-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
 .repeater-item { display: flex; gap: 10px; align-items: center; }
 .repeater-item .form-control { flex: 1; }
+.repeater-item .btn-danger,
+.repeater-item .repeater-remove { min-width: 36px; min-height: 36px; display: inline-flex; align-items: center; justify-content: center; padding: 0; font-size: 16px; border-radius: 8px; }
 
 /* Card Inner */
 .card-inner { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 18px; margin-bottom: 14px; }
@@ -153,13 +155,20 @@ a { color: var(--primary); text-decoration: none; }
 .form-actions { margin-top: 28px; padding-top: 24px; border-top: 1px solid #e2e8f0; }
 
 /* Buttons */
-.btn { display: inline-block; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all .15s; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: all .15s; text-decoration: none; font-family: inherit; line-height: 1.4; }
 .btn-primary { background: var(--primary); color: white; }
 .btn-primary:hover { background: #005f8d; color: white; }
-.btn-outline { border: 1px solid #e2e8f0; background: white; color: #475569; }
-.btn-outline:hover { border-color: var(--primary); color: var(--primary); }
-.btn-danger { background: #ef4444; color: white; }
-.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-success { background: #16a34a; color: white; }
+.btn-success:hover { background: #15803d; }
+.btn-outline { border: 1.5px solid #cbd5e1; background: transparent; color: #475569; }
+.btn-outline:hover { border-color: var(--primary); color: var(--primary); background: rgba(0,119,182,0.04); }
+.btn-danger { background: transparent; color: #ef4444; border: 1.5px solid #ef4444; }
+.btn-danger:hover { background: #ef4444; color: white; }
+.btn-sm { padding: 7px 14px; font-size: 12px; }
+.btn-lg { padding: 14px 28px; font-size: 15px; }
+.btn-block { display: flex; justify-content: center; width: 100%; }
+.btn-back { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: #64748b; border: 1.5px solid #e2e8f0; border-radius: 8px; text-decoration: none; transition: all .15s; }
+.btn-back:hover { border-color: #94a3b8; color: #334155; }
 .btn-lg { padding: 12px 24px; font-size: 15px; }
 .btn-block { display: flex; width: 100%; justify-content: center; align-items: center; gap: 8px; }
 
