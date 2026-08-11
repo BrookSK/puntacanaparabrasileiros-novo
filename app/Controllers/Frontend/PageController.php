@@ -123,26 +123,31 @@ class PageController extends Controller
             'username', 'first_name', 'last_name', 'phone', 'email', 'password',
             'password_confirmation', 'payment_email', 'pix', 'website',
             'followers_count', 'niche', 'content_type', 'promotion_strategy',
+            'how_found', 'social_links',
         ]);
 
         // Validação básica
         $errors = [];
-        if (empty($data['username'])) $errors['username'] = 'Nome de usuário é obrigatório.';
         if (empty($data['first_name'])) $errors['first_name'] = 'Nome é obrigatório.';
         if (empty($data['last_name'])) $errors['last_name'] = 'Sobrenome é obrigatório.';
         if (empty($data['phone'])) $errors['phone'] = 'WhatsApp/Telefone é obrigatório.';
         if (!filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Email inválido.';
         if (strlen($data['password'] ?? '') < 6) $errors['password'] = 'Senha deve ter pelo menos 6 caracteres.';
         if (($data['password'] ?? '') !== ($data['password_confirmation'] ?? '')) $errors['password_confirmation'] = 'Senhas não coincidem.';
-        if (empty($data['pix'])) $errors['pix'] = 'PIX é obrigatório.';
         if (empty($data['followers_count'])) $errors['followers_count'] = 'Quantidade de seguidores é obrigatória.';
         if (empty($data['niche'])) $errors['niche'] = 'Nicho é obrigatório.';
         if (empty($data['content_type'])) $errors['content_type'] = 'Tipo de conteúdo é obrigatório.';
 
-        // Verificar email duplicado
+        // Verificar se já existe solicitação com esse email
+        $requestModel = new \App\Models\AffiliateRequest();
+        if (empty($errors['email']) && $requestModel->findByEmail($data['email'])) {
+            $errors['email'] = 'Já existe uma solicitação com este email.';
+        }
+
+        // Verificar se email já é de um user existente
         $userModel = new \App\Models\User();
         if (empty($errors['email']) && $userModel->findByEmail($data['email'])) {
-            $errors['email'] = 'Este email já está cadastrado.';
+            $errors['email'] = 'Este email já está cadastrado no sistema.';
         }
 
         if (!empty($errors)) {
@@ -152,52 +157,45 @@ class PageController extends Controller
             return;
         }
 
-        // Criar usuário com role affiliate
+        // Salvar como solicitação de afiliação (NÃO cria user ainda)
         try {
-            $userId = $userModel->createUser([
+            $requestModel->create([
                 'first_name' => $data['first_name'],
                 'last_name' => $data['last_name'],
                 'email' => strtolower(trim($data['email'])),
-                'password' => $data['password'],
                 'phone' => $data['phone'],
-                'role' => 'customer',
-                'status' => 'active',
-                'email_verified_at' => date('Y-m-d H:i:s'),
-            ]);
-
-            // Criar registro de afiliado (pendente aprovação)
-            $affiliateModel = new \App\Models\Affiliate();
-            $affiliateModel->create([
-                'user_id' => $userId,
+                'username' => $data['username'] ?? null,
+                'password_hash' => password_hash($data['password'], PASSWORD_BCRYPT),
+                'pix' => $data['pix'] ?? null,
+                'payment_email' => $data['payment_email'] ?? null,
+                'website' => $data['website'] ?? null,
+                'followers_count' => $data['followers_count'],
+                'niche' => $data['niche'],
+                'content_type' => $data['content_type'],
+                'promotion_strategy' => $data['promotion_strategy'] ?? null,
+                'how_found' => $data['how_found'] ?? null,
+                'social_links' => $data['social_links'] ?? null,
                 'status' => 'pending',
-                'commission_rate' => 20.00,
-                'cookie_days' => 30,
-                'payment_email' => $data['payment_email'] ?? $data['email'],
-                'notes' => json_encode([
-                    'username' => $data['username'],
-                    'pix' => $data['pix'],
-                    'website' => $data['website'],
-                    'followers_count' => $data['followers_count'],
-                    'niche' => $data['niche'],
-                    'content_type' => $data['content_type'],
-                    'promotion_strategy' => $data['promotion_strategy'],
-                ]),
             ]);
         } catch (\Exception $e) {
-            $this->flash('error', 'Erro ao criar cadastro: ' . $e->getMessage());
+            $this->flash('error', 'Erro ao enviar solicitação: ' . $e->getMessage());
             $this->flash('old', $data);
             $this->redirect('/cadastro-afiliado');
             return;
         }
 
         // Notificar admin
-        $emailService = new \App\Services\EmailService();
-        $adminEmail = $this->setting('admin_email', '');
-        if ($adminEmail) {
-            $emailService->send($adminEmail, 'Admin', 'Novo Cadastro de Afiliado: ' . $data['first_name'] . ' ' . $data['last_name'], '<p>Um novo afiliado se cadastrou e aguarda aprovação.</p><p>Email: ' . e($data['email']) . '</p><p>Instagram/Site: ' . e($data['website'] ?? '') . '</p>');
+        try {
+            $emailService = new \App\Services\EmailService();
+            $adminEmail = $this->setting('admin_email', '');
+            if ($adminEmail) {
+                $emailService->send($adminEmail, 'Admin', 'Nova Solicitação de Afiliação: ' . $data['first_name'] . ' ' . $data['last_name'], '<p>Uma nova solicitação de afiliação foi recebida.</p><p>Nome: ' . e($data['first_name'] . ' ' . $data['last_name']) . '</p><p>Email: ' . e($data['email']) . '</p><p>Seguidores: ' . e($data['followers_count']) . '</p><p>Acesse o painel para aprovar ou recusar.</p>');
+            }
+        } catch (\Exception $e) {
+            // Silenciar erro de email
         }
 
-        $this->flash('success', 'Cadastro realizado com sucesso! Nossa equipe analisará seu perfil e entrará em contato em até 48 horas.');
+        $this->flash('success', 'Solicitação enviada com sucesso! Nossa equipe analisará seu perfil e entrará em contato em até 48 horas.');
         $this->redirect('/cadastro-afiliado');
     }
 

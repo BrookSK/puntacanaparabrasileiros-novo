@@ -7,54 +7,199 @@ use Core\Controller;
 use Core\Request;
 use Core\Response;
 use App\Models\Affiliate;
+use App\Models\AffiliateRequest;
 use App\Models\Commission;
+use App\Models\User;
 
 class AffiliatesController extends Controller
 {
     private Affiliate $affiliateModel;
+    private AffiliateRequest $requestModel;
     private Commission $commissionModel;
 
     public function __construct()
     {
         parent::__construct();
         $this->affiliateModel = new Affiliate();
+        $this->requestModel = new AffiliateRequest();
         $this->commissionModel = new Commission();
     }
 
+    /**
+     * Página principal com abas: Solicitações | Ativos | Bloqueados
+     */
     public function index(Request $request, Response $response): void
     {
+        $tab = $request->query('tab', 'solicitacoes');
         $page = max(1, (int) $request->query('page', '1'));
-        $affiliates = $this->affiliateModel->getWithUserData($page, 20);
 
-        $this->view('admin/affiliates/index', [
-            'affiliates' => $affiliates,
+        $pendingCount = $this->requestModel->countByStatus('pending');
+        $activeCount = $this->affiliateModel->count("status = 'active'");
+        $blockedCount = $this->affiliateModel->count("status IN ('rejected', 'suspended')");
+
+        $data = [
+            'tab' => $tab,
+            'pendingCount' => $pendingCount,
+            'activeCount' => $activeCount,
+            'blockedCount' => $blockedCount,
             'pageTitle' => 'Gerenciar Afiliados',
+        ];
+
+        if ($tab === 'solicitacoes') {
+            $data['requests'] = $this->requestModel->getPending($page);
+        } elseif ($tab === 'ativos') {
+            $data['affiliates'] = $this->affiliateModel->getWithUserData($page, 20);
+        } elseif ($tab === 'bloqueados') {
+            $offset = ($page - 1) * 20;
+            $items = $this->db->fetchAll(
+                "SELECT a.*, u.first_name, u.last_name, u.email
+                 FROM affiliates a
+                 INNER JOIN users u ON a.user_id = u.id
+                 WHERE a.status IN ('rejected', 'suspended')
+                 ORDER BY a.updated_at DESC
+                 LIMIT 20 OFFSET ?",
+                [$offset]
+            );
+            $data['blocked'] = $items;
+        }
+
+        $this->view('admin/affiliates/index', $data, 'admin');
+    }
+
+    /**
+     * Detalhes de uma solicitação de afiliação.
+     */
+    public function showRequest(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $req = $this->requestModel->find($id);
+
+        if (!$req) {
+            $this->abort(404);
+        }
+
+        $this->view('admin/affiliates/request-detail', [
+            'request' => $req,
+            'pageTitle' => 'Solicitação: ' . $req['first_name'] . ' ' . $req['last_name'],
         ], 'admin');
     }
 
-    public function approve(Request $request, Response $response): void
+    /**
+     * Aprovar solicitação: cria user + afiliado.
+     */
+    public function approveRequest(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
-        $this->affiliateModel->approve($id);
+        $req = $this->requestModel->find($id);
 
-        // Atualizar role do user para affiliate
-        $affiliate = $this->affiliateModel->find($id);
-        if ($affiliate) {
-            $this->db->update('users', ['role' => 'affiliate'], 'id = ? AND role = ?', [(int) $affiliate['user_id'], 'customer']);
+        if (!$req || $req['status'] !== 'pending') {
+            $this->flash('error', 'Solicitação não encontrada ou já processada.');
+            $this->redirect('/admin/afiliados');
+            return;
         }
 
-        $this->flash('success', 'Afiliado aprovado!');
+        $adminNotes = $request->input('admin_notes', '');
+
+        try {
+            // 1. Criar usuário
+            $userModel = new User();
+
+            // Verificar se email já existe como user
+            $existingUser = $userModel->findByEmail($req['email']);
+            if ($existingUser) {
+                $userId = (int) $existingUser['id'];
+                // Atualizar role para affiliate
+                $this->db->update('users', ['role' => 'affiliate'], 'id = ?', [$userId]);
+            } else {
+                $userId = $this->db->insert('users', [
+                    'first_name' => $req['first_name'],
+                    'last_name' => $req['last_name'],
+                    'email' => $req['email'],
+                    'password' => $req['password_hash'],
+                    'phone' => $req['phone'],
+                    'role' => 'affiliate',
+                    'status' => 'active',
+                    'email_verified_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            // 2. Criar registro de afiliado
+            $affiliateId = $this->affiliateModel->create([
+                'user_id' => $userId,
+                'status' => 'active',
+                'commission_rate' => 20.00,
+                'cookie_days' => 30,
+                'payment_email' => $req['payment_email'] ?: $req['email'],
+                'payment_method' => 'pix',
+                'notes' => json_encode([
+                    'username' => $req['username'],
+                    'pix' => $req['pix'],
+                    'website' => $req['website'],
+                    'followers_count' => $req['followers_count'],
+                    'niche' => $req['niche'],
+                    'content_type' => $req['content_type'],
+                    'promotion_strategy' => $req['promotion_strategy'],
+                    'social_links' => $req['social_links'],
+                ]),
+            ]);
+
+            // 3. Marcar solicitação como aprovada
+            $this->requestModel->approve($id, $adminNotes);
+
+            $this->flash('success', 'Afiliado aprovado com sucesso! ' . $req['first_name'] . ' ' . $req['last_name'] . ' agora tem acesso ao painel.');
+        } catch (\Exception $e) {
+            $this->flash('error', 'Erro ao aprovar: ' . $e->getMessage());
+        }
+
         $this->redirect('/admin/afiliados');
     }
 
-    public function reject(Request $request, Response $response): void
+    /**
+     * Recusar solicitação.
+     */
+    public function rejectRequest(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
-        $this->affiliateModel->reject($id);
-        $this->flash('success', 'Afiliado rejeitado.');
+        $req = $this->requestModel->find($id);
+
+        if (!$req || $req['status'] !== 'pending') {
+            $this->flash('error', 'Solicitação não encontrada ou já processada.');
+            $this->redirect('/admin/afiliados');
+            return;
+        }
+
+        $adminNotes = $request->input('admin_notes', '');
+        $this->requestModel->reject($id, $adminNotes);
+
+        $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi recusada.');
         $this->redirect('/admin/afiliados');
     }
 
+    /**
+     * Bloquear/suspender afiliado ativo.
+     */
+    public function suspend(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $this->db->update('affiliates', ['status' => 'suspended'], 'id = ?', [$id]);
+        $this->flash('success', 'Afiliado suspenso.');
+        $this->redirect('/admin/afiliados?tab=ativos');
+    }
+
+    /**
+     * Reativar afiliado bloqueado.
+     */
+    public function reactivate(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $this->db->update('affiliates', ['status' => 'active'], 'id = ?', [$id]);
+        $this->flash('success', 'Afiliado reativado.');
+        $this->redirect('/admin/afiliados?tab=ativos');
+    }
+
+    /**
+     * Gerenciar comissões.
+     */
     public function commissions(Request $request, Response $response): void
     {
         $page = max(1, (int) $request->query('page', '1'));
@@ -68,6 +213,9 @@ class AffiliatesController extends Controller
         ], 'admin');
     }
 
+    /**
+     * Pagar comissão.
+     */
     public function payCommission(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
@@ -75,7 +223,6 @@ class AffiliatesController extends Controller
 
         $this->commissionModel->markPaid($id, $reference ?: null);
 
-        // Atualizar total_paid do afiliado
         $commission = $this->commissionModel->find($id);
         if ($commission) {
             $this->db->query(

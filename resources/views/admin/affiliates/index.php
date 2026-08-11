@@ -1,57 +1,50 @@
-<div class="card-header">
-    <div class="header-actions">
-        <a href="/admin/afiliados/comissoes" class="btn btn-outline">Gerenciar Comissões</a>
-    </div>
+<!-- Abas -->
+<div class="affiliate-tabs">
+    <a href="/admin/afiliados?tab=solicitacoes" class="affiliate-tab <?= ($tab ?? '') === 'solicitacoes' ? 'active' : '' ?>">
+        Solicitações de Afiliação
+        <?php if ($pendingCount > 0): ?>
+        <span class="affiliate-tab-badge"><?= $pendingCount ?></span>
+        <?php endif; ?>
+    </a>
+    <a href="/admin/afiliados?tab=ativos" class="affiliate-tab <?= ($tab ?? '') === 'ativos' ? 'active' : '' ?>">
+        Afiliados Ativos
+        <span class="affiliate-tab-count">(<?= $activeCount ?>)</span>
+    </a>
+    <a href="/admin/afiliados?tab=bloqueados" class="affiliate-tab <?= ($tab ?? '') === 'bloqueados' ? 'active' : '' ?>">
+        Bloqueados
+        <span class="affiliate-tab-count">(<?= $blockedCount ?>)</span>
+    </a>
+    <a href="/admin/afiliados/comissoes" class="affiliate-tab">Comissões</a>
 </div>
 
+<?php if (($tab ?? '') === 'solicitacoes'): ?>
+<!-- Tab: Solicitações Pendentes -->
 <table class="table">
     <thead>
         <tr>
-            <th>Afiliado</th>
-            <th>E-mail</th>
-            <th>Código</th>
-            <th>Comissão (%)</th>
-            <th>Total Vendas</th>
-            <th>Total Pago</th>
-            <th>Status</th>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>WhatsApp</th>
+            <th>Seguidores</th>
+            <th>Nicho</th>
+            <th>Data</th>
             <th>Ações</th>
         </tr>
     </thead>
     <tbody>
-        <?php if (empty($affiliates['data'])): ?>
-        <tr>
-            <td colspan="8" class="text-center">Nenhum afiliado cadastrado.</td>
-        </tr>
+        <?php if (empty($requests['items'])): ?>
+        <tr><td colspan="7" class="text-center" style="padding:30px;color:#94a3b8;">Nenhuma solicitação pendente.</td></tr>
         <?php else: ?>
-        <?php foreach ($affiliates['data'] as $affiliate): ?>
+        <?php foreach ($requests['items'] as $req): ?>
         <tr>
-            <td><strong><?= e(($affiliate['first_name'] ?? '') . ' ' . ($affiliate['last_name'] ?? '')) ?></strong></td>
-            <td><?= e($affiliate['email'] ?? '-') ?></td>
-            <td><code><?= e($affiliate['referral_code'] ?? '-') ?></code></td>
-            <td><?= number_format((float)($affiliate['commission_rate'] ?? 0), 1) ?>%</td>
-            <td>$<?= number_format((float)($affiliate['total_sales'] ?? 0), 2) ?></td>
-            <td>$<?= number_format((float)($affiliate['total_paid'] ?? 0), 2) ?></td>
-            <td>
-                <?php
-                    $st = $affiliate['status'] ?? 'pending';
-                    $stColor = $st === 'active' ? 'success' : ($st === 'rejected' ? 'danger' : 'warning');
-                    $stLabel = $st === 'active' ? 'Ativo' : ($st === 'rejected' ? 'Rejeitado' : 'Pendente');
-                ?>
-                <span class="badge badge-<?= $stColor ?>"><?= $stLabel ?></span>
-            </td>
+            <td><strong><?= e($req['first_name'] . ' ' . $req['last_name']) ?></strong><br><small style="color:#94a3b8;">@<?= e($req['username'] ?? '') ?></small></td>
+            <td><?= e($req['email']) ?></td>
+            <td><?= e($req['phone']) ?></td>
+            <td><span class="badge badge-info"><?= e($req['followers_count'] ?? '-') ?></span></td>
+            <td><?= e(ucfirst($req['niche'] ?? '-')) ?></td>
+            <td><?= date('d/m/Y', strtotime($req['created_at'])) ?></td>
             <td class="actions-cell">
-                <?php if (($affiliate['status'] ?? '') === 'pending'): ?>
-                <form method="POST" action="/admin/afiliados/<?= (int)$affiliate['id'] ?>/aprovar" class="inline-form">
-                    <?= csrf_field() ?>
-                    <button class="btn btn-sm btn-primary">Aprovar</button>
-                </form>
-                <form method="POST" action="/admin/afiliados/<?= (int)$affiliate['id'] ?>/rejeitar" class="inline-form">
-                    <?= csrf_field() ?>
-                    <button class="btn btn-sm btn-danger" onclick="return confirm('Rejeitar este afiliado?')">Rejeitar</button>
-                </form>
-                <?php else: ?>
-                <span class="text-muted">-</span>
-                <?php endif; ?>
+                <a href="/admin/afiliados/solicitacao/<?= (int)$req['id'] ?>" class="btn btn-sm btn-primary">Ver Detalhes</a>
             </td>
         </tr>
         <?php endforeach; ?>
@@ -59,10 +52,90 @@
     </tbody>
 </table>
 
-<?php if (!empty($affiliates['totalPages']) && $affiliates['totalPages'] > 1): ?>
+<?php if (!empty($requests['total_pages']) && $requests['total_pages'] > 1): ?>
 <div class="pagination">
-    <?php for ($p = 1; $p <= $affiliates['totalPages']; $p++): ?>
-    <a href="?page=<?= $p ?>" class="pagination-btn <?= $p === ($affiliates['currentPage'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
+    <?php for ($p = 1; $p <= $requests['total_pages']; $p++): ?>
+    <a href="?tab=solicitacoes&page=<?= $p ?>" class="page-link <?= $p === ($requests['current_page'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
     <?php endfor; ?>
 </div>
 <?php endif; ?>
+
+<?php elseif (($tab ?? '') === 'ativos'): ?>
+<!-- Tab: Afiliados Ativos -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>Afiliado</th>
+            <th>Email</th>
+            <th>Comissão (%)</th>
+            <th>Total Vendas</th>
+            <th>Total Ganhos</th>
+            <th>Total Pago</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($affiliates['items'])): ?>
+        <tr><td colspan="7" class="text-center" style="padding:30px;color:#94a3b8;">Nenhum afiliado ativo.</td></tr>
+        <?php else: ?>
+        <?php foreach ($affiliates['items'] as $aff): ?>
+        <tr>
+            <td><strong><?= e(($aff['first_name'] ?? '') . ' ' . ($aff['last_name'] ?? '')) ?></strong></td>
+            <td><?= e($aff['email'] ?? '') ?></td>
+            <td><?= number_format((float)($aff['commission_rate'] ?? 20), 1) ?>%</td>
+            <td><?= money((float)($aff['total_sales'] ?? 0)) ?></td>
+            <td><?= money((float)($aff['total_earnings'] ?? 0)) ?></td>
+            <td><?= money((float)($aff['total_paid'] ?? 0)) ?></td>
+            <td class="actions-cell">
+                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/suspender" class="inline-form" onsubmit="return confirm('Suspender este afiliado?')">
+                    <?= csrf_field() ?>
+                    <button class="btn btn-sm btn-danger">Suspender</button>
+                </form>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>
+
+<?php elseif (($tab ?? '') === 'bloqueados'): ?>
+<!-- Tab: Bloqueados -->
+<table class="table">
+    <thead>
+        <tr>
+            <th>Afiliado</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($blocked)): ?>
+        <tr><td colspan="4" class="text-center" style="padding:30px;color:#94a3b8;">Nenhum afiliado bloqueado.</td></tr>
+        <?php else: ?>
+        <?php foreach ($blocked as $aff): ?>
+        <tr>
+            <td><strong><?= e(($aff['first_name'] ?? '') . ' ' . ($aff['last_name'] ?? '')) ?></strong></td>
+            <td><?= e($aff['email'] ?? '') ?></td>
+            <td><span class="badge badge-danger"><?= e(ucfirst($aff['status'])) ?></span></td>
+            <td class="actions-cell">
+                <form method="POST" action="/admin/afiliados/<?= (int)$aff['id'] ?>/reativar" class="inline-form">
+                    <?= csrf_field() ?>
+                    <button class="btn btn-sm btn-primary">Reativar</button>
+                </form>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+        <?php endif; ?>
+    </tbody>
+</table>
+<?php endif; ?>
+
+<style>
+.affiliate-tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 24px; }
+.affiliate-tab { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; font-size: 14px; font-weight: 600; color: #64748b; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+.affiliate-tab:hover { color: #334155; }
+.affiliate-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.affiliate-tab-badge { background: #ef4444; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; min-width: 20px; text-align: center; }
+.affiliate-tab-count { font-size: 12px; color: #94a3b8; font-weight: 400; }
+</style>

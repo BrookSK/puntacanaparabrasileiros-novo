@@ -211,8 +211,11 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
 
     // Afiliados
     $router->get('/afiliados', [AdminAffiliatesController::class, 'index'], [], 'admin.affiliates.index');
-    $router->post('/afiliados/{id}/aprovar', [AdminAffiliatesController::class, 'approve'], [CsrfMiddleware::class], 'admin.affiliates.approve');
-    $router->post('/afiliados/{id}/rejeitar', [AdminAffiliatesController::class, 'reject'], [CsrfMiddleware::class], 'admin.affiliates.reject');
+    $router->get('/afiliados/solicitacao/{id}', [AdminAffiliatesController::class, 'showRequest'], [], 'admin.affiliates.request.show');
+    $router->post('/afiliados/solicitacao/{id}/aprovar', [AdminAffiliatesController::class, 'approveRequest'], [CsrfMiddleware::class], 'admin.affiliates.request.approve');
+    $router->post('/afiliados/solicitacao/{id}/recusar', [AdminAffiliatesController::class, 'rejectRequest'], [CsrfMiddleware::class], 'admin.affiliates.request.reject');
+    $router->post('/afiliados/{id}/suspender', [AdminAffiliatesController::class, 'suspend'], [CsrfMiddleware::class], 'admin.affiliates.suspend');
+    $router->post('/afiliados/{id}/reativar', [AdminAffiliatesController::class, 'reactivate'], [CsrfMiddleware::class], 'admin.affiliates.reactivate');
     $router->get('/afiliados/comissoes', [AdminAffiliatesController::class, 'commissions'], [], 'admin.affiliates.commissions');
     $router->post('/afiliados/comissoes/{id}/pagar', [AdminAffiliatesController::class, 'payCommission'], [CsrfMiddleware::class], 'admin.affiliates.pay');
 
