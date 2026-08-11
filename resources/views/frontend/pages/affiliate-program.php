@@ -7,7 +7,7 @@
                 <h1>Transforme sua Influência em <span class="text-highlight-green">Renda Extra</span></h1>
                 <p>Junte-se ao nosso programa de afiliados e ganhe comissões divulgando experiências turísticas incríveis em Punta Cana para sua audiência.</p>
                 <div class="affiliate-hero-actions">
-                    <a href="/registrar" class="btn btn-secondary">Quero ser Afiliado &rarr;</a>
+                    <a href="/cadastro-afiliado" class="btn btn-secondary">Quero ser Afiliado &rarr;</a>
                     <a href="#como-funciona" class="btn btn-outline">Saiba Mais</a>
                 </div>
                 <div class="affiliate-hero-stats">
@@ -205,7 +205,7 @@
                         Alinhamento com os valores da nossa marca
                     </li>
                 </ul>
-                <a href="/registrar" class="btn btn-secondary">Candidatar-se Agora &rarr;</a>
+                <a href="/cadastro-afiliado" class="btn btn-secondary">Candidatar-se Agora &rarr;</a>
             </div>
 
             <!-- Direita: Cards de stats -->
@@ -290,7 +290,7 @@
             <h2>Pronto para começar a ganhar?</h2>
             <p>Junte-se a centenas de influenciadores que já estão lucrando com nosso programa de afiliados. Cadastre-se agora e comece sua jornada como nosso parceiro.</p>
             <div class="affiliate-cta-actions">
-                <a href="/registrar" class="btn btn-secondary">Cadastrar como Afiliado &rarr;</a>
+                <a href="/cadastro-afiliado" class="btn btn-secondary">Cadastrar como Afiliado &rarr;</a>
                 <a href="/contato" class="btn btn-outline-white">Fale Conosco</a>
             </div>
         </div>
