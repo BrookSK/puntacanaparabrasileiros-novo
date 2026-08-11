@@ -330,8 +330,15 @@ class AffiliatesController extends Controller
                 $this->redirect('/admin/afiliados?tab=bloqueados');
                 return;
             }
-            // Excluir afiliado e o user associado (se quiser manter o user, remova esta linha)
+            // Excluir afiliado, user associado e solicitação original
+            $userId = (int) $affiliate['user_id'];
             $this->db->delete('affiliates', 'id = ?', [$id]);
+            // Buscar email do user para limpar affiliate_requests também
+            $user = $this->db->fetchOne("SELECT email FROM users WHERE id = ?", [$userId]);
+            if ($user) {
+                $this->db->delete('affiliate_requests', 'email = ?', [$user['email']]);
+                $this->db->delete('users', 'id = ?', [$userId]);
+            }
             $this->flash('success', 'Afiliado excluído permanentemente.');
         } else {
             // Excluir solicitação bloqueada
@@ -345,6 +352,13 @@ class AffiliatesController extends Controller
                 $this->flash('error', 'Apenas solicitações bloqueadas podem ser excluídas.');
                 $this->redirect('/admin/afiliados?tab=bloqueados');
                 return;
+            }
+            // Limpar também user e affiliate associados ao email (caso tenha sido aprovado antes)
+            $email = $req['email'];
+            $existingUser = $this->db->fetchOne("SELECT id FROM users WHERE email = ?", [$email]);
+            if ($existingUser) {
+                $this->db->delete('affiliates', 'user_id = ?', [(int)$existingUser['id']]);
+                $this->db->delete('users', 'id = ?', [(int)$existingUser['id']]);
             }
             $this->db->delete('affiliate_requests', 'id = ?', [$id]);
             $this->flash('success', 'Solicitação excluída permanentemente.');
