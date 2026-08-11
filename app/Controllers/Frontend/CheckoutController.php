@@ -384,8 +384,10 @@ class CheckoutController extends Controller
             );
         }
 
-        // WhatsApp
+        // WhatsApp — Notificações via Evolution API (com fallback para webhook legado)
         $whatsappService = new WhatsAppService();
+
+        // 1. Confirmação para o cliente (passeio)
         if (!empty($items)) {
             $whatsappService->sendTripConfirmation($booking, [
                 'title' => $items[0]['trip_title'] ?? '',
@@ -395,6 +397,26 @@ class CheckoutController extends Controller
                 'reference' => $booking['booking_number'],
             ]);
         }
+
+        // 2. Confirmação para o cliente (transfer)
+        if (!empty($transfers)) {
+            foreach ($transfers as $transfer) {
+                $whatsappService->sendTransferConfirmation([
+                    'customer_name' => trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '')),
+                    'customer_phone' => $booking['billing_phone'] ?? '',
+                    'vehicle_title' => $transfer['vehicle_title'] ?? '',
+                    'origin_title' => $transfer['origin_title'] ?? '',
+                    'destination_title' => $transfer['destination_title'] ?? '',
+                    'date' => $transfer['date'] ?? '',
+                    'time' => $transfer['time'] ?? '',
+                    'adults' => $transfer['adults'] ?? 1,
+                    'reference' => $booking['booking_number'],
+                ]);
+            }
+        }
+
+        // 3. Notificação para grupo admin (nova reserva)
+        $whatsappService->notifyNewBooking($booking, $items, $transfers);
 
         // Comissão de afiliado
         if ($booking['affiliate_id']) {
