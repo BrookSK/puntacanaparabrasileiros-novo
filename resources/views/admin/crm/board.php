@@ -220,39 +220,81 @@ async function openCardDetail(id) {
     const body = document.getElementById('cardDetailBody');
     document.getElementById('cardDetailTitle').textContent = c.title;
 
+    // Status badges
+    let statusBadge = '';
+    if (c.lead_outcome === 'converted') statusBadge = '<span class="badge badge-success">Convertido</span>';
+    else if (c.lead_outcome === 'lost') statusBadge = '<span class="badge badge-danger">Perdido</span>';
+    else statusBadge = '<span class="badge badge-info">Em aberto</span>';
+
+    // Atividades
     let activitiesHtml = (c.activities || []).map(a => 
-        `<div class="activity-item"><small class="activity-type">${a.activity_type}</small> <span>${a.description || ''}</span> <small>${a.user_name || 'Sistema'} · ${a.created_at}</small></div>`
+        `<div class="cd-activity">
+            <div class="cd-activity-dot"></div>
+            <div class="cd-activity-content">
+                <span class="cd-activity-desc">${a.description || ''}</span>
+                <span class="cd-activity-meta">${a.user_name || 'Sistema'} &middot; ${formatDateShort(a.created_at)}</span>
+            </div>
+        </div>`
     ).join('');
 
     body.innerHTML = `
-        <div class="card-detail-grid">
-            <div class="card-detail-main">
-                <div class="form-group"><label>Título</label><input type="text" id="cd-title" class="form-control" value="${c.title || ''}"></div>
-                <div class="form-group"><label>Descrição</label><textarea id="cd-desc" class="form-control" rows="2">${c.description || ''}</textarea></div>
-                <div class="form-row">
-                    <div class="form-group"><label>Telefone</label><input type="text" id="cd-phone" class="form-control" value="${c.phone || ''}"></div>
-                    <div class="form-group"><label>Valor (R$)</label><input type="text" id="cd-value" class="form-control" value="${c.value || ''}"></div>
+        <div class="cd-layout">
+            <div class="cd-left">
+                <div class="cd-section">
+                    <div class="cd-info-row">
+                        <span class="cd-label">Status</span>
+                        ${statusBadge}
+                    </div>
+                    <div class="cd-info-row">
+                        <span class="cd-label">Coluna</span>
+                        <span class="cd-value"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.column_color || '#999'};margin-right:4px;"></span>${c.column_name || ''}</span>
+                    </div>
+                    ${c.assigned_name ? `<div class="cd-info-row"><span class="cd-label">Responsável</span><span class="cd-value">${c.assigned_name}</span></div>` : ''}
+                    ${c.phone ? `<div class="cd-info-row"><span class="cd-label">Telefone</span><span class="cd-value">${c.phone}</span></div>` : ''}
+                    ${c.value ? `<div class="cd-info-row"><span class="cd-label">Valor</span><span class="cd-value cd-value-money">R$ ${parseFloat(c.value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span></div>` : ''}
                 </div>
-                <div class="form-group"><label>Responsável</label><input type="text" class="form-control" value="${c.assigned_name || 'Sem responsável'}" disabled></div>
-                <div class="card-detail-actions">
-                    <button class="btn btn-success btn-sm" onclick="convertLead(${c.id})">✅ Converter</button>
-                    <button class="btn btn-danger btn-sm" onclick="lostLead(${c.id})">❌ Perdido</button>
-                    ${c.contact_id ? `<a href="/whatsapp/chat/${c.contact_id}" class="btn btn-outline btn-sm">💬 Abrir chat</a>` : ''}
-                    <button class="btn btn-outline btn-sm" onclick="openFollowUp(${c.id})">⏰ Retomar</button>
-                    <button class="btn btn-danger-outline btn-sm" onclick="deleteCard(${c.id})">🗑️ Excluir</button>
+
+                <div class="cd-section cd-edit-section">
+                    <h6>Editar</h6>
+                    <div class="cd-form-grid">
+                        <div class="cd-field"><label>Título</label><input type="text" id="cd-title" class="form-control" value="${c.title || ''}"></div>
+                        <div class="cd-field"><label>Telefone</label><input type="text" id="cd-phone" class="form-control" value="${c.phone || ''}"></div>
+                        <div class="cd-field"><label>Valor (R$)</label><input type="text" id="cd-value" class="form-control" value="${c.value || ''}"></div>
+                    </div>
+                    <div class="cd-field" style="margin-top:8px;"><label>Descrição</label><textarea id="cd-desc" class="form-control" rows="2">${c.description || ''}</textarea></div>
+                    <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="saveCard(${c.id})">Salvar</button>
                 </div>
-                <button class="btn btn-primary btn-sm" style="margin-top:12px;" onclick="saveCard(${c.id})">Salvar alterações</button>
+
+                <div class="cd-section cd-actions-section">
+                    <h6>Ações</h6>
+                    <div class="cd-actions-grid">
+                        <button class="cd-action-btn cd-action-convert" onclick="convertLead(${c.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Converter</button>
+                        <button class="cd-action-btn cd-action-lost" onclick="lostLead(${c.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Perdido</button>
+                        ${c.contact_id ? `<a href="/whatsapp/chat/${c.contact_id}" class="cd-action-btn cd-action-chat"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg> Chat</a>` : ''}
+                        <button class="cd-action-btn cd-action-followup" onclick="openFollowUp(${c.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Retomar</button>
+                        <button class="cd-action-btn cd-action-delete" onclick="deleteCard(${c.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg> Excluir</button>
+                    </div>
+                </div>
             </div>
-            <div class="card-detail-aside">
-                <h5>Atividades</h5>
-                <div class="activities-list">${activitiesHtml || '<p class="text-muted">Sem atividades</p>'}</div>
-                <div class="form-group" style="margin-top:12px;">
-                    <textarea id="cd-note" class="form-control" rows="2" placeholder="Adicionar nota..."></textarea>
-                    <button class="btn btn-sm btn-outline" style="margin-top:4px;" onclick="addNote(${c.id})">+ Nota</button>
+
+            <div class="cd-right">
+                <div class="cd-section">
+                    <h6>Atividades</h6>
+                    <div class="cd-activities">${activitiesHtml || '<p class="cd-empty">Nenhuma atividade registrada</p>'}</div>
+                </div>
+                <div class="cd-section cd-note-section">
+                    <textarea id="cd-note" class="form-control" rows="2" placeholder="Escrever nota..."></textarea>
+                    <button class="btn btn-sm btn-outline" onclick="addNote(${c.id})">Adicionar nota</button>
                 </div>
             </div>
         </div>`;
     document.getElementById('modal-card-detail').style.display = 'flex';
+}
+
+function formatDateShort(dt) {
+    if (!dt) return '';
+    const d = new Date(dt);
+    return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
 }
 
 async function saveCard(id) {
