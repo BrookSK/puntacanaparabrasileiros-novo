@@ -29,9 +29,6 @@
 
                 <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">WhatsApp</label>
                 <p style="margin:4px 0 16px;font-size:14px;"><?= e($request['phone']) ?></p>
-
-                <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Nome de Usuário</label>
-                <p style="margin:4px 0 16px;font-size:14px;">@<?= e($request['username'] ?? '-') ?></p>
             </div>
             <div>
                 <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Seguidores</label>

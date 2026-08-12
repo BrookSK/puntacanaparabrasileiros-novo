@@ -38,7 +38,7 @@
         <?php else: ?>
         <?php foreach ($requests['items'] as $req): ?>
         <tr>
-            <td><strong><?= e($req['first_name'] . ' ' . $req['last_name']) ?></strong><br><small style="color:#94a3b8;">@<?= e($req['username'] ?? '') ?></small></td>
+            <td><strong><?= e($req['first_name'] . ' ' . $req['last_name']) ?></strong></td>
             <td><?= e($req['email']) ?></td>
             <td><?= e($req['phone']) ?></td>
             <td><span class="badge badge-info"><?= e($req['followers_count'] ?? '-') ?></span></td>
