@@ -581,7 +581,18 @@ class AccountController extends Controller
         $commissionModel = new \App\Models\Commission();
         $commissions = $commissionModel->getByAffiliate((int) $affiliate['id'], 1, 50);
 
-        $this->view('frontend/affiliate/commissions', ['affiliate' => $affiliate, 'commissions' => $commissions['items'] ?? [], 'pageTitle' => 'Comissões'], 'app');
+        // Calcular total cancelado
+        $totalCancelled = $this->db->fetchColumn(
+            "SELECT COALESCE(SUM(amount), 0) FROM commissions WHERE affiliate_id = ? AND status = 'rejected'",
+            [(int) $affiliate['id']]
+        );
+
+        $this->view('frontend/affiliate/commissions', [
+            'affiliate' => $affiliate,
+            'commissions' => $commissions['items'] ?? [],
+            'totalCancelled' => (float) $totalCancelled,
+            'pageTitle' => 'Comissões',
+        ], 'app');
     }
 
     public function affiliateVisits(Request $request, Response $response): void
