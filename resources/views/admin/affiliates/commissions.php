@@ -71,11 +71,7 @@
             <td><?= !empty($comm['created_at']) ? date('d/m/Y H:i', strtotime($comm['created_at'])) : '-' ?></td>
             <td class="actions-cell">
                 <?php if ($cst === 'pending'): ?>
-                <form method="POST" action="/admin/afiliados/comissoes/<?= (int)$comm['id'] ?>/pagar" class="inline-form" onsubmit="return confirm('Marcar como paga?')" style="display:inline;">
-                    <?= csrf_field() ?>
-                    <input type="text" name="payout_reference" placeholder="Ref. pagamento" class="form-control" style="width:120px;display:inline-block;font-size:11px;padding:5px 8px;margin-right:4px;">
-                    <button class="btn btn-sm btn-success">Pagar</button>
-                </form>
+                <button type="button" class="btn btn-sm btn-success" onclick="openPayModal(<?= (int)$comm['id'] ?>)">Pagar</button>
                 <button type="button" class="btn btn-sm btn-danger" onclick="openCancelModal(<?= (int)$comm['id'] ?>)" style="margin-left:4px;">Cancelar</button>
                 <?php elseif ($cst === 'paid'): ?>
                 <span style="font-size:11px;color:#64748b;"><?= e($comm['payout_reference'] ?? '-') ?></span>
@@ -113,6 +109,22 @@
     </div>
 </div>
 
+<!-- Modal Pagar Comissão -->
+<div id="payModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#1e293b;border-radius:12px;padding:30px;width:100%;max-width:450px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+        <h3 style="margin:0 0 15px;color:#f1f5f9;font-size:18px;">Registrar Pagamento</h3>
+        <p style="color:#94a3b8;margin:0 0 15px;font-size:14px;">Informe a referência do pagamento (opcional):</p>
+        <form id="payForm" method="POST" action="">
+            <?= csrf_field() ?>
+            <input type="text" name="payout_reference" id="payReference" class="form-control" style="width:100%;margin-bottom:15px;" placeholder="Ex: PIX, comprovante, código de transação...">
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closePayModal()">Fechar</button>
+                <button type="submit" class="btn btn-success">Confirmar Pagamento</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
 function openCancelModal(commissionId) {
     const modal = document.getElementById('cancelModal');
@@ -126,10 +138,23 @@ function closeCancelModal() {
     document.getElementById('cancelModal').style.display = 'none';
 }
 
-// Fechar modal ao clicar fora
+function openPayModal(commissionId) {
+    const modal = document.getElementById('payModal');
+    const form = document.getElementById('payForm');
+    form.action = '/admin/afiliados/comissoes/' + commissionId + '/pagar';
+    document.getElementById('payReference').value = '';
+    modal.style.display = 'flex';
+}
+
+function closePayModal() {
+    document.getElementById('payModal').style.display = 'none';
+}
+
+// Fechar modais ao clicar fora
 document.getElementById('cancelModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeCancelModal();
-    }
+    if (e.target === this) closeCancelModal();
+});
+document.getElementById('payModal').addEventListener('click', function(e) {
+    if (e.target === this) closePayModal();
 });
 </script>
