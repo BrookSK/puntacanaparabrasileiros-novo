@@ -488,5 +488,24 @@ body {
     </p>
 </footer>
 
+<!-- Google Translate (segue idioma do catálogo via cookie) -->
+<div id="google_translate_element" style="display:none;"></div>
+<script>
+function googleTranslateElementInit() {
+    new google.translate.TranslateElement({
+        pageLanguage: 'pt',
+        includedLanguages: 'pt,en,es',
+        autoDisplay: false
+    }, 'google_translate_element');
+}
+</script>
+<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<style>
+.goog-te-banner-frame { display: none !important; }
+body { top: 0 !important; }
+.goog-te-gadget { display: none !important; }
+.skiptranslate { display: none !important; }
+</style>
+
 </body>
 </html>
