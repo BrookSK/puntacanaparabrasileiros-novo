@@ -34,7 +34,7 @@
                             <input type="text" id="bmHotelSearch" placeholder="Ex: Barceló, Hard Rock, Dreams..." autocomplete="off">
                         </div>
 
-                        <div class="bm-hotel-list notranslate" id="bmHotelList" translate="no">
+                        <div class="bm-hotel-list" id="bmHotelList">
                             <div class="bm-hotel-loading" id="bmHotelLoading" style="display:none">
                                 <span>Carregando hotéis...</span>
                             </div>
@@ -48,7 +48,7 @@
                     <!-- Horários de Busca (aparece após selecionar hotel) -->
                     <div class="bm-pickup-section" id="bmPickupSection" style="display:none">
                         <h4 class="bm-section-title">Horário de Busca</h4>
-                        <p class="bm-section-subtitle">Selecione o horário para busca no <strong id="bmPickupHotelName" class="notranslate" translate="no"></strong></p>
+                        <p class="bm-section-subtitle">Selecione o horário para busca no <input type="text" id="bmPickupHotelName" class="bm-hotel-name-input bm-hotel-name-inline" readonly tabindex="-1" value=""></p>
                         <div class="bm-pickup-times" id="bmPickupTimes"></div>
                     </div>
 
@@ -123,7 +123,7 @@
                 <div class="bm-sidebar-code" id="bmSidebarCode"></div>
 
                 <div class="bm-sidebar-hotel" id="bmSidebarHotel" style="display:none">
-                    <span id="bmSidebarHotelName" class="notranslate" translate="no"></span>
+                    <input type="text" id="bmSidebarHotelName" class="bm-hotel-name-input bm-sidebar-hotel-input" readonly tabindex="-1" value="">
                     <span id="bmSidebarPickupTime"></span>
                 </div>
 
