@@ -6236,8 +6236,8 @@ img { max-width: 100%; height: auto; }
 .bm-day.disabled { color: #ccc; cursor: default; }
 .bm-day.disabled:hover { background: none; }
 .bm-day.available { color: var(--accent); font-weight: 600; }
-.bm-day.selected { background: var(--accent); color: white; font-weight: 600; }
-.bm-day.today { border: 1px solid var(--accent); }
+.bm-day.selected { background: var(--accent); color: white; font-weight: 600; border-radius: 8px; }
+.bm-day.today { border: 2px solid var(--accent); border-radius: 8px; background: transparent; }
 
 /* Times */
 .bm-times { margin-bottom: 20px; }

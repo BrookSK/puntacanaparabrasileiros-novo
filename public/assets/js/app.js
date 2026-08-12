@@ -1138,13 +1138,13 @@
             const date = new Date(currentYear, currentMonth, d);
             const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
             const isToday = d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
-            const isSelected = selectedDate && date.toDateString() === new Date(selectedDate).toDateString();
+            const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+            const isSelected = selectedDate === dateStr;
             let classes = 'bm-day';
             if (isPast) classes += ' disabled';
             else classes += ' available';
-            if (isToday) classes += ' today';
+            if (isToday && !isSelected) classes += ' today';
             if (isSelected) classes += ' selected';
-            const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             html += `<div class="${classes}" data-date="${dateStr}" onclick="selectBookingDate('${dateStr}')">${d}</div>`;
         }
         daysContainer.innerHTML = html;
