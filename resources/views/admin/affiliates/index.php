@@ -15,6 +15,7 @@
         <span class="affiliate-tab-count">(<?= $blockedCount ?>)</span>
     </a>
     <a href="/admin/afiliados/comissoes" class="affiliate-tab">Comissões</a>
+    <a href="/admin/afiliados/criativos" class="affiliate-tab">Criativos</a>
 </div>
 
 <?php if (($tab ?? '') === 'solicitacoes'): ?>
