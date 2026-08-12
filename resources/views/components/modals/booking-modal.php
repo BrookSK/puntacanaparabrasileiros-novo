@@ -107,10 +107,10 @@
                     </div>
 
                     <!-- Ações -->
-                    <div class="bm-actions bm-actions-step2">
+                    <div class="bm-actions bm-actions-step2" style="display:flex;gap:10px;align-items:center;margin-top:24px;flex-wrap:nowrap;">
                         <button type="button" class="bm-btn-back" id="bmBack">&lsaquo; Voltar</button>
-                        <button type="button" class="bm-btn-cart" id="bmAddCart">ADICIONAR AO CARRINHO</button>
-                        <button type="button" class="bm-btn-checkout" id="bmDirectCheckout">IR PARA CHECKOUT</button>
+                        <button type="button" id="bmAddCart" style="padding:14px 20px;background:#1B6F00;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">ADICIONAR AO CARRINHO</button>
+                        <button type="button" id="bmDirectCheckout" style="padding:14px 20px;background:#0077b6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">IR PARA CHECKOUT</button>
                     </div>
                 </div>
             </div>
