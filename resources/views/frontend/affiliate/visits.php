@@ -27,7 +27,8 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Página Visitada</th>
-                                    <th>Referenciador</th>
+                                    <th>Link Usado</th>
+                                    <th>Converteu</th>
                                     <th>Data</th>
                                 </tr>
                             </thead>
@@ -36,13 +37,14 @@
                                 <?php foreach ($visits as $v): ?>
                                 <tr>
                                     <td class="aff-td-id">#<?= (int)$v['id'] ?></td>
-                                    <td class="aff-td-url"><span class="aff-url-text"><?= e($v['page_url'] ?? '-') ?></span></td>
-                                    <td class="aff-td-url"><span class="aff-url-text"><?= e($v['referrer'] ?? '-') ?></span></td>
+                                    <td class="aff-td-url"><span class="aff-url-text"><?= e($v['page_url'] ?? '/') ?></span></td>
+                                    <td class="aff-td-url"><span class="aff-url-text"><?= e($v['referrer'] ?: 'Link direto') ?></span></td>
+                                    <td><?php if (!empty($v['converted'])): ?><span style="color:var(--text-green);font-weight:600;">Sim</span><?php else: ?><span style="color:var(--gray);">Não</span><?php endif; ?></td>
                                     <td><?= format_datetime($v['created_at']) ?></td>
                                 </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <tr><td colspan="4" class="aff-table-empty">Nenhuma visita registrada ainda.</td></tr>
+                                <tr><td colspan="5" class="aff-table-empty">Nenhuma visita registrada ainda.</td></tr>
                             <?php endif; ?>
                             </tbody>
                         </table>
