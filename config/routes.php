@@ -223,6 +223,9 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/afiliados/{id}/reativar', [AdminAffiliatesController::class, 'reactivate'], [CsrfMiddleware::class], 'admin.affiliates.reactivate');
     $router->get('/afiliados/comissoes', [AdminAffiliatesController::class, 'commissions'], [], 'admin.affiliates.commissions');
     $router->post('/afiliados/comissoes/{id}/pagar', [AdminAffiliatesController::class, 'payCommission'], [CsrfMiddleware::class], 'admin.affiliates.pay');
+    $router->get('/afiliados/criativos', [AdminAffiliatesController::class, 'creatives'], [], 'admin.affiliates.creatives');
+    $router->post('/afiliados/criativos/criar', [AdminAffiliatesController::class, 'storeCreative'], [CsrfMiddleware::class], 'admin.affiliates.creatives.store');
+    $router->post('/afiliados/criativos/{id}/excluir', [AdminAffiliatesController::class, 'deleteCreative'], [CsrfMiddleware::class], 'admin.affiliates.creatives.delete');
 
     // Usuários
     $router->get('/usuarios', [AdminUsersController::class, 'index'], [], 'admin.users.index');

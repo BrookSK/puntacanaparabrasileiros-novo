@@ -603,7 +603,10 @@ class AccountController extends Controller
         $affiliate = $affiliateModel->findByUser((int) $user['id']);
         if (!$affiliate) { $this->redirect('/programa-de-afiliados'); return; }
 
-        $this->view('frontend/affiliate/creatives', ['affiliate' => $affiliate, 'pageTitle' => 'Criativos'], 'app');
+        $creativeModel = new \App\Models\AffiliateCreative();
+        $creatives = $creativeModel->getActive();
+
+        $this->view('frontend/affiliate/creatives', ['affiliate' => $affiliate, 'creatives' => $creatives, 'pageTitle' => 'Criativos'], 'app');
     }
 
     public function affiliatePayments(Request $request, Response $response): void

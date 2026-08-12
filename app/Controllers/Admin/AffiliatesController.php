@@ -448,4 +448,88 @@ class AffiliatesController extends Controller
         $this->flash('success', 'Comissão marcada como paga!');
         $this->redirect('/admin/afiliados/comissoes');
     }
+
+    // ============================================================
+    // Criativos para Afiliados
+    // ============================================================
+
+    public function creatives(Request $request, Response $response): void
+    {
+        $creativeModel = new \App\Models\AffiliateCreative();
+        $creatives = $creativeModel->getAll();
+
+        $this->view('admin/affiliates/creatives', [
+            'creatives' => $creatives,
+            'pageTitle' => 'Criativos para Afiliados',
+        ], 'admin');
+    }
+
+    public function storeCreative(Request $request, Response $response): void
+    {
+        $creativeModel = new \App\Models\AffiliateCreative();
+
+        $data = $request->only(['title', 'description', 'type', 'dimensions']);
+        $data['status'] = 'active';
+
+        // Auto sort_order
+        $lastOrder = $this->db->fetchOne("SELECT MAX(sort_order) as max_order FROM affiliate_creatives");
+        $data['sort_order'] = ($lastOrder ? (int) $lastOrder['max_order'] : 0) + 1;
+
+        // Upload da imagem
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            if (!in_array($file['type'], $allowedTypes)) {
+                $this->flash('error', 'Tipo de arquivo não permitido. Use JPG, PNG, WebP ou GIF.');
+                $this->redirect('/admin/afiliados/criativos');
+                return;
+            }
+
+            $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+            $filename = 'creative-' . uniqid() . '.' . $ext;
+            $destination = BASE_PATH . '/public/uploads/creatives/' . $filename;
+
+            // Criar diretório se não existir
+            $dir = dirname($destination);
+            if (!is_dir($dir)) {
+                mkdir($dir, 0755, true);
+            }
+
+            move_uploaded_file($file['tmp_name'], $destination);
+            $data['image_url'] = '/uploads/creatives/' . $filename;
+
+            // Detectar dimensões
+            $imageInfo = getimagesize($destination);
+            if ($imageInfo) {
+                $data['dimensions'] = $imageInfo[0] . 'x' . $imageInfo[1];
+            }
+        } else {
+            $this->flash('error', 'É necessário enviar uma imagem.');
+            $this->redirect('/admin/afiliados/criativos');
+            return;
+        }
+
+        $creativeModel->create($data);
+        $this->flash('success', 'Criativo adicionado!');
+        $this->redirect('/admin/afiliados/criativos');
+    }
+
+    public function deleteCreative(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $creativeModel = new \App\Models\AffiliateCreative();
+        $creative = $creativeModel->find($id);
+
+        if ($creative) {
+            // Remover arquivo físico
+            $filePath = BASE_PATH . '/public' . $creative['image_url'];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            $creativeModel->delete($id);
+        }
+
+        $this->flash('success', 'Criativo excluído!');
+        $this->redirect('/admin/afiliados/criativos');
+    }
 }

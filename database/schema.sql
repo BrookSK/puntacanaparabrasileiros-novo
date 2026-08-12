@@ -844,3 +844,22 @@ CREATE TABLE IF NOT EXISTS `coupons` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================================
+-- TABELA: affiliate_creatives
+-- Materiais criativos (banners, imagens) para afiliados
+-- ============================================================
+CREATE TABLE IF NOT EXISTS `affiliate_creatives` (
+    `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    `title` VARCHAR(255) NOT NULL,
+    `description` TEXT DEFAULT NULL,
+    `image_url` VARCHAR(500) NOT NULL,
+    `type` ENUM('banner','story','post','video','other') NOT NULL DEFAULT 'post',
+    `dimensions` VARCHAR(50) DEFAULT NULL COMMENT 'Ex: 1080x1080, 1920x1080',
+    `sort_order` INT NOT NULL DEFAULT 0,
+    `status` ENUM('active','inactive') NOT NULL DEFAULT 'active',
+    `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`id`),
+    KEY `idx_ac_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
