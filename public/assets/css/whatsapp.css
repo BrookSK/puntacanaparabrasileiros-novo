@@ -206,26 +206,46 @@
 }
 .wpp-msg-document .doc-actions a:hover { background: var(--wpp-primary-dark); }
 
-/* Audio player */
-.wpp-msg-audio { display: flex; align-items: center; gap: 8px; min-width: 200px; max-width: 280px; }
+/* Audio player — estilo WhatsApp Web */
+.wpp-msg-audio {
+    display: flex; flex-direction: column; min-width: 240px; max-width: 320px; gap: 4px;
+}
+.wpp-audio-row {
+    display: flex; align-items: center; gap: 10px;
+}
 .wpp-audio-play {
-    width: 28px; height: 28px; border-radius: 50%; background: #00BFA6; color: #fff;
-    border: none; cursor: pointer; font-size: 11px; flex-shrink: 0;
+    width: 36px; height: 36px; border-radius: 50%; background: #e8f5e9; color: #00BFA6;
+    border: none; cursor: pointer; font-size: 14px; flex-shrink: 0;
     display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
 }
-.wpp-audio-play:hover { background: #00897B; }
-.wpp-audio-wave {
-    flex: 1; height: 20px; background: #c8e6c9; border-radius: 10px;
-    overflow: hidden; position: relative;
+.wpp-audio-play:hover { background: #c8e6c9; }
+.wpp-audio-play svg { width: 16px; height: 16px; }
+.wpp-audio-waveform {
+    flex: 1; height: 32px; display: flex; align-items: center; gap: 1px;
+    cursor: pointer; position: relative;
 }
-.wpp-audio-progress { height: 100%; background: #00BFA6; width: 0; transition: width .1s; border-radius: 10px; }
-.wpp-audio-time { font-size: 10px; color: #666; white-space: nowrap; flex-shrink: 0; }
+.wpp-audio-waveform .wave-bar {
+    width: 3px; border-radius: 2px; background: #b0bec5; transition: background .1s;
+    min-height: 4px;
+}
+.wpp-audio-waveform .wave-bar.played { background: #00BFA6; }
+.wpp-audio-volume {
+    flex-shrink: 0; color: #90a4ae; display: flex; align-items: center;
+}
+.wpp-audio-times {
+    display: flex; justify-content: space-between; font-size: 10px; color: #90a4ae;
+    padding: 0 46px 0 46px;
+}
 .wpp-transcribe-btn {
     font-size: 11px; color: #00BFA6; cursor: pointer; background: none; border: none;
-    padding: 2px 0; text-decoration: underline;
+    padding: 2px 0; text-decoration: underline; text-align: left;
 }
 .wpp-transcribe-btn:hover { color: #00897B; }
-.wpp-transcription { font-style: italic; font-size: 12px; background: #f0faf8; padding: 4px 8px; border-radius: 4px; margin-top: 4px; color: #555; }
+.wpp-transcription {
+    font-style: italic; font-size: 12px; background: #f8f9fa; padding: 6px 10px;
+    border-radius: 6px; margin-top: 4px; color: #555; border-left: 3px solid #00BFA6;
+}
 
 /* Date separator */
 .wpp-date-sep { text-align: center; margin: 12px 0; }

@@ -342,11 +342,26 @@ function renderAudioPlayer(m) {
         if (m.transcription) html += `<div class="wpp-transcription">${escapeHtml(m.transcription)}</div>`;
         return html;
     }
-    let html = `<div class="wpp-msg-audio">
-        <button class="wpp-audio-play" onclick="event.stopPropagation();playAudio(this,'${m.media_url}')">▶</button>
-        <div class="wpp-audio-wave"><div class="wpp-audio-progress"></div></div>
-        <span class="wpp-audio-time">0:00</span>
+
+    // Gerar barras de waveform aleatórias (simulação visual)
+    const barCount = 35;
+    let bars = '';
+    for (let i = 0; i < barCount; i++) {
+        const h = Math.floor(Math.random() * 24) + 6;
+        bars += `<div class="wave-bar" style="height:${h}px;" data-idx="${i}"></div>`;
+    }
+
+    let html = `<div class="wpp-msg-audio" data-audio-url="${m.media_url}" data-msg-id="${m.id}">
+        <div class="wpp-audio-row">
+            <button class="wpp-audio-play" onclick="event.stopPropagation();toggleAudio(this)">
+                <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </button>
+            <div class="wpp-audio-waveform" onclick="event.stopPropagation();seekAudio(this,event)">${bars}</div>
+            <span class="wpp-audio-volume"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14M15.54 8.46a5 5 0 010 7.07"/></svg></span>
+        </div>
+        <div class="wpp-audio-times"><span class="audio-current">0:00</span><span class="audio-duration">0:00</span></div>
     </div>`;
+
     if (m.transcription) {
         html += `<div class="wpp-transcription">${escapeHtml(m.transcription)}</div>`;
     } else {
@@ -633,26 +648,73 @@ function closeLightbox(event) {
 // ÁUDIO PLAYER E TRANSCRIÇÃO
 // ═══════════════════════════════════════════════
 let currentAudio = null;
+let currentAudioEl = null;
 
-function playAudio(btn, url) {
-    if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+function toggleAudio(btn) {
+    const container = btn.closest('.wpp-msg-audio');
+    const url = container.dataset.audioUrl;
+
+    // Se já está tocando este áudio, pausar
+    if (currentAudio && currentAudioEl === container) {
+        if (currentAudio.paused) {
+            currentAudio.play();
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
+        } else {
+            currentAudio.pause();
+            btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+        }
+        return;
+    }
+
+    // Parar áudio anterior
+    if (currentAudio) {
+        currentAudio.pause();
+        if (currentAudioEl) {
+            currentAudioEl.querySelector('.wpp-audio-play').innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+            currentAudioEl.querySelectorAll('.wave-bar').forEach(b => b.classList.remove('played'));
+        }
+    }
 
     const audio = new Audio(url);
     currentAudio = audio;
-    const waveEl = btn.nextElementSibling.querySelector('.wpp-audio-progress');
-    const timeEl = btn.parentElement.querySelector('.wpp-audio-time');
+    currentAudioEl = container;
+    const bars = container.querySelectorAll('.wave-bar');
+    const currentTimeEl = container.querySelector('.audio-current');
+    const durationEl = container.querySelector('.audio-duration');
 
-    btn.textContent = '⏸';
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>';
     audio.play();
+
+    audio.addEventListener('loadedmetadata', () => {
+        durationEl.textContent = formatDuration(audio.duration);
+    });
 
     audio.addEventListener('timeupdate', () => {
         if (audio.duration) {
-            waveEl.style.width = (audio.currentTime / audio.duration * 100) + '%';
-            timeEl.textContent = formatDuration(audio.currentTime) + ' / ' + formatDuration(audio.duration);
+            const progress = audio.currentTime / audio.duration;
+            const playedCount = Math.floor(progress * bars.length);
+            bars.forEach((b, i) => {
+                b.classList.toggle('played', i < playedCount);
+            });
+            currentTimeEl.textContent = formatDuration(audio.currentTime);
         }
     });
-    audio.addEventListener('ended', () => { btn.textContent = '▶'; waveEl.style.width = '0'; });
-    audio.addEventListener('pause', () => { btn.textContent = '▶'; });
+
+    audio.addEventListener('ended', () => {
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>';
+        bars.forEach(b => b.classList.remove('played'));
+        currentTimeEl.textContent = '0:00';
+        currentAudio = null;
+        currentAudioEl = null;
+    });
+}
+
+function seekAudio(waveform, event) {
+    if (!currentAudio || currentAudioEl !== waveform.closest('.wpp-msg-audio')) return;
+    const rect = waveform.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const percent = x / rect.width;
+    currentAudio.currentTime = percent * currentAudio.duration;
 }
 
 async function transcribeAudio(msgId, btn) {
