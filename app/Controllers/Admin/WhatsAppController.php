@@ -1383,6 +1383,8 @@ class WhatsAppController extends Controller
             $msgType = 'reaction';
             $msgText = $msgContent['reactionMessage']['text'] ?? '';
             if (empty($msgText)) return; // Reação removida
+            // Guardar o ID da mensagem reagida para vincular no frontend
+            $reactionTargetId = $msgContent['reactionMessage']['key']['id'] ?? null;
         }
 
         // Mensagem apagada (protocol REVOKE)

@@ -287,7 +287,16 @@ function closeChat() {
 // RENDERIZAR MENSAGEM
 // ═══════════════════════════════════════════════
 function renderMessage(m) {
-    if (m.is_deleted) return `<div class="wpp-msg ${m.from_me ? 'me' : 'other'}" data-msg-id="${m.id}"><em class="wpp-msg-deleted">🚫 Mensagem apagada</em></div>`;
+    if (m.is_deleted) return `<div class="wpp-msg ${m.from_me ? 'me' : 'other'}" data-msg-id="${m.id}"><em class="wpp-msg-deleted" style="opacity:.6;">Mensagem apagada</em></div>`;
+
+    // Reações não são renderizadas como mensagens — são aplicadas como badges
+    if (m.message_type === 'reaction') {
+        // Tentar encontrar a mensagem original e adicionar reação
+        if (m.quoted_message_id) {
+            setTimeout(() => applyReaction(m.quoted_message_id, m.message_text), 50);
+        }
+        return ''; // Não renderizar como balão
+    }
 
     const side = m.from_me ? 'me' : 'other';
     let content = '';
@@ -333,7 +342,7 @@ function renderMessage(m) {
     const time = formatMessageTime(m.timestamp);
     const ack = m.from_me ? `<span class="wpp-msg-ack ${m.ack_status === 'read' ? 'read' : ''}">${ackIcon(m.ack_status)}</span>` : '';
 
-    return `<div class="wpp-msg ${side}" data-msg-id="${m.id}">${sender}${content}<div class="wpp-msg-time">${time} ${ack}</div></div>`;
+    return `<div class="wpp-msg ${side}" data-msg-id="${m.id}" data-message-id="${m.message_id || ''}">${sender}${content}<div class="wpp-msg-time">${time} ${ack}</div></div>`;
 }
 
 function renderAudioPlayer(m) {
@@ -936,6 +945,40 @@ async function syncGroups() {
     await fetch('/whatsapp/syncPhotos', { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } });
     alert(json.success ? `${json.updated} grupos sincronizados! Fotos atualizadas.` : (json.error || 'Erro'));
     loadContacts();
+}
+
+// ═══════════════════════════════════════════════
+// REAÇÕES
+// ═══════════════════════════════════════════════
+function applyReaction(quotedMessageId, emoji) {
+    if (!emoji) return;
+    // Encontrar a mensagem no DOM pelo quoted_message_id
+    // O quoted_message_id é o message_id da Evolution API, que está no data-msg-id como ID do banco
+    // Precisamos buscar pelo message_id no DOM — mas temos apenas o ID do banco como data-msg-id
+    // Alternativa: buscar todos os elementos e verificar
+    const allMsgs = document.querySelectorAll('.wpp-msg[data-msg-id]');
+    // Por enquanto, aplicar na última mensagem do mesmo remetente (heurística)
+    // Melhor: guardar em um mapa e aplicar por quoted_message_id
+    if (!window._reactionMap) window._reactionMap = {};
+    window._reactionMap[quotedMessageId] = emoji;
+    
+    // Tentar aplicar no DOM (se a mensagem tem o message_id como atributo)
+    const targetEl = document.querySelector(`[data-message-id="${quotedMessageId}"]`);
+    if (targetEl) {
+        addReactionBadge(targetEl, emoji);
+    }
+}
+
+function addReactionBadge(msgEl, emoji) {
+    // Remover reação existente se houver
+    const existing = msgEl.querySelector('.wpp-reaction');
+    if (existing) existing.remove();
+    
+    const badge = document.createElement('span');
+    badge.className = 'wpp-reaction';
+    badge.textContent = emoji;
+    msgEl.style.position = 'relative';
+    msgEl.appendChild(badge);
 }
 
 // ═══════════════════════════════════════════════
