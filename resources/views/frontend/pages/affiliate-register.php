@@ -69,13 +69,42 @@
                 <h3 class="form-section-title">Dados de Pagamento</h3>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>E-Mail de Pagamento</label>
-                        <input type="email" name="payment_email" class="form-control" value="<?= old('payment_email') ?>" placeholder="Email para receber pagamentos (PayPal)">
-                    </div>
-                    <div class="form-group">
                         <label>PIX <span class="required">*</span></label>
                         <input type="text" name="pix" class="form-control <?= has_error('pix') ? 'is-invalid' : '' ?>" value="<?= old('pix') ?>" placeholder="CPF, email ou chave aleatória" required>
                         <?php if (has_error('pix')): ?><span class="invalid-feedback"><?= e(error('pix')) ?></span><?php endif; ?>
+                    </div>
+                    <div class="form-group">
+                        <label>E-Mail de Pagamento</label>
+                        <input type="email" name="payment_email" class="form-control" value="<?= old('payment_email') ?>" placeholder="Email para receber pagamentos (PayPal)">
+                    </div>
+                </div>
+
+                <h4 style="font-size:14px;color:#64748b;margin:8px 0 12px;font-weight:600;">Dados Bancários (para TED)</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Banco <span class="required">*</span></label>
+                        <input type="text" name="bank_name" class="form-control <?= has_error('bank_name') ? 'is-invalid' : '' ?>" value="<?= old('bank_name') ?>" placeholder="Ex: Banco do Brasil, Nubank, Itaú..." required>
+                        <?php if (has_error('bank_name')): ?><span class="invalid-feedback"><?= e(error('bank_name')) ?></span><?php endif; ?>
+                    </div>
+                    <div class="form-group">
+                        <label>Agência <span class="required">*</span></label>
+                        <input type="text" name="bank_agency" class="form-control <?= has_error('bank_agency') ? 'is-invalid' : '' ?>" value="<?= old('bank_agency') ?>" placeholder="Ex: 0001" required>
+                        <?php if (has_error('bank_agency')): ?><span class="invalid-feedback"><?= e(error('bank_agency')) ?></span><?php endif; ?>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Conta <span class="required">*</span></label>
+                        <input type="text" name="bank_account" class="form-control <?= has_error('bank_account') ? 'is-invalid' : '' ?>" value="<?= old('bank_account') ?>" placeholder="Ex: 12345-6" required>
+                        <?php if (has_error('bank_account')): ?><span class="invalid-feedback"><?= e(error('bank_account')) ?></span><?php endif; ?>
+                    </div>
+                    <div class="form-group">
+                        <label>Tipo de Conta <span class="required">*</span></label>
+                        <select name="bank_account_type" class="form-control <?= has_error('bank_account_type') ? 'is-invalid' : '' ?>" required>
+                            <option value="corrente" <?= old('bank_account_type') === 'corrente' ? 'selected' : '' ?>>Conta Corrente</option>
+                            <option value="poupanca" <?= old('bank_account_type') === 'poupanca' ? 'selected' : '' ?>>Conta Poupança</option>
+                        </select>
+                        <?php if (has_error('bank_account_type')): ?><span class="invalid-feedback"><?= e(error('bank_account_type')) ?></span><?php endif; ?>
                     </div>
                 </div>
 

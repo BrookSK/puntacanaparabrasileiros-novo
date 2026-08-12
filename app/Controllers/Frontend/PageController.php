@@ -130,8 +130,9 @@ class PageController extends Controller
     {
         $data = $request->only([
             'username', 'first_name', 'last_name', 'phone', 'email', 'password',
-            'password_confirmation', 'payment_email', 'pix', 'website',
-            'followers_count', 'niche', 'content_type', 'promotion_strategy',
+            'password_confirmation', 'payment_email', 'pix',
+            'bank_name', 'bank_agency', 'bank_account', 'bank_account_type',
+            'website', 'followers_count', 'niche', 'content_type', 'promotion_strategy',
             'how_found', 'social_links',
         ]);
 
@@ -143,6 +144,10 @@ class PageController extends Controller
         if (!filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Email inválido.';
         if (strlen($data['password'] ?? '') < 6) $errors['password'] = 'Senha deve ter pelo menos 6 caracteres.';
         if (($data['password'] ?? '') !== ($data['password_confirmation'] ?? '')) $errors['password_confirmation'] = 'Senhas não coincidem.';
+        if (empty($data['pix'])) $errors['pix'] = 'Chave PIX é obrigatória.';
+        if (empty($data['bank_name'])) $errors['bank_name'] = 'Nome do banco é obrigatório.';
+        if (empty($data['bank_agency'])) $errors['bank_agency'] = 'Agência é obrigatória.';
+        if (empty($data['bank_account'])) $errors['bank_account'] = 'Conta é obrigatória.';
         if (empty($data['followers_count'])) $errors['followers_count'] = 'Quantidade de seguidores é obrigatória.';
         if (empty($data['niche'])) $errors['niche'] = 'Nicho é obrigatório.';
         if (empty($data['content_type'])) $errors['content_type'] = 'Tipo de conteúdo é obrigatório.';
@@ -221,6 +226,10 @@ class PageController extends Controller
                 'username' => $data['username'] ?? null,
                 'password_hash' => password_hash($data['password'], PASSWORD_BCRYPT),
                 'pix' => $data['pix'] ?? null,
+                'bank_name' => $data['bank_name'] ?? null,
+                'bank_agency' => $data['bank_agency'] ?? null,
+                'bank_account' => $data['bank_account'] ?? null,
+                'bank_account_type' => $data['bank_account_type'] ?? 'corrente',
                 'payment_email' => $data['payment_email'] ?? null,
                 'website' => $data['website'] ?? null,
                 'followers_count' => $data['followers_count'],

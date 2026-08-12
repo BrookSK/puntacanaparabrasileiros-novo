@@ -10,7 +10,8 @@ class AffiliateRequest extends Model
     protected string $table = 'affiliate_requests';
     protected array $fillable = [
         'first_name', 'last_name', 'email', 'phone', 'username',
-        'password_hash', 'pix', 'payment_email', 'website',
+        'password_hash', 'pix', 'bank_name', 'bank_agency', 'bank_account',
+        'bank_account_type', 'payment_email', 'website',
         'followers_count', 'niche', 'content_type', 'promotion_strategy',
         'how_found', 'social_links', 'status', 'admin_notes',
         'approved_at', 'rejected_at',

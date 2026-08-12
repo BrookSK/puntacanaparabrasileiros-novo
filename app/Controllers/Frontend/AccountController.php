@@ -653,7 +653,7 @@ class AccountController extends Controller
         $affiliate = $affiliateModel->findByUser((int) $user['id']);
         if (!$affiliate) { $this->redirect('/programa-de-afiliados'); return; }
 
-        $data = $request->only(['phone', 'payment_email', 'pix', 'website', 'followers_count', 'niche', 'content_type']);
+        $data = $request->only(['phone', 'payment_email', 'pix', 'bank_name', 'bank_agency', 'bank_account', 'bank_account_type', 'website', 'followers_count', 'niche', 'content_type']);
 
         // Atualizar phone no user
         $userModel = new User();
@@ -662,6 +662,10 @@ class AccountController extends Controller
         // Atualizar affiliate
         $notes = json_decode($affiliate['notes'] ?? '{}', true) ?: [];
         $notes['pix'] = $data['pix'] ?? '';
+        $notes['bank_name'] = $data['bank_name'] ?? '';
+        $notes['bank_agency'] = $data['bank_agency'] ?? '';
+        $notes['bank_account'] = $data['bank_account'] ?? '';
+        $notes['bank_account_type'] = $data['bank_account_type'] ?? 'corrente';
         $notes['website'] = $data['website'] ?? '';
         $notes['followers_count'] = $data['followers_count'] ?? '';
         $notes['niche'] = $data['niche'] ?? '';

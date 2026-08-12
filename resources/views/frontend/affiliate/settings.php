@@ -65,13 +65,37 @@
                         </div>
                         <div class="aff-form-grid">
                             <div class="form-group">
-                                <label>E-Mail de Pagamento</label>
-                                <input type="email" name="payment_email" class="form-control" value="<?= e($affiliate['payment_email'] ?? '') ?>" placeholder="Para receber pagamentos via PayPal">
-                            </div>
-                            <div class="form-group">
                                 <label>PIX *</label>
                                 <input type="text" name="pix" class="form-control" value="<?= e($affiliateNotes['pix'] ?? '') ?>" required placeholder="CPF, email ou chave aleatória">
                                 <small style="font-size:11px;color:var(--gray);margin-top:4px;display:block;">Chave PIX para recebimento de comissões</small>
+                            </div>
+                            <div class="form-group">
+                                <label>E-Mail de Pagamento</label>
+                                <input type="email" name="payment_email" class="form-control" value="<?= e($affiliate['payment_email'] ?? '') ?>" placeholder="Para receber pagamentos via PayPal">
+                            </div>
+                        </div>
+                        <h4 style="font-size:13px;color:#64748b;margin:12px 0 8px;font-weight:600;">Dados Bancários (para TED)</h4>
+                        <div class="aff-form-grid">
+                            <div class="form-group">
+                                <label>Banco *</label>
+                                <input type="text" name="bank_name" class="form-control" value="<?= e($affiliateNotes['bank_name'] ?? '') ?>" required placeholder="Ex: Banco do Brasil, Nubank, Itaú...">
+                            </div>
+                            <div class="form-group">
+                                <label>Agência *</label>
+                                <input type="text" name="bank_agency" class="form-control" value="<?= e($affiliateNotes['bank_agency'] ?? '') ?>" required placeholder="Ex: 0001">
+                            </div>
+                        </div>
+                        <div class="aff-form-grid">
+                            <div class="form-group">
+                                <label>Conta *</label>
+                                <input type="text" name="bank_account" class="form-control" value="<?= e($affiliateNotes['bank_account'] ?? '') ?>" required placeholder="Ex: 12345-6">
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de Conta *</label>
+                                <select name="bank_account_type" class="form-control" required>
+                                    <option value="corrente" <?= ($affiliateNotes['bank_account_type'] ?? '') === 'corrente' ? 'selected' : '' ?>>Conta Corrente</option>
+                                    <option value="poupanca" <?= ($affiliateNotes['bank_account_type'] ?? '') === 'poupanca' ? 'selected' : '' ?>>Conta Poupança</option>
+                                </select>
                             </div>
                         </div>
                     </div>

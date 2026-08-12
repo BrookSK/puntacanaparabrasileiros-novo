@@ -190,6 +190,10 @@ class AffiliatesController extends Controller
                 'notes' => json_encode([
                     'username' => $req['username'],
                     'pix' => $req['pix'],
+                    'bank_name' => $req['bank_name'] ?? null,
+                    'bank_agency' => $req['bank_agency'] ?? null,
+                    'bank_account' => $req['bank_account'] ?? null,
+                    'bank_account_type' => $req['bank_account_type'] ?? null,
                     'website' => $req['website'],
                     'followers_count' => $req['followers_count'],
                     'niche' => $req['niche'],
@@ -436,7 +440,7 @@ class AffiliatesController extends Controller
         $offset = ($page - 1) * $perPage;
 
         $commissions = $this->db->fetchAll(
-            "SELECT c.*, CONCAT(u.first_name, ' ', u.last_name) as affiliate_name, u.email as affiliate_email
+            "SELECT c.*, CONCAT(u.first_name, ' ', u.last_name) as affiliate_name, u.email as affiliate_email, a.notes as affiliate_notes, a.payment_email as affiliate_payment_email
              FROM commissions c
              LEFT JOIN affiliates a ON c.affiliate_id = a.id
              LEFT JOIN users u ON a.user_id = u.id

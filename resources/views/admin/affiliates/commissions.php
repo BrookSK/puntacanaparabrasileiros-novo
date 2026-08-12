@@ -71,7 +71,18 @@
             <td><?= !empty($comm['created_at']) ? date('d/m/Y H:i', strtotime($comm['created_at'])) : '-' ?></td>
             <td class="actions-cell">
                 <?php if ($cst === 'pending'): ?>
-                <button type="button" class="btn btn-sm btn-success" onclick="openPayModal(<?= (int)$comm['id'] ?>)">Pagar</button>
+                <?php
+                $affNotes = json_decode($comm['affiliate_notes'] ?? '{}', true) ?: [];
+                $payInfoJson = htmlspecialchars(json_encode([
+                    'name' => $comm['affiliate_name'] ?? '',
+                    'pix' => $affNotes['pix'] ?? '',
+                    'bank_name' => $affNotes['bank_name'] ?? '',
+                    'bank_agency' => $affNotes['bank_agency'] ?? '',
+                    'bank_account' => $affNotes['bank_account'] ?? '',
+                    'bank_account_type' => $affNotes['bank_account_type'] ?? '',
+                ]), ENT_QUOTES, 'UTF-8');
+                ?>
+                <button type="button" class="btn btn-sm btn-success" onclick='openPayModal(<?= (int)$comm["id"] ?>, <?= $payInfoJson ?>)'>Pagar</button>
                 <button type="button" class="btn btn-sm btn-danger" onclick="openCancelModal(<?= (int)$comm['id'] ?>)" style="margin-left:4px;">Cancelar</button>
                 <?php elseif ($cst === 'paid'): ?>
                 <span style="font-size:11px;color:#64748b;"><?= e($comm['payout_reference'] ?? '-') ?></span>
@@ -128,9 +139,24 @@
         <form id="payForm" method="POST" action="">
             <?= csrf_field() ?>
             <div class="modal-body-scroll">
+                <!-- Dados de pagamento do afiliado -->
+                <div id="payAffiliateInfo" style="background:#f1f5f9;border-radius:8px;padding:12px 14px;margin-bottom:16px;font-size:13px;line-height:1.7;">
+                    <strong style="display:block;margin-bottom:6px;color:#334155;">Dados do Afiliado</strong>
+                    <div id="payAffiliateName" style="color:#475569;"></div>
+                    <div id="payAffiliatePix" style="color:#475569;"></div>
+                    <div id="payAffiliateBank" style="color:#475569;margin-top:6px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>Forma de Pagamento</label>
+                    <select name="payment_type" id="payType" class="form-control">
+                        <option value="pix">PIX</option>
+                        <option value="ted">TED</option>
+                    </select>
+                </div>
                 <div class="form-group">
                     <label>Referência do pagamento</label>
-                    <input type="text" name="payout_reference" id="payReference" class="form-control" placeholder="Ex: PIX, comprovante, código de transação...">
+                    <input type="text" name="payout_reference" id="payReference" class="form-control" placeholder="Ex: comprovante, código de transação...">
                     <small>Opcional. Serve para identificar o pagamento depois.</small>
                 </div>
             </div>
@@ -171,11 +197,33 @@ function closeCancelModal() {
     document.getElementById('cancelModal').style.display = 'none';
 }
 
-function openPayModal(commissionId) {
+function openPayModal(commissionId, affiliateInfo) {
     const modal = document.getElementById('payModal');
     const form = document.getElementById('payForm');
     form.action = '/admin/afiliados/comissoes/' + commissionId + '/pagar';
     document.getElementById('payReference').value = '';
+
+    // Preencher dados do afiliado
+    const nameEl = document.getElementById('payAffiliateName');
+    const pixEl = document.getElementById('payAffiliatePix');
+    const bankEl = document.getElementById('payAffiliateBank');
+
+    if (affiliateInfo) {
+        nameEl.innerHTML = '<strong>Nome:</strong> ' + (affiliateInfo.name || '-');
+        pixEl.innerHTML = '<strong>PIX:</strong> ' + (affiliateInfo.pix || 'Não informado');
+
+        let bankHtml = '';
+        if (affiliateInfo.bank_name) {
+            const tipoLabel = affiliateInfo.bank_account_type === 'poupanca' ? 'Poupança' : 'Corrente';
+            bankHtml = '<strong>Banco:</strong> ' + affiliateInfo.bank_name + '<br>';
+            bankHtml += '<strong>Agência:</strong> ' + (affiliateInfo.bank_agency || '-') + '<br>';
+            bankHtml += '<strong>Conta:</strong> ' + (affiliateInfo.bank_account || '-') + ' (' + tipoLabel + ')';
+        } else {
+            bankHtml = '<em style="color:#94a3b8;">Dados bancários não informados</em>';
+        }
+        bankEl.innerHTML = bankHtml;
+    }
+
     modal.style.display = 'flex';
 }
 
