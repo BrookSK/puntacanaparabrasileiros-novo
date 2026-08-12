@@ -71,7 +71,7 @@
     </a>
 
     <!-- JavaScript -->
-    <script src="<?= asset('js/app.js') ?>?v=5.9"></script>
+    <script src="<?= asset('js/app.js') ?>?v=6.0"></script>
 
     <!-- Google Translate -->
     <div id="google_translate_element" style="display:none;"></div>
