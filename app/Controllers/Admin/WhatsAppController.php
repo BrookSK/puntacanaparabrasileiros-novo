@@ -1352,12 +1352,23 @@ class WhatsAppController extends Controller
         if ($fromMe) {
             // Mensagens fromMe enviadas pelo painel já foram salvas no momento do envio.
             // Mas mensagens enviadas pelo celular precisam ser registradas.
-            // A deduplicação abaixo resolve: se já existe (salva pelo painel), pula.
+            // A deduplicação por message_id abaixo resolve: se já existe, pula.
         }
 
-        // Deduplicação
-        $existing = $this->messageModel->findByMessageId((int) $instance['id'], $messageId);
-        if ($existing) return;
+        // Deduplicação por message_id
+        if (!empty($messageId)) {
+            $existing = $this->messageModel->findByMessageId((int) $instance['id'], $messageId);
+            if ($existing) {
+                // Se a mensagem existe mas foi salva como pending, atualizar o ack
+                if ($fromMe && ($existing['ack_status'] === 'pending' || str_starts_with($existing['message_id'] ?? '', 'pending_'))) {
+                    $this->db->update('whatsapp_messages', [
+                        'message_id' => $messageId,
+                        'ack_status' => 'sent',
+                    ], 'id = ?', [(int) $existing['id']]);
+                }
+                return;
+            }
+        }
 
         $instanceId = (int) $instance['id'];
         $pushName = $data['pushName'] ?? '';
