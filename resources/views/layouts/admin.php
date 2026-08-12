@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=4.3">
+    <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=4.4">
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp/chat')): ?>
     <link rel="stylesheet" href="<?= asset('css/whatsapp.css') ?>?v=1.4">
     <?php endif; ?>

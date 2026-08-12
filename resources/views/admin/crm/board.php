@@ -128,7 +128,7 @@
 
 <!-- Modal Detalhes do Card -->
 <div class="modal-overlay" id="modal-card-detail" style="display:none;">
-    <div class="modal-box modal-lg">
+    <div class="modal-box modal-xl">
         <div class="modal-header"><h3 id="cardDetailTitle">Detalhes do Card</h3><button class="modal-close" onclick="this.closest('.modal-overlay').style.display='none'">&times;</button></div>
         <div class="modal-body-scroll" id="cardDetailBody">
             <!-- Preenchido via JS -->
@@ -217,17 +217,18 @@ async function openCardDetail(id) {
     const json = await res.json();
     if (!json.success) return;
     const c = json.card;
+    const b = c.briefing || {};
     const body = document.getElementById('cardDetailBody');
     document.getElementById('cardDetailTitle').textContent = c.title;
 
-    // Status badges
+    // Status badge
     let statusBadge = '';
     if (c.lead_outcome === 'converted') statusBadge = '<span class="badge badge-success">Convertido</span>';
     else if (c.lead_outcome === 'lost') statusBadge = '<span class="badge badge-danger">Perdido</span>';
     else statusBadge = '<span class="badge badge-info">Em aberto</span>';
 
     // Atividades
-    let activitiesHtml = (c.activities || []).map(a => 
+    let activitiesHtml = (c.activities || []).slice(0, 15).map(a => 
         `<div class="cd-activity">
             <div class="cd-activity-dot"></div>
             <div class="cd-activity-content">
@@ -238,17 +239,13 @@ async function openCardDetail(id) {
     ).join('');
 
     body.innerHTML = `
-        <div class="cd-layout">
-            <div class="cd-left">
+        <div class="cd-layout-3col">
+            <!-- Coluna 1: Info + Editar -->
+            <div class="cd-col">
                 <div class="cd-section">
-                    <div class="cd-info-row">
-                        <span class="cd-label">Status</span>
-                        ${statusBadge}
-                    </div>
-                    <div class="cd-info-row">
-                        <span class="cd-label">Coluna</span>
-                        <span class="cd-value"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.column_color || '#999'};margin-right:4px;"></span>${c.column_name || ''}</span>
-                    </div>
+                    <h6>Informações</h6>
+                    <div class="cd-info-row"><span class="cd-label">Status</span>${statusBadge}</div>
+                    <div class="cd-info-row"><span class="cd-label">Coluna</span><span class="cd-value"><span class="cd-dot" style="background:${c.column_color || '#999'}"></span>${c.column_name || ''}</span></div>
                     ${c.assigned_name ? `<div class="cd-info-row"><span class="cd-label">Responsável</span><span class="cd-value">${c.assigned_name}</span></div>` : ''}
                     ${c.phone ? `<div class="cd-info-row"><span class="cd-label">Telefone</span><span class="cd-value">${c.phone}</span></div>` : ''}
                     ${c.value ? `<div class="cd-info-row"><span class="cd-label">Valor</span><span class="cd-value cd-value-money">R$ ${parseFloat(c.value).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span></div>` : ''}
@@ -256,16 +253,16 @@ async function openCardDetail(id) {
 
                 <div class="cd-section cd-edit-section">
                     <h6>Editar</h6>
-                    <div class="cd-form-grid">
-                        <div class="cd-field"><label>Título</label><input type="text" id="cd-title" class="form-control" value="${c.title || ''}"></div>
+                    <div class="cd-field"><label>Título</label><input type="text" id="cd-title" class="form-control" value="${c.title || ''}"></div>
+                    <div class="cd-form-row2">
                         <div class="cd-field"><label>Telefone</label><input type="text" id="cd-phone" class="form-control" value="${c.phone || ''}"></div>
                         <div class="cd-field"><label>Valor (R$)</label><input type="text" id="cd-value" class="form-control" value="${c.value || ''}"></div>
                     </div>
-                    <div class="cd-field" style="margin-top:8px;"><label>Descrição</label><textarea id="cd-desc" class="form-control" rows="2">${c.description || ''}</textarea></div>
-                    <button class="btn btn-primary btn-sm" style="margin-top:10px;" onclick="saveCard(${c.id})">Salvar</button>
+                    <div class="cd-field"><label>Descrição</label><textarea id="cd-desc" class="form-control" rows="2">${c.description || ''}</textarea></div>
+                    <button class="btn btn-primary btn-sm" onclick="saveCard(${c.id})">Salvar</button>
                 </div>
 
-                <div class="cd-section cd-actions-section">
+                <div class="cd-section">
                     <h6>Ações</h6>
                     <div class="cd-actions-grid">
                         <button class="cd-action-btn cd-action-convert" onclick="convertLead(${c.id})"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Converter</button>
@@ -277,12 +274,36 @@ async function openCardDetail(id) {
                 </div>
             </div>
 
-            <div class="cd-right">
+            <!-- Coluna 2: Briefing -->
+            <div class="cd-col">
+                <div class="cd-section">
+                    <h6>Briefing Comercial</h6>
+                    ${c.contact_id ? `
+                    <div class="cd-briefing-grid">
+                        <div class="cd-bf-item"><span class="cd-bf-label">Necessidade</span><span class="cd-bf-value">${b.need || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Dor/Problema</span><span class="cd-bf-value">${b.main_pain || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Solução atual</span><span class="cd-bf-value">${b.current_solution || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Objetivo</span><span class="cd-bf-value">${b.expected_goal || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Urgência</span><span class="cd-bf-value">${b.urgency || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Investimento</span><span class="cd-bf-value">${b.investment_range || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Decisor</span><span class="cd-bf-value">${b.decision_level || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Temperatura</span><span class="cd-bf-value cd-temp-${b.lead_temperature || ''}">${b.lead_temperature || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Objeção</span><span class="cd-bf-value">${b.main_objection || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Próximo passo</span><span class="cd-bf-value">${b.next_step || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Próx. contato</span><span class="cd-bf-value">${b.next_contact_date || '—'}</span></div>
+                        <div class="cd-bf-item"><span class="cd-bf-label">Observações</span><span class="cd-bf-value">${b.notes || '—'}</span></div>
+                    </div>
+                    ` : '<p class="cd-empty">Sem contato WhatsApp vinculado. Briefing disponível apenas para cards com contato.</p>'}
+                </div>
+            </div>
+
+            <!-- Coluna 3: Atividades -->
+            <div class="cd-col">
                 <div class="cd-section">
                     <h6>Atividades</h6>
-                    <div class="cd-activities">${activitiesHtml || '<p class="cd-empty">Nenhuma atividade registrada</p>'}</div>
+                    <div class="cd-activities">${activitiesHtml || '<p class="cd-empty">Nenhuma atividade</p>'}</div>
                 </div>
-                <div class="cd-section cd-note-section">
+                <div class="cd-note-section">
                     <textarea id="cd-note" class="form-control" rows="2" placeholder="Escrever nota..."></textarea>
                     <button class="btn btn-sm btn-outline" onclick="addNote(${c.id})">Adicionar nota</button>
                 </div>
