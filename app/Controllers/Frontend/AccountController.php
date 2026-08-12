@@ -492,6 +492,15 @@ class AccountController extends Controller
                 if ($booking) {
                     $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
                     $status = $booking['status'] ?? 'booked';
+
+                    // Verificar se há pagamento aprovado — se sim, considerar confirmado
+                    $payment = $this->db->fetchOne(
+                        "SELECT id FROM payments WHERE booking_id = ? AND status IN ('approved', 'completed', 'paid') ORDER BY created_at DESC LIMIT 1",
+                        [(int) $booking['id']]
+                    );
+                    if ($payment) {
+                        $status = 'confirmed';
+                    }
                 }
                 if ($voucher['booking_item_id']) {
                     $item = $this->db->fetchOne(
@@ -522,7 +531,16 @@ class AccountController extends Controller
                     $booking = $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [$voucher['booking_id']]);
                     if ($booking) {
                         $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
-                        $status = $status ?: ($booking['status'] ?? 'booked');
+                        // Verificar pagamento
+                        $payment = $this->db->fetchOne(
+                            "SELECT id FROM payments WHERE booking_id = ? AND status IN ('approved', 'completed', 'paid') ORDER BY created_at DESC LIMIT 1",
+                            [(int) $booking['id']]
+                        );
+                        if ($payment) {
+                            $status = 'confirmed';
+                        } else {
+                            $status = $status ?: ($booking['status'] ?? 'booked');
+                        }
                     }
                 }
             }

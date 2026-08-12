@@ -3,8 +3,8 @@
         <div class="voucher-confirm-card">
             <!-- Status Icon -->
             <?php
-                $isConfirmed = in_array($status, ['booked', 'confirmed', 'completed']);
-                $isPending = in_array($status, ['pending', 'partially_paid']);
+                $isConfirmed = in_array($status, ['booked', 'confirmed', 'completed', 'partially_paid']);
+                $isPending = in_array($status, ['pending']);
                 $isCancelled = in_array($status, ['cancelled', 'refunded']);
             ?>
 

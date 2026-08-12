@@ -77,7 +77,6 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
         </div>
         <div class="v-header-right">
             <p>Emissão: <strong><?= date('d/m/Y') ?></strong></p>
-            <p>Validade: <strong><?= !empty($item['trip_date']) ? date('d/m/Y', strtotime($item['trip_date'])) : '-' ?></strong></p>
             <p>Reserva: <strong><?= e($booking['booking_number'] ?? '') ?></strong></p>
             <p>Moeda: <strong>USD</strong></p>
         </div>
