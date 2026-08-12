@@ -93,7 +93,7 @@ document.getElementById('creativeImage')?.addEventListener('change', function() 
     if (this.files && this.files[0]) {
         label.textContent = this.files[0].name;
     } else {
-        label.textContent = 'Escolher imagem';
+        label.textContent = 'Escolher arquivo';
     }
 });
 </script>
