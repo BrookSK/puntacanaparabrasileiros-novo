@@ -522,21 +522,31 @@ function setupTextarea() {
 // ═══════════════════════════════════════════════
 async function loadQuickReplies() {
     try {
-        const res = await fetch('/whatsapp/quickReplies');
+        const res = await fetch('/whatsapp/quickReplies', {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        if (!res.ok) {
+            console.error('[WhatsApp] quickReplies HTTP', res.status);
+            return;
+        }
         const json = await res.json();
         STATE.quickReplies = json.replies || [];
-    } catch (e) {}
+        console.log('[WhatsApp] Quick replies carregadas:', STATE.quickReplies.length);
+    } catch (e) {
+        console.error('[WhatsApp] Erro ao carregar respostas rápidas:', e);
+    }
 }
 
 function checkQuickReply(text) {
     const dropdown = document.getElementById('quickReplyDropdown');
+    if (!dropdown) return;
     if (!text.startsWith('/') || text.length < 2) {
         dropdown.style.display = 'none';
         return;
     }
 
     const query = text.substring(1).toLowerCase();
-    const matches = STATE.quickReplies.filter(r => r.shortcut.startsWith(query));
+    const matches = STATE.quickReplies.filter(r => r.shortcut.toLowerCase().startsWith(query));
 
     if (matches.length === 0) {
         dropdown.style.display = 'none';
@@ -544,22 +554,32 @@ function checkQuickReply(text) {
     }
 
     dropdown.innerHTML = matches.map(r =>
-        `<div class="wpp-qr-item" onclick="selectQuickReply(${r.id},'${escapeHtml(r.message || '')}')">
-            <div class="qr-shortcut">/${r.shortcut}</div>
+        `<div class="wpp-qr-item" data-reply-id="${r.id}">
+            <div class="qr-shortcut">/${escapeHtml(r.shortcut)}</div>
             <div class="qr-preview">${escapeHtml(truncateText(r.message || '', 60))}</div>
         </div>`
     ).join('');
+
+    // Adicionar event listeners (evita problemas com aspas no onclick inline)
+    dropdown.querySelectorAll('.wpp-qr-item').forEach(item => {
+        item.addEventListener('click', () => {
+            selectQuickReply(parseInt(item.dataset.replyId));
+        });
+    });
+
     dropdown.style.display = 'block';
 }
 
-function selectQuickReply(id, message) {
+function selectQuickReply(id) {
     const textarea = document.getElementById('messageInput');
-    const reply = STATE.quickReplies.find(r => r.id === id);
+    const reply = STATE.quickReplies.find(r => parseInt(r.id) === id);
     if (reply) {
         textarea.value = reply.message || '';
+        textarea.style.height = '34px';
         textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
     }
     document.getElementById('quickReplyDropdown').style.display = 'none';
+    textarea.focus();
 }
 
 function openQuickReplies() {
