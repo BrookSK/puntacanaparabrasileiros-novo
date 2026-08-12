@@ -178,9 +178,7 @@ class TripsController extends Controller
         }
 
         $gallery = $this->processGalleryUploads($request);
-        if (!empty($gallery)) {
-            $data['gallery'] = json_encode($gallery);
-        }
+        $data['gallery'] = !empty($gallery) ? json_encode($gallery) : null;
 
         $this->tripModel->update($id, $data);
 
@@ -390,12 +388,12 @@ class TripsController extends Controller
     {
         $urls = [];
 
-        // URLs informadas manualmente
-        $manualUrls = $request->input('gallery_images', []);
-        foreach ($manualUrls as $url) {
-            $url = trim($url);
-            if (!empty($url)) {
-                $urls[] = $url;
+        // Imagens existentes que foram mantidas pelo admin
+        $existingImages = $request->input('gallery_existing', []);
+        foreach ($existingImages as $img) {
+            $img = trim($img);
+            if (!empty($img)) {
+                $urls[] = $img;
             }
         }
 
