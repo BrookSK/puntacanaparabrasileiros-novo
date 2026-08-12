@@ -253,7 +253,7 @@ class VoucherService
             }
         }
 
-        // Preparar dados dos vouchers com nomes dos passeios
+        // Preparar dados dos vouchers com nomes dos passeios e trajetos
         foreach ($vouchers as &$v) {
             if ($v['type'] === 'trip' && !empty($v['booking_item_id'])) {
                 $item = $this->db->fetchOne(
@@ -261,6 +261,17 @@ class VoucherService
                     [(int) $v['booking_item_id']]
                 );
                 $v['trip_name'] = $item['trip_name'] ?? '';
+            }
+            if ($v['type'] === 'transfer' && !empty($v['transfer_booking_id'])) {
+                $transfer = $this->db->fetchOne(
+                    "SELECT tlo.title as origin_title, tld.title as destination_title
+                     FROM transfer_bookings tb
+                     LEFT JOIN transfer_locations tlo ON tb.origin_id = tlo.id
+                     LEFT JOIN transfer_locations tld ON tb.destination_id = tld.id
+                     WHERE tb.id = ?",
+                    [(int) $v['transfer_booking_id']]
+                );
+                $v['route_name'] = ($transfer['origin_title'] ?? '') . ' → ' . ($transfer['destination_title'] ?? '');
             }
         }
         unset($v);

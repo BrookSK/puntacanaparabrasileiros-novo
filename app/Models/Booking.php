@@ -79,7 +79,19 @@ class Booking extends Model
     public function getVouchers(int $bookingId): array
     {
         return $this->db->fetchAll(
-            "SELECT * FROM vouchers WHERE booking_id = ? ORDER BY created_at DESC",
+            "SELECT v.*,
+                    t.title as trip_name,
+                    tlo.title as origin_title,
+                    tld.title as destination_title,
+                    CASE WHEN v.type = 'transfer' THEN CONCAT(COALESCE(tlo.title,''), ' → ', COALESCE(tld.title,'')) ELSE NULL END as route_name
+             FROM vouchers v
+             LEFT JOIN booking_items bi ON v.booking_item_id = bi.id
+             LEFT JOIN trips t ON bi.trip_id = t.id
+             LEFT JOIN transfer_bookings tb ON v.transfer_booking_id = tb.id
+             LEFT JOIN transfer_locations tlo ON tb.origin_id = tlo.id
+             LEFT JOIN transfer_locations tld ON tb.destination_id = tld.id
+             WHERE v.booking_id = ?
+             ORDER BY v.created_at DESC",
             [$bookingId]
         );
     }

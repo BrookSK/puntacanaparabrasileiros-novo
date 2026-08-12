@@ -37,7 +37,7 @@
         <div style="padding:14px 16px;background:#f3f4f6;border-radius:8px;margin-bottom:10px;">
             <strong style="font-size:13px;color:#1a1a1a;display:block;margin-bottom:6px;">
                 <?php if (($v['type'] ?? '') === 'transfer'): ?>
-                    📄 VOUCHER TRANSFER
+                    📄 VOUCHER TRANSFER<?php if (!empty($v['route_name'])): ?> — <?= e($v['route_name']) ?><?php endif; ?>
                 <?php else: ?>
                     📄 VOUCHER PASSEIO<?php if (!empty($v['trip_name'])): ?> — <?= e($v['trip_name']) ?><?php endif; ?>
                 <?php endif; ?>

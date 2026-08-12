@@ -106,6 +106,8 @@
                             <span style="font-size:13px;color:#6b7280;">
                                 <?php if (!empty($vc['trip_name'])): ?>
                                     <?= e($vc['trip_name']) ?>
+                                <?php elseif (!empty($vc['route_name'])): ?>
+                                    <?= e($vc['route_name']) ?>
                                 <?php endif; ?>
                                 <span style="font-size:11px;color:#9ca3af;margin-left:6px;">— Cód: <?= e($vc['reference_code'] ?? '') ?></span>
                             </span>
