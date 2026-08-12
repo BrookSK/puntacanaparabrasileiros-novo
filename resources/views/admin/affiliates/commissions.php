@@ -11,7 +11,6 @@
 <div class="settings-tabs" style="margin-bottom:20px;">
     <a href="/admin/afiliados/comissoes?status=all" class="tab-btn <?= ($currentStatus ?? '') === 'all' ? 'active' : '' ?>">Todas</a>
     <a href="/admin/afiliados/comissoes?status=pending" class="tab-btn <?= ($currentStatus ?? '') === 'pending' ? 'active' : '' ?>">Pendentes</a>
-    <a href="/admin/afiliados/comissoes?status=approved" class="tab-btn <?= ($currentStatus ?? '') === 'approved' ? 'active' : '' ?>">Aprovadas</a>
     <a href="/admin/afiliados/comissoes?status=paid" class="tab-btn <?= ($currentStatus ?? '') === 'paid' ? 'active' : '' ?>">Pagas</a>
     <a href="/admin/afiliados/comissoes?status=rejected" class="tab-btn <?= ($currentStatus ?? '') === 'rejected' ? 'active' : '' ?>">Canceladas</a>
 </div>
@@ -72,11 +71,12 @@
             <td><?= !empty($comm['created_at']) ? date('d/m/Y H:i', strtotime($comm['created_at'])) : '-' ?></td>
             <td class="actions-cell">
                 <?php if ($cst === 'pending'): ?>
-                <form method="POST" action="/admin/afiliados/comissoes/<?= (int)$comm['id'] ?>/pagar" class="inline-form" onsubmit="return confirm('Marcar como paga?')">
+                <form method="POST" action="/admin/afiliados/comissoes/<?= (int)$comm['id'] ?>/pagar" class="inline-form" onsubmit="return confirm('Marcar como paga?')" style="display:inline;">
                     <?= csrf_field() ?>
                     <input type="text" name="payout_reference" placeholder="Ref. pagamento" class="form-control" style="width:120px;display:inline-block;font-size:11px;padding:5px 8px;margin-right:4px;">
                     <button class="btn btn-sm btn-success">Pagar</button>
                 </form>
+                <button type="button" class="btn btn-sm btn-danger" onclick="openCancelModal(<?= (int)$comm['id'] ?>)" style="margin-left:4px;">Cancelar</button>
                 <?php elseif ($cst === 'paid'): ?>
                 <span style="font-size:11px;color:#64748b;"><?= e($comm['payout_reference'] ?? '-') ?></span>
                 <?php else: ?>
@@ -96,3 +96,40 @@
     <?php endfor; ?>
 </div>
 <?php endif; ?>
+
+<!-- Modal Cancelar Comissão -->
+<div id="cancelModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
+    <div style="background:#1e293b;border-radius:12px;padding:30px;width:100%;max-width:450px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
+        <h3 style="margin:0 0 15px;color:#f1f5f9;font-size:18px;">Cancelar Comissão</h3>
+        <p style="color:#94a3b8;margin:0 0 15px;font-size:14px;">Informe o motivo do cancelamento:</p>
+        <form id="cancelForm" method="POST" action="">
+            <?= csrf_field() ?>
+            <textarea name="reason" id="cancelReason" rows="4" class="form-control" style="width:100%;resize:vertical;margin-bottom:15px;" placeholder="Motivo do cancelamento..." required></textarea>
+            <div style="display:flex;gap:10px;justify-content:flex-end;">
+                <button type="button" class="btn btn-secondary" onclick="closeCancelModal()">Fechar</button>
+                <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openCancelModal(commissionId) {
+    const modal = document.getElementById('cancelModal');
+    const form = document.getElementById('cancelForm');
+    form.action = '/admin/afiliados/comissoes/' + commissionId + '/cancelar';
+    document.getElementById('cancelReason').value = '';
+    modal.style.display = 'flex';
+}
+
+function closeCancelModal() {
+    document.getElementById('cancelModal').style.display = 'none';
+}
+
+// Fechar modal ao clicar fora
+document.getElementById('cancelModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeCancelModal();
+    }
+});
+</script>

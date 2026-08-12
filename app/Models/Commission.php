@@ -37,6 +37,14 @@ class Commission extends Model
         ], 'id = ?', [$id]);
     }
 
+    public function cancel(int $id, string $reason): int
+    {
+        return $this->db->update($this->table, [
+            'status' => 'rejected',
+            'notes' => $reason,
+        ], 'id = ?', [$id]);
+    }
+
     public function getTotalPending(int $affiliateId): float
     {
         $result = $this->db->fetchColumn(

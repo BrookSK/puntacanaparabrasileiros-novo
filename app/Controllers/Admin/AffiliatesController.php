@@ -478,6 +478,26 @@ class AffiliatesController extends Controller
         $this->redirect('/admin/afiliados/comissoes');
     }
 
+    /**
+     * Cancelar comissão.
+     */
+    public function cancelCommission(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $reason = trim($request->input('reason', ''));
+
+        if (empty($reason)) {
+            $this->flash('error', 'Informe o motivo do cancelamento.');
+            $this->redirect('/admin/afiliados/comissoes');
+            return;
+        }
+
+        $this->commissionModel->cancel($id, $reason);
+
+        $this->flash('success', 'Comissão cancelada com sucesso.');
+        $this->redirect('/admin/afiliados/comissoes?status=rejected');
+    }
+
     // ============================================================
     // Criativos para Afiliados
     // ============================================================
