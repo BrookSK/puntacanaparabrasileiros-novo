@@ -33,7 +33,13 @@
             </div>
             <div class="form-group col-2">
                 <label>Imagem <span class="required">*</span></label>
-                <input type="file" name="image" class="form-control" accept="image/*" required>
+                <div class="file-upload-area">
+                    <input type="file" name="image" id="creativeImage" class="file-input-hidden" accept="image/*" required>
+                    <label for="creativeImage" class="file-upload-label">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span id="creativeFileName">Escolher imagem</span>
+                    </label>
+                </div>
             </div>
             <div class="form-group col-2" style="display:flex;align-items:flex-end;">
                 <button type="submit" class="btn btn-primary">Enviar Criativo</button>
@@ -79,3 +85,14 @@
     </div>
     <?php endif; ?>
 </div>
+
+<script>
+document.getElementById('creativeImage')?.addEventListener('change', function() {
+    var label = document.getElementById('creativeFileName');
+    if (this.files && this.files[0]) {
+        label.textContent = this.files[0].name;
+    } else {
+        label.textContent = 'Escolher imagem';
+    }
+});
+</script>
