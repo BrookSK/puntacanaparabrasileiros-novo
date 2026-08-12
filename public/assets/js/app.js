@@ -808,6 +808,62 @@
         setTimeout(() => { window.location = '/checkout'; }, 500);
     });
 
+    // Multi transfers - Add to cart
+    document.getElementById('btnAddCartMulti')?.addEventListener('click', function() {
+        const sel = window._multiTransferSelection || {};
+        const routes = window._multiTransferRoutes || [];
+        const results = window._multiTransferData || [];
+        if (Object.keys(sel).length === 0) { toast('Selecione um veículo para cada rota.', 'warning'); return; }
+
+        // Coletar passageiros
+        var paxData = {};
+        var paxInputs = document.querySelectorAll('#paxDropdownMulti .pax-input-sm');
+        for (var i = 0; i < paxInputs.length; i++) {
+            var name = paxInputs[i].getAttribute('name');
+            if (name) paxData[name.replace(/^multi_/, '')] = paxInputs[i].value || '0';
+        }
+        var serviceType = document.getElementById('multiServiceType')?.value || 'private';
+        var groupId = 'tg_' + Date.now();
+
+        // Adicionar cada rota selecionada ao carrinho
+        var promises = [];
+        Object.keys(sel).forEach(function(key) {
+            var idx = parseInt(key.split('_')[1]);
+            var vehicle = sel[key];
+            var route = routes[idx];
+            var data = results[idx];
+            if (!vehicle || !route) return;
+
+            var payload = Object.assign({}, paxData, {
+                vehicle_id: vehicle.id,
+                origin_id: route.origin_id,
+                destination_id: route.destination_id,
+                date: route.date || '',
+                time: route.time || '',
+                type: 'multi_' + (idx + 1),
+                service_type: serviceType,
+                group_id: groupId,
+            });
+            promises.push(ajax('/api/cart/add-transfer', { body: JSON.stringify(payload) }));
+        });
+
+        Promise.all(promises).then(function(responses) {
+            var allOk = responses.every(function(r) { return r.success; });
+            if (allOk) {
+                toast('Transfers adicionados ao carrinho!', 'success');
+                updateCartBadge();
+            } else {
+                toast('Erro ao adicionar alguns transfers.', 'error');
+            }
+        }).catch(function() { toast('Erro de conexão.', 'error'); });
+    });
+
+    // Multi transfers - Direct checkout
+    document.getElementById('btnDirectCheckoutMulti')?.addEventListener('click', function() {
+        document.getElementById('btnAddCartMulti')?.click();
+        setTimeout(function() { window.location = '/checkout'; }, 800);
+    });
+
     // ==================== CHECKOUT ====================
     const checkoutForm = document.getElementById('checkoutForm');
     if (checkoutForm) {

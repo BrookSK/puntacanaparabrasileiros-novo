@@ -273,6 +273,7 @@
                     </div>
                     <div class="transfer-summary-actions">
                         <button type="button" class="btn btn-primary btn-lg" id="btnAddCartMulti">Adicionar ao Carrinho</button>
+                        <button type="button" class="btn btn-accent btn-lg" id="btnDirectCheckoutMulti">Ir para Checkout</button>
                     </div>
                 </div>
             </div>
