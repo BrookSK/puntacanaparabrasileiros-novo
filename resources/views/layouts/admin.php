@@ -21,7 +21,7 @@
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-header">
                 <a href="/admin" class="sidebar-logo">
-                    <strong>PCB</strong> Admin
+                    <strong>Punta Cana</strong> <span style="opacity:0.7;font-weight:400;">Admin</span>
                 </a>
                 <button class="sidebar-toggle" id="sidebarToggle">&times;</button>
             </div>
