@@ -6273,6 +6273,7 @@ img { max-width: 100%; height: auto; }
 .bm-actions-step2 {
     justify-content: flex-end;
     gap: 10px;
+    flex-wrap: nowrap;
 }
 .bm-actions-step2 .bm-btn-back {
     margin-right: auto;
@@ -6489,21 +6490,6 @@ img { max-width: 100%; height: auto; }
     border-top: 1px solid #eee;
     margin-bottom: 16px;
 }
-.bm-btn-checkout {
-    width: 100%;
-    padding: 13px;
-    background: var(--dark);
-    color: white;
-    border: none;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    font-family: var(--font);
-    transition: background .2s;
-}
-.bm-btn-checkout:hover { background: #000; }
 
 /* Hotel Selection Step */
 .bm-hotel-section { margin-bottom: 20px; }
