@@ -1,32 +1,34 @@
 <!-- Blog Hero -->
-<section class="passeios-hero">
+<section class="blog-hero">
     <div class="container">
-        <div class="passeios-hero-content">
-            <h1>Nosso Blog</h1>
-            <p>Dicas, roteiros e informações úteis para planejar sua viagem perfeita para Punta Cana</p>
+        <div class="blog-hero-content">
+            <span class="blog-hero-badge">Blog</span>
+            <h1>Dicas & Roteiros</h1>
+            <p>Tudo o que você precisa saber para aproveitar o melhor de Punta Cana. Guias práticos, roteiros e experiências reais.</p>
         </div>
     </div>
 </section>
 
 <!-- Post em Destaque -->
 <?php if ($featuredPost): ?>
-<section class="section section-blog-featured">
+<section class="section blog-destaque-section">
     <div class="container">
-        <div class="blog-featured-card">
-            <a href="/blog/<?= e($featuredPost['slug']) ?>" class="blog-featured-image">
+        <div class="blog-destaque-card">
+            <a href="/blog/<?= e($featuredPost['slug']) ?>" class="blog-destaque-img">
                 <img src="<?= e($featuredPost['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($featuredPost['title']) ?>" loading="lazy">
+                <div class="blog-destaque-overlay"></div>
             </a>
-            <div class="blog-featured-content">
+            <div class="blog-destaque-body">
                 <?php if ($featuredPost['category_name'] ?? null): ?>
-                <span class="blog-featured-category" style="color: <?= e($featuredPost['category_color'] ?? '#3772C0') ?>; border-color: <?= e($featuredPost['category_color'] ?? '#3772C0') ?>">
+                <span class="blog-destaque-cat" style="background: <?= e($featuredPost['category_color'] ?? 'var(--text-green)') ?>">
                     <?= e($featuredPost['category_name']) ?>
                 </span>
                 <?php endif; ?>
-                <h2 class="blog-featured-title">
+                <h2 class="blog-destaque-title">
                     <a href="/blog/<?= e($featuredPost['slug']) ?>"><?= e($featuredPost['title']) ?></a>
                 </h2>
-                <p class="blog-featured-excerpt"><?= e(truncate($featuredPost['excerpt'] ?? $featuredPost['content'] ?? '', 200)) ?></p>
-                <div class="blog-featured-meta">
+                <p class="blog-destaque-excerpt"><?= e(truncate($featuredPost['excerpt'] ?? $featuredPost['content'] ?? '', 180)) ?></p>
+                <div class="blog-destaque-meta">
                     <span>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         <?= e(($featuredPost['author_first_name'] ?? 'Punta Cana') . ' ' . ($featuredPost['author_last_name'] ?? 'para Brasileiros')) ?>
@@ -36,111 +38,99 @@
                         <?= format_date($featuredPost['published_at'] ?? $featuredPost['created_at']) ?>
                     </span>
                 </div>
-                <a href="/blog/<?= e($featuredPost['slug']) ?>" class="btn btn-accent">Ler artigo completo</a>
+                <a href="/blog/<?= e($featuredPost['slug']) ?>" class="blog-destaque-btn">
+                    Ler artigo completo
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+                </a>
             </div>
         </div>
     </div>
 </section>
 <?php endif; ?>
 
-<!-- Listagem de Posts com Sidebar -->
-<section class="section section-blog-list">
+<!-- Filtro de Categorias -->
+<?php if (!empty($categories)): ?>
+<section class="blog-categorias-section">
     <div class="container">
-        <div class="blog-list-layout">
-            <!-- Posts Grid (esquerda) -->
-            <div class="blog-list-main">
-                <h3 class="blog-list-heading">Posts Recentes</h3>
-                <?php if (!empty($posts['items'])): ?>
-                <div class="blog-grid-2col">
-                    <?php foreach ($posts['items'] as $post): ?>
-                    <div class="blog-card">
-                        <a href="/blog/<?= e($post['slug']) ?>" class="blog-card-image">
-                            <img src="<?= e($post['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($post['title']) ?>" loading="lazy">
-                            <?php if ($post['category_name'] ?? null): ?>
-                            <span class="blog-card-category" style="background: <?= e($post['category_color'] ?? '#3772C0') ?>">
-                                <?= e(strtoupper($post['category_name'])) ?>
-                            </span>
-                            <?php endif; ?>
-                        </a>
-                        <div class="blog-card-body">
-                            <h3 class="blog-card-title">
-                                <a href="/blog/<?= e($post['slug']) ?>"><?= e($post['title']) ?></a>
-                            </h3>
-                            <a href="/blog/<?= e($post['slug']) ?>" class="blog-card-readmore">LER MAIS &raquo;</a>
-                            <div class="blog-card-meta">
-                                <span><?= e(($post['author_first_name'] ?? 'Admin') . ' ' . ($post['author_last_name'] ?? '')) ?></span>
-                                <span>&middot;</span>
-                                <span><?= format_date($post['published_at'] ?? $post['created_at']) ?></span>
-                            </div>
-                        </div>
+        <div class="blog-categorias-pills">
+            <a href="/blog" class="blog-pill <?= empty($currentCategory) ? 'active' : '' ?>">Todos</a>
+            <?php foreach ($categories as $cat): ?>
+            <a href="/blog?categoria=<?= e($cat['slug']) ?>" class="blog-pill <?= ($currentCategory ?? '') === $cat['slug'] ? 'active' : '' ?>">
+                <?= e($cat['name']) ?>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
+<!-- Grid de Posts -->
+<section class="section blog-posts-section">
+    <div class="container">
+        <?php if (!empty($posts['items'])): ?>
+        <div class="blog-posts-grid">
+            <?php foreach ($posts['items'] as $post): ?>
+            <article class="blog-post-card">
+                <a href="/blog/<?= e($post['slug']) ?>" class="blog-post-card-img">
+                    <img src="<?= e($post['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($post['title']) ?>" loading="lazy">
+                    <?php if ($post['category_name'] ?? null): ?>
+                    <span class="blog-post-card-cat" style="background: <?= e($post['category_color'] ?? 'var(--text-green)') ?>">
+                        <?= e($post['category_name']) ?>
+                    </span>
+                    <?php endif; ?>
+                </a>
+                <div class="blog-post-card-body">
+                    <div class="blog-post-card-meta">
+                        <span><?= format_date($post['published_at'] ?? $post['created_at']) ?></span>
+                        <span>&middot;</span>
+                        <span><?= e(($post['author_first_name'] ?? 'Admin') . ' ' . ($post['author_last_name'] ?? '')) ?></span>
                     </div>
-                    <?php endforeach; ?>
-                </div>
-
-                <!-- Paginação -->
-                <?php if ($posts['total_pages'] > 1): ?>
-                <nav class="pagination">
-                    <?php for ($i = 1; $i <= $posts['total_pages']; $i++): ?>
-                    <a href="?page=<?= $i ?>&categoria=<?= e($currentCategory ?? '') ?>"
-                       class="page-link <?= $i === $posts['current_page'] ? 'active' : '' ?>">
-                        <?= $i ?>
+                    <h3 class="blog-post-card-title">
+                        <a href="/blog/<?= e($post['slug']) ?>"><?= e($post['title']) ?></a>
+                    </h3>
+                    <p class="blog-post-card-excerpt"><?= e(truncate($post['excerpt'] ?? $post['content'] ?? '', 120)) ?></p>
+                    <a href="/blog/<?= e($post['slug']) ?>" class="blog-post-card-link">
+                        Ler mais
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
                     </a>
-                    <?php endfor; ?>
-                </nav>
-                <?php endif; ?>
-                <?php else: ?>
-                <div class="empty-state">
-                    <p>Nenhum post publicado ainda.</p>
                 </div>
-                <?php endif; ?>
+            </article>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Paginação -->
+        <?php if ($posts['total_pages'] > 1): ?>
+        <nav class="pagination">
+            <?php for ($i = 1; $i <= $posts['total_pages']; $i++): ?>
+            <a href="?page=<?= $i ?>&categoria=<?= e($currentCategory ?? '') ?>"
+               class="page-link <?= $i === $posts['current_page'] ? 'active' : '' ?>">
+                <?= $i ?>
+            </a>
+            <?php endfor; ?>
+        </nav>
+        <?php endif; ?>
+        <?php else: ?>
+        <div class="empty-state" style="text-align:center;padding:60px 20px;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" style="margin-bottom:16px;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <p style="color:var(--gray);font-size:16px;">Nenhum post publicado ainda.</p>
+        </div>
+        <?php endif; ?>
+    </div>
+</section>
+
+<!-- Newsletter CTA -->
+<section class="blog-newsletter-section">
+    <div class="container">
+        <div class="blog-newsletter-card">
+            <div class="blog-newsletter-content">
+                <h3>Receba nossas dicas exclusivas</h3>
+                <p>Assine nossa newsletter e fique por dentro dos melhores roteiros e ofertas para Punta Cana.</p>
             </div>
-
-            <!-- Sidebar (direita) -->
-            <aside class="blog-sidebar">
-                <!-- Busca -->
-                <div class="blog-sidebar-widget">
-                    <h4>Buscar</h4>
-                    <form action="/blog" method="GET" class="blog-search-form">
-                        <div class="blog-search-input-wrap">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                            <input type="text" name="busca" placeholder="Buscar no blog..." class="blog-search-input">
-                        </div>
-                    </form>
-                </div>
-
-                <!-- Categorias -->
-                <div class="blog-sidebar-widget">
-                    <h4>Categorias</h4>
-                    <ul class="blog-sidebar-list">
-                        <?php foreach ($categories as $cat): ?>
-                        <li><a href="/blog?categoria=<?= e($cat['slug']) ?>"><?= e($cat['name']) ?></a></li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-
-                <!-- Tags Populares -->
-                <div class="blog-sidebar-widget">
-                    <h4>Tags Populares</h4>
-                    <ul class="blog-sidebar-list">
-                        <li><a href="/blog?busca=scuba+doo">Scuba Doo</a></li>
-                        <li><a href="/blog?busca=coco+bongo">Coco Bongo</a></li>
-                        <li><a href="/blog?busca=buggies">Buggies</a></li>
-                    </ul>
-                </div>
-
-                <!-- Newsletter -->
-                <div class="blog-sidebar-widget blog-sidebar-newsletter">
-                    <h4>Assine nossa Newsletter</h4>
-                    <p>Receba as melhores dicas e ofertas exclusivas para sua viagem a Punta Cana.</p>
-                    <form class="newsletter-form" id="newsletterForm" onsubmit="return submitNewsletter(event)">
-                        <label>Seu melhor e-mail: <span class="required">*</span></label>
-                        <input type="email" name="newsletter_email" id="newsletterEmail" placeholder="" class="form-control" required>
-                        <button type="submit" class="btn-newsletter">Assinar</button>
-                        <p class="newsletter-privacy">Respeitamos sua privacidade. Você pode cancelar a qualquer momento.</p>
-                        <p class="newsletter-msg" id="newsletterMsg" style="display:none;font-size:13px;margin-top:8px;"></p>
-                    </form>
-                </div>
-            </aside>
+            <form class="blog-newsletter-form" id="blogNewsletterForm" onsubmit="return submitNewsletter(event)">
+                <input type="email" name="newsletter_email" id="newsletterEmail" placeholder="Seu melhor e-mail" class="blog-newsletter-input" required>
+                <button type="submit" class="blog-newsletter-btn">Assinar</button>
+            </form>
+            <p class="blog-newsletter-msg" id="newsletterMsg" style="display:none;"></p>
         </div>
     </div>
 </section>
