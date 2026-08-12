@@ -183,15 +183,14 @@
                             </div>
                         </div>
 
-                        <?php if ($partialEnabled): ?>
-                        <div class="partial-payment-option">
-                            <label>
-                                <input type="checkbox" name="payment_mode" value="partial" id="partialCheck">
-                                Pagar apenas <?= (int)$partialPercent ?>% agora (depósito de <?= money($cart['grand_total'] * $partialPercent / 100) ?>)
-                            </label>
-                            <p class="partial-note">O restante deve ser pago antes da data do passeio/transfer.</p>
+                        <!-- Pagamento parcial obrigatório -->
+                        <div class="partial-payment-info" style="margin-top:16px;padding:14px 18px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
+                            <input type="hidden" name="payment_mode" value="partial" id="partialCheck">
+                            <p style="font-size:13px;color:#0369a1;margin:0;font-weight:600;">
+                                💳 Pague apenas <?= (int)$partialPercent ?>% agora: <strong><?= money($cart['grand_total'] * $partialPercent / 100) ?></strong>
+                            </p>
+                            <p style="font-size:12px;color:#64748b;margin:4px 0 0;">O restante (<?= money($cart['grand_total'] - ($cart['grand_total'] * $partialPercent / 100)) ?>) deve ser pago antes da data do passeio/transfer.</p>
                         </div>
-                        <?php endif; ?>
                     </div>
 
                     </div><!-- end checkoutStep4 -->
@@ -207,7 +206,7 @@
                     <!-- Botão -->
                     <div id="paymentContainer" class="checkout-submit" style="display:none;">
                         <button type="submit" id="submitBtn" class="btn btn-primary btn-block btn-lg">
-                            Confirmar e Pagar <?= money($cart['grand_total']) ?>
+                            Confirmar e Pagar <?= money($cart['grand_total'] * $partialPercent / 100) ?>
                         </button>
                     </div>
 
@@ -301,12 +300,10 @@
                             <span>Total:</span>
                             <span id="checkoutTotal"><?= money($cart['grand_total']) ?></span>
                         </div>
-                        <?php if ($partialEnabled): ?>
-                        <div class="summary-row summary-partial" id="partialRow" style="display:none;">
+                        <div class="summary-row summary-partial" id="partialRow" style="display:flex;">
                             <span>Pagamento agora (<?= (int)$partialPercent ?>%):</span>
-                            <span id="partialAmount"><?= money($cart['grand_total'] * $partialPercent / 100) ?></span>
+                            <span id="partialAmount"><strong><?= money($cart['grand_total'] * $partialPercent / 100) ?></strong></span>
                         </div>
-                        <?php endif; ?>
                     </div>
                 </div>
             </aside>

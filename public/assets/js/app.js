@@ -873,7 +873,7 @@
 
             const formData = new FormData(checkoutForm);
             const data = Object.fromEntries(formData.entries());
-            data.payment_mode = document.getElementById('partialCheck')?.checked ? 'partial' : 'full';
+            data.payment_mode = 'partial';
 
             document.getElementById('checkoutLoading').style.display = 'flex';
 
@@ -963,10 +963,44 @@
     }
 
     function capturePayPal(response) {
-        // Confirm with webhook
-        ajax('/api/webhook/payment', { body: JSON.stringify({ gateway: 'paypal', payment_id: response.payment_id, transaction_id: response.paypal_order_id }) })
-            .then(data => { window.location = '/checkout/sucesso/' + response.booking_number; })
-            .catch(() => { window.location = '/checkout/sucesso/' + response.booking_number; });
+        document.getElementById('checkoutLoading').style.display = 'none';
+
+        // Usar PayPal JS SDK para que o cliente aprove a order
+        if (typeof paypal === 'undefined') {
+            toast('PayPal não carregou. Recarregue a página.', 'error');
+            return;
+        }
+
+        // Esconder botão de submit e mostrar PayPal buttons
+        document.getElementById('paymentContainer').style.display = 'none';
+        var paypalContainer = document.getElementById('paypalButtonContainer');
+        paypalContainer.style.display = 'block';
+        paypalContainer.innerHTML = '';
+
+        paypal.Buttons({
+            createOrder: function() {
+                // Order já foi criada server-side, retornar o ID
+                return response.paypal_order_id;
+            },
+            onApprove: function(data) {
+                // Cliente aprovou - capturar server-side
+                document.getElementById('checkoutLoading').style.display = 'flex';
+                paypalContainer.style.display = 'none';
+                ajax('/api/webhook/payment', { body: JSON.stringify({ gateway: 'paypal', payment_id: response.payment_id, transaction_id: data.orderID }) })
+                    .then(function() { window.location = '/checkout/sucesso/' + response.booking_number; })
+                    .catch(function() { window.location = '/checkout/sucesso/' + response.booking_number; });
+            },
+            onCancel: function() {
+                toast('Pagamento cancelado. Tente novamente.', 'warning');
+                paypalContainer.style.display = 'none';
+                document.getElementById('paymentContainer').style.display = 'block';
+            },
+            onError: function(err) {
+                toast('Erro no PayPal. Tente novamente.', 'error');
+                paypalContainer.style.display = 'none';
+                document.getElementById('paymentContainer').style.display = 'block';
+            }
+        }).render('#paypalButtonContainer');
     }
 
     function handleStripePayment(response) {

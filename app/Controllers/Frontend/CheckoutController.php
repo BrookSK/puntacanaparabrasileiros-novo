@@ -84,14 +84,11 @@ class CheckoutController extends Controller
 
             // Criar booking
             $bookingNumber = $this->bookingModel->generateBookingNumber();
-            $paymentMode = $request->input('payment_mode', 'full');
+            $paymentMode = 'partial'; // Sempre pagamento parcial (50%)
             $gateway = $request->input('gateway', 'paypal');
             $total = $summary['grand_total'];
-            $payAmount = $total;
-
-            if ($paymentMode === 'partial' && $this->paymentService->isPartialPaymentEnabled()) {
-                $payAmount = $this->paymentService->calculatePartialAmount($total);
-            }
+            $partialPercent = (float) $this->setting('partial_payment_percent', '50');
+            $payAmount = round($total * ($partialPercent / 100), 2);
 
             // Verificar afiliado
             $affiliateService = new AffiliateService();
