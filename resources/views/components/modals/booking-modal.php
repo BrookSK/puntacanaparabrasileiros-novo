@@ -45,13 +45,6 @@
                         </div>
                     </div>
 
-                    <!-- Horários de Busca (aparece após selecionar hotel) -->
-                    <div class="bm-pickup-section" id="bmPickupSection" style="display:none">
-                        <h4 class="bm-section-title">Horário de Busca</h4>
-                        <p class="bm-section-subtitle">Selecione o horário para busca no <input type="text" id="bmPickupHotelName" class="bm-hotel-name-input bm-hotel-name-inline" readonly tabindex="-1" value=""></p>
-                        <div class="bm-pickup-times" id="bmPickupTimes"></div>
-                    </div>
-
                     <!-- Botão Continuar -->
                     <div class="bm-actions">
                         <button type="button" class="bm-btn-continue" id="bmContinueStep1" disabled>CONTINUAR</button>
@@ -124,7 +117,6 @@
 
                 <div class="bm-sidebar-hotel" id="bmSidebarHotel" style="display:none">
                     <input type="text" id="bmSidebarHotelName" class="bm-hotel-name-input bm-sidebar-hotel-input" readonly tabindex="-1" value="">
-                    <span id="bmSidebarPickupTime"></span>
                 </div>
 
                 <div class="bm-sidebar-package" id="bmSidebarPackage" style="display:none">

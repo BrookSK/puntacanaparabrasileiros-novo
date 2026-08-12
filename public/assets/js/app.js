@@ -1100,18 +1100,6 @@
         if (!selectedHotel) return;
         document.querySelectorAll('.bm-hotel-item').forEach(el => el.classList.remove('selected'));
         document.querySelector(`.bm-hotel-item[data-hotel-id="${hotelId}"]`)?.classList.add('selected');
-        const section = document.getElementById('bmPickupSection');
-        document.getElementById('bmPickupHotelName').value = selectedHotel.hotel_name;
-        document.getElementById('bmPickupTimes').innerHTML = selectedHotel.schedules.map(s => `<button type="button" class="bm-pickup-time-btn" data-time="${s.time}" onclick="selectPickupTime('${s.time}')">${s.time}</button>`).join('');
-        section.style.display = 'block';
-        document.getElementById('bmContinueStep1').disabled = true;
-        updateSidebar();
-    };
-
-    window.selectPickupTime = function(time) {
-        selectedPickupTime = time;
-        document.querySelectorAll('.bm-pickup-time-btn').forEach(el => el.classList.remove('selected'));
-        document.querySelector(`.bm-pickup-time-btn[data-time="${time}"]`)?.classList.add('selected');
         document.getElementById('bmContinueStep1').disabled = false;
         updateSidebar();
     };
@@ -1269,11 +1257,9 @@
         // Hotel
         const hotelEl = document.getElementById('bmSidebarHotel');
         const hotelNameEl = document.getElementById('bmSidebarHotelName');
-        const pickupEl = document.getElementById('bmSidebarPickupTime');
         if (selectedHotel) {
             hotelEl.style.display = 'block';
             hotelNameEl.value = 'Hotel: ' + selectedHotel.hotel_name;
-            pickupEl.textContent = selectedPickupTime ? 'Busca: ' + selectedPickupTime : '';
         }
         // Date
         const dateEl = document.getElementById('bmSidebarDate');
