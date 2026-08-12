@@ -25,7 +25,7 @@
             <th>Taxa</th>
             <th>Status</th>
             <th>Data</th>
-            <th>Ações</th>
+            <th><?= ($currentStatus ?? '') === 'rejected' ? 'Motivo' : 'Ações' ?></th>
         </tr>
     </thead>
     <tbody>
@@ -76,7 +76,7 @@
                 <?php elseif ($cst === 'paid'): ?>
                 <span style="font-size:11px;color:#64748b;"><?= e($comm['payout_reference'] ?? '-') ?></span>
                 <?php elseif ($cst === 'rejected' && !empty($comm['notes'])): ?>
-                <button type="button" class="btn btn-sm btn-outline" onclick="showReasonModal('<?= e(addslashes($comm['notes'])) ?>')">Ver motivo</button>
+                <span style="font-size:12px;color:#94a3b8;"><?= e($comm['notes']) ?></span>
                 <?php else: ?>
                 -
                 <?php endif; ?>
