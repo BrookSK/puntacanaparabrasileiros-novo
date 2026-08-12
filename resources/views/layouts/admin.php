@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=4.2">
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp/chat')): ?>
-    <link rel="stylesheet" href="<?= asset('css/whatsapp.css') ?>?v=1.2">
+    <link rel="stylesheet" href="<?= asset('css/whatsapp.css') ?>?v=1.3">
     <?php endif; ?>
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
 </head>
