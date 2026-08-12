@@ -123,7 +123,7 @@
                 <div class="bm-sidebar-code" id="bmSidebarCode"></div>
 
                 <div class="bm-sidebar-hotel" id="bmSidebarHotel" style="display:none">
-                    <input type="text" id="bmSidebarHotelName" class="bm-hotel-name-input bm-sidebar-hotel-input" readonly tabindex="-1" value="">
+                    <span id="bmSidebarHotelName" class="notranslate" translate="no"></span>
                     <span id="bmSidebarPickupTime"></span>
                 </div>
 

@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=<?= e(setting('font_primary', 'Poppins')) ?>:wght@300;400;500;600;700;800&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="<?= asset('css/app.css') ?>?v=6.0">
+    <link rel="stylesheet" href="<?= asset('css/app.css') ?>?v=6.1">
 
     <!-- Custom CSS from settings -->
     <?php if (setting('custom_css')): ?>
@@ -71,7 +71,7 @@
     </a>
 
     <!-- JavaScript -->
-    <script src="<?= asset('js/app.js') ?>?v=6.0"></script>
+    <script src="<?= asset('js/app.js') ?>?v=6.1"></script>
 
     <!-- Google Translate -->
     <div id="google_translate_element" style="display:none;"></div>

@@ -6552,11 +6552,8 @@ img { max-width: 100%; height: auto; }
 .bm-hotel-item.selected .bm-hotel-item-icon svg { color: #fff; }
 .bm-hotel-item-content { flex: 1; min-width: 0; }
 .bm-hotel-name { display: block; font-size: 14px; font-weight: 600; color: var(--dark); font-family: var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.bm-hotel-name-input { display: block; width: 100%; font-size: 14px; font-weight: 600; color: var(--dark); font-family: var(--font); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; background: none; border: none; outline: none; padding: 0; margin: 0; cursor: pointer; pointer-events: none; }
-.bm-hotel-name-inline { display: inline; width: auto; font-weight: 700; }
-.bm-sidebar-hotel-input { font-size: 12px; font-weight: 600; color: var(--dark); width: 100%; }
 .bm-hotel-times-count { display: block; font-size: 11px; color: #999; margin-top: 2px; }
-.bm-hotel-item.selected .bm-hotel-name, .bm-hotel-item.selected .bm-hotel-name-input { color: var(--text-green, #1B6F00); }
+.bm-hotel-item.selected .bm-hotel-name { color: var(--text-green, #1B6F00); }
 .bm-hotel-item.selected .bm-hotel-times-count { color: var(--text-green, #1B6F00); }
 .bm-hotel-check { width: 24px; height: 24px; border-radius: 50%; border: 2px solid #ddd; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all .2s; }
 .bm-hotel-check svg { display: none; }
