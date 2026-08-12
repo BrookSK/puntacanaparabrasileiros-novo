@@ -615,6 +615,8 @@ const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['i
 </script>
 
 <style>
+.tf-autocomplete { position: relative; }
+.tf-autocomplete-input { width: 100%; }
 .tf-autocomplete-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1.5px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .tf-autocomplete-item { padding: 12px 16px; font-size: 14px; cursor: pointer; border-bottom: 1px solid #f5f5f5; color: #1C2011; transition: background 0.15s; }
 .tf-autocomplete-item:last-child { border-bottom: none; }
