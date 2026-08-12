@@ -9,6 +9,12 @@
             <button class="tab-btn" data-tab="transfers">Transfer</button>
         </nav>
         <div class="header-actions">
+            <!-- Bandeiras idioma -->
+            <div style="display:flex;gap:6px;align-items:center;margin-right:12px;">
+                <a href="javascript:void(0)" onclick="translatePage('en')" title="English" style="display:inline-flex;opacity:0.85;transition:opacity .2s;"><svg width="22" height="14" viewBox="0 0 24 16"><rect width="24" height="16" fill="#002868"/><rect y="1.23" width="24" height="1.23" fill="white"/><rect y="3.69" width="24" height="1.23" fill="white"/><rect y="6.15" width="24" height="1.23" fill="white"/><rect y="8.62" width="24" height="1.23" fill="white"/><rect y="11.08" width="24" height="1.23" fill="white"/><rect y="13.54" width="24" height="1.23" fill="white"/><rect y="2.46" width="24" height="1.23" fill="#BF0A30"/><rect y="4.92" width="24" height="1.23" fill="#BF0A30"/><rect y="7.38" width="24" height="1.23" fill="#BF0A30"/><rect y="9.85" width="24" height="1.23" fill="#BF0A30"/><rect y="12.31" width="24" height="1.23" fill="#BF0A30"/><rect y="14.77" width="24" height="1.23" fill="#BF0A30"/><rect width="10" height="8.62" fill="#002868"/></svg></a>
+                <a href="javascript:void(0)" onclick="translatePage('pt')" title="Português" style="display:inline-flex;opacity:0.85;transition:opacity .2s;"><svg width="22" height="14" viewBox="0 0 24 16"><rect width="24" height="16" fill="#009739"/><path d="M12 2L22 8L12 14L2 8Z" fill="#FEDD00"/><circle cx="12" cy="8" r="3.5" fill="#002776"/></svg></a>
+                <a href="javascript:void(0)" onclick="translatePage('es')" title="Español" style="display:inline-flex;opacity:0.85;transition:opacity .2s;"><svg width="22" height="14" viewBox="0 0 24 16"><rect width="24" height="4" fill="#AA151B"/><rect y="4" width="24" height="8" fill="#F1BF00"/><rect y="12" width="24" height="4" fill="#AA151B"/></svg></a>
+            </div>
             <a href="/catalogo/pdf" target="_blank" class="btn-cta" style="background:#E4B505;color:#1C2011;margin-right:8px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                 Baixar PDF

@@ -14,5 +14,37 @@
 </head>
 <body>
     <?= $content ?>
+
+    <!-- Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script>
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'pt',
+            includedLanguages: 'pt,en,es',
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+
+    function translatePage(lang) {
+        if (lang === 'pt') {
+            document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+            location.reload();
+            return;
+        }
+        var langCode = '/pt/' + lang;
+        document.cookie = 'googtrans=' + langCode + '; path=/;';
+        document.cookie = 'googtrans=' + langCode + '; path=/; domain=.' + location.hostname;
+        location.reload();
+    }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <style>
+    .goog-te-banner-frame { display: none !important; }
+    body { top: 0 !important; }
+    .goog-te-gadget { display: none !important; }
+    .skiptranslate { display: none !important; }
+    </style>
 </body>
 </html>
