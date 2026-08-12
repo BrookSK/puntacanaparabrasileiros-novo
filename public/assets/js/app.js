@@ -500,43 +500,84 @@
         const resultsDiv = document.getElementById('transferMultiResults');
         const totalBar = document.getElementById('transferTotalBar');
         container.innerHTML = '';
-        let totalPrice = 0;
 
         results.forEach((data, idx) => {
             const route = routesData[idx];
-            const v = data.results[0]; // Use the first (cheapest/best) vehicle
-            totalPrice += v.price;
+            const routeLabel = data.origin + ' → ' + data.destination + (route.date ? ' (' + formatDateBR(route.date) + ')' : '');
 
-            container.innerHTML += `
-            <div class="transfer-result-item">
-                <div class="transfer-result-route">
-                    <strong>Rota ${idx + 1}:</strong> ${data.origin} → ${data.destination} (${formatDateBR(route.date)})
-                </div>
-                <div class="transfer-vehicle-card">
-                    <div class="transfer-vehicle-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
-                    <div class="transfer-vehicle-info">
-                        <h4>${v.title}</h4>
-                        <p>${v.description || ''}</p>
-                        <div class="transfer-vehicle-meta">
-                            <span>🌐 ${v.max_passengers} passageiros</span>
-                            <span>🧳 ${v.max_luggage || 0} malas</span>
-                            <span>⏱ ${v.duration || 0} min</span>
+            let vehiclesHtml = '';
+            data.results.forEach((v, vIdx) => {
+                vehiclesHtml += `
+                <div class="transfer-vehicle-option" data-direction="multi_${idx}" data-idx="${vIdx}" data-price="${v.price}" data-id="${v.id}">
+                    <div class="tv-img"><img src="${v.image || '/assets/images/placeholder.jpg'}" alt="${v.title}"></div>
+                    <div class="tv-body">
+                        <div class="tv-info">
+                            <h4>${v.title}</h4>
+                            <p>${v.description || ''}</p>
+                            <div class="tv-specs">
+                                <span class="tv-spec"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Até ${v.max_passengers} passageiros</span>
+                                <span class="tv-spec"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a4 4 0 00-8 0v2"/></svg> Até ${v.max_luggage} malas</span>
+                                <span class="tv-spec"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg> ${v.duration} min</span>
+                            </div>
+                        </div>
+                        <div class="tv-price-col">
+                            <span class="tv-price">$${v.price.toFixed(2)}</span>
+                            <span class="tv-price-label">USD</span>
                         </div>
                     </div>
+                    <div class="tv-select-indicator"></div>
+                </div>`;
+            });
+
+            container.innerHTML += `
+            <div class="transfer-section">
+                <div class="transfer-section-header">
+                    <div class="transfer-section-icon transfer-section-icon--arrival">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="M12 5l7 7-7 7"/></svg>
+                    </div>
                     <div>
-                        <span class="transfer-vehicle-price">$${v.price.toFixed(2)}</span>
-                        <span class="transfer-vehicle-currency">USD</span>
+                        <h3 class="transfer-section-title">ROTA ${idx + 1}</h3>
+                        <p class="transfer-section-route">${routeLabel}</p>
                     </div>
                 </div>
+                <div class="transfer-vehicles-grid">${vehiclesHtml}</div>
             </div>`;
         });
 
-        document.getElementById('multiTotalValue').textContent = '$' + totalPrice.toFixed(2) + ' USD';
-        totalBar.style.display = 'block';
         resultsDiv.style.display = 'block';
 
-        window._transferSearchResults = { results: results.map(r => r.results[0]), routes: routesData };
-        window._transferTotalPrice = totalPrice;
+        // Store data for multi selection
+        window._multiTransferData = results;
+        window._multiTransferRoutes = routesData;
+        window._multiTransferSelection = {};
+
+        // Bind click events
+        document.querySelectorAll('#resultsList .transfer-vehicle-option').forEach(card => {
+            card.addEventListener('click', function() {
+                const direction = this.dataset.direction;
+                const vehicleIdx = parseInt(this.dataset.idx);
+                // Deselect all in this route
+                document.querySelectorAll(`#resultsList .transfer-vehicle-option[data-direction="${direction}"]`).forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                window._multiTransferSelection[direction] = window._multiTransferData[parseInt(direction.split('_')[1])].results[vehicleIdx];
+                updateMultiTotal();
+            });
+        });
+
+        // Auto-select first vehicle of each route
+        results.forEach((data, idx) => {
+            const firstCard = document.querySelector(`#resultsList .transfer-vehicle-option[data-direction="multi_${idx}"][data-idx="0"]`);
+            if (firstCard) firstCard.click();
+        });
+    }
+
+    function updateMultiTotal() {
+        const sel = window._multiTransferSelection || {};
+        let total = 0;
+        Object.values(sel).forEach(v => { if (v) total += v.price; });
+        document.getElementById('multiTotalValue').textContent = '$' + total.toFixed(2) + ' USD';
+        document.getElementById('transferTotalBar').style.display = 'block';
+        window._multiTransferTotalPrice = total;
     }
 
     function searchTransfers() {
