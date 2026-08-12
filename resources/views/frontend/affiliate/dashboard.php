@@ -126,11 +126,11 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: <?= json_encode(array_map(function($i) { return date('d/m', strtotime("-" . (29-$i) . " days")); }, range(0, 29))) ?>,
+            labels: <?= json_encode($chartLabels ?? []) ?>,
             datasets: [
-                { label: 'Visitas', data: Array(30).fill(0), borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.05)', tension: 0.4, fill: true },
-                { label: 'Comissões', data: Array(30).fill(0), borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.05)', tension: 0.4, fill: true },
-                { label: 'Ganhos', data: Array(30).fill(0), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', tension: 0.4, fill: true }
+                { label: 'Visitas', data: <?= json_encode($chartVisits ?? array_fill(0, 30, 0)) ?>, borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.05)', tension: 0.4, fill: true },
+                { label: 'Comissões', data: <?= json_encode($chartCommissions ?? array_fill(0, 30, 0)) ?>, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.05)', tension: 0.4, fill: true },
+                { label: 'Ganhos', data: <?= json_encode($chartEarnings ?? array_fill(0, 30, 0)) ?>, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', tension: 0.4, fill: true }
             ]
         },
         options: {

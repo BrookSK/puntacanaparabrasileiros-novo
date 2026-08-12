@@ -554,9 +554,47 @@ class AccountController extends Controller
 
         if (!$affiliate) { $this->redirect('/programa-de-afiliados'); return; }
 
+        $affiliateId = (int) $affiliate['id'];
+
+        // Buscar dados dos últimos 30 dias para o gráfico
+        $visitsByDay = $this->db->fetchAll(
+            "SELECT DATE(created_at) as day, COUNT(*) as total FROM affiliate_visits WHERE affiliate_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY DATE(created_at)",
+            [$affiliateId]
+        );
+        $commissionsByDay = $this->db->fetchAll(
+            "SELECT DATE(created_at) as day, COUNT(*) as total, SUM(amount) as earnings FROM commissions WHERE affiliate_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) GROUP BY DATE(created_at)",
+            [$affiliateId]
+        );
+
+        // Montar arrays de 30 posições (indexadas por data)
+        $visitsMap = [];
+        foreach ($visitsByDay as $row) { $visitsMap[$row['day']] = (int) $row['total']; }
+        $commissionsMap = [];
+        $earningsMap = [];
+        foreach ($commissionsByDay as $row) {
+            $commissionsMap[$row['day']] = (int) $row['total'];
+            $earningsMap[$row['day']] = (float) $row['earnings'];
+        }
+
+        $chartLabels = [];
+        $chartVisits = [];
+        $chartCommissions = [];
+        $chartEarnings = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-{$i} days"));
+            $chartLabels[] = date('d/m', strtotime($date));
+            $chartVisits[] = $visitsMap[$date] ?? 0;
+            $chartCommissions[] = $commissionsMap[$date] ?? 0;
+            $chartEarnings[] = $earningsMap[$date] ?? 0;
+        }
+
         $this->view('frontend/affiliate/dashboard', [
             'affiliate' => $affiliate,
             'user' => $user,
+            'chartLabels' => $chartLabels,
+            'chartVisits' => $chartVisits,
+            'chartCommissions' => $chartCommissions,
+            'chartEarnings' => $chartEarnings,
             'pageTitle' => 'Painel do Afiliado',
         ], 'app');
     }
