@@ -351,12 +351,26 @@ function renderDocument(m) {
     if (!m.media_url) {
         return `<div class="wpp-msg-text" style="color:#999;font-style:italic;">Documento: ${escapeHtml(m.media_filename || 'arquivo')}</div>`;
     }
-    const icons = { 'application/pdf': '📕', 'application/msword': '📘', 'application/vnd.ms-excel': '📗' };
-    const icon = icons[m.media_mime_type] || '📄';
+    // Ícone por tipo
+    let icon = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+    let iconColor = '#64748b';
+    if (m.media_mime_type && m.media_mime_type.includes('pdf')) { iconColor = '#ef4444'; }
+    else if (m.media_mime_type && (m.media_mime_type.includes('excel') || m.media_mime_type.includes('spreadsheet'))) { iconColor = '#16a34a'; }
+    else if (m.media_mime_type && (m.media_mime_type.includes('word') || m.media_mime_type.includes('document'))) { iconColor = '#2563eb'; }
+
+    const fileName = m.media_filename || 'Documento';
+    const mimeLabel = m.media_mime_type ? m.media_mime_type.split('/').pop().toUpperCase() : '';
+
     return `<div class="wpp-msg-document">
-        <span class="doc-icon">${icon}</span>
-        <div class="doc-info"><strong>${escapeHtml(m.media_filename || 'Documento')}</strong><br><small>${m.media_mime_type || ''}</small></div>
-        <div class="doc-actions"><a href="${m.media_url}" target="_blank">Ver</a> <a href="${m.media_url}" download>Baixar</a></div>
+        <span class="doc-icon" style="color:${iconColor}">${icon}</span>
+        <div class="doc-info">
+            <strong>${escapeHtml(fileName)}</strong>
+            <small>${mimeLabel}</small>
+        </div>
+        <div class="doc-actions">
+            <a href="${m.media_url}" target="_blank">Ver</a>
+            <a href="${m.media_url}" download="${escapeHtml(fileName)}">Baixar</a>
+        </div>
     </div>`;
 }
 
@@ -848,7 +862,9 @@ async function startConversation(e) {
 async function syncGroups() {
     const res = await fetch('/whatsapp/syncGroups', { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } });
     const json = await res.json();
-    alert(json.success ? `${json.updated} grupos sincronizados!` : (json.error || 'Erro'));
+    // Também sincronizar fotos
+    await fetch('/whatsapp/syncPhotos', { method: 'POST', headers: { 'X-CSRF-TOKEN': csrfToken } });
+    alert(json.success ? `${json.updated} grupos sincronizados! Fotos atualizadas.` : (json.error || 'Erro'));
     loadContacts();
 }
 

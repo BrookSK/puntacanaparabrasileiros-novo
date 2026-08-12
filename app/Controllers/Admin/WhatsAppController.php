@@ -628,6 +628,24 @@ class WhatsAppController extends Controller
             return;
         }
 
+        // Buscar foto de perfil se não tem (lazy loading)
+        if (empty($contact['profile_picture_url'])) {
+            try {
+                $instance = $this->instanceModel->find((int) $contact['instance_id']);
+                if ($instance) {
+                    $api = EvolutionApi::fromInstance($instance);
+                    $picResult = $api->fetchProfilePicture($contact['remote_jid']);
+                    $picUrl = $picResult['profilePictureUrl'] ?? $picResult['picture'] ?? $picResult['imgUrl'] ?? null;
+                    if ($picUrl) {
+                        $this->contactModel->update($id, ['profile_picture_url' => $picUrl]);
+                        $contact['profile_picture_url'] = $picUrl;
+                    }
+                }
+            } catch (\Throwable $e) {
+                // Foto não disponível — seguir sem
+            }
+        }
+
         // Briefing
         $contact['briefing'] = $this->db->fetchOne(
             "SELECT * FROM commercial_briefings WHERE contact_id = ?",
