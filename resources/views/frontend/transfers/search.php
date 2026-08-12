@@ -110,21 +110,19 @@
                         <div class="transfer-form-row">
                             <div class="tf-field">
                                 <label>ORIGEM</label>
-                                <select name="multi_origin_1" class="tf-input multi-origin">
-                                    <option value="">Digite para buscar...</option>
-                                    <?php foreach ($locations as $loc): ?>
-                                    <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="tf-autocomplete">
+                                    <input type="text" class="tf-input tf-autocomplete-input multi-origin-input" data-route="1" placeholder="Digite para buscar..." autocomplete="off">
+                                    <input type="hidden" class="multi-origin" name="multi_origin_1">
+                                    <div class="tf-autocomplete-list multi-origin-list"></div>
+                                </div>
                             </div>
                             <div class="tf-field">
                                 <label>DESTINO</label>
-                                <select name="multi_destination_1" class="tf-input multi-destination">
-                                    <option value="">Digite para buscar...</option>
-                                    <?php foreach ($locations as $loc): ?>
-                                    <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="tf-autocomplete">
+                                    <input type="text" class="tf-input tf-autocomplete-input multi-dest-input" data-route="1" placeholder="Digite para buscar..." autocomplete="off">
+                                    <input type="hidden" class="multi-destination" name="multi_destination_1">
+                                    <div class="tf-autocomplete-list multi-dest-list"></div>
+                                </div>
                             </div>
                             <div class="tf-field">
                                 <label>DATA</label>
@@ -148,21 +146,19 @@
                         <div class="transfer-form-row">
                             <div class="tf-field">
                                 <label>ORIGEM</label>
-                                <select name="multi_origin_2" class="tf-input multi-origin">
-                                    <option value="">Digite para buscar...</option>
-                                    <?php foreach ($locations as $loc): ?>
-                                    <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="tf-autocomplete">
+                                    <input type="text" class="tf-input tf-autocomplete-input multi-origin-input" data-route="2" placeholder="Digite para buscar..." autocomplete="off">
+                                    <input type="hidden" class="multi-origin" name="multi_origin_2">
+                                    <div class="tf-autocomplete-list multi-origin-list"></div>
+                                </div>
                             </div>
                             <div class="tf-field">
                                 <label>DESTINO</label>
-                                <select name="multi_destination_2" class="tf-input multi-destination">
-                                    <option value="">Digite para buscar...</option>
-                                    <?php foreach ($locations as $loc): ?>
-                                    <option value="<?= (int)$loc['id'] ?>"><?= e($loc['title']) ?></option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="tf-autocomplete">
+                                    <input type="text" class="tf-input tf-autocomplete-input multi-dest-input" data-route="2" placeholder="Digite para buscar..." autocomplete="off">
+                                    <input type="hidden" class="multi-destination" name="multi_destination_2">
+                                    <div class="tf-autocomplete-list multi-dest-list"></div>
+                                </div>
                             </div>
                             <div class="tf-field">
                                 <label>DATA</label>
@@ -261,6 +257,22 @@
                     <div class="transfer-summary-actions">
                         <button type="button" class="btn btn-primary btn-lg" id="btnAddCart">Adicionar ao Carrinho</button>
                         <button type="button" class="btn btn-accent btn-lg" id="btnDirectCheckout">Ir para Checkout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Resultados Múltiplos Transfers -->
+        <div class="transfer-results-area" id="transferMultiResults" style="display:none;">
+            <div class="transfer-results-card">
+                <div id="resultsList"></div>
+                <div class="transfer-summary" id="transferTotalBar" style="display:none;">
+                    <div class="transfer-summary-total">
+                        <span>Total:</span>
+                        <strong id="multiTotalValue">$0.00 USD</strong>
+                    </div>
+                    <div class="transfer-summary-actions">
+                        <button type="button" class="btn btn-primary btn-lg" id="btnAddCartMulti">Adicionar ao Carrinho</button>
                     </div>
                 </div>
             </div>
@@ -498,9 +510,111 @@ const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['i
 })();
 </script>
 
+<script>
+// Autocomplete para múltiplos transfers
+(function() {
+    function setupMultiAutocomplete(container) {
+        if (!container) return;
+        var inputEls = container.querySelectorAll('.tf-autocomplete-input');
+        inputEls.forEach(function(input) {
+            var wrapper = input.closest('.tf-autocomplete');
+            var hidden = wrapper.querySelector('input[type="hidden"]');
+            var list = wrapper.querySelector('.tf-autocomplete-list');
+            if (!hidden || !list) return;
+
+            // Skip if already initialized
+            if (input.dataset.acInit) return;
+            input.dataset.acInit = '1';
+
+            input.addEventListener('input', function() {
+                var q = this.value.toLowerCase().trim();
+                hidden.value = '';
+                if (q.length === 0) {
+                    list.innerHTML = TRANSFER_LOCATIONS.map(function(l) {
+                        return '<div class="tf-autocomplete-item" data-id="' + l.id + '" data-title="' + l.title + '">' + l.title + '</div>';
+                    }).join('');
+                    list.style.display = 'block';
+                    return;
+                }
+                var filtered = TRANSFER_LOCATIONS.filter(function(l) { return l.title.toLowerCase().includes(q); });
+                if (filtered.length === 0) {
+                    list.innerHTML = '<div class="tf-autocomplete-empty">Nenhum resultado</div>';
+                } else {
+                    list.innerHTML = filtered.map(function(l) {
+                        var idx = l.title.toLowerCase().indexOf(q);
+                        var highlighted = idx === -1 ? l.title : l.title.substring(0, idx) + '<strong>' + l.title.substring(idx, idx + q.length) + '</strong>' + l.title.substring(idx + q.length);
+                        return '<div class="tf-autocomplete-item" data-id="' + l.id + '" data-title="' + l.title + '">' + highlighted + '</div>';
+                    }).join('');
+                }
+                list.style.display = 'block';
+            });
+
+            input.addEventListener('focus', function() {
+                if (this.value.length === 0) {
+                    list.innerHTML = TRANSFER_LOCATIONS.map(function(l) {
+                        return '<div class="tf-autocomplete-item" data-id="' + l.id + '" data-title="' + l.title + '">' + l.title + '</div>';
+                    }).join('');
+                    list.style.display = 'block';
+                } else {
+                    this.dispatchEvent(new Event('input'));
+                }
+            });
+
+            list.addEventListener('click', function(e) {
+                var item = e.target.closest('.tf-autocomplete-item');
+                if (!item) return;
+                input.value = item.dataset.title;
+                hidden.value = item.dataset.id;
+                list.style.display = 'none';
+            });
+
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.tf-autocomplete') || !wrapper.contains(e.target)) {
+                    list.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Inicializar autocompletes das rotas existentes
+    var multiContainer = document.getElementById('multipleRoutesContainer');
+    setupMultiAutocomplete(multiContainer);
+
+    // Override addRoute para inicializar autocomplete nas novas rotas
+    var originalAddRoute = window.addRoute;
+    window.addRoute = function() {
+        var container = document.getElementById('multipleRoutesContainer');
+        if (!container) return;
+        var routes = container.querySelectorAll('.multiple-route-item');
+        var newIndex = routes.length + 1;
+        if (newIndex > 10) { return; }
+
+        var routeHtml = '<div class="multiple-route-item" data-route="' + newIndex + '">' +
+            '<div class="multiple-route-header">' +
+                '<span class="route-number">Rota ' + newIndex + '</span>' +
+                '<button type="button" class="btn-remove-route" onclick="removeRoute(this)" title="Remover rota">' +
+                    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>' +
+                '</button>' +
+            '</div>' +
+            '<div class="transfer-form-row">' +
+                '<div class="tf-field"><label>ORIGEM</label><div class="tf-autocomplete"><input type="text" class="tf-input tf-autocomplete-input multi-origin-input" data-route="' + newIndex + '" placeholder="Digite para buscar..." autocomplete="off"><input type="hidden" class="multi-origin" name="multi_origin_' + newIndex + '"><div class="tf-autocomplete-list multi-origin-list"></div></div></div>' +
+                '<div class="tf-field"><label>DESTINO</label><div class="tf-autocomplete"><input type="text" class="tf-input tf-autocomplete-input multi-dest-input" data-route="' + newIndex + '" placeholder="Digite para buscar..." autocomplete="off"><input type="hidden" class="multi-destination" name="multi_destination_' + newIndex + '"><div class="tf-autocomplete-list multi-dest-list"></div></div></div>' +
+                '<div class="tf-field"><label>DATA</label><input type="date" name="multi_date_' + newIndex + '" class="tf-input multi-date" min="' + new Date().toISOString().split('T')[0] + '"></div>' +
+                '<div class="tf-field tf-field-sm"><label>HORA</label><input type="time" name="multi_time_' + newIndex + '" class="tf-input multi-time"></div>' +
+            '</div>' +
+        '</div>';
+        container.insertAdjacentHTML('beforeend', routeHtml);
+
+        // Inicializar autocomplete no novo item
+        setupMultiAutocomplete(container);
+    };
+
+    // Expor para ser reutilizado
+    window.setupMultiAutocomplete = setupMultiAutocomplete;
+})();
+</script>
+
 <style>
-.tf-autocomplete { position: relative; }
-.tf-autocomplete-input { width: 100%; }
 .tf-autocomplete-list { display: none; position: absolute; top: 100%; left: 0; right: 0; background: #fff; border: 1.5px solid #e0e0e0; border-top: none; border-radius: 0 0 8px 8px; max-height: 250px; overflow-y: auto; z-index: 100; box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
 .tf-autocomplete-item { padding: 12px 16px; font-size: 14px; cursor: pointer; border-bottom: 1px solid #f5f5f5; color: #1C2011; transition: background 0.15s; }
 .tf-autocomplete-item:last-child { border-bottom: none; }

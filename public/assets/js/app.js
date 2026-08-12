@@ -464,6 +464,7 @@
 
         document.getElementById('transferLoading').style.display = 'block';
         document.getElementById('transferResults').style.display = 'none';
+        document.getElementById('transferMultiResults').style.display = 'none';
         document.getElementById('transferEmptyState').style.display = 'none';
 
         // Search for all routes in parallel
@@ -496,7 +497,7 @@
 
     function renderMultipleResults(results, routesData) {
         const container = document.getElementById('resultsList');
-        const resultsDiv = document.getElementById('transferResults');
+        const resultsDiv = document.getElementById('transferMultiResults');
         const totalBar = document.getElementById('transferTotalBar');
         container.innerHTML = '';
         let totalPrice = 0;
@@ -530,7 +531,7 @@
             </div>`;
         });
 
-        document.getElementById('transferTotalValue').textContent = '$' + totalPrice.toFixed(2) + ' USD';
+        document.getElementById('multiTotalValue').textContent = '$' + totalPrice.toFixed(2) + ' USD';
         totalBar.style.display = 'block';
         resultsDiv.style.display = 'block';
 
