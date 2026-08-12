@@ -1305,6 +1305,9 @@
     document.getElementById('bmCheckout')?.addEventListener('click', () => {
         submitBooking('checkout');
     });
+    document.getElementById('bmDirectCheckout')?.addEventListener('click', () => {
+        submitBooking('checkout');
+    });
 
     function submitBooking(redirect) {
         if (!selectedDate || !selectedPackage) { alert('Selecione data e pacote.'); return; }

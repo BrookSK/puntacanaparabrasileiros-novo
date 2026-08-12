@@ -6323,6 +6323,19 @@ img { max-width: 100%; height: auto; }
     font-family: var(--font);
 }
 .bm-btn-cart:hover { background: #155c00; }
+.bm-btn-checkout {
+    padding: 14px 40px;
+    background: #0077b6;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    font-family: var(--font);
+}
+.bm-btn-checkout:hover { background: #005f8d; }
 
 /* Packages */
 .bm-packages {

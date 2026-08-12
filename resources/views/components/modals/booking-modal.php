@@ -110,6 +110,7 @@
                     <div class="bm-actions bm-actions-step2">
                         <button type="button" class="bm-btn-back" id="bmBack">&lsaquo; Voltar</button>
                         <button type="button" class="bm-btn-cart" id="bmAddCart">ADICIONAR AO CARRINHO</button>
+                        <button type="button" class="bm-btn-checkout" id="bmDirectCheckout">IR PARA CHECKOUT</button>
                     </div>
                 </div>
             </div>
