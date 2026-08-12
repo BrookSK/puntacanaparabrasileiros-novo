@@ -1349,7 +1349,11 @@ class WhatsAppController extends Controller
         if (empty($remoteJid) || str_contains($remoteJid, 'status@') || str_contains($remoteJid, 'broadcast')) {
             return;
         }
-        if ($fromMe) return; // Mensagens próprias já são salvas no envio
+        if ($fromMe) {
+            // Mensagens fromMe enviadas pelo painel já foram salvas no momento do envio.
+            // Mas mensagens enviadas pelo celular precisam ser registradas.
+            // A deduplicação abaixo resolve: se já existe (salva pelo painel), pula.
+        }
 
         // Deduplicação
         $existing = $this->messageModel->findByMessageId((int) $instance['id'], $messageId);
@@ -1417,7 +1421,7 @@ class WhatsAppController extends Controller
             'contact_id' => $contactId,
             'remote_jid' => $remoteJid,
             'message_id' => $messageId,
-            'from_me' => 0,
+            'from_me' => $fromMe ? 1 : 0,
             'message_type' => $msgType,
             'message_text' => $msgText,
             'media_url' => $mediaUrl,
@@ -1426,21 +1430,23 @@ class WhatsAppController extends Controller
             'sender_name' => $pushName ?: null,
             'participant_jid' => $participantJid,
             'timestamp' => date('Y-m-d H:i:s', (int) $timestamp),
-            'is_read' => 0,
-            'ack_status' => null,
+            'is_read' => $fromMe ? 1 : 0,
+            'ack_status' => $fromMe ? 'sent' : null,
             'created_at' => date('Y-m-d H:i:s'),
         ]);
 
-        // Incrementar não lidas
-        $this->contactModel->incrementUnread($contactId);
+        // Incrementar não lidas (só se não é mensagem própria)
+        if (!$fromMe) {
+            $this->contactModel->incrementUnread($contactId);
+        }
 
         // Atualizar last_message_at
         $this->contactModel->update($contactId, [
             'last_message_at' => date('Y-m-d H:i:s', (int) $timestamp),
         ]);
 
-        // Regra automática: se concluído, volta para "novo"
-        if ($contact['service_status'] === 'concluido') {
+        // Regra automática: se concluído e recebeu mensagem do contato, volta para "novo"
+        if (!$fromMe && $contact['service_status'] === 'concluido') {
             $this->contactModel->update($contactId, ['service_status' => 'novo']);
         }
     }

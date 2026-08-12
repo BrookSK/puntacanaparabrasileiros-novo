@@ -184,6 +184,12 @@ async function openContact(contactId) {
             document.getElementById('serviceStatusSelect').value = c.service_status || 'novo';
 
             // Preencher details panel
+            const detailAvatarEl = document.getElementById('detailAvatar');
+            if (detailAvatarEl) {
+                detailAvatarEl.innerHTML = (c.profile_picture_url && c.profile_picture_url !== 'null' && c.profile_picture_url.startsWith('http'))
+                    ? `<img src="${c.profile_picture_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` 
+                    : `<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:24px;font-weight:600;color:#666;">${(c.contact_name || c.push_name || 'XX').substring(0, 2).toUpperCase()}</span>`;
+            }
             document.getElementById('detailName').value = c.contact_name || '';
             document.getElementById('detailAssigned').value = c.assigned_to || '';
             document.getElementById('detailNotes').value = c.internal_notes || '';
