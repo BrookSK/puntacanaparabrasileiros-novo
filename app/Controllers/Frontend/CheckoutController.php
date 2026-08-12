@@ -399,18 +399,11 @@ class CheckoutController extends Controller
             );
         }
 
-<<<<<<< HEAD
         // ── WHATSAPP ───────────────────────────────────────────────────────
 
         $whatsappService = new WhatsAppService();
 
         // WhatsApp para passeios
-=======
-        // WhatsApp — Notificações via Evolution API (com fallback para webhook legado)
-        $whatsappService = new WhatsAppService();
-
-        // 1. Confirmação para o cliente (passeio)
->>>>>>> 45ac2a0ac7224d0957d4654d57eb526b1dca960b
         if (!empty($items)) {
             try {
                 $whatsappService->sendTripConfirmation($booking, [
@@ -423,7 +416,6 @@ class CheckoutController extends Controller
             } catch (\Throwable $e) { /* continua */ }
         }
 
-<<<<<<< HEAD
         // WhatsApp para transfers (todos os tipos)
         if (!empty($transfers)) {
             foreach ($transfers as $tr) {
@@ -449,29 +441,6 @@ class CheckoutController extends Controller
 
         // ── COMISSÃO DE AFILIADO ───────────────────────────────────────────
 
-=======
-        // 2. Confirmação para o cliente (transfer)
-        if (!empty($transfers)) {
-            foreach ($transfers as $transfer) {
-                $whatsappService->sendTransferConfirmation([
-                    'customer_name' => trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '')),
-                    'customer_phone' => $booking['billing_phone'] ?? '',
-                    'vehicle_title' => $transfer['vehicle_title'] ?? '',
-                    'origin_title' => $transfer['origin_title'] ?? '',
-                    'destination_title' => $transfer['destination_title'] ?? '',
-                    'date' => $transfer['date'] ?? '',
-                    'time' => $transfer['time'] ?? '',
-                    'adults' => $transfer['adults'] ?? 1,
-                    'reference' => $booking['booking_number'],
-                ]);
-            }
-        }
-
-        // 3. Notificação para grupo admin (nova reserva)
-        $whatsappService->notifyNewBooking($booking, $items, $transfers);
-
-        // Comissão de afiliado
->>>>>>> 45ac2a0ac7224d0957d4654d57eb526b1dca960b
         if ($booking['affiliate_id']) {
             $affiliateService = new AffiliateService();
             $affiliateService->createCommission(
