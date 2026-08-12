@@ -120,6 +120,8 @@
     .goog-te-gadget { display: none !important; }
     .skiptranslate { display: none !important; }
     body { top: 0px !important; }
+    /* Impedir que Google Translate traduza nomes de hotéis e outros elementos marcados */
+    .notranslate, [translate="no"] { font-style: inherit !important; }
     </style>
 
     <!-- Body Scripts from settings -->

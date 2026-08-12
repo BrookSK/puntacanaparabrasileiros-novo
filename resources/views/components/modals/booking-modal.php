@@ -34,7 +34,7 @@
                             <input type="text" id="bmHotelSearch" placeholder="Ex: Barceló, Hard Rock, Dreams..." autocomplete="off">
                         </div>
 
-                        <div class="bm-hotel-list" id="bmHotelList">
+                        <div class="bm-hotel-list notranslate" id="bmHotelList" translate="no">
                             <div class="bm-hotel-loading" id="bmHotelLoading" style="display:none">
                                 <span>Carregando hotéis...</span>
                             </div>

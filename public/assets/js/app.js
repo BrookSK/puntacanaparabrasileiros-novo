@@ -1048,6 +1048,34 @@
     modal.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
 
     // ===== STEP 1: Hotel & Horário de Busca =====
+
+    // Observer para proteger nomes de hotéis contra Google Translate
+    (function() {
+        var observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'characterData' || mutation.type === 'childList') {
+                    var target = mutation.target;
+                    var el = target.nodeType === 3 ? target.parentElement : target;
+                    if (el && el.closest && el.closest('[data-hotel-name]')) {
+                        var container = el.closest('[data-hotel-name]');
+                        var original = container.getAttribute('data-hotel-name');
+                        if (original && container.textContent !== original && container.textContent !== 'Hotel: ' + original) {
+                            if (container.id === 'bmSidebarHotelName') {
+                                container.textContent = 'Hotel: ' + original;
+                            } else {
+                                container.textContent = original;
+                            }
+                        }
+                    }
+                }
+            });
+        });
+        var modalEl = document.getElementById('bookingModal');
+        if (modalEl) {
+            observer.observe(modalEl, { characterData: true, childList: true, subtree: true });
+        }
+    })();
+
     function loadHotels() {
         if (typeof TRIP_ID === 'undefined') return;
         if (hotelsData.length > 0) return; // já carregou
@@ -1073,7 +1101,29 @@
             list.innerHTML = '<div class="bm-hotel-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;color:#bbb;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Nenhum hotel encontrado com esse nome.</div>';
             return;
         }
-        list.innerHTML = hotels.map(h => `<div class="bm-hotel-item ${selectedHotel && selectedHotel.id === h.id ? 'selected' : ''}" data-hotel-id="${h.id}" onclick="selectHotel(${h.id})"><div class="bm-hotel-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><div class="bm-hotel-item-content"><span class="bm-hotel-name notranslate" translate="no">${h.hotel_name}</span><span class="bm-hotel-times-count">${h.schedules.length} hor\u00E1rio(s) de busca</span></div><div class="bm-hotel-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>`).join('');
+        list.innerHTML = hotels.map(h => `<div class="bm-hotel-item ${selectedHotel && selectedHotel.id === h.id ? 'selected' : ''}" data-hotel-id="${h.id}" onclick="selectHotel(${h.id})"><div class="bm-hotel-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><div class="bm-hotel-item-content"><span class="bm-hotel-name notranslate" translate="no" data-hotel-name="${h.hotel_name.replace(/"/g, '&quot;')}">${h.hotel_name}</span><span class="bm-hotel-times-count">${h.schedules.length} hor\u00E1rio(s) de busca</span></div><div class="bm-hotel-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>`).join('');
+        // Proteger nomes dos hotéis contra tradução automática do Google Translate
+        protectHotelNames();
+    }
+
+    // Garante que nomes de hotéis não sejam alterados pelo Google Translate
+    function protectHotelNames() {
+        setTimeout(function() {
+            document.querySelectorAll('.bm-hotel-name[data-hotel-name]').forEach(function(el) {
+                var original = el.getAttribute('data-hotel-name');
+                if (el.textContent !== original) {
+                    el.textContent = original;
+                }
+            });
+        }, 100);
+        setTimeout(function() {
+            document.querySelectorAll('.bm-hotel-name[data-hotel-name]').forEach(function(el) {
+                var original = el.getAttribute('data-hotel-name');
+                if (el.textContent !== original) {
+                    el.textContent = original;
+                }
+            });
+        }, 500);
     }
 
     document.getElementById('bmHotelSearch')?.addEventListener('input', function() {
@@ -1100,6 +1150,7 @@
         document.querySelector(`.bm-hotel-item[data-hotel-id="${hotelId}"]`)?.classList.add('selected');
         const section = document.getElementById('bmPickupSection');
         document.getElementById('bmPickupHotelName').textContent = selectedHotel.hotel_name;
+        document.getElementById('bmPickupHotelName').setAttribute('data-hotel-name', selectedHotel.hotel_name);
         document.getElementById('bmPickupTimes').innerHTML = selectedHotel.schedules.map(s => `<button type="button" class="bm-pickup-time-btn" data-time="${s.time}" onclick="selectPickupTime('${s.time}')">${s.time}</button>`).join('');
         section.style.display = 'block';
         document.getElementById('bmContinueStep1').disabled = true;
@@ -1271,6 +1322,7 @@
         if (selectedHotel) {
             hotelEl.style.display = 'block';
             hotelNameEl.textContent = 'Hotel: ' + selectedHotel.hotel_name;
+            hotelNameEl.setAttribute('data-hotel-name', selectedHotel.hotel_name);
             pickupEl.textContent = selectedPickupTime ? 'Busca: ' + selectedPickupTime : '';
         }
         // Date
