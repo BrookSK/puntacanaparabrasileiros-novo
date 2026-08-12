@@ -164,10 +164,6 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
                 ?></div>
             </div>
             <div class="v-cell">
-                <div class="v-cell-label">Ponto de Encontro</div>
-                <div class="v-cell-value"><?= e($item['meeting_point'] ?? 'Lobby do hotel') ?></div>
-            </div>
-            <div class="v-cell">
                 <div class="v-cell-label">Valor</div>
                 <div class="v-cell-value">$<?= number_format((float)($item['price'] ?? 0), 2) ?> USD</div>
             </div>
