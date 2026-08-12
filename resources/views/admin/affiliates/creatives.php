@@ -32,7 +32,7 @@
                 <input type="text" name="description" class="form-control" placeholder="Breve descrição do material">
             </div>
             <div class="form-group col-2">
-                <label>Imagem <span class="required">*</span></label>
+                <label>Arquivo <span class="required">*</span></label>
                 <div class="file-upload-area">
                     <input type="file" name="image" id="creativeImage" class="file-input-hidden" accept="image/*,video/*,.pdf,.doc,.docx,.psd,.ai,.zip" required>
                     <label for="creativeImage" class="file-upload-label">
