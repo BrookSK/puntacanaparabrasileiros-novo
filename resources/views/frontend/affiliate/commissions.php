@@ -12,7 +12,7 @@
                 </div>
 
                 <!-- Summary Cards -->
-                <div class="aff-stats-grid aff-stats-grid--4">
+                <div class="aff-stats-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:24px;">
                     <div class="aff-mini-card">
                         <span class="aff-mini-card-label">Total de Comissões</span>
                         <span class="aff-mini-card-value"><?= (int)($affiliate['total_referrals'] ?? 0) ?></span>
