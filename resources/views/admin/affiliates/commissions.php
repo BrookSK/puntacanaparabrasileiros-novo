@@ -75,6 +75,8 @@
                 <button type="button" class="btn btn-sm btn-danger" onclick="openCancelModal(<?= (int)$comm['id'] ?>)" style="margin-left:4px;">Cancelar</button>
                 <?php elseif ($cst === 'paid'): ?>
                 <span style="font-size:11px;color:#64748b;"><?= e($comm['payout_reference'] ?? '-') ?></span>
+                <?php elseif ($cst === 'rejected' && !empty($comm['notes'])): ?>
+                <button type="button" class="btn btn-sm btn-outline" onclick="showReasonModal('<?= e(addslashes($comm['notes'])) ?>')">Ver motivo</button>
                 <?php else: ?>
                 -
                 <?php endif; ?>
@@ -140,6 +142,22 @@
     </div>
 </div>
 
+<!-- Modal Motivo do Cancelamento -->
+<div class="modal-overlay" id="reasonModal" style="display:none;">
+    <div class="modal-box modal-sm">
+        <div class="modal-header">
+            <h3>Motivo do Cancelamento</h3>
+            <button class="modal-close" onclick="closeReasonModal()">&times;</button>
+        </div>
+        <div class="modal-body-scroll">
+            <p id="reasonText" style="color:#334155;line-height:1.7;white-space:pre-wrap;margin:0;"></p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeReasonModal()">Fechar</button>
+        </div>
+    </div>
+</div>
+
 <script>
 function openCancelModal(commissionId) {
     const modal = document.getElementById('cancelModal');
@@ -172,12 +190,25 @@ document.getElementById('cancelModal').addEventListener('click', function(e) {
 document.getElementById('payModal').addEventListener('click', function(e) {
     if (e.target === this) closePayModal();
 });
+document.getElementById('reasonModal').addEventListener('click', function(e) {
+    if (e.target === this) closeReasonModal();
+});
 
 // Fechar modais com ESC
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeCancelModal();
         closePayModal();
+        closeReasonModal();
     }
 });
+
+function showReasonModal(reason) {
+    document.getElementById('reasonText').textContent = reason;
+    document.getElementById('reasonModal').style.display = 'flex';
+}
+
+function closeReasonModal() {
+    document.getElementById('reasonModal').style.display = 'none';
+}
 </script>
