@@ -20,7 +20,7 @@
             <div class="header-actions">
                 <!-- Bandeiras idioma -->
                 <div class="header-flags">
-                    <a href="?lang=en" class="flag-btn" title="English">
+                    <a href="javascript:void(0)" class="flag-btn" title="English" onclick="translatePage('en')">
                         <svg width="24" height="16" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
                             <rect width="24" height="16" fill="#002868"/>
                             <rect y="1.23" width="24" height="1.23" fill="white"/><rect y="3.69" width="24" height="1.23" fill="white"/><rect y="6.15" width="24" height="1.23" fill="white"/><rect y="8.62" width="24" height="1.23" fill="white"/><rect y="11.08" width="24" height="1.23" fill="white"/><rect y="13.54" width="24" height="1.23" fill="white"/>
@@ -28,7 +28,7 @@
                             <rect width="10" height="8.62" fill="#002868"/>
                         </svg>
                     </a>
-                    <a href="?lang=pt" class="flag-btn" title="Português">
+                    <a href="javascript:void(0)" class="flag-btn" title="Português" onclick="translatePage('pt')">
                         <svg width="24" height="16" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
                             <rect width="24" height="16" fill="#009739"/>
                             <path d="M12 2L22 8L12 14L2 8Z" fill="#FEDD00"/>
@@ -36,7 +36,7 @@
                             <path d="M9 8.5C9 8.5 10.5 7 12 7.5C13.5 8 15 8.5 15 8.5" stroke="white" stroke-width="0.5" fill="none"/>
                         </svg>
                     </a>
-                    <a href="?lang=es" class="flag-btn" title="Español">
+                    <a href="javascript:void(0)" class="flag-btn" title="Español" onclick="translatePage('es')">
                         <svg width="24" height="16" viewBox="0 0 24 16" xmlns="http://www.w3.org/2000/svg">
                             <rect width="24" height="4" fill="#AA151B"/><rect y="4" width="24" height="8" fill="#F1BF00"/><rect y="12" width="24" height="4" fill="#AA151B"/>
                         </svg>

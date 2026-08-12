@@ -73,6 +73,55 @@
     <!-- JavaScript -->
     <script src="<?= asset('js/app.js') ?>?v=5.8"></script>
 
+    <!-- Google Translate -->
+    <div id="google_translate_element" style="display:none;"></div>
+    <script>
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'pt',
+            includedLanguages: 'pt,en,es',
+            autoDisplay: false
+        }, 'google_translate_element');
+    }
+
+    function translatePage(lang) {
+        // Se for PT, restaurar original
+        if (lang === 'pt') {
+            // Remover tradução
+            var frame = document.querySelector('.goog-te-banner-frame');
+            if (frame) {
+                var innerDoc = frame.contentDocument || frame.contentWindow.document;
+                var restoreBtn = innerDoc.querySelector('.goog-close-link');
+                if (restoreBtn) restoreBtn.click();
+            }
+            // Fallback: setar cookie e recarregar
+            document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+            document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+            if (window.location.href.indexOf('#googtrans') > -1) {
+                window.location.href = window.location.href.split('#')[0];
+            } else {
+                location.reload();
+            }
+            return;
+        }
+
+        // Setar cookie de tradução e recarregar
+        var langCode = '/pt/' + lang;
+        document.cookie = 'googtrans=' + langCode + '; path=/;';
+        document.cookie = 'googtrans=' + langCode + '; path=/; domain=.' + location.hostname;
+        location.reload();
+    }
+    </script>
+    <script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <style>
+    /* Esconder a barra do Google Translate */
+    .goog-te-banner-frame { display: none !important; }
+    body { top: 0 !important; }
+    .goog-te-gadget { display: none !important; }
+    .skiptranslate { display: none !important; }
+    body { top: 0px !important; }
+    </style>
+
     <!-- Body Scripts from settings -->
     <?= setting('body_scripts', '') ?>
 </body>
