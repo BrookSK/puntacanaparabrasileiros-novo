@@ -1378,6 +1378,8 @@ class WhatsAppController extends Controller
         // Detectar tipo de mensagem
         [$msgType, $msgText, $mediaData] = $this->parseMessageContent($msgContent);
 
+        $reactionTargetId = null;
+
         // Verificar se é reação
         if (isset($msgContent['reactionMessage'])) {
             $msgType = 'reaction';
@@ -1429,6 +1431,8 @@ class WhatsAppController extends Controller
         }
 
         // Salvar mensagem
+        $quotedMsgId = $reactionTargetId ?? ($msgContent['extendedTextMessage']['contextInfo']['quotedMessage']['stanzaId'] ?? null);
+        
         $this->db->insert('whatsapp_messages', [
             'instance_id' => $instanceId,
             'contact_id' => $contactId,
@@ -1440,6 +1444,7 @@ class WhatsAppController extends Controller
             'media_url' => $mediaUrl,
             'media_mime_type' => $mediaData['mimetype'] ?? null,
             'media_filename' => $mediaData['filename'] ?? null,
+            'quoted_message_id' => $quotedMsgId,
             'sender_name' => $pushName ?: null,
             'participant_jid' => $participantJid,
             'timestamp' => date('Y-m-d H:i:s', (int) $timestamp),
