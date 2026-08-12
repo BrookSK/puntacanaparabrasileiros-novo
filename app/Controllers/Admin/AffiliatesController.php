@@ -417,11 +417,40 @@ class AffiliatesController extends Controller
     public function commissions(Request $request, Response $response): void
     {
         $page = max(1, (int) $request->query('page', '1'));
-        $status = $request->query('status', 'pending');
-        $commissions = $this->commissionModel->paginate($page, 20, 'status = ?', [$status], 'created_at DESC');
+        $status = $request->query('status', 'all');
+        $perPage = 20;
+
+        // Construir query com JOIN para pegar nome do afiliado
+        $whereClause = '1=1';
+        $params = [];
+        if ($status !== 'all') {
+            $whereClause = 'c.status = ?';
+            $params = [$status];
+        }
+
+        $total = (int) $this->db->fetchColumn(
+            "SELECT COUNT(*) FROM commissions c WHERE {$whereClause}",
+            $params
+        );
+        $totalPages = (int) ceil($total / $perPage);
+        $offset = ($page - 1) * $perPage;
+
+        $commissions = $this->db->fetchAll(
+            "SELECT c.*, CONCAT(u.first_name, ' ', u.last_name) as affiliate_name, u.email as affiliate_email
+             FROM commissions c
+             LEFT JOIN affiliates a ON c.affiliate_id = a.id
+             LEFT JOIN users u ON a.user_id = u.id
+             WHERE {$whereClause}
+             ORDER BY c.created_at DESC
+             LIMIT {$perPage} OFFSET {$offset}",
+            $params
+        );
 
         $this->view('admin/affiliates/commissions', [
             'commissions' => $commissions,
+            'total' => $total,
+            'totalPages' => $totalPages,
+            'currentPage' => $page,
             'currentStatus' => $status,
             'pageTitle' => 'Comissões de Afiliados',
         ], 'admin');

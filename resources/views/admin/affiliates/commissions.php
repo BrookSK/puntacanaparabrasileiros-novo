@@ -5,13 +5,15 @@
             Voltar para Afiliados
         </a>
     </div>
-    <form method="GET" class="filter-form">
-        <select name="status" class="form-control" onchange="this.form.submit()">
-            <option value="pending" <?= ($currentStatus ?? '') === 'pending' ? 'selected' : '' ?>>Pendentes</option>
-            <option value="paid" <?= ($currentStatus ?? '') === 'paid' ? 'selected' : '' ?>>Pagas</option>
-            <option value="cancelled" <?= ($currentStatus ?? '') === 'cancelled' ? 'selected' : '' ?>>Canceladas</option>
-        </select>
-    </form>
+</div>
+
+<!-- Tabs de Status -->
+<div class="settings-tabs" style="margin-bottom:20px;">
+    <a href="/admin/afiliados/comissoes?status=all" class="tab-btn <?= ($currentStatus ?? '') === 'all' ? 'active' : '' ?>">Todas</a>
+    <a href="/admin/afiliados/comissoes?status=pending" class="tab-btn <?= ($currentStatus ?? '') === 'pending' ? 'active' : '' ?>">Pendentes</a>
+    <a href="/admin/afiliados/comissoes?status=approved" class="tab-btn <?= ($currentStatus ?? '') === 'approved' ? 'active' : '' ?>">Aprovadas</a>
+    <a href="/admin/afiliados/comissoes?status=paid" class="tab-btn <?= ($currentStatus ?? '') === 'paid' ? 'active' : '' ?>">Pagas</a>
+    <a href="/admin/afiliados/comissoes?status=rejected" class="tab-btn <?= ($currentStatus ?? '') === 'rejected' ? 'active' : '' ?>">Canceladas</a>
 </div>
 
 <table class="table">
@@ -19,21 +21,28 @@
         <tr>
             <th>Afiliado</th>
             <th>Reserva</th>
-            <th>Valor</th>
+            <th>Valor Base</th>
+            <th>Comissão</th>
+            <th>Taxa</th>
             <th>Status</th>
             <th>Data</th>
             <th>Ações</th>
         </tr>
     </thead>
     <tbody>
-        <?php if (empty($commissions['data'])): ?>
+        <?php if (empty($commissions)): ?>
         <tr>
-            <td colspan="6" class="text-center">Nenhuma comissão encontrada.</td>
+            <td colspan="8" style="text-align:center;padding:30px;color:#94a3b8;">Nenhuma comissão encontrada.</td>
         </tr>
         <?php else: ?>
-        <?php foreach ($commissions['data'] as $comm): ?>
+        <?php foreach ($commissions as $comm): ?>
         <tr>
-            <td><?= e($comm['affiliate_name'] ?? 'Afiliado #' . ($comm['affiliate_id'] ?? '?')) ?></td>
+            <td>
+                <strong><?= e($comm['affiliate_name'] ?? 'Afiliado #' . ($comm['affiliate_id'] ?? '?')) ?></strong>
+                <?php if (!empty($comm['affiliate_email'])): ?>
+                <br><small style="color:#94a3b8;"><?= e($comm['affiliate_email']) ?></small>
+                <?php endif; ?>
+            </td>
             <td>
                 <?php if (!empty($comm['booking_id'])): ?>
                 <a href="/admin/reservas/<?= (int)$comm['booking_id'] ?>">#<?= (int)$comm['booking_id'] ?></a>
@@ -41,24 +50,37 @@
                 -
                 <?php endif; ?>
             </td>
-            <td><strong>$<?= number_format((float)($comm['amount'] ?? 0), 2) ?></strong></td>
+            <td>$<?= number_format((float)($comm['base_amount'] ?? 0), 2) ?></td>
+            <td><strong style="color:#16a34a;">$<?= number_format((float)($comm['amount'] ?? 0), 2) ?></strong></td>
+            <td><?= number_format((float)($comm['rate'] ?? 0), 0) ?>%</td>
             <td>
                 <?php
                     $cst = $comm['status'] ?? 'pending';
-                    $cstColor = $cst === 'paid' ? 'success' : ($cst === 'cancelled' ? 'danger' : 'warning');
-                    $cstLabel = $cst === 'paid' ? 'Pago' : ($cst === 'cancelled' ? 'Cancelado' : 'Pendente');
+                    $statusMap = [
+                        'pending' => ['warning', 'Pendente'],
+                        'approved' => ['info', 'Aprovada'],
+                        'paid' => ['success', 'Paga'],
+                        'rejected' => ['danger', 'Cancelada'],
+                    ];
+                    $badge = $statusMap[$cst] ?? ['secondary', ucfirst($cst)];
                 ?>
-                <span class="badge badge-<?= $cstColor ?>"><?= $cstLabel ?></span>
+                <span class="badge badge-<?= $badge[0] ?>"><?= $badge[1] ?></span>
+                <?php if ($cst === 'paid' && !empty($comm['paid_at'])): ?>
+                <br><small style="color:#94a3b8;"><?= date('d/m/Y', strtotime($comm['paid_at'])) ?></small>
+                <?php endif; ?>
             </td>
-            <td><?= !empty($comm['created_at']) ? date('d/m/Y', strtotime($comm['created_at'])) : '-' ?></td>
+            <td><?= !empty($comm['created_at']) ? date('d/m/Y H:i', strtotime($comm['created_at'])) : '-' ?></td>
             <td class="actions-cell">
-                <?php if (($comm['status'] ?? '') === 'pending'): ?>
-                <form method="POST" action="/admin/afiliados/comissoes/<?= (int)$comm['id'] ?>/pagar" class="inline-form">
+                <?php if ($cst === 'pending'): ?>
+                <form method="POST" action="/admin/afiliados/comissoes/<?= (int)$comm['id'] ?>/pagar" class="inline-form" onsubmit="return confirm('Marcar como paga?')">
                     <?= csrf_field() ?>
-                    <button class="btn btn-sm btn-primary" onclick="return confirm('Marcar como pago?')">Pagar</button>
+                    <input type="text" name="payout_reference" placeholder="Ref. pagamento" class="form-control" style="width:120px;display:inline-block;font-size:11px;padding:5px 8px;margin-right:4px;">
+                    <button class="btn btn-sm btn-success">Pagar</button>
                 </form>
+                <?php elseif ($cst === 'paid'): ?>
+                <span style="font-size:11px;color:#64748b;"><?= e($comm['payout_reference'] ?? '-') ?></span>
                 <?php else: ?>
-                <span class="text-muted"><?= e($comm['payout_reference'] ?? '-') ?></span>
+                -
                 <?php endif; ?>
             </td>
         </tr>
@@ -67,10 +89,10 @@
     </tbody>
 </table>
 
-<?php if (!empty($commissions['totalPages']) && $commissions['totalPages'] > 1): ?>
+<?php if (($totalPages ?? 0) > 1): ?>
 <div class="pagination">
-    <?php for ($p = 1; $p <= $commissions['totalPages']; $p++): ?>
-    <a href="?page=<?= $p ?>&status=<?= e($currentStatus ?? 'pending') ?>" class="pagination-btn <?= $p === ($commissions['currentPage'] ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
+    <?php for ($p = 1; $p <= $totalPages; $p++): ?>
+    <a href="?page=<?= $p ?>&status=<?= e($currentStatus ?? 'all') ?>" class="page-link <?= $p === ($currentPage ?? 1) ? 'active' : '' ?>"><?= $p ?></a>
     <?php endfor; ?>
 </div>
 <?php endif; ?>
