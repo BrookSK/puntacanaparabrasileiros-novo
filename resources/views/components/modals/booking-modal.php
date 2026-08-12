@@ -48,7 +48,7 @@
                     <!-- Horários de Busca (aparece após selecionar hotel) -->
                     <div class="bm-pickup-section" id="bmPickupSection" style="display:none">
                         <h4 class="bm-section-title">Horário de Busca</h4>
-                        <p class="bm-section-subtitle">Selecione o horário para busca no <strong id="bmPickupHotelName"></strong></p>
+                        <p class="bm-section-subtitle">Selecione o horário para busca no <strong id="bmPickupHotelName" class="notranslate" translate="no"></strong></p>
                         <div class="bm-pickup-times" id="bmPickupTimes"></div>
                     </div>
 
@@ -123,7 +123,7 @@
                 <div class="bm-sidebar-code" id="bmSidebarCode"></div>
 
                 <div class="bm-sidebar-hotel" id="bmSidebarHotel" style="display:none">
-                    <span id="bmSidebarHotelName"></span>
+                    <span id="bmSidebarHotelName" class="notranslate" translate="no"></span>
                     <span id="bmSidebarPickupTime"></span>
                 </div>
 
