@@ -103,7 +103,8 @@ function renderContacts(contacts) {
 
 function renderContactItem(c) {
     const name = c.contact_name || c.push_name || c.phone || 'Desconhecido';
-    const avatar = c.profile_picture_url
+    const hasPhoto = c.profile_picture_url && c.profile_picture_url !== 'null' && c.profile_picture_url.startsWith('http');
+    const avatar = hasPhoto
         ? `<img src="${c.profile_picture_url}" alt="">`
         : name.substring(0, 2).toUpperCase();
     const avatarClass = c.is_group ? 'wpp-avatar group' : 'wpp-avatar';
@@ -178,8 +179,8 @@ async function openContact(contactId) {
             const c = json.contact;
             document.getElementById('chatName').textContent = c.contact_name || c.push_name || c.phone || '—';
             document.getElementById('chatPhone').textContent = c.phone || '';
-            document.getElementById('chatAvatar').innerHTML = c.profile_picture_url
-                ? `<img src="${c.profile_picture_url}">` : (c.contact_name || 'XX').substring(0, 2).toUpperCase();
+            document.getElementById('chatAvatar').innerHTML = (c.profile_picture_url && c.profile_picture_url !== 'null' && c.profile_picture_url.startsWith('http'))
+                ? `<img src="${c.profile_picture_url}">` : (c.contact_name || c.push_name || 'XX').substring(0, 2).toUpperCase();
             document.getElementById('serviceStatusSelect').value = c.service_status || 'novo';
 
             // Preencher details panel

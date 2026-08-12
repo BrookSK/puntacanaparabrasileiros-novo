@@ -250,7 +250,7 @@ class EvolutionApi
      */
     public function fetchProfilePicture(string $remoteJid): ?array
     {
-        return $this->get("/chat/fetchProfilePictureUrl/{$this->instanceName}", [
+        return $this->post("/chat/fetchProfilePictureUrl/{$this->instanceName}", [
             'number' => $remoteJid,
         ]);
     }

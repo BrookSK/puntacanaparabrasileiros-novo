@@ -635,8 +635,22 @@ class WhatsAppController extends Controller
                 if ($instance) {
                     $api = EvolutionApi::fromInstance($instance);
                     $picResult = $api->fetchProfilePicture($contact['remote_jid']);
-                    $picUrl = $picResult['profilePictureUrl'] ?? $picResult['picture'] ?? $picResult['imgUrl'] ?? null;
-                    if ($picUrl) {
+                    $picUrl = null;
+                    if ($picResult) {
+                        // A Evolution API retorna em diferentes formatos dependendo da versão
+                        $picUrl = $picResult['profilePictureUrl'] 
+                            ?? $picResult['picture'] 
+                            ?? $picResult['imgUrl'] 
+                            ?? $picResult['wpiUrl']
+                            ?? $picResult['url']
+                            ?? $picResult['eurl']
+                            ?? null;
+                        // Às vezes vem como array dentro de um objeto
+                        if (!$picUrl && isset($picResult[0])) {
+                            $picUrl = $picResult[0]['profilePictureUrl'] ?? $picResult[0]['imgUrl'] ?? null;
+                        }
+                    }
+                    if ($picUrl && str_starts_with($picUrl, 'http')) {
                         $this->contactModel->update($id, ['profile_picture_url' => $picUrl]);
                         $contact['profile_picture_url'] = $picUrl;
                     }
@@ -1226,8 +1240,20 @@ class WhatsAppController extends Controller
         foreach ($contacts as $contact) {
             try {
                 $result = $api->fetchProfilePicture($contact['remote_jid']);
-                $url = $result['profilePictureUrl'] ?? $result['picture'] ?? null;
-                if ($url) {
+                $url = null;
+                if ($result) {
+                    $url = $result['profilePictureUrl'] 
+                        ?? $result['picture'] 
+                        ?? $result['imgUrl']
+                        ?? $result['wpiUrl']
+                        ?? $result['url']
+                        ?? $result['eurl']
+                        ?? null;
+                    if (!$url && isset($result[0])) {
+                        $url = $result[0]['profilePictureUrl'] ?? $result[0]['imgUrl'] ?? null;
+                    }
+                }
+                if ($url && str_starts_with($url, 'http')) {
                     $this->contactModel->update((int) $contact['id'], ['profile_picture_url' => $url]);
                     $updated++;
                 }
