@@ -20,11 +20,6 @@
 
                 <!-- Dados de Acesso -->
                 <h3 class="form-section-title">Dados de Acesso</h3>
-                <div class="form-group">
-                    <label>Nome de usuário <span class="required">*</span></label>
-                    <input type="text" name="username" class="form-control <?= has_error('username') ? 'is-invalid' : '' ?>" value="<?= old('username') ?>" placeholder="Seu nome de usuário" required>
-                    <?php if (has_error('username')): ?><span class="invalid-feedback"><?= e(error('username')) ?></span><?php endif; ?>
-                </div>
 
                 <div class="form-row">
                     <div class="form-group">
