@@ -94,15 +94,22 @@
 <?php endif; ?>
 
 <!-- Modal Cancelar Comissão -->
-<div id="cancelModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#1e293b;border-radius:12px;padding:30px;width:100%;max-width:450px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-        <h3 style="margin:0 0 15px;color:#f1f5f9;font-size:18px;">Cancelar Comissão</h3>
-        <p style="color:#94a3b8;margin:0 0 15px;font-size:14px;">Informe o motivo do cancelamento:</p>
+<div class="modal-overlay" id="cancelModal" style="display:none;">
+    <div class="modal-box modal-sm">
+        <div class="modal-header">
+            <h3>Cancelar Comissão</h3>
+            <button class="modal-close" onclick="closeCancelModal()">&times;</button>
+        </div>
         <form id="cancelForm" method="POST" action="">
             <?= csrf_field() ?>
-            <textarea name="reason" id="cancelReason" rows="4" class="form-control" style="width:100%;resize:vertical;margin-bottom:15px;" placeholder="Motivo do cancelamento..." required></textarea>
-            <div style="display:flex;gap:10px;justify-content:flex-end;">
-                <button type="button" class="btn btn-secondary" onclick="closeCancelModal()">Fechar</button>
+            <div class="modal-body-scroll">
+                <div class="form-group">
+                    <label>Motivo do cancelamento *</label>
+                    <textarea name="reason" id="cancelReason" class="form-control" rows="4" placeholder="Informe o motivo do cancelamento..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeCancelModal()">Cancelar</button>
                 <button type="submit" class="btn btn-danger">Confirmar Cancelamento</button>
             </div>
         </form>
@@ -110,15 +117,23 @@
 </div>
 
 <!-- Modal Pagar Comissão -->
-<div id="payModal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9999;align-items:center;justify-content:center;">
-    <div style="background:#1e293b;border-radius:12px;padding:30px;width:100%;max-width:450px;box-shadow:0 20px 60px rgba(0,0,0,0.5);">
-        <h3 style="margin:0 0 15px;color:#f1f5f9;font-size:18px;">Registrar Pagamento</h3>
-        <p style="color:#94a3b8;margin:0 0 15px;font-size:14px;">Informe a referência do pagamento (opcional):</p>
+<div class="modal-overlay" id="payModal" style="display:none;">
+    <div class="modal-box modal-sm">
+        <div class="modal-header">
+            <h3>Registrar Pagamento</h3>
+            <button class="modal-close" onclick="closePayModal()">&times;</button>
+        </div>
         <form id="payForm" method="POST" action="">
             <?= csrf_field() ?>
-            <input type="text" name="payout_reference" id="payReference" class="form-control" style="width:100%;margin-bottom:15px;" placeholder="Ex: PIX, comprovante, código de transação...">
-            <div style="display:flex;gap:10px;justify-content:flex-end;">
-                <button type="button" class="btn btn-secondary" onclick="closePayModal()">Fechar</button>
+            <div class="modal-body-scroll">
+                <div class="form-group">
+                    <label>Referência do pagamento</label>
+                    <input type="text" name="payout_reference" id="payReference" class="form-control" placeholder="Ex: PIX, comprovante, código de transação...">
+                    <small>Opcional. Serve para identificar o pagamento depois.</small>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closePayModal()">Cancelar</button>
                 <button type="submit" class="btn btn-success">Confirmar Pagamento</button>
             </div>
         </form>
@@ -156,5 +171,13 @@ document.getElementById('cancelModal').addEventListener('click', function(e) {
 });
 document.getElementById('payModal').addEventListener('click', function(e) {
     if (e.target === this) closePayModal();
+});
+
+// Fechar modais com ESC
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeCancelModal();
+        closePayModal();
+    }
 });
 </script>
