@@ -34,11 +34,12 @@
             <div class="form-group col-2">
                 <label>Imagem <span class="required">*</span></label>
                 <div class="file-upload-area">
-                    <input type="file" name="image" id="creativeImage" class="file-input-hidden" accept="image/*" required>
+                    <input type="file" name="image" id="creativeImage" class="file-input-hidden" accept="image/*,video/*,.pdf,.doc,.docx,.psd,.ai,.zip" required>
                     <label for="creativeImage" class="file-upload-label">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                        <span id="creativeFileName">Escolher imagem</span>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <span id="creativeFileName">Escolher arquivo</span>
                     </label>
+                    <small class="form-hint">Imagem, vídeo, PDF ou outros formatos.</small>
                 </div>
             </div>
             <div class="form-group col-2" style="display:flex;align-items:flex-end;">

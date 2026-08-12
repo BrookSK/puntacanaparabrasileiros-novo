@@ -23,13 +23,37 @@
                             <?php foreach ($creatives as $creative): ?>
                             <div class="aff-creative-card">
                                 <div class="aff-creative-img">
-                                    <img src="<?= e($creative['image_url'] ?? asset('images/placeholder.jpg')) ?>" alt="<?= e($creative['title'] ?? 'Criativo') ?>" loading="lazy">
+                                    <?php
+                                    $fileUrl = $creative['image_url'] ?? '';
+                                    $ext = strtolower(pathinfo($fileUrl, PATHINFO_EXTENSION));
+                                    $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg']);
+                                    $isVideo = in_array($ext, ['mp4', 'webm', 'mov']);
+                                    $isPdf = $ext === 'pdf';
+                                    ?>
+                                    <?php if ($isImage): ?>
+                                    <img src="<?= e($fileUrl) ?>" alt="<?= e($creative['title'] ?? 'Criativo') ?>" loading="lazy">
+                                    <?php elseif ($isVideo): ?>
+                                    <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#1e293b;">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="1.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                    </div>
+                                    <?php elseif ($isPdf): ?>
+                                    <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#fef2f2;">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    </div>
+                                    <?php else: ?>
+                                    <div style="display:flex;align-items:center;justify-content:center;height:100%;background:#f1f5f9;">
+                                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.5"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
                                 <div class="aff-creative-info">
                                     <span class="aff-creative-title"><?= e($creative['title'] ?? 'Material Promocional') ?></span>
                                     <div class="aff-creative-actions">
-                                        <a href="<?= e($creative['image_url'] ?? '#') ?>" target="_blank" class="btn btn-sm btn-outline">Ver</a>
-                                        <button type="button" class="btn btn-sm btn-primary" onclick="copyAffLink(this)" data-url="<?= e(setting('site_url', 'https://puntacanaparabrasileiros.com')) ?>/?ref=<?= (int)($affiliate['id'] ?? 1) ?>">Copiar Link</button>
+                                        <a href="<?= e($fileUrl) ?>" download class="btn btn-sm btn-primary" title="Baixar">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:3px;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                            Baixar
+                                        </a>
+                                        <button type="button" class="btn btn-sm btn-outline" onclick="copyAffLink(this)" data-url="<?= e(setting('site_url', 'https://puntacanaparabrasileiros.com')) ?>/?ref=<?= (int)($affiliate['id'] ?? 1) ?>">Copiar Link</button>
                                     </div>
                                 </div>
                             </div>

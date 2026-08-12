@@ -475,12 +475,20 @@ class AffiliatesController extends Controller
         $lastOrder = $this->db->fetchOne("SELECT MAX(sort_order) as max_order FROM affiliate_creatives");
         $data['sort_order'] = ($lastOrder ? (int) $lastOrder['max_order'] : 0) + 1;
 
-        // Upload da imagem
+        // Upload do arquivo
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+            $allowedTypes = [
+                'image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml',
+                'video/mp4', 'video/webm', 'video/quicktime',
+                'application/pdf',
+                'application/zip', 'application/x-zip-compressed',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/msword',
+                'application/postscript',
+            ];
             if (!in_array($file['type'], $allowedTypes)) {
-                $this->flash('error', 'Tipo de arquivo não permitido. Use JPG, PNG, WebP ou GIF.');
+                $this->flash('error', 'Tipo de arquivo não permitido.');
                 $this->redirect('/admin/afiliados/criativos');
                 return;
             }
@@ -498,10 +506,12 @@ class AffiliatesController extends Controller
             move_uploaded_file($file['tmp_name'], $destination);
             $data['image_url'] = '/uploads/creatives/' . $filename;
 
-            // Detectar dimensões
-            $imageInfo = getimagesize($destination);
-            if ($imageInfo) {
-                $data['dimensions'] = $imageInfo[0] . 'x' . $imageInfo[1];
+            // Detectar dimensões se for imagem
+            if (str_starts_with($file['type'], 'image/')) {
+                $imageInfo = @getimagesize($destination);
+                if ($imageInfo) {
+                    $data['dimensions'] = $imageInfo[0] . 'x' . $imageInfo[1];
+                }
             }
         } else {
             $this->flash('error', 'É necessário enviar uma imagem.');
