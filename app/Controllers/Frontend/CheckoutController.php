@@ -368,19 +368,12 @@ class CheckoutController extends Controller
             } catch (\Throwable $e) { /* continua */ }
         }
 
-        // ── EMAILS AO CLIENTE ──────────────────────────────────────────────
+        // ── EMAIL AO CLIENTE ───────────────────────────────────────────────
 
         $emailService = new EmailService();
 
-        // 1. Email de vouchers gerais (passeios + transfers misturados)
+        // Email único com vouchers (já inclui detalhes da reserva + vouchers para passeios e transfers)
         $voucherService->sendVouchersByEmail($bookingId);
-
-        // 2. Email dedicado de confirmação de transfer (Somente Ida, Ida e Volta, Múltiplos)
-        if (!empty($transfers)) {
-            try {
-                $voucherService->sendTransferConfirmationEmail($bookingId);
-            } catch (\Throwable $e) { /* não bloqueia */ }
-        }
 
         // ── NOTIFICAÇÃO ADMIN ──────────────────────────────────────────────
 
