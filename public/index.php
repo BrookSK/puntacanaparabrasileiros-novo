@@ -67,9 +67,13 @@ require BASE_PATH . '/config/routes.php';
 \Core\View::share('currentUser', $app->getSession()->get('user'));
 \Core\View::share('csrfToken', $app->getSession()->csrfToken());
 
-// Rastreamento global de links de afiliado (?ref=)
+// Rastreamento global de links de afiliado
+// Registra a visita inicial (com ?ref=) E também páginas subsequentes enquanto o cookie existir
 $refParam = $_GET['ref'] ?? null;
+$affiliateCookie = $_COOKIE['pcb_ref'] ?? null;
+
 if ($refParam && ctype_digit($refParam)) {
+    // Primeira visita com ?ref= — registra e seta cookie
     $affiliateService = new \App\Services\AffiliateService();
     $affiliateService->trackVisit(
         (int) $refParam,
@@ -78,6 +82,27 @@ if ($refParam && ctype_digit($refParam)) {
         $_SERVER['REQUEST_URI'] ?? '/',
         $_SERVER['HTTP_USER_AGENT'] ?? null
     );
+} elseif ($affiliateCookie && ctype_digit($affiliateCookie)) {
+    // Navegação subsequente com cookie ativo — registra cada página visitada
+    $pageUri = $_SERVER['REQUEST_URI'] ?? '/';
+    // Não registrar assets, API calls, admin ou painel do afiliado
+    if (!str_starts_with($pageUri, '/assets/') && !str_starts_with($pageUri, '/api/') && !str_starts_with($pageUri, '/admin') && !str_starts_with($pageUri, '/painel-afiliado')) {
+        $db = \Core\Database::getInstance();
+        // Evitar duplicatas: não registrar mesma página + mesmo IP no último minuto
+        $recentVisit = $db->fetchOne(
+            "SELECT id FROM affiliate_visits WHERE affiliate_id = ? AND page_url = ? AND ip_address = ? AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE) LIMIT 1",
+            [(int) $affiliateCookie, $pageUri, $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0']
+        );
+        if (!$recentVisit) {
+            $db->insert('affiliate_visits', [
+                'affiliate_id' => (int) $affiliateCookie,
+                'ip_address' => $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+                'referrer' => $_SERVER['HTTP_REFERER'] ?? null,
+                'page_url' => $pageUri,
+                'user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? null,
+            ]);
+        }
+    }
 }
 
 // Executar aplicação
