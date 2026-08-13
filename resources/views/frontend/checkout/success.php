@@ -111,20 +111,6 @@
             </div>
             <?php endif; ?>
 
-            <!-- Info -->
-            <div style="display:flex;gap:14px;align-items:flex-start;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px 22px;margin-bottom:32px;text-align:left;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                <div>
-                    <p style="font-size:13px;color:#166534;line-height:1.7;margin:0 0 6px;">Enviamos um e-mail de confirmação para <strong><?= e($booking['billing_email'] ?? '') ?></strong> com todos os detalhes e vouchers.</p>
-                    <p style="font-size:13px;color:#166534;line-height:1.7;margin:0;">Dúvidas? Fale conosco pelo WhatsApp: <a href="https://api.whatsapp.com/send?phone=18294582170" style="color:#15803d;font-weight:600;">+1 (829) 458-2170</a></p>
-                </div>
-            </div>
-
-            <?php else: ?>
-            <h2 style="font-size:26px;font-weight:700;color:#1f2937;margin-bottom:8px;">Reserva Confirmada!</h2>
-            <p style="font-size:15px;color:#6b7280;margin-bottom:36px;line-height:1.6;">Sua reserva foi processada com sucesso.<br>Você receberá um e-mail com os detalhes em breve.</p>
-            <?php endif; ?>
-
             <!-- Documentos Extras -->
             <?php if (!empty($tripDocuments)): ?>
             <div style="text-align:left;margin-bottom:28px;background:#fffbeb;border:1px solid #fbbf24;border-radius:12px;padding:20px 24px;">
@@ -144,6 +130,20 @@
                 </a>
                 <?php endforeach; ?>
             </div>
+            <?php endif; ?>
+
+            <!-- Info -->
+            <div style="display:flex;gap:14px;align-items:flex-start;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px 22px;margin-bottom:32px;text-align:left;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                <div>
+                    <p style="font-size:13px;color:#166534;line-height:1.7;margin:0 0 6px;">Enviamos um e-mail de confirmação para <strong><?= e($booking['billing_email'] ?? '') ?></strong> com todos os detalhes e vouchers.</p>
+                    <p style="font-size:13px;color:#166534;line-height:1.7;margin:0;">Dúvidas? Fale conosco pelo WhatsApp: <a href="https://api.whatsapp.com/send?phone=18294582170" style="color:#15803d;font-weight:600;">+1 (829) 458-2170</a></p>
+                </div>
+            </div>
+
+            <?php else: ?>
+            <h2 style="font-size:26px;font-weight:700;color:#1f2937;margin-bottom:8px;">Reserva Confirmada!</h2>
+            <p style="font-size:15px;color:#6b7280;margin-bottom:36px;line-height:1.6;">Sua reserva foi processada com sucesso.<br>Você receberá um e-mail com os detalhes em breve.</p>
             <?php endif; ?>
 
             <!-- Botões -->
