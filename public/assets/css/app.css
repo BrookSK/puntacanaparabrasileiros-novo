@@ -2744,6 +2744,13 @@ img { max-width: 100%; height: auto; }
 .stepper-step.completed .stepper-label { color: #6b7280; }
 .stepper-line.completed { background: var(--primary); }
 .stepper-line.active { background: var(--primary); }
+@media (max-width: 576px) {
+    .booking-stepper { flex-wrap: nowrap; overflow: hidden; padding: 0 12px; }
+    .stepper-label { font-size: 11px; white-space: normal; text-align: center; line-height: 1.2; }
+    .stepper-line { width: 24px; margin: 0 6px; }
+    .stepper-circle { width: 30px; height: 30px; font-size: 11px; }
+    .stepper-step { gap: 6px; }
+}
 .booking-modal-stepper { display: none; }
 .checkout-terms { border-bottom: none; padding-bottom: 16px; }
 .checkout-submit { margin-top: 8px; }
