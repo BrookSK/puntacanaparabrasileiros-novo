@@ -58,7 +58,7 @@
         modal.style.cssText = 'background:#fff;border-radius:12px;padding:32px 28px 24px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;animation:modalFadeIn 0.3s ease;';
 
         const icon = '<div style="margin-bottom:16px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>';
-        const title = '<h3 style="margin:0 0 12px;font-size:1.25rem;color:#1a1a1a;font-weight:600;">Transfer Indisponível</h3>';
+        const title = '<h3 style="margin:0 0 12px;font-size:1.25rem;color:#1a1a1a;font-weight:600;">Capacidade Máxima Atingida</h3>';
         const msg = '<p style="margin:0 0 24px;font-size:1rem;color:#555;line-height:1.5;">' + message + '</p>';
         const btn = '<button id="fullModalOkBtn" style="background:#1B6F00;color:#fff;border:none;padding:12px 40px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s;">OK</button>';
 
