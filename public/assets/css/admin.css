@@ -318,6 +318,10 @@ a { color: var(--primary); text-decoration: none; }
 .booking-trip-card-details { display: flex; gap: 24px; flex-wrap: wrap; padding-top: 14px; border-top: 1px solid #e2e8f0; }
 .booking-trip-detail { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #475569; line-height: 1.6; }
 .booking-trip-detail svg { color: #94a3b8; }
+.booking-trip-detail-item { display: flex; flex-direction: column; gap: 3px; }
+.booking-detail-label { display: flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.3px; }
+.booking-detail-label svg { color: #94a3b8; flex-shrink: 0; }
+.booking-detail-value { font-size: 13px; font-weight: 500; color: #1e293b; padding-left: 18px; }
 
 /* Transfer Cards */
 .booking-transfer-card { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 10px; padding: 22px; margin-bottom: 16px; }

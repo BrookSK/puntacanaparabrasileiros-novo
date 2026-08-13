@@ -139,47 +139,65 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                     </div>
                     <div class="booking-trip-card-price">$<?= number_format((float)($item['price'] ?? $item['subtotal'] ?? 0), 2) ?></div>
                 </div>
-                <div class="booking-trip-card-details">
+                <div class="booking-trip-card-details" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 20px;margin-top:14px;padding-top:14px;border-top:1px solid #f3f4f6;">
                     <?php if (!empty($item['trip_date'])): ?>
-                    <div class="booking-trip-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                        <?= date('d/m/Y', strtotime($item['trip_date'])) ?>
+                    <div class="booking-trip-detail-item">
+                        <span class="booking-detail-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            Data
+                        </span>
+                        <span class="booking-detail-value"><?= date('d/m/Y', strtotime($item['trip_date'])) ?></span>
                     </div>
                     <?php endif; ?>
                     <?php if (!empty($item['trip_time'])): ?>
-                    <div class="booking-trip-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        Horário: <?= e($item['trip_time']) ?>
+                    <div class="booking-trip-detail-item">
+                        <span class="booking-detail-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Horário
+                        </span>
+                        <span class="booking-detail-value"><?= e($item['trip_time']) ?></span>
                     </div>
                     <?php endif; ?>
                     <?php if (!empty($item['hotel_name'])): ?>
-                    <div class="booking-trip-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
-                        Hotel: <?= e($item['hotel_name']) ?>
+                    <div class="booking-trip-detail-item">
+                        <span class="booking-detail-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                            Hotel
+                        </span>
+                        <span class="booking-detail-value"><?= e($item['hotel_name']) ?></span>
                     </div>
                     <?php endif; ?>
                     <?php if (!empty($item['pickup_time'])): ?>
-                    <div class="booking-trip-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                        Busca: <?= e($item['pickup_time']) ?>
+                    <div class="booking-trip-detail-item">
+                        <span class="booking-detail-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            Busca
+                        </span>
+                        <span class="booking-detail-value"><?= e($item['pickup_time']) ?></span>
                     </div>
                     <?php endif; ?>
                     <?php if (!empty($item['package_title'])): ?>
-                    <div class="booking-trip-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                        Pacote: <?= e($item['package_title']) ?>
+                    <div class="booking-trip-detail-item">
+                        <span class="booking-detail-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                            Pacote
+                        </span>
+                        <span class="booking-detail-value"><?= e($item['package_title']) ?></span>
                     </div>
                     <?php endif; ?>
                     <?php if (!empty($item['travelers'])): ?>
-                    <div class="booking-trip-detail">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                        <?php
+                    <div class="booking-trip-detail-item">
+                        <span class="booking-detail-label">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                            Passageiros
+                        </span>
+                        <span class="booking-detail-value"><?php
                             $travelerParts = [];
                             foreach ($item['travelers'] as $t) {
                                 $travelerParts[] = (int)$t['quantity'] . ' ' . e($t['category_name'] ?? 'Viajante');
                             }
                             echo implode(', ', $travelerParts);
-                        ?>
+                        ?></span>
                     </div>
                     <?php endif; ?>
                 </div>
