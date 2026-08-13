@@ -42,12 +42,8 @@ class VouchersController extends Controller
             $this->abort(404, 'Arquivo do voucher não encontrado.');
         }
 
-        // Servir o HTML com auto-print para gerar PDF
+        // Servir o HTML do voucher para visualização
         $html = file_get_contents($filePath);
-
-        // Adicionar script de auto-print para download como PDF
-        $autoprint = '<script>window.onload=function(){window.print();};</script>';
-        $html = str_replace('</body>', $autoprint . '</body>', $html);
 
         $response->setHeader('Content-Type', 'text/html; charset=utf-8');
         $response->setBody($html);
@@ -65,11 +61,29 @@ class VouchersController extends Controller
             $this->abort(404, 'Arquivo não encontrado.');
         }
 
-        // Gerar nome amigável para download
-        $type = ($voucher['type'] ?? 'trip') === 'transfer' ? 'Transfer' : 'Viagem';
-        $downloadName = 'Voucher - ' . $type . ' - ' . $voucher['reference_code'] . '.html';
+        // Servir o HTML com script de auto-print para que o navegador gere PDF
+        $html = file_get_contents($filePath);
 
-        $response->download($filePath, $downloadName);
+        // Adicionar CSS de impressão + script de auto-print
+        $printScript = '
+<style>
+@media print {
+    body { margin: 0; padding: 0; }
+    @page { margin: 10mm; size: A4; }
+}
+</style>
+<script>
+window.onload = function() {
+    document.title = "Voucher - ' . addslashes($voucher['reference_code'] ?? 'PDF') . '";
+    setTimeout(function() { window.print(); }, 500);
+};
+</script>';
+
+        $html = str_replace('</head>', $printScript . '</head>', $html);
+
+        $response->setHeader('Content-Type', 'text/html; charset=utf-8');
+        $response->setBody($html);
+        $response->send();
     }
 
     public function send(Request $request, Response $response): void
