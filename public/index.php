@@ -67,5 +67,18 @@ require BASE_PATH . '/config/routes.php';
 \Core\View::share('currentUser', $app->getSession()->get('user'));
 \Core\View::share('csrfToken', $app->getSession()->csrfToken());
 
+// Rastreamento global de links de afiliado (?ref=)
+$refParam = $_GET['ref'] ?? null;
+if ($refParam && ctype_digit($refParam)) {
+    $affiliateService = new \App\Services\AffiliateService();
+    $affiliateService->trackVisit(
+        (int) $refParam,
+        $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+        $_SERVER['HTTP_REFERER'] ?? null,
+        $_SERVER['REQUEST_URI'] ?? '/',
+        $_SERVER['HTTP_USER_AGENT'] ?? null
+    );
+}
+
 // Executar aplicação
 $app->run();

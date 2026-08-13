@@ -11,26 +11,12 @@ use App\Models\TripCategory;
 use App\Models\TripPackage;
 use App\Models\TransferVehicle;
 use App\Models\BlogPost;
-use App\Services\AffiliateService;
 use App\Services\InstagramService;
 
 class HomeController extends Controller
 {
     public function index(Request $request, Response $response): void
     {
-        // Rastrear afiliado se houver parâmetro ref
-        $ref = $request->query('ref');
-        if ($ref) {
-            $affiliateService = new AffiliateService();
-            $affiliateService->trackVisit(
-                (int) $ref,
-                $request->ip(),
-                $request->header('referer'),
-                $request->uri(),
-                $request->userAgent()
-            );
-        }
-
         $tripModel = new Trip();
         $categoryModel = new TripCategory();
         $packageModel = new TripPackage();
