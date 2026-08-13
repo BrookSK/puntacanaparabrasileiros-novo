@@ -51,6 +51,29 @@
         </div>
         <?php endforeach; ?>
 
+        <!-- Documentos Extras do Passeio -->
+        <?php if (!empty($tripDocuments)): ?>
+        <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:8px;padding:20px;margin-top:24px;">
+            <h3 style="font-size:14px;margin:0 0 12px;color:#92400e;text-transform:uppercase;letter-spacing:0.5px;">📎 Documentos do Passeio</h3>
+            <p style="font-size:13px;color:#555;margin:0 0 16px;line-height:1.6;">
+                Baixe e leia os documentos abaixo antes da data do seu passeio.
+            </p>
+            <table style="width:100%;border-collapse:collapse;">
+                <?php foreach ($tripDocuments as $tDoc): ?>
+                <tr>
+                    <td style="padding:8px 0;border-bottom:1px solid #fef3c7;">
+                        <strong style="font-size:13px;color:#1a1a1a;"><?= e($tDoc['name'] ?? 'Documento') ?></strong>
+                        <span style="display:block;font-size:11px;color:#888;margin-top:2px;"><?= e($tDoc['trip_name'] ?? '') ?> • <?= e(strtoupper($tDoc['type'] ?? '')) ?></span>
+                    </td>
+                    <td style="padding:8px 0;text-align:right;border-bottom:1px solid #fef3c7;">
+                        <a href="https://puntacananovo.lrvweb.com.br<?= e($tDoc['path']) ?>" style="display:inline-block;padding:6px 14px;background:#1B6F00;color:#fff;border-radius:5px;font-size:11px;font-weight:600;text-decoration:none;">⬇ Baixar</a>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </table>
+        </div>
+        <?php endif; ?>
+
         <!-- Termos e Política de Cancelamento -->
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:20px;margin-top:24px;">
             <h3 style="font-size:14px;margin:0 0 12px;color:#1B6F00;text-transform:uppercase;letter-spacing:0.5px;">📋 Documentos Importantes</h3>

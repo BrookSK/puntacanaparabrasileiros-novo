@@ -285,7 +285,7 @@ class VoucherService
             $booking['billing_first_name'] . ' ' . $booking['billing_last_name'],
             'Seus Vouchers - Punta Cana para Brasileiros',
             'voucher-email',
-            ['booking' => $booking, 'vouchers' => $vouchers]
+            ['booking' => $booking, 'vouchers' => $vouchers, 'tripDocuments' => $this->getTripDocuments($bookingId)]
         );
 
         if ($sent) {
@@ -295,6 +295,30 @@ class VoucherService
         }
 
         return $sent;
+    }
+
+    /**
+     * Retorna documentos extras dos passeios de um booking.
+     */
+    private function getTripDocuments(int $bookingId): array
+    {
+        $items = $this->db->fetchAll(
+            "SELECT t.title, t.documents FROM booking_items bi INNER JOIN trips t ON bi.trip_id = t.id WHERE bi.booking_id = ?",
+            [$bookingId]
+        );
+        $docs = [];
+        foreach ($items as $item) {
+            if (!empty($item['documents'])) {
+                $tripDocs = json_decode($item['documents'], true);
+                if (is_array($tripDocs)) {
+                    foreach ($tripDocs as $doc) {
+                        $doc['trip_name'] = $item['title'];
+                        $docs[] = $doc;
+                    }
+                }
+            }
+        }
+        return $docs;
     }
 
     /**

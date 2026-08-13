@@ -125,6 +125,27 @@
             <p style="font-size:15px;color:#6b7280;margin-bottom:36px;line-height:1.6;">Sua reserva foi processada com sucesso.<br>Você receberá um e-mail com os detalhes em breve.</p>
             <?php endif; ?>
 
+            <!-- Documentos Extras -->
+            <?php if (!empty($tripDocuments)): ?>
+            <div style="text-align:left;margin-bottom:28px;background:#fffbeb;border:1px solid #fbbf24;border-radius:12px;padding:20px 24px;">
+                <h4 style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:#92400e;margin-bottom:14px;text-transform:uppercase;letter-spacing:0.5px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    Documentos do Passeio
+                </h4>
+                <p style="font-size:13px;color:#78350f;margin-bottom:14px;line-height:1.6;">Baixe os documentos abaixo antes da data do passeio.</p>
+                <?php foreach ($tripDocuments as $tDoc): ?>
+                <a href="<?= e($tDoc['path']) ?>" target="_blank" download style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:#fff;border:1px solid #fef3c7;border-radius:8px;margin-bottom:8px;text-decoration:none;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#92400e" stroke-width="2" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span style="flex:1;">
+                        <strong style="font-size:13px;color:#1f2937;display:block;"><?= e($tDoc['name'] ?? 'Documento') ?></strong>
+                        <span style="font-size:11px;color:#6b7280;"><?= e($tDoc['trip_name'] ?? '') ?> • <?= e(strtoupper($tDoc['type'] ?? '')) ?></span>
+                    </span>
+                    <span style="font-size:11px;color:#1B6F00;font-weight:600;">Baixar</span>
+                </a>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+
             <!-- Botões -->
             <div style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap;">
                 <a href="/passeios" class="btn btn-primary btn-lg">Ver Mais Passeios</a>

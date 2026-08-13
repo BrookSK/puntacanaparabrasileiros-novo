@@ -356,10 +356,26 @@ class CheckoutController extends Controller
         $items = $this->bookingModel->getItems((int) $booking['id']);
         $transfers = $this->bookingModel->getTransferBookings((int) $booking['id']);
 
+        // Buscar documentos extras dos passeios
+        $tripDocuments = [];
+        foreach ($items as $item) {
+            $trip = $this->db->fetchOne("SELECT documents FROM trips WHERE id = ?", [(int) $item['trip_id']]);
+            if ($trip && !empty($trip['documents'])) {
+                $docs = json_decode($trip['documents'], true);
+                if (is_array($docs)) {
+                    foreach ($docs as $doc) {
+                        $doc['trip_name'] = $item['trip_title'] ?? '';
+                        $tripDocuments[] = $doc;
+                    }
+                }
+            }
+        }
+
         $this->view('frontend/checkout/success', [
             'booking' => $booking,
             'items' => $items,
             'transfers' => $transfers,
+            'tripDocuments' => $tripDocuments,
             'pageTitle' => 'Reserva Confirmada!',
         ], 'app');
     }
