@@ -1245,15 +1245,17 @@
     let hotelsData = [];
 
     // Abrir modal
-    document.querySelector('.btn-verificar')?.addEventListener('click', function(e) {
-        e.preventDefault();
-        modal.style.display = 'flex';
-        document.getElementById('bmSidebarTitle').textContent = tripTitle;
-        const codeEl = document.getElementById('bmSidebarCode');
-        if (codeEl && typeof TRIP_ID !== 'undefined') {
-            codeEl.innerHTML = '<span class="bm-code-badge">C\u00F3digo Da Viagem: WTE-' + (8000 + TRIP_ID) + '</span>';
-        }
-        loadHotels();
+    document.querySelectorAll('.btn-verificar').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            modal.style.display = 'flex';
+            document.getElementById('bmSidebarTitle').textContent = tripTitle;
+            const codeEl = document.getElementById('bmSidebarCode');
+            if (codeEl && typeof TRIP_ID !== 'undefined') {
+                codeEl.innerHTML = '<span class="bm-code-badge">C\u00F3digo Da Viagem: WTE-' + (8000 + TRIP_ID) + '</span>';
+            }
+            loadHotels();
+        });
     });
 
     // Fechar modal

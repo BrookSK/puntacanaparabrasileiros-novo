@@ -6527,15 +6527,42 @@ img { max-width: 100%; height: auto; }
 .bm-sidebar-hotel span:last-child { color: var(--text-green, #1B6F00); font-weight: 700; margin-top: 2px; }
 
 @media (max-width: 768px) {
+    .booking-modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+    .booking-modal {
+        max-height: 92vh;
+        border-radius: 16px 16px 0 0;
+        overflow-x: hidden;
+    }
     .booking-modal-layout {
         grid-template-columns: 1fr;
     }
     .booking-modal-sidebar {
-        border-radius: 0 0 16px 16px;
+        border-radius: 0;
     }
     .booking-modal-main {
         border-right: none;
         border-bottom: 1px solid #eee;
+        padding: 20px 16px;
+        overflow-x: hidden;
+    }
+    .booking-modal-tabs {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .bm-actions {
+        flex-wrap: wrap;
+    }
+    .bm-actions-step2 {
+        flex-wrap: wrap !important;
+    }
+    .bm-actions-step2 button {
+        flex: 1;
+        min-width: 0;
+        font-size: 11px !important;
+        padding: 12px 10px !important;
     }
 }
 

@@ -487,5 +487,5 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
         <span class="trip-mobile-cta-from">A partir de</span>
         <span class="trip-mobile-cta-value"><?= money($basePrice) ?> <small>/ Adulto</small></span>
     </div>
-    <a href="#booking-section" class="trip-mobile-cta-btn">Verificar Disponibilidade</a>
+    <a href="#booking-section" class="trip-mobile-cta-btn btn-verificar">Verificar Disponibilidade</a>
 </div>
