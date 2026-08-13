@@ -658,9 +658,27 @@ class AccountController extends Controller
         $affiliate = $affiliateModel->findByUser((int) $user['id']);
         if (!$affiliate) { $this->redirect('/programa-de-afiliados'); return; }
 
-        $visits = $this->db->fetchAll("SELECT * FROM affiliate_visits WHERE affiliate_id = ? ORDER BY created_at DESC LIMIT 50", [(int) $affiliate['id']]);
+        $affiliateId = (int) $affiliate['id'];
+        $page = max(1, (int) $request->query('page', '1'));
+        $perPage = 10;
+        $offset = ($page - 1) * $perPage;
 
-        $this->view('frontend/affiliate/visits', ['affiliate' => $affiliate, 'visits' => $visits, 'pageTitle' => 'Visitas'], 'app');
+        $total = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM affiliate_visits WHERE affiliate_id = ?", [$affiliateId]);
+        $totalPages = (int) ceil($total / $perPage);
+
+        $visits = $this->db->fetchAll(
+            "SELECT * FROM affiliate_visits WHERE affiliate_id = ? ORDER BY created_at DESC LIMIT {$perPage} OFFSET {$offset}",
+            [$affiliateId]
+        );
+
+        $this->view('frontend/affiliate/visits', [
+            'affiliate' => $affiliate,
+            'visits' => $visits,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'total' => $total,
+            'pageTitle' => 'Visitas',
+        ], 'app');
     }
 
     public function affiliateCreatives(Request $request, Response $response): void

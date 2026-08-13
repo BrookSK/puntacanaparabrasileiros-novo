@@ -19,7 +19,7 @@
                 <div class="aff-card">
                     <div class="aff-table-header">
                         <h3 class="aff-card-title">Histórico de Visitas</h3>
-                        <span class="aff-table-count"><?= count($visits ?? []) ?> registro<?= count($visits ?? []) !== 1 ? 's' : '' ?></span>
+                        <span class="aff-table-count"><?= $total ?? 0 ?> registro<?= ($total ?? 0) !== 1 ? 's' : '' ?></span>
                     </div>
                     <div class="aff-table-wrap">
                         <table class="aff-table">
@@ -76,6 +76,15 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- Paginação -->
+                    <?php if (($totalPages ?? 1) > 1): ?>
+                    <nav class="pagination" style="margin-top:20px;">
+                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                        <a href="?page=<?= $i ?>" class="page-link <?= $i === ($currentPage ?? 1) ? 'active' : '' ?>"><?= $i ?></a>
+                        <?php endfor; ?>
+                    </nav>
+                    <?php endif; ?>
                 </div>
             </main>
         </div>
