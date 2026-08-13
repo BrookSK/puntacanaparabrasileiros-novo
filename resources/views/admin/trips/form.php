@@ -187,6 +187,39 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                             <div id="galleryPreviews" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
                         </div>
                     </div>
+
+                    <!-- Documentos Extras -->
+                    <div class="form-group">
+                        <label>Documentos Extras</label>
+                        <p style="font-size:11px;color:#94a3b8;margin-bottom:10px;">Documentos que o cliente receberá ao reservar (termos, formulários, etc.)</p>
+
+                        <!-- Documentos existentes -->
+                        <?php
+                        $existingDocs = ($isEdit && !empty($trip['documents'])) ? json_decode($trip['documents'], true) : [];
+                        ?>
+                        <?php if (!empty($existingDocs)): ?>
+                        <div id="docs-current" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
+                            <?php foreach ($existingDocs as $idx => $doc): ?>
+                            <div class="doc-item" style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                <span style="flex:1;font-size:13px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?= e($doc['name'] ?? basename($doc['path'] ?? '')) ?></span>
+                                <input type="hidden" name="docs_existing[]" value="<?= e(json_encode($doc)) ?>">
+                                <button type="button" onclick="this.closest('.doc-item').remove()" style="background:#ef4444;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Upload novos documentos -->
+                        <label for="docFiles" class="btn btn-outline" style="cursor:pointer;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Adicionar Documentos
+                        </label>
+                        <input type="file" name="doc_files[]" id="docFiles" multiple accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="previewDocFiles(this)">
+                        <p style="font-size:10px;color:#94a3b8;margin-top:6px;">PDF, PNG, JPG, DOC, XLS — Máx. 10MB cada</p>
+                        <div id="docPreviews" style="display:flex;flex-direction:column;gap:6px;margin-top:10px;"></div>
+                    </div>
+
                     <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="partial_payment_enabled" <?= !empty($trip['partial_payment_enabled']) ? 'checked' : '' ?>> Pagamento Parcial</label></div>
                     <div class="form-group"><label>% Depósito</label><input type="number" name="partial_payment_percent" value="<?= e($trip['partial_payment_percent'] ?? '50') ?>" class="form-control" min="1" max="99"></div>
                 </div>
@@ -239,6 +272,18 @@ function removeGalleryFile(idx) {
     previewGalleryFiles(input);
 }
 document.addEventListener('click', function(e) { if (e.target.classList.contains('repeater-remove')) { e.target.closest('.repeater-item, .package-item').remove(); } });
+
+function previewDocFiles(input) {
+    const container = document.getElementById('docPreviews');
+    container.innerHTML = '';
+    for (let i = 0; i < input.files.length; i++) {
+        const file = input.files[i];
+        const div = document.createElement('div');
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 14px;font-size:13px;color:#166534;';
+        div.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + file.name + '</span><span style="font-size:11px;color:#64748b;">' + (file.size / 1024 / 1024).toFixed(2) + ' MB</span>';
+        container.appendChild(div);
+    }
+}
 document.getElementById('addPackageBtn')?.addEventListener('click', function() { const list = document.getElementById('packages-list'), i = list.children.length; const cats = <?= json_encode($travelerCategories ?? []) ?>; let ch = ''; cats.forEach(tc => { ch += `<label class="checkbox-label"><input type="checkbox" name="packages[${i}][categories][]" value="${tc.id}"> ${tc.name}</label>`; }); const d = document.createElement('div'); d.className = 'package-item card-inner'; d.innerHTML = `<div class="form-row"><div class="form-group col-6"><label>Nome</label><input type="text" name="packages[${i}][title]" class="form-control"></div><div class="form-group col-6"><label>Descrição</label><input type="text" name="packages[${i}][description]" class="form-control"></div></div><div class="form-group"><label>Categorias</label><div class="checkbox-grid">${ch}</div></div><button type="button" class="btn btn-sm btn-danger repeater-remove">&times; Remover</button>`; list.appendChild(d); });
 
 // Categories Multi-select

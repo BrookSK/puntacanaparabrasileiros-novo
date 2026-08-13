@@ -89,6 +89,10 @@ class TripsController extends Controller
         $gallery = $this->processGalleryUploads($request);
         $data['gallery'] = !empty($gallery) ? json_encode($gallery) : null;
 
+        // Documentos extras
+        $documents = $this->processDocumentUploads($request);
+        $data['documents'] = !empty($documents) ? json_encode($documents) : null;
+
         $tripId = $this->tripModel->create($data);
 
         // Categorias
@@ -179,6 +183,10 @@ class TripsController extends Controller
 
         $gallery = $this->processGalleryUploads($request);
         $data['gallery'] = !empty($gallery) ? json_encode($gallery) : null;
+
+        // Documentos extras
+        $documents = $this->processDocumentUploads($request);
+        $data['documents'] = !empty($documents) ? json_encode($documents) : null;
 
         $this->tripModel->update($id, $data);
 
@@ -417,5 +425,53 @@ class TripsController extends Controller
         }
 
         return $urls;
+    }
+
+    /**
+     * Processa uploads de documentos extras.
+     */
+    private function processDocumentUploads(Request $request): array
+    {
+        $documents = [];
+
+        // Documentos existentes mantidos pelo admin
+        $existingDocs = $request->input('docs_existing', []);
+        foreach ($existingDocs as $docJson) {
+            $doc = json_decode($docJson, true);
+            if ($doc && !empty($doc['path'])) {
+                $documents[] = $doc;
+            }
+        }
+
+        // Novos documentos enviados por upload
+        if (isset($_FILES['doc_files'])) {
+            $files = $_FILES['doc_files'];
+            $count = is_array($files['name']) ? count($files['name']) : 0;
+            $allowedTypes = [
+                'application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+                'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ];
+
+            for ($i = 0; $i < $count; $i++) {
+                if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
+                if ($files['size'][$i] > 10 * 1024 * 1024) continue;
+                if (!in_array($files['type'][$i], $allowedTypes)) continue;
+
+                $ext = strtolower(pathinfo($files['name'][$i], PATHINFO_EXTENSION));
+                $filename = 'doc-' . uniqid() . '.' . $ext;
+                $destination = BASE_PATH . '/public/uploads/' . $filename;
+                move_uploaded_file($files['tmp_name'][$i], $destination);
+
+                $documents[] = [
+                    'name' => $files['name'][$i],
+                    'path' => '/uploads/' . $filename,
+                    'type' => $ext,
+                    'size' => $files['size'][$i],
+                ];
+            }
+        }
+
+        return $documents;
     }
 }

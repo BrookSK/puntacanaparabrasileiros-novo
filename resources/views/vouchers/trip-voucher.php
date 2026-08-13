@@ -190,6 +190,24 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
         <?php endif; ?>
     </div>
 
+    <!-- Documentos Extras -->
+    <?php
+    $voucherDocs = !empty($item['trip_documents']) ? json_decode($item['trip_documents'], true) : [];
+    ?>
+    <?php if (!empty($voucherDocs)): ?>
+    <div class="v-section" style="margin-top:20px;">
+        <div class="v-section-title">Documentos Importantes</div>
+        <p style="font-size:12px;color:#666;margin-bottom:10px;">Baixe e leia os documentos abaixo antes da data do passeio.</p>
+        <?php foreach ($voucherDocs as $vDoc): ?>
+        <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#f8faf8;border:1px solid #e8f0e8;border-radius:6px;margin-bottom:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span style="flex:1;font-size:12px;color:#333;"><?= e($vDoc['name'] ?? 'Documento') ?></span>
+            <a href="<?= e(rtrim(\Core\App::getInstance()->setting('site_url', ''), '/') . $vDoc['path']) ?>" target="_blank" style="font-size:11px;color:#1B6F00;font-weight:600;text-decoration:none;">Baixar</a>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
+
     <!-- QR Code -->
     <div class="v-qr">
         <img src="<?= e($qr_url) ?>" alt="QR">

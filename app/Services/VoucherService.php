@@ -31,7 +31,7 @@ class VoucherService
     {
         $booking = $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [$bookingId]);
         $item = $this->db->fetchOne(
-            "SELECT bi.*, t.title as trip_title, t.meeting_point, t.featured_image, t.duration, t.duration_unit
+            "SELECT bi.*, t.title as trip_title, t.meeting_point, t.featured_image, t.duration, t.duration_unit, t.documents as trip_documents
              FROM booking_items bi
              INNER JOIN trips t ON bi.trip_id = t.id
              WHERE bi.id = ?",

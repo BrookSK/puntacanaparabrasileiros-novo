@@ -110,6 +110,35 @@
                         </ul>
                     </div>
                     <?php endif; ?>
+
+                    <!-- Documentos Extras -->
+                    <?php
+                    $tripDocuments = !empty($trip['documents']) ? json_decode($trip['documents'], true) : [];
+                    ?>
+                    <?php if (!empty($tripDocuments)): ?>
+                    <div class="trip-section">
+                        <h3>Documentos Importantes</h3>
+                        <p style="font-size:14px;color:#636e72;margin-bottom:14px;">Documentos necessários para este passeio. Baixe e leia antes da data reservada.</p>
+                        <div style="display:flex;flex-direction:column;gap:10px;">
+                            <?php foreach ($tripDocuments as $doc): ?>
+                            <a href="<?= e($doc['path']) ?>" target="_blank" download style="display:flex;align-items:center;gap:12px;background:#f8faf8;border:1px solid #e8f0e8;border-radius:10px;padding:14px 18px;text-decoration:none;transition:border-color .2s;">
+                                <span style="width:38px;height:38px;border-radius:8px;background:#e8f5e9;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <?php if (($doc['type'] ?? '') === 'pdf'): ?>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                    <?php else: ?>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                                    <?php endif; ?>
+                                </span>
+                                <span style="flex:1;overflow:hidden;">
+                                    <strong style="display:block;font-size:14px;color:#1C2011;margin-bottom:2px;"><?= e($doc['name'] ?? 'Documento') ?></strong>
+                                    <span style="font-size:12px;color:#636e72;text-transform:uppercase;"><?= e(strtoupper($doc['type'] ?? 'FILE')) ?> • <?= $doc['size'] ? number_format($doc['size'] / 1024, 0) . ' KB' : '' ?></span>
+                                </span>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2" style="flex-shrink:0;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Tab: Custo -->
