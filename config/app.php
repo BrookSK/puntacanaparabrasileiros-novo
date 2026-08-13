@@ -18,7 +18,7 @@ return [
     'vouchers_path' => BASE_PATH . '/public/uploads/vouchers',
 
     // Sessão
-    'session_lifetime' => 604800, // 7 dias em segundos
+    'session_lifetime' => 2592000, // 30 dias em segundos
     'cart_expiration' => 604800, // 7 dias
 
     // Upload

@@ -24,12 +24,15 @@ class Session
         }
 
         session_set_cookie_params([
-            'lifetime' => 86400 * 7, // 7 dias
+            'lifetime' => 86400 * 30, // 30 dias
             'path' => '/',
             'secure' => isset($_SERVER['HTTPS']),
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
+
+        // Garantir que a sessão não expire no servidor antes de 30 dias
+        ini_set('session.gc_maxlifetime', (string)(86400 * 30));
 
         session_start();
         $this->started = true;
