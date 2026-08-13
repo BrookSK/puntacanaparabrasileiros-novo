@@ -334,11 +334,11 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                     </div>
                     <div class="booking-voucher-item-actions">
                         <?php if (!empty($vc['file_path'])): ?>
-                        <a href="/uploads/vouchers/<?= e($vc['file_path']) ?>" target="_blank" class="btn btn-sm btn-outline" title="Visualizar Voucher">
+                        <a href="/admin/vouchers/<?= (int)$vc['id'] ?>/visualizar" target="_blank" class="btn btn-sm btn-outline" title="Visualizar Voucher">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             Ver Voucher
                         </a>
-                        <a href="/uploads/vouchers/<?= e($vc['file_path']) ?>" download class="btn btn-sm btn-outline" title="Baixar">
+                        <a href="/admin/vouchers/<?= (int)$vc['id'] ?>/download" class="btn btn-sm btn-outline" title="Baixar Voucher">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             Baixar
                         </a>
