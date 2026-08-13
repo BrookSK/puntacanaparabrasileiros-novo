@@ -74,6 +74,21 @@
                     </div>
                     <?php endif; ?>
 
+                    <!-- O que levar (padrão para todos os passeios) -->
+                    <div class="trip-section">
+                        <h3>O que levar</h3>
+                        <ul class="trip-check-list trip-pack-list">
+                            <li>Roupas e calçados confortáveis</li>
+                            <li>Roupa de praia</li>
+                            <li>Óculos de sol e bandana</li>
+                            <li>Protetor solar</li>
+                            <li>Repelente</li>
+                            <li>Roupa de banho</li>
+                            <li>Toalha de banho</li>
+                            <li>Dinheiro para fotos (explore as estradas de Macao)</li>
+                        </ul>
+                    </div>
+
                     <!-- Itinerário / Destaques -->
                     <?php if (!empty($itinerary)): ?>
                     <div class="trip-section">
