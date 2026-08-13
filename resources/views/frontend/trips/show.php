@@ -480,3 +480,12 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
 </script>
 
 <?= partial('modals/booking-modal') ?>
+
+<!-- Barra fixa mobile: Preço + Botão Verificar Disponibilidade -->
+<div class="trip-mobile-cta">
+    <div class="trip-mobile-cta-price">
+        <span class="trip-mobile-cta-from">A partir de</span>
+        <span class="trip-mobile-cta-value"><?= money($basePrice) ?> <small>/ Adulto</small></span>
+    </div>
+    <a href="#booking-section" class="trip-mobile-cta-btn">Verificar Disponibilidade</a>
+</div>

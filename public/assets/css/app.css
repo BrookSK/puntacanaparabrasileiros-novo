@@ -5763,6 +5763,66 @@ img { max-width: 100%; height: auto; }
     background: #155c00;
     color: var(--white);
 }
+
+/* Barra fixa mobile - Verificar Disponibilidade */
+.trip-mobile-cta {
+    display: none;
+}
+@media (max-width: 768px) {
+    .trip-mobile-cta {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 999;
+        background: #fff;
+        padding: 12px 16px;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        border-top: 1px solid #eee;
+    }
+    .trip-mobile-cta-price {
+        display: flex;
+        flex-direction: column;
+    }
+    .trip-mobile-cta-from {
+        font-size: 0.7rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+    .trip-mobile-cta-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #1B6F00;
+    }
+    .trip-mobile-cta-value small {
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: #6b7280;
+    }
+    .trip-mobile-cta-btn {
+        background: #1B6F00;
+        color: #fff;
+        padding: 12px 20px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: background 0.2s;
+    }
+    .trip-mobile-cta-btn:hover,
+    .trip-mobile-cta-btn:active {
+        background: #155c00;
+        color: #fff;
+    }
+    /* Dar espaço no final da página para não sobrepor conteúdo */
+    .trip-detail {
+        padding-bottom: 80px;
+    }
+}
 .btn-wishlist-trip {
     display: flex;
     align-items: center;
