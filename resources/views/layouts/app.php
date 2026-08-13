@@ -14,7 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=<?= e(setting('font_primary', 'Poppins')) ?>:wght@300;400;500;600;700;800&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="<?= asset('css/app.css') ?>?v=6.9">
+    <link rel="stylesheet" href="<?= asset('css/app.css') ?>?v=7.0">
     <link rel="stylesheet" href="<?= asset('css/phone-country.css') ?>?v=1.1">
 
     <!-- Custom CSS from settings -->

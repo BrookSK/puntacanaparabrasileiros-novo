@@ -2935,8 +2935,11 @@ img { max-width: 100%; height: auto; }
 }
 
 /* WhatsApp Float */
-.whatsapp-float { position: fixed; bottom: 25px; right: 25px; background: #25D366; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; transition: transform .2s; }
+.whatsapp-float { position: fixed; bottom: 25px; right: 25px; background: #25D366; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; transition: transform .2s, bottom .2s; }
 .whatsapp-float:hover { transform: scale(1.1); color: white; }
+@media (max-width: 768px) {
+    .whatsapp-float { bottom: 80px; }
+}
 
 /* Toast Notifications */
 .app-toast { position: fixed; top: 24px; right: 24px; z-index: 99999; display: flex; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 12px; background: #fff; box-shadow: 0 8px 30px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.08); max-width: 400px; min-width: 280px; transform: translateX(120%); transition: transform .3s cubic-bezier(0.4,0,0.2,1); border-left: 4px solid #10b981; }
