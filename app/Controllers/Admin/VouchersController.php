@@ -67,7 +67,7 @@ class VouchersController extends Controller
         $type = ($voucher['type'] ?? 'trip') === 'transfer' ? 'Transfer' : 'Passeio';
         $downloadName = 'Voucher-' . $type . '-' . ($voucher['reference_code'] ?? 'download') . '.pdf';
 
-        // Gerar PDF usando dompdf
+        // Tentar gerar PDF com dompdf se disponível
         if (class_exists('\\Dompdf\\Dompdf')) {
             $dompdf = new \Dompdf\Dompdf(['isRemoteEnabled' => true]);
             $dompdf->loadHtml($html);
@@ -81,14 +81,25 @@ class VouchersController extends Controller
             exit;
         }
 
-        // Fallback: servir HTML com auto-print se dompdf não disponível
-        $printScript = '
-<style>@media print { body { margin: 0; } @page { margin: 10mm; size: A4; } }</style>
-<script>document.title="' . addslashes($downloadName) . '";window.onload=function(){window.print();};</script>';
-        $html = str_replace('</head>', $printScript . '</head>', $html);
+        // Fallback sem dompdf: servir página que converte e baixa PDF via JS (html2pdf.js)
+        $encodedHtml = base64_encode($html);
+        $jsPage = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Gerando PDF...</title>'
+            . '<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>'
+            . '</head><body>'
+            . '<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;">'
+            . '<p style="font-size:1.1rem;color:#333;">Gerando PDF do voucher, aguarde...</p></div>'
+            . '<div id="voucherContent" style="position:absolute;left:-9999px;top:0;"></div>'
+            . '<script>'
+            . 'var htmlContent = atob("' . $encodedHtml . '");'
+            . 'var container = document.getElementById("voucherContent");'
+            . 'container.innerHTML = htmlContent;'
+            . 'var opt = { margin: 5, filename: "' . addslashes($downloadName) . '", image: { type: "jpeg", quality: 0.98 },'
+            . ' html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: "mm", format: "a4", orientation: "portrait" } };'
+            . 'html2pdf().set(opt).from(container).save().then(function(){ setTimeout(function(){ window.close(); }, 1500); });'
+            . '</script></body></html>';
 
         header('Content-Type: text/html; charset=utf-8');
-        echo $html;
+        echo $jsPage;
         exit;
     }
 
