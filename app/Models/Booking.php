@@ -37,9 +37,11 @@ class Booking extends Model
     public function getItems(int $bookingId): array
     {
         return $this->db->fetchAll(
-            "SELECT bi.*, t.title as trip_title, t.slug as trip_slug, t.featured_image
+            "SELECT bi.*, t.title as trip_title, t.slug as trip_slug, t.featured_image,
+                    tp.title as package_title
              FROM booking_items bi
              INNER JOIN trips t ON bi.trip_id = t.id
+             LEFT JOIN trip_packages tp ON bi.package_id = tp.id
              WHERE bi.booking_id = ?",
             [$bookingId]
         );

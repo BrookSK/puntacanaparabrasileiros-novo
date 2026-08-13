@@ -123,6 +123,8 @@ class CheckoutController extends Controller
                     'package_id' => (int) $tripItem['package_id'],
                     'trip_date' => $tripItem['date'],
                     'trip_time' => $tripItem['time'] ?? null,
+                    'hotel_name' => $tripItem['hotel_name'] ?? null,
+                    'pickup_time' => $tripItem['pickup_time'] ?? null,
                     'pax' => json_encode($tripItem['pax']),
                     'extra_services' => !empty($tripItem['extra_services']) ? json_encode($tripItem['extra_services']) : null,
                     'price' => $tripItem['total'],

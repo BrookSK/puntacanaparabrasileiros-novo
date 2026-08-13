@@ -146,6 +146,30 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                         <?= date('d/m/Y', strtotime($item['trip_date'])) ?>
                     </div>
                     <?php endif; ?>
+                    <?php if (!empty($item['trip_time'])): ?>
+                    <div class="booking-trip-detail">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Horário: <?= e($item['trip_time']) ?>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($item['hotel_name'])): ?>
+                    <div class="booking-trip-detail">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                        Hotel: <?= e($item['hotel_name']) ?>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($item['pickup_time'])): ?>
+                    <div class="booking-trip-detail">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        Busca: <?= e($item['pickup_time']) ?>
+                    </div>
+                    <?php endif; ?>
+                    <?php if (!empty($item['package_title'])): ?>
+                    <div class="booking-trip-detail">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                        Pacote: <?= e($item['package_title']) ?>
+                    </div>
+                    <?php endif; ?>
                     <?php if (!empty($item['travelers'])): ?>
                     <div class="booking-trip-detail">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
