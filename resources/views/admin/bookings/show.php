@@ -328,27 +328,22 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         </div>
                         <div>
-                            <strong><?= e($vc['voucher_code'] ?? '-') ?></strong>
-                            <small><?= e(ucfirst($vc['type'] ?? '-')) ?></small>
+                            <strong><?= e($vc['type'] === 'trip' ? ($vc['trip_name'] ?? 'Passeio') : ($vc['route_name'] ?? 'Transfer')) ?></strong>
+                            <small><?= e(ucfirst($vc['type'] ?? '-')) ?> — <?= e($vc['reference_code'] ?? '-') ?></small>
                         </div>
                     </div>
-                    <div class="booking-voucher-item-status">
-                        <span class="badge badge-<?= ($vc['status'] ?? '') === 'active' ? 'success' : 'secondary' ?>">
-                            <?= ($vc['status'] ?? '') === 'active' ? 'Ativo' : e($vc['status'] ?? '-') ?>
-                        </span>
-                    </div>
                     <div class="booking-voucher-item-actions">
-                        <?php if (!empty($vc['pdf_url'])): ?>
-                        <a href="<?= e($vc['pdf_url']) ?>" target="_blank" class="btn btn-sm btn-outline" title="Baixar PDF">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            PDF
-                        </a>
-                        <a href="<?= e($vc['pdf_url']) ?>" target="_blank" class="btn btn-sm btn-outline" title="Visualizar">
+                        <?php if (!empty($vc['file_path'])): ?>
+                        <a href="/uploads/vouchers/<?= e($vc['file_path']) ?>" target="_blank" class="btn btn-sm btn-outline" title="Visualizar Voucher">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            Ver
+                            Ver Voucher
+                        </a>
+                        <a href="/uploads/vouchers/<?= e($vc['file_path']) ?>" download class="btn btn-sm btn-outline" title="Baixar">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            Baixar
                         </a>
                         <?php else: ?>
-                        <span class="text-muted" style="font-size:12px;color:#94a3b8;">Sem PDF</span>
+                        <span class="text-muted" style="font-size:12px;color:#94a3b8;">Sem arquivo</span>
                         <?php endif; ?>
                     </div>
                 </div>
