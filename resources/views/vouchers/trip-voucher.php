@@ -164,9 +164,19 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
                 ?></div>
             </div>
             <div class="v-cell">
-                <div class="v-cell-label">Valor</div>
+                <div class="v-cell-label">Valor Total</div>
                 <div class="v-cell-value">$<?= number_format((float)($item['price'] ?? 0), 2) ?> USD</div>
             </div>
+            <div class="v-cell">
+                <div class="v-cell-label">Valor Pago</div>
+                <div class="v-cell-value" style="color:#059669;font-weight:700;">$<?= number_format((float)($booking['paid_amount'] ?? 0), 2) ?> USD</div>
+            </div>
+            <?php if ((float)($booking['due_amount'] ?? 0) > 0): ?>
+            <div class="v-cell">
+                <div class="v-cell-label">Saldo Pendente</div>
+                <div class="v-cell-value" style="color:#d97706;font-weight:700;">$<?= number_format((float)($booking['due_amount'] ?? 0), 2) ?> USD</div>
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 

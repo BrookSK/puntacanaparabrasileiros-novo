@@ -45,9 +45,29 @@
                         </div>
                         <div style="display:flex;flex-direction:column;gap:2px;">
                             <span style="font-size:12px;color:#9ca3af;">Valor Total</span>
-                            <strong style="font-size:14px;color:#1f2937;">$<?= number_format((float)($booking['total'] ?? $booking['subtotal'] ?? 0), 2) ?> USD</strong>
+                            <strong style="font-size:14px;color:#1f2937;">$<?= number_format((float)($booking['total'] ?? 0), 2) ?> USD</strong>
                         </div>
                     </div>
+                    <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6;">
+                        <div style="width:36px;height:36px;background:#d1fae5;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:2px;">
+                            <span style="font-size:12px;color:#9ca3af;">Valor Pago</span>
+                            <strong style="font-size:14px;color:#059669;">$<?= number_format((float)($booking['paid_amount'] ?? 0), 2) ?> USD</strong>
+                        </div>
+                    </div>
+                    <?php if ((float)($booking['due_amount'] ?? 0) > 0): ?>
+                    <div style="display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid #f3f4f6;">
+                        <div style="width:36px;height:36px;background:#fef3c7;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:2px;">
+                            <span style="font-size:12px;color:#9ca3af;">Saldo Pendente</span>
+                            <strong style="font-size:14px;color:#d97706;">$<?= number_format((float)($booking['due_amount'] ?? 0), 2) ?> USD</strong>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     <div style="display:flex;align-items:center;gap:14px;padding:14px 0;">
                         <div style="width:36px;height:36px;background:#fef3c7;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>

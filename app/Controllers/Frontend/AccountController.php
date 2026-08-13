@@ -483,6 +483,7 @@ class AccountController extends Controller
         $date = '';
         $status = 'booked';
         $type = 'trip';
+        $booking = null;
 
         if ($voucher) {
             $type = $voucher['type'] ?? 'trip';
@@ -558,6 +559,9 @@ class AccountController extends Controller
             'customerName' => $customerName,
             'date' => $date,
             'status' => $status,
+            'totalAmount' => (float) ($booking['total'] ?? 0),
+            'paidAmount' => (float) ($booking['paid_amount'] ?? 0),
+            'dueAmount' => (float) ($booking['due_amount'] ?? 0),
             'pageTitle' => 'Confirmação de Voucher - ' . $reference,
         ], 'app');
     }

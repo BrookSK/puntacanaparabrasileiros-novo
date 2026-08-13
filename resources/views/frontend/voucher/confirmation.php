@@ -104,6 +104,22 @@
                             </span>
                         </td>
                     </tr>
+                    <?php if (($totalAmount ?? 0) > 0): ?>
+                    <tr>
+                        <th>Valor Total</th>
+                        <td><strong>$<?= number_format($totalAmount ?? 0, 2) ?> USD</strong></td>
+                    </tr>
+                    <tr>
+                        <th>Valor Pago</th>
+                        <td style="color:#059669;font-weight:600;">$<?= number_format($paidAmount ?? 0, 2) ?> USD</td>
+                    </tr>
+                    <?php if (($dueAmount ?? 0) > 0): ?>
+                    <tr>
+                        <th>Saldo Pendente</th>
+                        <td style="color:#d97706;font-weight:600;">$<?= number_format($dueAmount ?? 0, 2) ?> USD</td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php endif; ?>
                 </table>
             </div>
 

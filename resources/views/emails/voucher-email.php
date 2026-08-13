@@ -18,7 +18,11 @@
             <h3 style="font-size:14px;margin:0 0 12px;color:#1B6F00;text-transform:uppercase;letter-spacing:0.5px;">Resumo da Reserva</h3>
             <table style="width:100%;font-size:14px;">
                 <tr><td style="padding:6px 0;color:#666;">Número:</td><td style="padding:6px 0;font-weight:600;"><?= e($booking['booking_number'] ?? '') ?></td></tr>
-                <tr><td style="padding:6px 0;color:#666;">Total:</td><td style="padding:6px 0;font-weight:600;">$<?= number_format((float)($booking['total'] ?? $booking['subtotal'] ?? 0), 2) ?> USD</td></tr>
+                <tr><td style="padding:6px 0;color:#666;">Total:</td><td style="padding:6px 0;font-weight:600;">$<?= number_format((float)($booking['total'] ?? 0), 2) ?> USD</td></tr>
+                <tr><td style="padding:6px 0;color:#666;">Valor Pago:</td><td style="padding:6px 0;font-weight:600;color:#059669;">$<?= number_format((float)($booking['paid_amount'] ?? 0), 2) ?> USD</td></tr>
+                <?php if ((float)($booking['due_amount'] ?? 0) > 0): ?>
+                <tr><td style="padding:6px 0;color:#666;">Saldo Pendente:</td><td style="padding:6px 0;font-weight:600;color:#d97706;">$<?= number_format((float)($booking['due_amount'] ?? 0), 2) ?> USD</td></tr>
+                <?php endif; ?>
                 <tr><td style="padding:6px 0;color:#666;">Status:</td><td style="padding:6px 0;font-weight:600;color:#16a34a;">Confirmado</td></tr>
             </table>
         </div>

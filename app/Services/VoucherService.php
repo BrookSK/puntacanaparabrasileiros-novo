@@ -110,8 +110,12 @@ class VoucherService
 
         $reference = $this->voucherModel->generateReference();
 
+        // Buscar booking para dados de pagamento
+        $booking = $transfer['booking_id'] ? $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [(int) $transfer['booking_id']]) : null;
+
         $html = View::render('vouchers/transfer-voucher', [
             'transfer' => $transfer,
+            'booking' => $booking,
             'reference' => $reference,
             'logo' => App::getInstance()->setting('voucher_logo', ''),
             'footer_text' => App::getInstance()->setting('voucher_footer_text', ''),
