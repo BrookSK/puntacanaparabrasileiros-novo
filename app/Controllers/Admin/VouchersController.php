@@ -61,29 +61,35 @@ class VouchersController extends Controller
             $this->abort(404, 'Arquivo não encontrado.');
         }
 
-        // Servir o HTML com script de auto-print para que o navegador gere PDF
         $html = file_get_contents($filePath);
 
-        // Adicionar CSS de impressão + script de auto-print
-        $printScript = '
-<style>
-@media print {
-    body { margin: 0; padding: 0; }
-    @page { margin: 10mm; size: A4; }
-}
-</style>
-<script>
-window.onload = function() {
-    document.title = "Voucher - ' . addslashes($voucher['reference_code'] ?? 'PDF') . '";
-    setTimeout(function() { window.print(); }, 500);
-};
-</script>';
+        // Gerar nome amigável para o PDF
+        $type = ($voucher['type'] ?? 'trip') === 'transfer' ? 'Transfer' : 'Passeio';
+        $downloadName = 'Voucher-' . $type . '-' . ($voucher['reference_code'] ?? 'download') . '.pdf';
 
+        // Gerar PDF usando dompdf
+        if (class_exists('\\Dompdf\\Dompdf')) {
+            $dompdf = new \Dompdf\Dompdf(['isRemoteEnabled' => true]);
+            $dompdf->loadHtml($html);
+            $dompdf->setPaper('A4', 'portrait');
+            $dompdf->render();
+
+            header('Content-Type: application/pdf');
+            header('Content-Disposition: attachment; filename="' . $downloadName . '"');
+            header('Cache-Control: no-cache, must-revalidate');
+            echo $dompdf->output();
+            exit;
+        }
+
+        // Fallback: servir HTML com auto-print se dompdf não disponível
+        $printScript = '
+<style>@media print { body { margin: 0; } @page { margin: 10mm; size: A4; } }</style>
+<script>document.title="' . addslashes($downloadName) . '";window.onload=function(){window.print();};</script>';
         $html = str_replace('</head>', $printScript . '</head>', $html);
 
-        $response->setHeader('Content-Type', 'text/html; charset=utf-8');
-        $response->setBody($html);
-        $response->send();
+        header('Content-Type: text/html; charset=utf-8');
+        echo $html;
+        exit;
     }
 
     public function send(Request $request, Response $response): void

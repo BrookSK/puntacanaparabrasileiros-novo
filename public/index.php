@@ -51,6 +51,12 @@ spl_autoload_register(function (string $class): void {
 // Carregar helpers globais
 require_once BASE_PATH . '/app/Helpers/functions.php';
 
+// Carregar autoload do Composer se disponível (para libs externas como dompdf)
+$composerAutoload = BASE_PATH . '/vendor/autoload.php';
+if (file_exists($composerAutoload)) {
+    require_once $composerAutoload;
+}
+
 // Configurar path das views
 \Core\View::setViewsPath($appConfig['views_path']);
 
