@@ -5184,6 +5184,9 @@ img { max-width: 100%; height: auto; }
 @media (max-width: 480px) {
     .footer-top { grid-template-columns: 1fr; }
     .header-icons .header-icon-btn:nth-child(n+4) { display: none; }
+    .header-icons .header-icon-btn.header-cart,
+    .header-icons .header-user-menu,
+    .header-icons > a[title="Entrar"] { display: flex !important; }
 }
 
 /* ============================================================
