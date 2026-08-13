@@ -175,6 +175,23 @@
                             <?php endforeach; ?>
                         </div>
 
+                        <!-- Opção: Finalizar por WhatsApp -->
+                        <div class="whatsapp-checkout-option" style="margin-top:20px;padding:18px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;">
+                            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                                <div style="width:40px;height:40px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.625-1.472A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.19-.588-5.932-1.614l-.424-.253-2.744.874.87-2.675-.278-.442A9.78 9.78 0 012.182 12c0-5.422 4.396-9.818 9.818-9.818S21.818 6.578 21.818 12s-4.396 9.818-9.818 9.818z"/></svg>
+                                </div>
+                                <div>
+                                    <strong style="font-size:0.95rem;color:#166534;">Prefere tirar uma dúvida antes?</strong>
+                                    <p style="font-size:0.82rem;color:#4b5563;margin:2px 0 0;">Fale conosco pelo WhatsApp e finalize sua reserva com ajuda de um atendente.</p>
+                                </div>
+                            </div>
+                            <a href="https://api.whatsapp.com/send?phone=18294582170&text=<?= urlencode("Olá! Estou no checkout e gostaria de tirar uma dúvida antes de finalizar minha reserva.\n\nReserva no valor de: \${$cart['grand_total']}\n\nPode me ajudar?") ?>" target="_blank" rel="noopener" class="btn btn-block" style="background:#25D366;color:#fff;border:none;padding:12px;border-radius:8px;font-weight:600;font-size:0.9rem;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;transition:background 0.2s;">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.625-1.472A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.19-.588-5.932-1.614l-.424-.253-2.744.874.87-2.675-.278-.442A9.78 9.78 0 012.182 12c0-5.422 4.396-9.818 9.818-9.818S21.818 6.578 21.818 12s-4.396 9.818-9.818 9.818z"/></svg>
+                                Finalizar pelo WhatsApp
+                            </a>
+                        </div>
+
                         <!-- CPF para PIX -->
                         <div class="pix-cpf-field" id="pixCpfField" style="display:none;">
                             <div class="form-group">
