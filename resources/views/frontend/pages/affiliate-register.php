@@ -37,7 +37,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>WhatsApp ou Telefone <span class="required">*</span></label>
-                        <input type="tel" name="phone" class="form-control <?= has_error('phone') ? 'is-invalid' : '' ?>" value="<?= old('phone') ?>" placeholder="+55 11 99999-9999" required>
+                        <input type="tel" name="phone" class="form-control <?= has_error('phone') ? 'is-invalid' : '' ?>" value="<?= old('phone') ?>" placeholder="+55 11 99999-9999" required data-phone-country>
                         <?php if (has_error('phone')): ?><span class="invalid-feedback"><?= e(error('phone')) ?></span><?php endif; ?>
                     </div>
                     <div class="form-group">

@@ -69,7 +69,7 @@
                             </div>
                             <div class="form-group">
                                 <label>WhatsApp *</label>
-                                <input type="tel" name="phone" class="form-control" required placeholder="+55 11 99999-9999">
+                                <input type="tel" name="phone" class="form-control" required placeholder="+55 11 99999-9999" data-phone-country>
                             </div>
                         </div>
                         <div class="form-row">

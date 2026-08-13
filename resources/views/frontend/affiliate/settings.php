@@ -23,7 +23,7 @@
                         <div class="aff-form-grid">
                             <div class="form-group">
                                 <label>WhatsApp ou Telefone *</label>
-                                <input type="tel" name="phone" class="form-control" value="<?= e($user['phone'] ?? '') ?>" required>
+                                <input type="tel" name="phone" class="form-control" value="<?= e($user['phone'] ?? '') ?>" required data-phone-country>
                             </div>
                             <div class="form-group">
                                 <label>Site, Instagram ou TikTok</label>

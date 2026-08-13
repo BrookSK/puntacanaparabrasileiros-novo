@@ -318,7 +318,7 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <input type="tel" name="phone" class="form-control" placeholder="Insira seu número de telefone com DDD*" required>
+                                <input type="tel" name="phone" class="form-control" placeholder="DDD + Número" required data-phone-country>
                             </div>
                         </div>
                         <div class="form-row">

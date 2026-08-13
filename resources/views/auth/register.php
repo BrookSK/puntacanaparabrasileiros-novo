@@ -21,7 +21,7 @@
     </div>
     <div class="form-group">
         <label>Telefone/WhatsApp</label>
-        <input type="tel" name="phone" class="form-control" value="<?= old('phone') ?>" placeholder="+55 11 99999-9999">
+        <input type="tel" name="phone" class="form-control" value="<?= old('phone') ?>" placeholder="+55 11 99999-9999" data-phone-country>
     </div>
     <div class="form-row">
         <div class="form-group">
