@@ -46,11 +46,34 @@ class CheckoutController extends Controller
         $paypalService = new PayPalService();
         $stripeService = new StripeService();
 
+        // Calcular valor parcial efetivo considerando % por passeio
+        $globalPercent = (float) $this->setting('partial_payment_percent', '50');
+        $effectivePayAmount = 0;
+        $tripModel = new \App\Models\Trip();
+        foreach ($summary['trips'] as $tripItem) {
+            $trip = $tripModel->find((int) $tripItem['trip_id']);
+            if ($trip && !empty($trip['partial_payment_enabled']) && (float)($trip['partial_payment_percent'] ?? 0) > 0) {
+                $itemPercent = (float) $trip['partial_payment_percent'];
+            } else {
+                $itemPercent = $globalPercent;
+            }
+            $effectivePayAmount += round((float)$tripItem['total'] * ($itemPercent / 100), 2);
+        }
+        foreach ($summary['transfers'] as $transferItem) {
+            $effectivePayAmount += round((float)$transferItem['total'] * ($globalPercent / 100), 2);
+        }
+        if ($effectivePayAmount <= 0) {
+            $effectivePayAmount = round($summary['grand_total'] * ($globalPercent / 100), 2);
+        }
+        // Calcular percentual efetivo para exibição
+        $effectivePercent = $summary['grand_total'] > 0 ? round(($effectivePayAmount / $summary['grand_total']) * 100) : $globalPercent;
+
         $this->view('frontend/checkout/index', [
             'cart' => $summary,
             'gateways' => $gateways,
             'partialEnabled' => $partialEnabled,
-            'partialPercent' => (float) $this->setting('partial_payment_percent', '50'),
+            'partialPercent' => $effectivePercent,
+            'partialAmount' => $effectivePayAmount,
             'paypalClientId' => $paypalService->getClientId(),
             'stripePublishableKey' => $stripeService->getPublishableKey(),
             'pageTitle' => 'Checkout',
@@ -84,11 +107,31 @@ class CheckoutController extends Controller
 
             // Criar booking
             $bookingNumber = $this->bookingModel->generateBookingNumber();
-            $paymentMode = 'partial'; // Sempre pagamento parcial (50%)
+            $paymentMode = 'partial';
             $gateway = $request->input('gateway', 'paypal');
             $total = $summary['grand_total'];
-            $partialPercent = (float) $this->setting('partial_payment_percent', '50');
-            $payAmount = round($total * ($partialPercent / 100), 2);
+            $globalPercent = (float) $this->setting('partial_payment_percent', '50');
+
+            // Calcular valor parcial considerando % específico de cada passeio
+            $payAmount = 0;
+            $tripModel = new \App\Models\Trip();
+            foreach ($summary['trips'] as $tripItem) {
+                $trip = $tripModel->find((int) $tripItem['trip_id']);
+                if ($trip && !empty($trip['partial_payment_enabled']) && (float)($trip['partial_payment_percent'] ?? 0) > 0) {
+                    $itemPercent = (float) $trip['partial_payment_percent'];
+                } else {
+                    $itemPercent = $globalPercent;
+                }
+                $payAmount += round((float)$tripItem['total'] * ($itemPercent / 100), 2);
+            }
+            // Transfers usam o percentual global
+            foreach ($summary['transfers'] as $transferItem) {
+                $payAmount += round((float)$transferItem['total'] * ($globalPercent / 100), 2);
+            }
+            // Se não calculou nada (carrinho vazio?), fallback pro global
+            if ($payAmount <= 0) {
+                $payAmount = round($total * ($globalPercent / 100), 2);
+            }
 
             // Verificar afiliado
             $affiliateService = new AffiliateService();

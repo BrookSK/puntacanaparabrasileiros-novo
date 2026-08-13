@@ -187,9 +187,9 @@
                         <div class="partial-payment-info" style="margin-top:16px;padding:14px 18px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
                             <input type="hidden" name="payment_mode" value="partial" id="partialCheck">
                             <p style="font-size:13px;color:#0369a1;margin:0;font-weight:600;">
-                                💳 Pague apenas <?= (int)$partialPercent ?>% agora: <strong><?= money($cart['grand_total'] * $partialPercent / 100) ?></strong>
+                                💳 Pague apenas <?= (int)$partialPercent ?>% agora: <strong><?= money($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100)) ?></strong>
                             </p>
-                            <p style="font-size:12px;color:#64748b;margin:4px 0 0;">O restante (<?= money($cart['grand_total'] - ($cart['grand_total'] * $partialPercent / 100)) ?>) deve ser pago antes da data do passeio/transfer.</p>
+                            <p style="font-size:12px;color:#64748b;margin:4px 0 0;">O restante (<?= money($cart['grand_total'] - ($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100))) ?>) deve ser pago antes da data do passeio/transfer.</p>
                         </div>
                     </div>
 
@@ -206,7 +206,7 @@
                     <!-- Botão -->
                     <div id="paymentContainer" class="checkout-submit" style="display:none;">
                         <button type="submit" id="submitBtn" class="btn btn-primary btn-block btn-lg">
-                            Confirmar e Pagar <?= money($cart['grand_total'] * $partialPercent / 100) ?>
+                            Confirmar e Pagar <?= money($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100)) ?>
                         </button>
                     </div>
 
@@ -302,7 +302,7 @@
                         </div>
                         <div class="summary-row summary-partial" id="partialRow" style="display:flex;">
                             <span>Pagamento agora (<?= (int)$partialPercent ?>%):</span>
-                            <span id="partialAmount"><strong><?= money($cart['grand_total'] * $partialPercent / 100) ?></strong></span>
+                            <span id="partialAmount"><strong><?= money($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100)) ?></strong></span>
                         </div>
                     </div>
                 </div>
