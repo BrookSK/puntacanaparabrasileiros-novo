@@ -283,14 +283,32 @@ document.addEventListener('click', function(e) { if (e.target.classList.contains
 
 function previewDocFiles(input) {
     const container = document.getElementById('docPreviews');
-    container.innerHTML = '';
+    // Acumular arquivos usando DataTransfer
+    if (!window._docDT) window._docDT = new DataTransfer();
     for (let i = 0; i < input.files.length; i++) {
-        const file = input.files[i];
+        window._docDT.items.add(input.files[i]);
+    }
+    input.files = window._docDT.files;
+    // Renderizar lista
+    container.innerHTML = '';
+    for (let i = 0; i < window._docDT.files.length; i++) {
+        const file = window._docDT.files[i];
         const div = document.createElement('div');
-        div.style.cssText = 'display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 14px;font-size:13px;color:#166534;';
-        div.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + file.name + '</span><span style="font-size:11px;color:#64748b;">' + (file.size / 1024 / 1024).toFixed(2) + ' MB</span>';
+        div.style.cssText = 'display:flex;align-items:center;gap:10px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;';
+        div.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + file.name + '</span><span style="font-size:11px;color:#64748b;">' + (file.size / 1024 / 1024).toFixed(2) + ' MB</span><button type="button" onclick="removeDocFile(' + i + ')" style="background:#ef4444;color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>';
         container.appendChild(div);
     }
+}
+
+function removeDocFile(idx) {
+    const input = document.getElementById('docFiles');
+    const dt = new DataTransfer();
+    for (let i = 0; i < window._docDT.files.length; i++) {
+        if (i !== idx) dt.items.add(window._docDT.files[i]);
+    }
+    window._docDT = dt;
+    input.files = dt.files;
+    previewDocFiles(input);
 }
 document.getElementById('addPackageBtn')?.addEventListener('click', function() { const list = document.getElementById('packages-list'), i = list.children.length; const cats = <?= json_encode($travelerCategories ?? []) ?>; let ch = ''; cats.forEach(tc => { ch += `<label class="checkbox-label"><input type="checkbox" name="packages[${i}][categories][]" value="${tc.id}"> ${tc.name}</label>`; }); const d = document.createElement('div'); d.className = 'package-item card-inner'; d.innerHTML = `<div class="form-row"><div class="form-group col-6"><label>Nome</label><input type="text" name="packages[${i}][title]" class="form-control"></div><div class="form-group col-6"><label>Descrição</label><input type="text" name="packages[${i}][description]" class="form-control"></div></div><div class="form-group"><label>Categorias</label><div class="checkbox-grid">${ch}</div></div><button type="button" class="btn btn-sm btn-danger repeater-remove">&times; Remover</button>`; list.appendChild(d); });
 
