@@ -126,7 +126,7 @@ class CheckoutController extends Controller
             }
             // Transfers usam o percentual global
             foreach ($summary['transfers'] as $transferItem) {
-                $payAmount += round((float)$transferItem['total'] * ($globalPercent / 100), 2);
+                $payAmount += round((float)($transferItem['total'] ?? $transferItem['price'] ?? 0) * ($globalPercent / 100), 2);
             }
             // Se não calculou nada (carrinho vazio?), fallback pro global
             if ($payAmount <= 0) {
