@@ -5187,6 +5187,10 @@ img { max-width: 100%; height: auto; }
     .header-icons .header-icon-btn.header-cart,
     .header-icons .header-user-menu,
     .header-icons > a[title="Entrar"] { display: flex !important; }
+    .header-icons { gap: 2px; }
+    .header-icon-btn { width: 34px; height: 34px; padding: 0; }
+    .header-icon-btn svg { width: 16px; height: 16px; }
+    .mobile-toggle { margin-left: 2px; }
 }
 
 /* ============================================================
