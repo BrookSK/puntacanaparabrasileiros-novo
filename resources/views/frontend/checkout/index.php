@@ -467,6 +467,15 @@ document.getElementById('goToPaymentBtn')?.addEventListener('click', function() 
 
     // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Scroll stepper para o passo ativo no mobile
+    var stepperEl = document.getElementById('checkoutStepper');
+    var activeStep = document.getElementById('stepperStep4');
+    if (stepperEl && activeStep && window.innerWidth <= 576) {
+        setTimeout(function() {
+            activeStep.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+        }, 300);
+    }
 });
 </script>
 <?php if ($paypalClientId): ?>

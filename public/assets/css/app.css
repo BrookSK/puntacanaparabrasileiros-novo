@@ -2745,11 +2745,41 @@ img { max-width: 100%; height: auto; }
 .stepper-line.completed { background: var(--primary); }
 .stepper-line.active { background: var(--primary); }
 @media (max-width: 576px) {
-    .booking-stepper { flex-wrap: nowrap; overflow: hidden; padding: 0 12px; }
-    .stepper-label { font-size: 11px; white-space: normal; text-align: center; line-height: 1.2; }
-    .stepper-line { width: 24px; margin: 0 6px; }
-    .stepper-circle { width: 30px; height: 30px; font-size: 11px; }
-    .stepper-step { gap: 6px; }
+    .booking-stepper-section { padding: 20px 0 5px; }
+    #checkoutStepper {
+        overflow-x: auto !important;
+        justify-content: flex-start !important;
+        padding: 0 16px !important;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        scroll-snap-type: x proximity;
+    }
+    #checkoutStepper::-webkit-scrollbar { display: none; }
+    #checkoutStepper > div[style*="display:flex"][style*="align-items:center"][style*="gap:10px"] {
+        scroll-snap-align: center;
+    }
+    #checkoutStepper span[style*="white-space:nowrap"] {
+        white-space: normal !important;
+        font-size: 11px !important;
+        max-width: 70px;
+        line-height: 1.2;
+        text-align: center;
+    }
+    #checkoutStepper div[style*="width:50px"] {
+        width: 20px !important;
+        margin: 0 6px !important;
+    }
+    #checkoutStepper div[style*="width:36px"] {
+        width: 28px !important;
+        height: 28px !important;
+        font-size: 11px !important;
+    }
+    #checkoutStepper > div[style*="display:flex"][style*="align-items:center"][style*="gap:10px"] {
+        gap: 4px !important;
+        flex-direction: column;
+        align-items: center !important;
+        min-width: fit-content;
+    }
 }
 .booking-modal-stepper { display: none; }
 .checkout-terms { border-bottom: none; padding-bottom: 16px; }
