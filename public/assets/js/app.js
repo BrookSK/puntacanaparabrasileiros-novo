@@ -849,12 +849,35 @@
                 service_type: serviceType,
                 group_id: groupId,
             });
-            addArrival.then(() => ajax('/api/cart/add-transfer', { body: JSON.stringify(departurePayload) }))
-                .then(d => { if (d.success) { toast('Transfers adicionados ao carrinho!', 'success'); updateCartBadge(); } else { toast(d.error || 'Erro.', 'error'); } })
-                .catch(() => toast('Erro de conexão.', 'error'));
+            addArrival.then(arrResult => {
+                if (!arrResult.success) {
+                    const data = window._transferData;
+                    const availableVehicles = data && data.results ? data.results.filter(v => !v.is_full) : [];
+                    const hasAlternatives = availableVehicles.length > 1;
+                    showFullModal(arrResult.error || 'Transfer indisponível.', { hasAlternatives: hasAlternatives });
+                    return;
+                }
+                return ajax('/api/cart/add-transfer', { body: JSON.stringify(departurePayload) });
+            }).then(d => {
+                if (!d) return; // arrival falhou, já mostrou modal
+                if (d.success) { toast('Transfers adicionados ao carrinho!', 'success'); updateCartBadge(); }
+                else {
+                    const data = window._transferData;
+                    const availableVehicles = data && data.results ? data.results.filter(v => !v.is_full) : [];
+                    const hasAlternatives = availableVehicles.length > 1;
+                    showFullModal(d.error || 'Transfer indisponível.', { hasAlternatives: hasAlternatives });
+                }
+            }).catch(() => toast('Erro de conexão.', 'error'));
         } else {
-            addArrival.then(d => { if (d.success) { toast('Transfer adicionado ao carrinho!', 'success'); updateCartBadge(); } else { toast(d.error || 'Erro.', 'error'); } })
-                .catch(() => toast('Erro de conexão.', 'error'));
+            addArrival.then(d => {
+                if (d.success) { toast('Transfer adicionado ao carrinho!', 'success'); updateCartBadge(); }
+                else {
+                    const data = window._transferData;
+                    const availableVehicles = data && data.results ? data.results.filter(v => !v.is_full) : [];
+                    const hasAlternatives = availableVehicles.length > 1;
+                    showFullModal(d.error || 'Transfer indisponível.', { hasAlternatives: hasAlternatives });
+                }
+            }).catch(() => toast('Erro de conexão.', 'error'));
         }
     });
 
@@ -973,7 +996,20 @@
                 toast('Transfers adicionados ao carrinho!', 'success');
                 updateCartBadge();
             } else {
-                toast('Erro ao adicionar alguns transfers.', 'error');
+                // Pegar a primeira mensagem de erro
+                var errorMsg = '';
+                for (var i = 0; i < responses.length; i++) {
+                    if (!responses[i].success) { errorMsg = responses[i].error || 'Transfer indisponível.'; break; }
+                }
+                var multiData = window._multiTransferData || [];
+                var hasAlternatives = false;
+                for (var j = 0; j < multiData.length; j++) {
+                    if (multiData[j] && multiData[j].results && multiData[j].results.filter(function(v) { return !v.is_full; }).length > 1) {
+                        hasAlternatives = true;
+                        break;
+                    }
+                }
+                showFullModal(errorMsg, { hasAlternatives: hasAlternatives });
             }
         }).catch(function() { toast('Erro de conexão.', 'error'); });
     });
