@@ -72,17 +72,30 @@ class TransferSearchController extends Controller
 
         $results = [];
         foreach ($vehicles as $vehicle) {
+            // Verificar capacidade disponível para o dia solicitado
+            $bookedPax = 0;
+            if (!empty($date)) {
+                $bookedPax = (int) $this->db->fetchColumn(
+                    "SELECT COALESCE(SUM(adults + children + infants), 0) FROM transfer_bookings WHERE vehicle_id = ? AND date = ? AND status != 'cancelled'",
+                    [(int) $vehicle['id'], $date]
+                );
+            }
+            $maxCapacity = (int) $vehicle['max_passengers'];
+            $remainingCapacity = max(0, $maxCapacity - $bookedPax);
+
             $results[] = [
                 'id' => $vehicle['id'],
                 'title' => $vehicle['title'],
                 'description' => $vehicle['description'],
                 'image' => $vehicle['image'],
                 'vehicle_type' => $vehicle['vehicle_type'],
-                'max_passengers' => (int) $vehicle['max_passengers'],
+                'max_passengers' => $maxCapacity,
                 'max_luggage' => (int) $vehicle['max_luggage'],
                 'price' => $vehicle['calculated_price'],
                 'duration' => (int) ($vehicle['duration'] ?? 0),
                 'route_id' => (int) $vehicle['route_id'],
+                'remaining_capacity' => $remainingCapacity,
+                'is_full' => $remainingCapacity < $totalPax,
             ];
         }
 

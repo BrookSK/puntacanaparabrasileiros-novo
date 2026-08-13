@@ -190,6 +190,20 @@ class CheckoutController extends Controller
 
             // Criar transfer bookings
             foreach ($summary['transfers'] as $transfer) {
+                // Verificar capacidade antes de criar
+                $transferPax = (int) ($transfer['adults'] ?? 1) + (int) ($transfer['children'] ?? 0) + (int) ($transfer['infants'] ?? 0);
+                $bookedPax = (int) $this->db->fetchColumn(
+                    "SELECT COALESCE(SUM(adults + children + infants), 0) FROM transfer_bookings WHERE vehicle_id = ? AND date = ? AND status != 'cancelled'",
+                    [(int) $transfer['vehicle_id'], $transfer['date']]
+                );
+                $vehicleData = $this->db->fetchOne("SELECT max_passengers, title FROM transfer_vehicles WHERE id = ?", [(int) $transfer['vehicle_id']]);
+                $maxCap = (int) ($vehicleData['max_passengers'] ?? 99);
+                if ($bookedPax + $transferPax > $maxCap) {
+                    $this->db->rollback();
+                    $this->json(['success' => false, 'error' => 'O veículo "' . ($vehicleData['title'] ?? '') . '" está lotado para o dia ' . $transfer['date'] . '. Capacidade máxima atingida.'], 400);
+                    return;
+                }
+
                 $this->db->insert('transfer_bookings', [
                     'booking_id' => $bookingId,
                     'group_id' => $transfer['group_id'] ?? null,

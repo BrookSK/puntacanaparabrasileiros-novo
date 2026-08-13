@@ -71,8 +71,24 @@ class CartController extends Controller
             return;
         }
 
-        // Buscar nomes
+        // Verificar capacidade disponível para o veículo no dia
         $vehicle = $vehicleModel->find($vehicleId);
+        $maxCapacity = (int) ($vehicle['max_passengers'] ?? 0);
+        $bookedPax = (int) $this->db->fetchColumn(
+            "SELECT COALESCE(SUM(adults + children + infants), 0) FROM transfer_bookings WHERE vehicle_id = ? AND date = ? AND status != 'cancelled'",
+            [$vehicleId, $date]
+        );
+        $remainingCapacity = max(0, $maxCapacity - $bookedPax);
+
+        if ($totalPax > $remainingCapacity) {
+            $vehicleTitle = $vehicle['title'] ?? 'Veículo';
+            if ($remainingCapacity <= 0) {
+                $this->json(['error' => "O {$vehicleTitle} está lotado para o dia {$date}. Capacidade máxima atingida."], 400);
+            } else {
+                $this->json(['error' => "O {$vehicleTitle} tem apenas {$remainingCapacity} vaga(s) disponível(is) para o dia {$date}. Você solicitou {$totalPax} passageiro(s)."], 400);
+            }
+            return;
+        }
         $locationModel = new TransferLocation();
         $origin = $locationModel->find($originId);
         $destination = $locationModel->find($destinationId);
