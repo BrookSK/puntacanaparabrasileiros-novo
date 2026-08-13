@@ -63,6 +63,31 @@
                         <?php if ($trip['description']): ?>
                         <?= nl2br(e($trip['description'])) ?>
                         <?php endif; ?>
+
+                        <?php
+                        // Texto padrão de visão geral — exibir apenas se não estiver já na descrição
+                        $defaultOverviewText = 'Prepare-se para uma aventura emocionante sobre quatro rodas pelas estradas e trilhas da região de Macao';
+                        $hasDefaultText = (
+                            str_contains($trip['short_description'] ?? '', $defaultOverviewText) ||
+                            str_contains($trip['description'] ?? '', $defaultOverviewText)
+                        );
+                        if (!$hasDefaultText):
+                        ?>
+                        <p style="margin-top:20px;">Prepare-se para uma aventura emocionante sobre quatro rodas pelas estradas e trilhas da região de Macao, em Punta Cana! Com paisagens de tirar o fôlego, lama, cavernas escondidas e elementos culturais. O passeio oferece uma experiência vibrante para quem busca adrenalina e diversão. Você poderá nadar em um cenote de águas cristalinas e visitar a Vila Taína para uma imersão na cultura local.</p>
+                        <p>A ordem do passeio poderá ser alterada sem aviso prévio.</p>
+                        <p>Gestantes não são permitidas.</p>
+                        <p style="margin-top:16px;font-weight:600;">O que levar:</p>
+                        <ul style="padding-left:20px;margin-top:8px;line-height:2;">
+                            <li>Roupas e calçados confortáveis</li>
+                            <li>Roupa de praia</li>
+                            <li>Óculos de sol e bandana</li>
+                            <li>Protetor solar</li>
+                            <li>Repelente</li>
+                            <li>Roupa de banho</li>
+                            <li>Toalha de banho</li>
+                            <li>Dinheiro para fotos Explore as estradas de Macao.</li>
+                        </ul>
+                        <?php endif; ?>
                     </div>
 
                     <!-- Notas Importantes / Avisos -->
@@ -73,21 +98,6 @@
                         </div>
                     </div>
                     <?php endif; ?>
-
-                    <!-- O que levar (padrão para todos os passeios) -->
-                    <div class="trip-section">
-                        <h3>O que levar</h3>
-                        <ul class="trip-check-list trip-pack-list">
-                            <li>Roupas e calçados confortáveis</li>
-                            <li>Roupa de praia</li>
-                            <li>Óculos de sol e bandana</li>
-                            <li>Protetor solar</li>
-                            <li>Repelente</li>
-                            <li>Roupa de banho</li>
-                            <li>Toalha de banho</li>
-                            <li>Dinheiro para fotos (explore as estradas de Macao)</li>
-                        </ul>
-                    </div>
 
                     <!-- Itinerário / Destaques -->
                     <?php if (!empty($itinerary)): ?>
