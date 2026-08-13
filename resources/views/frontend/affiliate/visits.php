@@ -35,9 +35,36 @@
                             <tbody>
                             <?php if (!empty($visits)): ?>
                                 <?php foreach ($visits as $v): ?>
+                                <?php
+                                    // Converter URL em nome amigável
+                                    $pageUrl = $v['page_url'] ?? '/';
+                                    $pagePath = strtok($pageUrl, '?'); // remove query string
+                                    $pageName = 'Home';
+                                    if ($pagePath === '/' || $pagePath === '') {
+                                        $pageName = 'Home';
+                                    } elseif (str_starts_with($pagePath, '/passeios/')) {
+                                        $slug = basename($pagePath);
+                                        $pageName = 'Passeio: ' . ucwords(str_replace('-', ' ', $slug));
+                                    } elseif ($pagePath === '/passeios') {
+                                        $pageName = 'Página de Passeios';
+                                    } elseif (str_starts_with($pagePath, '/transfers') || str_starts_with($pagePath, '/transfer')) {
+                                        $pageName = 'Transfer';
+                                    } elseif (str_starts_with($pagePath, '/blog/')) {
+                                        $slug = basename($pagePath);
+                                        $pageName = 'Blog: ' . ucwords(str_replace('-', ' ', $slug));
+                                    } elseif ($pagePath === '/blog') {
+                                        $pageName = 'Blog';
+                                    } elseif ($pagePath === '/sobre-nos') {
+                                        $pageName = 'Sobre Nós';
+                                    } elseif ($pagePath === '/contato') {
+                                        $pageName = 'Contato';
+                                    } else {
+                                        $pageName = ucwords(str_replace(['-', '/'], [' ', ' / '], ltrim($pagePath, '/')));
+                                    }
+                                ?>
                                 <tr>
                                     <td class="aff-td-id">#<?= (int)$v['id'] ?></td>
-                                    <td class="aff-td-url"><span class="aff-url-text"><?= e($v['page_url'] ?? '/') ?></span></td>
+                                    <td><strong><?= e($pageName) ?></strong><br><small style="color:var(--gray);font-size:11px;"><?= e($pagePath) ?></small></td>
                                     <td class="aff-td-url"><span class="aff-url-text"><?= e($v['referrer'] ?: 'Link direto') ?></span></td>
                                     <td><?php if (!empty($v['converted'])): ?><span style="color:var(--text-green);font-weight:600;">Sim</span><?php else: ?><span style="color:var(--gray);">Não</span><?php endif; ?></td>
                                     <td><?= format_datetime($v['created_at']) ?></td>
