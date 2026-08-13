@@ -60,7 +60,7 @@ class CheckoutController extends Controller
             $effectivePayAmount += round((float)$tripItem['total'] * ($itemPercent / 100), 2);
         }
         foreach ($summary['transfers'] as $transferItem) {
-            $effectivePayAmount += round((float)$transferItem['total'] * ($globalPercent / 100), 2);
+            $effectivePayAmount += round((float)($transferItem['total'] ?? $transferItem['price'] ?? 0) * ($globalPercent / 100), 2);
         }
         if ($effectivePayAmount <= 0) {
             $effectivePayAmount = round($summary['grand_total'] * ($globalPercent / 100), 2);
