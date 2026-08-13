@@ -6557,12 +6557,14 @@ img { max-width: 100%; height: auto; }
     }
     .bm-actions-step2 {
         flex-wrap: wrap !important;
+        gap: 8px !important;
     }
     .bm-actions-step2 button {
-        flex: 1;
+        flex: 1 1 100%;
         min-width: 0;
-        font-size: 11px !important;
-        padding: 12px 10px !important;
+        font-size: 13px !important;
+        padding: 14px 16px !important;
+        white-space: normal !important;
     }
 }
 
