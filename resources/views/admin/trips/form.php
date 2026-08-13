@@ -53,6 +53,46 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 </div>
             </div>
 
+            <!-- Documentos Extras -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon" style="background:#fef3c7;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    </div>
+                    <div>
+                        <h3>Documentos Extras</h3>
+                        <p class="admin-card-subtitle">Documentos que o cliente receberá ao reservar (termos, formulários, etc.)</p>
+                    </div>
+                </div>
+
+                <!-- Documentos existentes -->
+                <?php
+                $existingDocs = ($isEdit && !empty($trip['documents'])) ? json_decode($trip['documents'], true) : [];
+                ?>
+                <?php if (!empty($existingDocs)): ?>
+                <div id="docs-current" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
+                    <?php foreach ($existingDocs as $idx => $doc): ?>
+                    <div class="doc-item" style="display:flex;align-items:center;gap:12px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px 16px;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span style="flex:1;font-size:13px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?= e($doc['name'] ?? basename($doc['path'] ?? '')) ?></span>
+                        <span style="font-size:11px;color:#94a3b8;text-transform:uppercase;"><?= e(strtoupper($doc['type'] ?? '')) ?></span>
+                        <input type="hidden" name="docs_existing[]" value="<?= e(json_encode($doc)) ?>">
+                        <button type="button" onclick="this.closest('.doc-item').remove()" style="background:#ef4444;color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
+
+                <!-- Upload novos documentos -->
+                <label for="docFiles" class="btn btn-outline" style="cursor:pointer;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Adicionar Documentos
+                </label>
+                <input type="file" name="doc_files[]" id="docFiles" multiple accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="previewDocFiles(this)">
+                <p style="font-size:10px;color:#94a3b8;margin-top:6px;">PDF, PNG, JPG, DOC, XLS — Máx. 10MB cada</p>
+                <div id="docPreviews" style="display:flex;flex-direction:column;gap:6px;margin-top:10px;"></div>
+            </div>
+
             <!-- Inclui / Não Inclui -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div><h3>O que Inclui / Não Inclui</h3><p class="admin-card-subtitle">Itens inclusos e não inclusos</p></div></div>
@@ -186,38 +226,6 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                             <p style="font-size:10px;color:#94a3b8;margin-top:6px;">JPG, PNG, WebP, GIF, SVG, AVIF — Máx. 10MB cada</p>
                             <div id="galleryPreviews" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
                         </div>
-                    </div>
-
-                    <!-- Documentos Extras -->
-                    <div class="form-group">
-                        <label>Documentos Extras</label>
-                        <p style="font-size:11px;color:#94a3b8;margin-bottom:10px;">Documentos que o cliente receberá ao reservar (termos, formulários, etc.)</p>
-
-                        <!-- Documentos existentes -->
-                        <?php
-                        $existingDocs = ($isEdit && !empty($trip['documents'])) ? json_decode($trip['documents'], true) : [];
-                        ?>
-                        <?php if (!empty($existingDocs)): ?>
-                        <div id="docs-current" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;">
-                            <?php foreach ($existingDocs as $idx => $doc): ?>
-                            <div class="doc-item" style="display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2" style="flex-shrink:0;"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                <span style="flex:1;font-size:13px;color:#334155;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?= e($doc['name'] ?? basename($doc['path'] ?? '')) ?></span>
-                                <input type="hidden" name="docs_existing[]" value="<?= e(json_encode($doc)) ?>">
-                                <button type="button" onclick="this.closest('.doc-item').remove()" style="background:#ef4444;color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
-                            </div>
-                            <?php endforeach; ?>
-                        </div>
-                        <?php endif; ?>
-
-                        <!-- Upload novos documentos -->
-                        <label for="docFiles" class="btn btn-outline" style="cursor:pointer;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            Adicionar Documentos
-                        </label>
-                        <input type="file" name="doc_files[]" id="docFiles" multiple accept=".pdf,.png,.jpg,.jpeg,.gif,.webp,.doc,.docx,.xls,.xlsx" style="display:none;" onchange="previewDocFiles(this)">
-                        <p style="font-size:10px;color:#94a3b8;margin-top:6px;">PDF, PNG, JPG, DOC, XLS — Máx. 10MB cada</p>
-                        <div id="docPreviews" style="display:flex;flex-direction:column;gap:6px;margin-top:10px;"></div>
                     </div>
 
                     <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="partial_payment_enabled" <?= !empty($trip['partial_payment_enabled']) ? 'checked' : '' ?>> Pagamento Parcial</label></div>
