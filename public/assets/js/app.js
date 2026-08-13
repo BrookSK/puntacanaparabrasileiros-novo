@@ -35,6 +35,61 @@
     // Expor globalmente
     window.toast = toast;
 
+    // ==================== MODAL CENTRALIZADO (LOTADO) ====================
+    /**
+     * Exibe um modal centralizado na tela com mensagem e botão OK.
+     * @param {string} message - Mensagem a exibir
+     * @param {object} options - { hasAlternatives: bool }
+     *   hasAlternatives = true → ao clicar OK, fecha o modal e mantém na tela atual
+     *   hasAlternatives = false → ao clicar OK, redireciona para /transfers
+     */
+    function showFullModal(message, options = {}) {
+        // Remove modal anterior se existir
+        const existing = document.getElementById('fullScreenModal');
+        if (existing) existing.remove();
+
+        const hasAlternatives = options.hasAlternatives || false;
+
+        const overlay = document.createElement('div');
+        overlay.id = 'fullScreenModal';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+
+        const modal = document.createElement('div');
+        modal.style.cssText = 'background:#fff;border-radius:12px;padding:32px 28px 24px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;animation:modalFadeIn 0.3s ease;';
+
+        const icon = '<div style="margin-bottom:16px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e53e3e" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>';
+        const title = '<h3 style="margin:0 0 12px;font-size:1.25rem;color:#1a1a1a;font-weight:600;">Transfer Indisponível</h3>';
+        const msg = '<p style="margin:0 0 24px;font-size:1rem;color:#555;line-height:1.5;">' + message + '</p>';
+        const btn = '<button id="fullModalOkBtn" style="background:#1B6F00;color:#fff;border:none;padding:12px 40px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;transition:background 0.2s;">OK</button>';
+
+        modal.innerHTML = icon + title + msg + btn;
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+
+        // Impedir scroll do body enquanto modal está aberto
+        document.body.style.overflow = 'hidden';
+
+        // Adicionar animação CSS inline
+        if (!document.getElementById('fullModalStyles')) {
+            const style = document.createElement('style');
+            style.id = 'fullModalStyles';
+            style.textContent = '@keyframes modalFadeIn{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}';
+            document.head.appendChild(style);
+        }
+
+        // Handler do botão OK
+        document.getElementById('fullModalOkBtn').addEventListener('click', function() {
+            overlay.remove();
+            document.body.style.overflow = '';
+            if (!hasAlternatives) {
+                window.location = '/transfers';
+            }
+        });
+    }
+
+    // Expor globalmente
+    window.showFullModal = showFullModal;
+
     // ==================== UTILITIES ====================
     function ajax(url, options = {}) {
         const defaults = { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': CSRF_TOKEN, 'Content-Type': 'application/json' } };
@@ -804,8 +859,73 @@
     });
 
     document.getElementById('btnDirectCheckout')?.addEventListener('click', () => {
-        document.getElementById('btnAddCart')?.click();
-        setTimeout(() => { window.location = '/checkout'; }, 500);
+        const sel = window._transferSelection;
+        if (!sel || !sel.arrival) { toast('Selecione um transfer de entrada.', 'warning'); return; }
+
+        const activeTab = document.querySelector('.transfer-tab.active')?.dataset.tab;
+        const isRoundtrip = activeTab === 'roundtrip';
+        if (isRoundtrip && !sel.departure) { toast('Selecione um transfer de saída.', 'warning'); return; }
+
+        const groupId = 'tg_' + Date.now();
+        const originId = document.getElementById('originSelect').value;
+        const destinationId = document.getElementById('destinationSelect').value;
+        const serviceType = document.getElementById('serviceType').value;
+
+        var paxData = {};
+        var paxInputs = document.querySelectorAll('#paxDropdown .pax-input-sm');
+        for (var i = 0; i < paxInputs.length; i++) {
+            var name = paxInputs[i].getAttribute('name');
+            if (name) paxData[name] = paxInputs[i].value || '0';
+        }
+
+        const arrivalPayload = Object.assign({}, paxData, {
+            vehicle_id: sel.arrival.id,
+            origin_id: originId,
+            destination_id: destinationId,
+            date: document.querySelector('[name="arrival_date"]').value,
+            time: document.querySelector('[name="arrival_time"]').value,
+            type: 'arrival',
+            service_type: serviceType,
+            group_id: groupId,
+        });
+
+        ajax('/api/cart/add-transfer', { body: JSON.stringify(arrivalPayload) }).then(arrivalResult => {
+            if (!arrivalResult.success) {
+                // Verificar se há mais de uma opção de veículo disponível
+                const data = window._transferData;
+                const availableVehicles = data && data.results ? data.results.filter(v => !v.is_full) : [];
+                const hasAlternatives = availableVehicles.length > 1;
+                showFullModal(arrivalResult.error || 'Transfer indisponível.', { hasAlternatives: hasAlternatives });
+                return;
+            }
+
+            if (isRoundtrip && sel.departure) {
+                const departurePayload = Object.assign({}, paxData, {
+                    vehicle_id: sel.departure.id,
+                    origin_id: destinationId,
+                    destination_id: originId,
+                    date: document.querySelector('[name="departure_date"]').value,
+                    time: document.querySelector('[name="departure_time"]').value,
+                    type: 'departure',
+                    service_type: serviceType,
+                    group_id: groupId,
+                });
+                ajax('/api/cart/add-transfer', { body: JSON.stringify(departurePayload) }).then(depResult => {
+                    if (!depResult.success) {
+                        const data = window._transferData;
+                        const availableVehicles = data && data.results ? data.results.filter(v => !v.is_full) : [];
+                        const hasAlternatives = availableVehicles.length > 1;
+                        showFullModal(depResult.error || 'Transfer indisponível.', { hasAlternatives: hasAlternatives });
+                        return;
+                    }
+                    updateCartBadge();
+                    window.location = '/checkout';
+                }).catch(() => toast('Erro de conexão.', 'error'));
+            } else {
+                updateCartBadge();
+                window.location = '/checkout';
+            }
+        }).catch(() => toast('Erro de conexão.', 'error'));
     });
 
     // Multi transfers - Add to cart
@@ -860,8 +980,65 @@
 
     // Multi transfers - Direct checkout
     document.getElementById('btnDirectCheckoutMulti')?.addEventListener('click', function() {
-        document.getElementById('btnAddCartMulti')?.click();
-        setTimeout(function() { window.location = '/checkout'; }, 800);
+        const sel = window._multiTransferSelection || {};
+        const routes = window._multiTransferRoutes || [];
+        const results = window._multiTransferData || [];
+        if (Object.keys(sel).length === 0) { toast('Selecione um veículo para cada rota.', 'warning'); return; }
+
+        // Coletar passageiros
+        var paxData = {};
+        var paxInputs = document.querySelectorAll('#paxDropdownMulti .pax-input-sm');
+        for (var i = 0; i < paxInputs.length; i++) {
+            var name = paxInputs[i].getAttribute('name');
+            if (name) paxData[name.replace(/^multi_/, '')] = paxInputs[i].value || '0';
+        }
+        var serviceType = document.getElementById('multiServiceType')?.value || 'private';
+        var groupId = 'tg_' + Date.now();
+
+        // Adicionar cada rota selecionada ao carrinho
+        var promises = [];
+        Object.keys(sel).forEach(function(key) {
+            var idx = parseInt(key.split('_')[1]);
+            var vehicle = sel[key];
+            var route = routes[idx];
+            if (!vehicle || !route) return;
+
+            var payload = Object.assign({}, paxData, {
+                vehicle_id: vehicle.id,
+                origin_id: route.origin_id,
+                destination_id: route.destination_id,
+                date: route.date || '',
+                time: route.time || '',
+                type: 'multi_' + (idx + 1),
+                service_type: serviceType,
+                group_id: groupId,
+            });
+            promises.push(ajax('/api/cart/add-transfer', { body: JSON.stringify(payload) }));
+        });
+
+        Promise.all(promises).then(function(responses) {
+            var hasError = responses.some(function(r) { return !r.success; });
+            if (hasError) {
+                // Pegar a primeira mensagem de erro
+                var errorMsg = '';
+                for (var i = 0; i < responses.length; i++) {
+                    if (!responses[i].success) { errorMsg = responses[i].error || 'Transfer indisponível.'; break; }
+                }
+                // Verificar se há alternativas (mais de um veículo por rota)
+                var multiData = window._multiTransferData || [];
+                var hasAlternatives = false;
+                for (var j = 0; j < multiData.length; j++) {
+                    if (multiData[j] && multiData[j].results && multiData[j].results.filter(function(v) { return !v.is_full; }).length > 1) {
+                        hasAlternatives = true;
+                        break;
+                    }
+                }
+                showFullModal(errorMsg, { hasAlternatives: hasAlternatives });
+                return;
+            }
+            updateCartBadge();
+            window.location = '/checkout';
+        }).catch(function() { toast('Erro de conexão.', 'error'); });
     });
 
     // ==================== CHECKOUT ====================
