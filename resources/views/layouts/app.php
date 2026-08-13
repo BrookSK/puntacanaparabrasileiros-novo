@@ -15,7 +15,7 @@
 
     <!-- CSS -->
     <link rel="stylesheet" href="<?= asset('css/app.css') ?>?v=6.5">
-    <link rel="stylesheet" href="<?= asset('css/phone-country.css') ?>?v=1.0">
+    <link rel="stylesheet" href="<?= asset('css/phone-country.css') ?>?v=1.1">
 
     <!-- Custom CSS from settings -->
     <?php if (setting('custom_css')): ?>
@@ -73,7 +73,7 @@
 
     <!-- JavaScript -->
     <script src="<?= asset('js/app.js') ?>?v=6.4"></script>
-    <script src="<?= asset('js/phone-country.js') ?>?v=1.0"></script>
+    <script src="<?= asset('js/phone-country.js') ?>?v=1.1"></script>
 
     <!-- Google Translate -->
     <div id="google_translate_element" style="display:none;"></div>
