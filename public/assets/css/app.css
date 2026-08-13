@@ -2228,6 +2228,31 @@ img { max-width: 100%; height: auto; }
     gap: 16px;
 }
 
+.instagram-see-more {
+    text-align: center;
+    margin-top: 28px;
+}
+.instagram-see-more-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 50px;
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+.instagram-see-more-btn:hover {
+    border-color: #E1306C;
+    color: #E1306C;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(225,48,108,0.15);
+}
+
 @media (max-width: 992px) {
     .instagram-feed,
     .instagram-placeholder-grid {
@@ -2235,40 +2260,49 @@ img { max-width: 100%; height: auto; }
     }
 }
 @media (max-width: 576px) {
+    .section-instagram {
+        padding: 40px 0 50px;
+    }
     .instagram-feed,
     .instagram-placeholder-grid {
-        grid-template-columns: none;
-        display: flex;
-        overflow-x: auto;
-        scroll-snap-type: x mandatory;
-        gap: 14px;
-        padding: 0 16px 16px;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-    }
-    .instagram-feed::-webkit-scrollbar,
-    .instagram-placeholder-grid::-webkit-scrollbar {
-        display: none;
-    }
-    .instagram-feed .instagram-item,
-    .instagram-feed .instagram-placeholder-item,
-    .instagram-placeholder-grid .instagram-placeholder-item {
-        min-width: 260px;
-        max-width: 280px;
-        flex-shrink: 0;
-        scroll-snap-align: start;
-    }
-    .instagram-item-media {
-        aspect-ratio: 4/5;
-    }
-    .section-instagram {
-        padding: 50px 0 60px;
-    }
-    .section-instagram .container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
         padding: 0;
     }
-    .section-instagram .section-intro {
-        padding: 0 16px;
+    .instagram-item:nth-child(n+5),
+    .instagram-placeholder-item:nth-child(n+5) {
+        display: none;
+    }
+    .instagram-item,
+    .instagram-placeholder-item {
+        border-radius: 8px;
+    }
+    .instagram-item-header {
+        padding: 8px 10px;
+    }
+    .instagram-avatar {
+        width: 22px;
+        height: 22px;
+    }
+    .instagram-avatar img {
+        width: 22px;
+        height: 22px;
+    }
+    .instagram-username {
+        font-size: 11px;
+    }
+    .instagram-date {
+        display: none;
+    }
+    .instagram-item-media {
+        aspect-ratio: 1/1;
+    }
+    .instagram-see-more {
+        margin-top: 20px;
+    }
+    .instagram-see-more-btn {
+        font-size: 0.85rem;
+        padding: 10px 24px;
     }
 }
 
