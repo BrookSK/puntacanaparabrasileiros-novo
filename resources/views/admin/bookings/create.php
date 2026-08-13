@@ -42,7 +42,7 @@
                     </div>
                     <div class="form-group col-6">
                         <label>Telefone / WhatsApp</label>
-                        <input type="text" name="billing_phone" class="form-control" placeholder="+55 11 99999-9999">
+                        <input type="tel" name="billing_phone" class="form-control" placeholder="+55 11 99999-9999" data-phone-country>
                     </div>
                 </div>
 

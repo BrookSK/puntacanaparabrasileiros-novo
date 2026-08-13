@@ -87,7 +87,7 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                 </div>
                 <div class="booking-info-item">
                     <span class="booking-info-label">Telefone</span>
-                    <span class="booking-info-value"><?= e($booking['billing_phone'] ?? '-') ?></span>
+                    <span class="booking-info-value"><?= phone_with_flag($booking['billing_phone'] ?? '') ?></span>
                 </div>
                 <div class="booking-info-item">
                     <span class="booking-info-label">País</span>

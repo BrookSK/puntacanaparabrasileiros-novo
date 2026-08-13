@@ -28,7 +28,7 @@
                 <p style="margin:4px 0 16px;font-size:14px;"><a href="mailto:<?= e($request['email']) ?>"><?= e($request['email']) ?></a></p>
 
                 <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">WhatsApp</label>
-                <p style="margin:4px 0 16px;font-size:14px;"><?= e($request['phone']) ?></p>
+                <p style="margin:4px 0 16px;font-size:14px;"><?= phone_with_flag($request['phone'] ?? '') ?></p>
             </div>
             <div>
                 <label style="font-size:11px;font-weight:600;color:#64748b;text-transform:uppercase;">Seguidores</label>

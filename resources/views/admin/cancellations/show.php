@@ -230,7 +230,7 @@ $bst = $booking['status'] ?? 'pending';
                 </div>
                 <div class="summary-row">
                     <span class="summary-row-label">Telefone</span>
-                    <span class="summary-row-value"><?= e($booking['billing_phone'] ?? '—') ?></span>
+                    <span class="summary-row-value"><?= phone_with_flag($booking['billing_phone'] ?? '') ?></span>
                 </div>
             </div>
         </div>

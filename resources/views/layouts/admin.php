@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/admin.css') ?>?v=4.5">
+    <link rel="stylesheet" href="<?= asset('css/phone-country.css') ?>?v=1.1">
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp/chat')): ?>
     <link rel="stylesheet" href="<?= asset('css/whatsapp.css') ?>?v=1.4">
     <?php endif; ?>
@@ -118,6 +119,7 @@
     </div>
 
     <script src="<?= asset('js/admin.js') ?>?v=2.3"></script>
+    <script src="<?= asset('js/phone-country.js') ?>?v=1.1"></script>
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp/chat')): ?>
     <script src="<?= asset('js/whatsapp.js') ?>?v=1.5"></script>
     <?php endif; ?>

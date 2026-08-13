@@ -40,7 +40,7 @@
         <tr>
             <td><strong><?= e($req['first_name'] . ' ' . $req['last_name']) ?></strong></td>
             <td><?= e($req['email']) ?></td>
-            <td><?= e($req['phone']) ?></td>
+            <td><?= phone_with_flag($req['phone'] ?? '') ?></td>
             <td><span class="badge badge-info"><?= e($req['followers_count'] ?? '-') ?></span></td>
             <td><?= e(ucfirst($req['niche'] ?? '-')) ?></td>
             <td><?= date('d/m/Y', strtotime($req['created_at'])) ?></td>

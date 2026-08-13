@@ -238,3 +238,48 @@ function time_ago(string $datetime): string
     if ($diff->i > 0) return 'há ' . $diff->i . ' minuto' . ($diff->i > 1 ? 's' : '');
     return 'agora';
 }
+
+/**
+ * Exibe telefone com bandeira do país baseado no DDI.
+ * Retorna HTML com <img> da bandeira + número formatado.
+ */
+function phone_with_flag(?string $phone): string
+{
+    if (!$phone) return '-';
+
+    // Mapa de DDI para código de país (para a bandeira)
+    $ddiMap = [
+        '+55' => 'br', '+1' => 'us', '+351' => 'pt', '+54' => 'ar',
+        '+57' => 'co', '+56' => 'cl', '+52' => 'mx', '+51' => 'pe',
+        '+598' => 'uy', '+595' => 'py', '+593' => 'ec', '+591' => 'bo',
+        '+58' => 've', '+507' => 'pa', '+506' => 'cr', '+502' => 'gt',
+        '+53' => 'cu', '+34' => 'es', '+33' => 'fr', '+49' => 'de',
+        '+39' => 'it', '+44' => 'gb', '+81' => 'jp', '+61' => 'au',
+        '+972' => 'il', '+244' => 'ao', '+258' => 'mz',
+    ];
+
+    $countryCode = '';
+    $cleanPhone = trim($phone);
+
+    // Tentar detectar DDI no início do número
+    if (str_starts_with($cleanPhone, '+')) {
+        // Testar DDIs de 4, 3 e 2 dígitos (+ incluído)
+        foreach ([4, 3, 2] as $len) {
+            $prefix = substr($cleanPhone, 0, $len + 1); // +XXX
+            if (isset($ddiMap[$prefix])) {
+                $countryCode = $ddiMap[$prefix];
+                break;
+            }
+        }
+    }
+
+    if (!$countryCode) {
+        // Padrão: Brasil
+        $countryCode = 'br';
+    }
+
+    $flagUrl = 'https://flagcdn.com/20x15/' . $countryCode . '.png';
+    $flagHtml = '<img src="' . $flagUrl . '" alt="' . $countryCode . '" style="width:20px;height:15px;border-radius:2px;box-shadow:0 0 1px rgba(0,0,0,0.2);vertical-align:middle;margin-right:6px;">';
+
+    return $flagHtml . e($cleanPhone);
+}
