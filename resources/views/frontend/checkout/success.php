@@ -9,7 +9,7 @@
 
 <section class="section">
     <div class="container">
-        <div style="max-width:600px;margin:0 auto;text-align:center;background:#fff;border-radius:20px;padding:50px 40px;box-shadow:0 4px 24px rgba(0,0,0,0.06);border:1px solid #f3f4f6;">
+        <div style="max-width:600px;margin:0 auto;text-align:center;background:#fff;border-radius:20px;padding:50px 40px;box-shadow:0 4px 24px rgba(0,0,0,0.06);border:1px solid #f3f4f6;overflow-wrap:break-word;word-break:break-word;">
 
             <!-- Check Icon -->
             <div style="margin-bottom:28px;">
@@ -72,9 +72,9 @@
                         <div style="width:36px;height:36px;background:#fef3c7;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         </div>
-                        <div style="display:flex;flex-direction:column;gap:2px;">
+                        <div style="display:flex;flex-direction:column;gap:2px;min-width:0;">
                             <span style="font-size:12px;color:#9ca3af;">E-mail de Confirmação</span>
-                            <strong style="font-size:14px;color:#1f2937;"><?= e($booking['billing_email'] ?? '') ?></strong>
+                            <strong style="font-size:14px;color:#1f2937;word-break:break-all;overflow-wrap:break-word;"><?= e($booking['billing_email'] ?? '') ?></strong>
                         </div>
                     </div>
                 </div>
@@ -135,8 +135,8 @@
             <!-- Info -->
             <div style="display:flex;gap:14px;align-items:flex-start;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:18px 22px;margin-bottom:32px;text-align:left;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="flex-shrink:0;margin-top:2px;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                <div>
-                    <p style="font-size:13px;color:#166534;line-height:1.7;margin:0 0 6px;">Enviamos um e-mail de confirmação para <strong><?= e($booking['billing_email'] ?? '') ?></strong> com todos os detalhes e vouchers.</p>
+                <div style="min-width:0;">
+                    <p style="font-size:13px;color:#166534;line-height:1.7;margin:0 0 6px;word-break:break-word;overflow-wrap:break-word;">Enviamos um e-mail de confirmação para <strong style="word-break:break-all;"><?= e($booking['billing_email'] ?? '') ?></strong> com todos os detalhes e vouchers.</p>
                     <p style="font-size:13px;color:#166534;line-height:1.7;margin:0;">Dúvidas? Fale conosco pelo WhatsApp: <a href="https://api.whatsapp.com/send?phone=18294582170" style="color:#15803d;font-weight:600;">+1 (829) 458-2170</a></p>
                 </div>
             </div>
