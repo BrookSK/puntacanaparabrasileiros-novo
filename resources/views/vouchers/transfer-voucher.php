@@ -130,7 +130,7 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
     <!-- Instruções -->
     <div class="v-instructions">
         <div class="v-instructions-title">Instruções Importantes</div>
-        <p>Um representante estará aguardando com uma placa com seu nome. Em caso de atraso no voo, avise pelo WhatsApp (+1 829 458-2170). O motorista esperará até 45 minutos. Para saída do hotel: esteja pronto no lobby 10 min antes.</p>
+        <p>Apresente este voucher pelo celular ao motorista. Não é necessário imprimir. Um representante estará aguardando com uma placa com seu nome. Em caso de atraso no voo, avise pelo WhatsApp (+1 829 458-2170). O motorista esperará até 45 minutos. Para saída do hotel: esteja pronto no lobby 10 min antes.</p>
     </div>
 
     <!-- QR -->

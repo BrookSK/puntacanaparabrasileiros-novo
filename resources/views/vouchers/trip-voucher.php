@@ -187,7 +187,7 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
         <?php if (!empty($instructions)): ?>
         <p><?= nl2br(e($instructions)) ?></p>
         <?php else: ?>
-        <p>Apresente este voucher (impresso ou no celular) no ponto de encontro. O horário exato será confirmado 1 dia antes via WhatsApp. Esteja pronto 10 minutos antes do horário agendado.</p>
+        <p>Apresente este voucher pelo celular no ponto de encontro. Não é necessário imprimir. O horário exato será confirmado 1 dia antes via WhatsApp. Esteja pronto 15 minutos antes do horário agendado.</p>
         <?php endif; ?>
     </div>
 
