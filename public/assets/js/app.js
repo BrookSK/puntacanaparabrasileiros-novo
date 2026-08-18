@@ -825,6 +825,9 @@
         }
 
         // Add arrival
+        const flightNumber = document.getElementById('flightNumber')?.value || '';
+        const flightTime = document.getElementById('flightTime')?.value || '';
+
         const arrivalPayload = Object.assign({}, paxData, {
             vehicle_id: sel.arrival.id,
             origin_id: originId,
@@ -834,6 +837,8 @@
             type: 'arrival',
             service_type: serviceType,
             group_id: groupId,
+            flight_number: flightNumber,
+            flight_time: flightTime,
         });
 
         const addArrival = ajax('/api/cart/add-transfer', { body: JSON.stringify(arrivalPayload) });
@@ -848,6 +853,8 @@
                 type: 'departure',
                 service_type: serviceType,
                 group_id: groupId,
+                flight_number: flightNumber,
+                flight_time: flightTime,
             });
             addArrival.then(arrResult => {
                 if (!arrResult.success) {
@@ -901,6 +908,9 @@
             if (name) paxData[name] = paxInputs[i].value || '0';
         }
 
+        const flightNumberDC = document.getElementById('flightNumber')?.value || '';
+        const flightTimeDC = document.getElementById('flightTime')?.value || '';
+
         const arrivalPayload = Object.assign({}, paxData, {
             vehicle_id: sel.arrival.id,
             origin_id: originId,
@@ -910,6 +920,8 @@
             type: 'arrival',
             service_type: serviceType,
             group_id: groupId,
+            flight_number: flightNumberDC,
+            flight_time: flightTimeDC,
         });
 
         ajax('/api/cart/add-transfer', { body: JSON.stringify(arrivalPayload) }).then(arrivalResult => {
@@ -932,6 +944,8 @@
                     type: 'departure',
                     service_type: serviceType,
                     group_id: groupId,
+                    flight_number: flightNumberDC,
+                    flight_time: flightTimeDC,
                 });
                 ajax('/api/cart/add-transfer', { body: JSON.stringify(departurePayload) }).then(depResult => {
                     if (!depResult.success) {

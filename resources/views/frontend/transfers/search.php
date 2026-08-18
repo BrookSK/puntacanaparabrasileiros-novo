@@ -93,6 +93,29 @@
                         </select>
                     </div>
                 </div>
+
+                <!-- Campos de voo (aparece quando origem ou destino é aeroporto) -->
+                <div class="transfer-flight-info" id="flightInfoSection" style="display:none;">
+                    <div class="flight-info-banner">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0077b6" stroke-width="2"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                        <span id="flightInfoLabel">Informe os dados do seu voo</span>
+                    </div>
+                    <div class="transfer-form-row">
+                        <div class="tf-field">
+                            <label>NÚMERO DO VOO <small>(opcional)</small></label>
+                            <input type="text" name="flight_number" id="flightNumber" class="tf-input" placeholder="Ex: LA8180, AA956">
+                        </div>
+                        <div class="tf-field">
+                            <label id="flightTimeLabel">HORÁRIO DO VOO</label>
+                            <input type="time" name="flight_time" id="flightTime" class="tf-input">
+                        </div>
+                    </div>
+                    <div class="flight-info-tip" id="flightInfoTip" style="display:none;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        <span id="flightTipText"></span>
+                    </div>
+                </div>
+
                 <button type="button" id="searchTransfersBtn" class="btn-buscar-transfer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                     BUSCAR
@@ -387,7 +410,7 @@
 
 
 <script>
-const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['id' => (int)$loc['id'], 'title' => $loc['title']]; }, $locations)) ?>;
+const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['id' => (int)$loc['id'], 'title' => $loc['title'], 'type' => $loc['location_type'] ?? 'other']; }, $locations)) ?>;
 
 (function() {
     function setupAutocomplete(inputId, hiddenId, listId) {
@@ -463,6 +486,163 @@ const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['i
 
     setupAutocomplete('originInput', 'originSelect', 'originList');
     setupAutocomplete('destinationInput', 'destinationSelect', 'destinationList');
+})();
+
+// Lógica de detecção de aeroporto e horário do voo
+(function() {
+    var flightSection = document.getElementById('flightInfoSection');
+    var flightInfoLabel = document.getElementById('flightInfoLabel');
+    var flightTimeLabel = document.getElementById('flightTimeLabel');
+    var flightInfoTip = document.getElementById('flightInfoTip');
+    var flightTipText = document.getElementById('flightTipText');
+    var arrivalTimeInput = document.getElementById('arrivalTime');
+    var flightTimeInput = document.getElementById('flightTime');
+
+    if (!flightSection) return;
+
+    function getLocationType(locationId) {
+        if (!locationId) return null;
+        for (var i = 0; i < TRANSFER_LOCATIONS.length; i++) {
+            if (String(TRANSFER_LOCATIONS[i].id) === String(locationId)) {
+                return TRANSFER_LOCATIONS[i].type;
+            }
+        }
+        return null;
+    }
+
+    function checkAirportInvolved() {
+        var originId = document.getElementById('originSelect').value;
+        var destinationId = document.getElementById('destinationSelect').value;
+        var originType = getLocationType(originId);
+        var destType = getLocationType(destinationId);
+
+        var isAirportOrigin = originType === 'airport';
+        var isAirportDest = destType === 'airport';
+
+        if (isAirportOrigin || isAirportDest) {
+            flightSection.style.display = 'block';
+
+            if (isAirportOrigin && !isAirportDest) {
+                // Aeroporto → Hotel (Chegada)
+                flightInfoLabel.textContent = 'Informe o horário de chegada do seu voo';
+                flightTimeLabel.textContent = 'HORÁRIO DE CHEGADA DO VOO';
+                flightInfoTip.style.display = 'flex';
+                flightTipText.textContent = 'O motorista estará aguardando no aeroporto com uma placa com seu nome. Considere até 30 minutos para desembarque e retirada de bagagem.';
+            } else if (isAirportDest && !isAirportOrigin) {
+                // Hotel → Aeroporto (Partida)
+                flightInfoLabel.textContent = 'Informe o horário de partida do seu voo';
+                flightTimeLabel.textContent = 'HORÁRIO DE PARTIDA DO VOO';
+                flightInfoTip.style.display = 'flex';
+                flightTipText.textContent = 'Recomendamos chegar ao aeroporto 3 horas antes do voo. O horário de busca no hotel será calculado automaticamente considerando o tempo de deslocamento.';
+            } else {
+                // Ambos aeroporto (raro)
+                flightInfoLabel.textContent = 'Informe o horário do seu voo';
+                flightTimeLabel.textContent = 'HORÁRIO DO VOO';
+                flightInfoTip.style.display = 'none';
+            }
+        } else {
+            flightSection.style.display = 'none';
+        }
+    }
+
+    // Calcular horário de busca para Hotel → Aeroporto
+    function calculatePickupTime() {
+        var destinationId = document.getElementById('destinationSelect').value;
+        var destType = getLocationType(destinationId);
+        var originId = document.getElementById('originSelect').value;
+        var originType = getLocationType(originId);
+
+        // Só calcula para Hotel → Aeroporto
+        if (destType !== 'airport' || originType === 'airport') return;
+
+        var flightTime = flightTimeInput.value;
+        if (!flightTime) return;
+
+        // Pegar duração do veículo selecionado (se disponível)
+        var duration = 35; // padrão 35 min se não tiver veículo selecionado
+        var data = window._transferData;
+        var sel = window._transferSelection;
+        if (sel && sel.departure && sel.departure.duration) {
+            duration = sel.departure.duration;
+        } else if (data && data.results && data.results.length > 0) {
+            duration = data.results[0].duration || 35;
+        }
+
+        // Calcular: horário voo - 3h - duração
+        var parts = flightTime.split(':');
+        var flightMinutes = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        var pickupMinutes = flightMinutes - 180 - duration; // 3h = 180 min
+
+        if (pickupMinutes < 0) pickupMinutes += 1440; // se passar da meia-noite
+
+        var pickupHours = Math.floor(pickupMinutes / 60);
+        var pickupMins = pickupMinutes % 60;
+        var pickupTimeStr = String(pickupHours).padStart(2, '0') + ':' + String(pickupMins).padStart(2, '0');
+
+        // Preencher o campo de hora de partida automaticamente
+        var departureTimeInput = document.querySelector('[name="departure_time"]');
+        if (departureTimeInput) {
+            departureTimeInput.value = pickupTimeStr;
+        }
+        // Para aba somente ida, preencher arrival_time
+        var activeTab = document.querySelector('.transfer-tab.active');
+        if (activeTab && activeTab.dataset.tab !== 'roundtrip') {
+            if (arrivalTimeInput) arrivalTimeInput.value = pickupTimeStr;
+        }
+
+        // Mostrar dica com horário calculado
+        flightInfoTip.style.display = 'flex';
+        flightTipText.textContent = 'Horário sugerido de saída do hotel: ' + pickupTimeStr + ' (considerando ' + duration + ' min de deslocamento + 3h de antecedência no aeroporto).';
+    }
+
+    // Para Aeroporto → Hotel, copiar horário do voo para o campo de hora
+    function applyArrivalFlightTime() {
+        var originId = document.getElementById('originSelect').value;
+        var originType = getLocationType(originId);
+        var destinationId = document.getElementById('destinationSelect').value;
+        var destType = getLocationType(destinationId);
+
+        if (originType === 'airport' && destType !== 'airport') {
+            var flightTime = flightTimeInput.value;
+            if (flightTime && arrivalTimeInput) {
+                arrivalTimeInput.value = flightTime;
+            }
+        }
+    }
+
+    // Observar mudanças nos selects de origem/destino
+    var originHidden = document.getElementById('originSelect');
+    var destHidden = document.getElementById('destinationSelect');
+
+    // MutationObserver para detectar mudanças no value dos hidden inputs
+    var observer = new MutationObserver(checkAirportInvolved);
+    if (originHidden) observer.observe(originHidden, { attributes: true, attributeFilter: ['value'] });
+    if (destHidden) observer.observe(destHidden, { attributes: true, attributeFilter: ['value'] });
+
+    // Também verificar periodicamente (fallback, pois hidden.value não dispara mutation)
+    setInterval(function() {
+        var currentOrigin = originHidden ? originHidden.value : '';
+        var currentDest = destHidden ? destHidden.value : '';
+        if (currentOrigin !== (window._lastOriginId || '') || currentDest !== (window._lastDestId || '')) {
+            window._lastOriginId = currentOrigin;
+            window._lastDestId = currentDest;
+            checkAirportInvolved();
+        }
+    }, 500);
+
+    // Quando o horário do voo muda
+    flightTimeInput.addEventListener('change', function() {
+        var destType = getLocationType(destHidden ? destHidden.value : '');
+        var originType = getLocationType(originHidden ? originHidden.value : '');
+
+        if (destType === 'airport' && originType !== 'airport') {
+            calculatePickupTime();
+        } else if (originType === 'airport' && destType !== 'airport') {
+            applyArrivalFlightTime();
+        }
+    });
+
+    flightTimeInput.addEventListener('input', flightTimeInput.onchange);
 })();
 </script>
 
