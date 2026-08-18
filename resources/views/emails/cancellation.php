@@ -79,7 +79,9 @@
     <!-- Footer -->
     <div style="background:#f8fafb;border-top:1px solid #e8eeec;padding:24px 30px;text-align:center;">
         <p style="margin:0 0 8px;font-size:13px;color:#64748b;">Equipe Punta Cana para Brasileiros</p>
-        <p style="margin:0;font-size:11px;color:#94a3b8;">Este é um e-mail automático. Em caso de dúvidas, entre em contato pelo WhatsApp.</p>
+        <p style="font-size:11px;color:#888;margin:4px 0 2px;">Av. Barceló, nº 91, Local 7 - Plaza Arrecife, Verón, Punta Cana</p>
+        <p style="font-size:11px;color:#888;margin:2px 0;">RNC: 1-33-28776-5 | República Dominicana | +1 (829) 458-2170</p>
+        <p style="margin:8px 0 0;font-size:11px;color:#94a3b8;">Este é um e-mail automático. Em caso de dúvidas, entre em contato pelo WhatsApp.</p>
     </div>
 
 </div>

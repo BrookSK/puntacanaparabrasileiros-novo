@@ -30,7 +30,7 @@
         <!-- Instruções -->
         <div style="background:#fffbeb;border:1px solid #fbbf24;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
             <p style="font-size:13px;color:#78350f;margin:0;line-height:1.7;">
-                <strong>Importante:</strong> Apresente os vouchers (impressos ou no celular) no ponto de encontro.
+                <strong>Importante:</strong> Apresente os vouchers pelo celular no ponto de encontro. Não é necessário imprimir.
                 O horário exato será confirmado 1 dia antes via WhatsApp.
             </p>
         </div>
@@ -115,7 +115,8 @@
     <!-- Footer -->
     <div style="background:#f8f8f8;padding:20px 40px;text-align:center;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 10px 10px;">
         <p style="font-size:11px;color:#888;margin:2px 0;"><strong>Punta Cana para Brasileiros Oliveira & Ramos SRL</strong></p>
-        <p style="font-size:11px;color:#888;margin:2px 0;">RNC: 1-33-28776-5 | Punta Cana, República Dominicana</p>
+        <p style="font-size:11px;color:#888;margin:2px 0;">Av. Barceló, nº 91, Local 7 - Plaza Arrecife, Verón, Punta Cana</p>
+        <p style="font-size:11px;color:#888;margin:2px 0;">RNC: 1-33-28776-5 | República Dominicana</p>
         <p style="font-size:11px;color:#888;margin:2px 0;">contato@puntacanaparabrasileiros.com | +1 (829) 458-2170</p>
     </div>
 </div>

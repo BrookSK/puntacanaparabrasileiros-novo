@@ -23,6 +23,9 @@
     </div>
     <div style="background:#f1f1f1;padding:15px;text-align:center;font-size:12px;color:#666">
         <?= e(setting('voucher_footer_text', '')) ?>
+        <p style="font-size:11px;color:#888;margin:8px 0 2px;"><strong>Punta Cana para Brasileiros Oliveira & Ramos SRL</strong></p>
+        <p style="font-size:11px;color:#888;margin:2px 0;">Av. Barceló, nº 91, Local 7 - Plaza Arrecife, Verón, Punta Cana</p>
+        <p style="font-size:11px;color:#888;margin:2px 0;">RNC: 1-33-28776-5 | República Dominicana | +1 (829) 458-2170</p>
     </div>
 </div>
 </body></html>
