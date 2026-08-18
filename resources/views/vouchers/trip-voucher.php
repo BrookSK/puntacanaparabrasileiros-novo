@@ -71,7 +71,8 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
             <div class="v-company-info">
                 <h2>Punta Cana para Brasileiros</h2>
                 <p>Oliveira & Ramos SRL — RNC: 1-33-28776-5<br>
-                Punta Cana, República Dominicana<br>
+                Av. Barceló, nº 91, Local 7 - Plaza Arrecife<br>
+                Verón, Punta Cana, República Dominicana<br>
                 +1 (829) 458-2170 | contato@puntacanaparabrasileiros.com</p>
             </div>
         </div>
