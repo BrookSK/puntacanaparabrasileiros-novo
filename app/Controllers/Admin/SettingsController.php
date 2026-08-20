@@ -73,8 +73,22 @@ class SettingsController extends Controller
             $data[$field] = isset($data[$field]) ? '1' : '0';
         }
 
+        // Mapeamento de campo → grupo para garantir que novos campos sejam criados no grupo correto
+        $fieldGroupMap = [
+            'paypal_enabled' => 'payments', 'paypal_client_id' => 'payments', 'paypal_secret' => 'payments', 'paypal_mode' => 'payments',
+            'stripe_enabled' => 'payments', 'stripe_publishable_key' => 'payments', 'stripe_secret_key' => 'payments',
+            'pagbank_enabled' => 'payments', 'pagbank_token' => 'payments', 'pagbank_mode' => 'payments', 'pagbank_usd_brl_rate' => 'payments',
+            'partial_payment_enabled' => 'payments', 'partial_payment_percent' => 'payments',
+            'checkout_online_enabled' => 'payments', 'checkout_whatsapp_enabled' => 'payments',
+            'whatsapp_enabled' => 'whatsapp',
+            'affiliate_enabled' => 'affiliates', 'affiliate_auto_approve' => 'affiliates',
+        ];
+
         // Salvar no banco
-        $this->settingModel->updateBulk($data);
+        foreach ($data as $key => $value) {
+            $group = $fieldGroupMap[$key] ?? null;
+            $this->settingModel->setWithGroup($key, $value, $group);
+        }
 
         // Recarregar settings na App
         $this->app->reloadSettings();

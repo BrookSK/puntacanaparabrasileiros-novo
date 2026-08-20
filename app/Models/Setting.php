@@ -33,6 +33,26 @@ class Setting extends Model
         }
     }
 
+    public function setWithGroup(string $key, mixed $value, ?string $group = null): void
+    {
+        $existing = $this->findWhere('setting_key', $key);
+        if ($existing) {
+            $updateData = ['setting_value' => $value];
+            // Atualizar grupo se informado e diferente do atual
+            if ($group && ($existing['setting_group'] ?? '') !== $group) {
+                $updateData['setting_group'] = $group;
+            }
+            $this->db->update($this->table, $updateData, 'id = ?', [(int) $existing['id']]);
+        } else {
+            $this->db->insert($this->table, [
+                'setting_key' => $key,
+                'setting_value' => $value,
+                'setting_group' => $group ?? 'general',
+                'setting_type' => 'text',
+            ]);
+        }
+    }
+
     public function getByGroup(string $group): array
     {
         return $this->where('setting_group = ?', [$group], 'setting_key ASC');

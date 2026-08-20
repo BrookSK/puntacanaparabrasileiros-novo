@@ -159,8 +159,12 @@
 
             <h4 class="settings-section-title">Modo de Checkout</h4>
             <p class="admin-card-subtitle" style="margin-bottom:12px;">Defina quais opções de finalização estarão disponíveis para o cliente no checkout.</p>
-            <div class="form-group"><label><input type="checkbox" name="checkout_online_enabled" value="1" <?= ($settings['payments']['checkout_online_enabled']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Pagamento Online (PayPal, Stripe, PIX)</label></div>
-            <div class="form-group"><label><input type="checkbox" name="checkout_whatsapp_enabled" value="1" <?= ($settings['payments']['checkout_whatsapp_enabled']['setting_value'] ?? '1') === '1' ? 'checked' : '' ?>> Finalizar pelo WhatsApp</label></div>
+            <?php
+                $checkoutOnline = $settings['payments']['checkout_online_enabled']['setting_value'] ?? ($settings['general']['checkout_online_enabled']['setting_value'] ?? '1');
+                $checkoutWhatsapp = $settings['payments']['checkout_whatsapp_enabled']['setting_value'] ?? ($settings['general']['checkout_whatsapp_enabled']['setting_value'] ?? '1');
+            ?>
+            <div class="form-group"><label><input type="checkbox" name="checkout_online_enabled" value="1" <?= $checkoutOnline === '1' ? 'checked' : '' ?>> Pagamento Online (PayPal, Stripe, PIX)</label></div>
+            <div class="form-group"><label><input type="checkbox" name="checkout_whatsapp_enabled" value="1" <?= $checkoutWhatsapp === '1' ? 'checked' : '' ?>> Finalizar pelo WhatsApp</label></div>
             <p style="font-size:12px;color:#6b7280;margin-top:4px;">Ao menos uma opção deve estar ativa. Se apenas WhatsApp estiver ativo, o cliente será direcionado para finalizar a reserva por mensagem.</p>
         </div>
     </div>
