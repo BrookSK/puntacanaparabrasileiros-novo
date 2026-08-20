@@ -67,6 +67,7 @@ class SettingsController extends Controller
         $booleanFields = [
             'paypal_enabled', 'stripe_enabled', 'pagbank_enabled', 'partial_payment_enabled',
             'whatsapp_enabled', 'affiliate_enabled', 'affiliate_auto_approve',
+            'checkout_online_enabled', 'checkout_whatsapp_enabled',
         ];
         foreach ($booleanFields as $field) {
             $data[$field] = isset($data[$field]) ? '1' : '0';
