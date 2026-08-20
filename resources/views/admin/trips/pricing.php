@@ -30,7 +30,7 @@ $weekdays = ['0' => 'Domingo', '1' => 'Segunda', '2' => 'Terça', '3' => 'Quarta
     </p>
 </div>
 
-<form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/precos/salvar" class="admin-form">
+<form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/precos" class="admin-form">
     <?= csrf_field() ?>
 
     <?php $ruleIndex = 0; ?>
