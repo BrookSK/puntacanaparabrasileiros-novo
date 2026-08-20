@@ -40,6 +40,16 @@ class CheckoutController extends Controller
         }
 
         $summary = $this->cartService->getSummary();
+
+        // Verificar se os preços mudaram enquanto estavam no carrinho
+        $priceChanges = $this->checkPriceChanges($summary);
+        if (!empty($priceChanges)) {
+            // Notificar admin sobre alteração de preço
+            $this->notifyPriceChange($priceChanges, $summary);
+            // Atualizar o carrinho com novos preços
+            $summary = $this->cartService->getSummary();
+        }
+
         $gateways = $this->paymentService->getAvailableGateways();
         $partialEnabled = $this->paymentService->isPartialPaymentEnabled();
 
@@ -78,6 +88,7 @@ class CheckoutController extends Controller
             'stripePublishableKey' => $stripeService->getPublishableKey(),
             'checkoutOnlineEnabled' => $this->setting('checkout_online_enabled', '1') === '1',
             'checkoutWhatsappEnabled' => $this->setting('checkout_whatsapp_enabled', '1') === '1',
+            'priceChanges' => $priceChanges ?? [],
             'pageTitle' => 'Checkout',
         ], 'app');
     }
@@ -516,5 +527,116 @@ class CheckoutController extends Controller
                 (float) $booking['total']
             );
         }
+    }
+
+    /**
+     * Verifica se os preços dos itens no carrinho mudaram desde que foram adicionados.
+     * Se mudaram, atualiza o carrinho e retorna as mudanças.
+     */
+    private function checkPriceChanges(array $summary): array
+    {
+        $changes = [];
+        $pricingService = new \App\Services\PricingService();
+        $trips = $this->cartService->getTrips();
+        $updated = false;
+
+        foreach ($trips as $idx => $item) {
+            $packageId = (int) ($item['package_id'] ?? 0);
+            $date = $item['date'] ?? '';
+            $pax = $item['pax'] ?? [];
+            $extras = $item['extra_services'] ?? [];
+
+            if (!$packageId || !$date || empty($pax)) continue;
+
+            try {
+                $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extras);
+                $newTotal = (float) $calculation['total'];
+                $oldTotal = (float) ($item['total'] ?? 0);
+
+                if (abs($newTotal - $oldTotal) > 0.01) {
+                    $changes[] = [
+                        'type' => 'trip',
+                        'title' => $item['trip_title'] ?? 'Passeio',
+                        'old_price' => $oldTotal,
+                        'new_price' => $newTotal,
+                        'date' => $date,
+                    ];
+
+                    // Atualizar o item no carrinho
+                    $trips[$idx]['total'] = $newTotal;
+                    $trips[$idx]['subtotal'] = $calculation['subtotal'];
+                    $trips[$idx]['breakdown'] = $calculation['breakdown'];
+                    $trips[$idx]['extras_total'] = $calculation['extras_total'];
+                    $trips[$idx]['group_discount'] = $calculation['group_discount'];
+                    $updated = true;
+                }
+            } catch (\Throwable $e) {
+                // Se não conseguir recalcular, ignora
+            }
+        }
+
+        if ($updated) {
+            $this->session->set('cart_items', $trips);
+        }
+
+        return $changes;
+    }
+
+    /**
+     * Notifica o admin sobre mudança de preço por email e WhatsApp.
+     */
+    private function notifyPriceChange(array $changes, array $summary): void
+    {
+        $user = $this->currentUser();
+        $customerName = $user ? ($user['first_name'] . ' ' . ($user['last_name'] ?? '')) : 'Visitante';
+        $customerEmail = $user['email'] ?? 'não identificado';
+
+        // Montar mensagem
+        $msg = "⚠️ ALERTA: Preço alterado no carrinho de um cliente\n\n";
+        $msg .= "Cliente: {$customerName} ({$customerEmail})\n\n";
+        $msg .= "Itens com preço alterado:\n";
+        foreach ($changes as $change) {
+            $msg .= "• {$change['title']} ({$change['date']})\n";
+            $msg .= "  Preço anterior: \$" . number_format($change['old_price'], 2) . "\n";
+            $msg .= "  Preço atual: \$" . number_format($change['new_price'], 2) . "\n\n";
+        }
+
+        // Enviar email ao admin
+        try {
+            $adminEmail = $this->setting('admin_email', '');
+            if ($adminEmail) {
+                $emailService = new \App\Services\EmailService();
+                $htmlBody = '<h3>⚠️ Alerta: Preço alterado no carrinho</h3>';
+                $htmlBody .= '<p>O preço de um item mudou enquanto estava no carrinho de um cliente.</p>';
+                $htmlBody .= '<p><strong>Cliente:</strong> ' . htmlspecialchars($customerName) . ' (' . htmlspecialchars($customerEmail) . ')</p>';
+                $htmlBody .= '<table style="border-collapse:collapse;width:100%;margin-top:16px;">';
+                $htmlBody .= '<tr style="background:#f3f4f6;"><th style="padding:10px;text-align:left;border:1px solid #e5e7eb;">Item</th><th style="padding:10px;border:1px solid #e5e7eb;">Preço Anterior</th><th style="padding:10px;border:1px solid #e5e7eb;">Preço Atual</th></tr>';
+                foreach ($changes as $change) {
+                    $htmlBody .= '<tr>';
+                    $htmlBody .= '<td style="padding:10px;border:1px solid #e5e7eb;">' . htmlspecialchars($change['title']) . ' (' . htmlspecialchars($change['date']) . ')</td>';
+                    $htmlBody .= '<td style="padding:10px;border:1px solid #e5e7eb;color:#dc2626;">$' . number_format($change['old_price'], 2) . '</td>';
+                    $htmlBody .= '<td style="padding:10px;border:1px solid #e5e7eb;color:#16a34a;font-weight:bold;">$' . number_format($change['new_price'], 2) . '</td>';
+                    $htmlBody .= '</tr>';
+                }
+                $htmlBody .= '</table>';
+
+                $emailService->send($adminEmail, 'Admin', 'Alerta: Preço alterado no carrinho de cliente', $htmlBody);
+            }
+        } catch (\Throwable $e) {}
+
+        // Enviar WhatsApp ao admin via Evolution API
+        try {
+            $whatsappNumber = '18294582170';
+            $evolutionApi = new \App\Services\EvolutionApi();
+            $evolutionApi->sendText($whatsappNumber, $msg);
+        } catch (\Throwable $e) {}
+
+        // Flash para o cliente saber que o preço mudou
+        $flashMsg = 'Atenção: o preço de alguns itens foi atualizado desde que foram adicionados ao carrinho.';
+        foreach ($changes as $change) {
+            $diff = $change['new_price'] - $change['old_price'];
+            $flashMsg .= ' ' . $change['title'] . ': de $' . number_format($change['old_price'], 2) . ' para $' . number_format($change['new_price'], 2) . '.';
+        }
+        $this->flash('warning', $flashMsg);
     }
 }
