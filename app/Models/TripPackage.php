@@ -49,10 +49,21 @@ class TripPackage extends Model
     }
 
     /**
-     * Retorna o preço base (menor preço entre as categorias).
+     * Retorna o preço base (menor preço entre as categorias, considerando regras dinâmicas).
      */
     public function getBasePrice(int $packageId): float
     {
+        // Primeiro, verificar se há regras dinâmicas com tipo "padrão" (default/weekday) ativas
+        $dynamicPrice = $this->db->fetchColumn(
+            "SELECT MIN(COALESCE(sale_price, price)) FROM trip_day_pricing WHERE package_id = ? AND active = 1 AND COALESCE(sale_price, price) > 0",
+            [$packageId]
+        );
+
+        if ($dynamicPrice && (float) $dynamicPrice > 0) {
+            return (float) $dynamicPrice;
+        }
+
+        // Fallback: preço das categorias do pacote
         $price = $this->db->fetchColumn(
             "SELECT MIN(COALESCE(sale_price, price)) FROM trip_package_categories WHERE package_id = ? AND COALESCE(sale_price, price) > 0",
             [$packageId]
