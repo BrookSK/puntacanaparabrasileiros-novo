@@ -181,7 +181,37 @@
                             <span style="font-size:0.8rem;color:#94a3b8;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;">ou</span>
                             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
                         </div>
-                        <a href="https://api.whatsapp.com/send?phone=18294582170&text=<?= urlencode("Olá! Estou no checkout e gostaria de tirar uma dúvida antes de finalizar minha reserva.\n\nReserva no valor de: \${$cart['grand_total']}\n\nPode me ajudar?") ?>" target="_blank" rel="noopener" class="whatsapp-checkout-btn" style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:#fff;border:2px solid #25D366;border-radius:10px;text-decoration:none;transition:all 0.2s ease;cursor:pointer;">
+                        <?php
+                        // Montar mensagem detalhada para WhatsApp
+                        $whatsappMsg = "Olá! Estou no checkout e gostaria de finalizar minha reserva com ajuda.\n\n";
+                        $whatsappMsg .= "📋 *MINHA RESERVA:*\n\n";
+
+                        if (!empty($cart['trips'])) {
+                            $whatsappMsg .= "🎯 *PASSEIOS:*\n";
+                            foreach ($cart['trips'] as $tripItem) {
+                                $whatsappMsg .= "• " . ($tripItem['trip_title'] ?? 'Passeio') . "\n";
+                                $whatsappMsg .= "  📅 Data: " . format_date($tripItem['date'] ?? '') . (!empty($tripItem['time']) ? " às " . $tripItem['time'] : '') . "\n";
+                                $whatsappMsg .= "  👥 " . (int)($tripItem['total_pax'] ?? 1) . " passageiro(s)\n";
+                                $whatsappMsg .= "  💵 " . money((float)($tripItem['total'] ?? 0)) . " USD\n\n";
+                            }
+                        }
+
+                        if (!empty($cart['transfers'])) {
+                            $whatsappMsg .= "🚐 *TRANSFERS:*\n";
+                            foreach ($cart['transfers'] as $transferItem) {
+                                $whatsappMsg .= "• " . ($transferItem['origin_title'] ?? '') . " → " . ($transferItem['destination_title'] ?? '') . "\n";
+                                $whatsappMsg .= "  🚗 " . ($transferItem['vehicle_title'] ?? 'Transfer') . "\n";
+                                $whatsappMsg .= "  📅 " . format_date($transferItem['date'] ?? '') . " às " . ($transferItem['time'] ?? '') . "\n";
+                                $pax = (int)($transferItem['adults'] ?? 0) + (int)($transferItem['children'] ?? 0) + (int)($transferItem['infants'] ?? 0);
+                                $whatsappMsg .= "  👥 " . $pax . " passageiro(s)\n";
+                                $whatsappMsg .= "  💵 " . money((float)($transferItem['price'] ?? 0)) . " USD\n\n";
+                            }
+                        }
+
+                        $whatsappMsg .= "💰 *Total: \$" . number_format($cart['grand_total'], 2) . " USD*\n\n";
+                        $whatsappMsg .= "Pode me ajudar a finalizar?";
+                        ?>
+                        <a href="https://api.whatsapp.com/send?phone=18294582170&text=<?= urlencode($whatsappMsg) ?>" target="_blank" rel="noopener" class="whatsapp-checkout-btn" style="display:flex;align-items:center;gap:14px;padding:16px 20px;background:#fff;border:2px solid #25D366;border-radius:10px;text-decoration:none;transition:all 0.2s ease;cursor:pointer;">
                             <div style="width:44px;height:44px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492l4.625-1.472A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818c-2.168 0-4.19-.588-5.932-1.614l-.424-.253-2.744.874.87-2.675-.278-.442A9.78 9.78 0 012.182 12c0-5.422 4.396-9.818 9.818-9.818S21.818 6.578 21.818 12s-4.396 9.818-9.818 9.818z"/></svg>
                             </div>
