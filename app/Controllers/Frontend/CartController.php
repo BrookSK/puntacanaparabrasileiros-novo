@@ -24,12 +24,116 @@ class CartController extends Controller
     public function index(Request $request, Response $response): void
     {
         $this->cartService->cleanExpired();
+
+        // Verificar se preços mudaram e atualizar
+        $priceChanges = $this->checkAndUpdatePrices();
+
         $summary = $this->cartService->getSummary();
+
+        if (!empty($priceChanges)) {
+            $msg = 'Atenção: o preço de alguns itens foi atualizado.';
+            foreach ($priceChanges as $change) {
+                $msg .= ' ' . $change['title'] . ': de $' . number_format($change['old_price'], 2) . ' para $' . number_format($change['new_price'], 2) . '.';
+            }
+            $this->flash('warning', $msg);
+
+            // Notificar admin
+            $this->notifyAdminPriceChange($priceChanges);
+        }
 
         $this->view('frontend/cart/index', [
             'cart' => $summary,
             'pageTitle' => 'Carrinho',
         ], 'app');
+    }
+
+    /**
+     * Verifica e atualiza preços dos itens no carrinho.
+     */
+    private function checkAndUpdatePrices(): array
+    {
+        $changes = [];
+        $pricingService = new PricingService();
+        $trips = $this->cartService->getTrips();
+        $updated = false;
+
+        foreach ($trips as $idx => $item) {
+            $packageId = (int) ($item['package_id'] ?? 0);
+            $date = $item['date'] ?? '';
+            $pax = $item['pax'] ?? [];
+            $extras = $item['extra_services'] ?? [];
+
+            if (!$packageId || !$date || empty($pax)) continue;
+
+            try {
+                $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extras);
+                $newTotal = (float) $calculation['total'];
+                $oldTotal = (float) ($item['total'] ?? 0);
+
+                if (abs($newTotal - $oldTotal) > 0.01) {
+                    $changes[] = [
+                        'type' => 'trip',
+                        'title' => $item['trip_title'] ?? 'Passeio',
+                        'old_price' => $oldTotal,
+                        'new_price' => $newTotal,
+                        'date' => $date,
+                    ];
+
+                    $trips[$idx]['total'] = $newTotal;
+                    $trips[$idx]['subtotal'] = $calculation['subtotal'];
+                    $trips[$idx]['breakdown'] = $calculation['breakdown'];
+                    $trips[$idx]['extras_total'] = $calculation['extras_total'];
+                    $trips[$idx]['group_discount'] = $calculation['group_discount'];
+                    $updated = true;
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        if ($updated) {
+            $this->session->set('cart_items', $trips);
+        }
+
+        return $changes;
+    }
+
+    /**
+     * Notifica admin sobre mudança de preço.
+     */
+    private function notifyAdminPriceChange(array $changes): void
+    {
+        $user = $this->currentUser();
+        $customerName = $user ? ($user['first_name'] . ' ' . ($user['last_name'] ?? '')) : 'Visitante';
+        $customerEmail = $user['email'] ?? 'não identificado';
+
+        // WhatsApp
+        $msg = "⚠️ ALERTA: Preço alterado no carrinho\n\n";
+        $msg .= "Cliente: {$customerName} ({$customerEmail})\n\n";
+        foreach ($changes as $change) {
+            $msg .= "• {$change['title']} ({$change['date']})\n";
+            $msg .= "  Antes: \$" . number_format($change['old_price'], 2) . "\n";
+            $msg .= "  Agora: \$" . number_format($change['new_price'], 2) . "\n\n";
+        }
+
+        try {
+            $evolutionApi = new \App\Services\EvolutionApi();
+            $evolutionApi->sendText('18294582170', $msg);
+        } catch (\Throwable $e) {}
+
+        // Email
+        try {
+            $adminEmail = \Core\App::getInstance()->setting('admin_email', '');
+            if ($adminEmail) {
+                $emailService = new \App\Services\EmailService();
+                $html = '<h3>⚠️ Preço alterado no carrinho de cliente</h3>';
+                $html .= '<p><strong>Cliente:</strong> ' . htmlspecialchars($customerName) . ' (' . htmlspecialchars($customerEmail) . ')</p>';
+                $html .= '<ul>';
+                foreach ($changes as $change) {
+                    $html .= '<li><strong>' . htmlspecialchars($change['title']) . '</strong> (' . htmlspecialchars($change['date']) . '): de $' . number_format($change['old_price'], 2) . ' para <strong>$' . number_format($change['new_price'], 2) . '</strong></li>';
+                }
+                $html .= '</ul>';
+                $emailService->send($adminEmail, 'Admin', 'Alerta: Preço alterado no carrinho', $html);
+            }
+        } catch (\Throwable $e) {}
     }
 
     public function add(Request $request, Response $response): void
