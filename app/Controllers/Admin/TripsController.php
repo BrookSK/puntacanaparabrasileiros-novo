@@ -330,69 +330,58 @@ class TripsController extends Controller
 
     /**
      * Notifica clientes logados que possuem o passeio no carrinho sobre mudança de preço.
+     * Registra a mudança no banco para que a notificação seja enviada quando o cliente acessar o carrinho.
      */
     private function notifyClientsOfPriceChange(int $tripId, string $tripTitle, array $oldPrices, array $newPrices): void
     {
-        // Buscar sessões ativas que possam ter este passeio no carrinho
-        $sessionsPath = BASE_PATH . '/storage/sessions';
-        if (!is_dir($sessionsPath)) return;
+        $oldPrice = reset($oldPrices);
+        $newPrice = reset($newPrices);
 
-        $sessionFiles = glob($sessionsPath . '/sess_*');
-        $notifiedEmails = [];
+        // Registrar mudança de preço no banco para notificação futura
+        $this->db->query(
+            "CREATE TABLE IF NOT EXISTS price_change_notifications (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                trip_id INT NOT NULL,
+                trip_title VARCHAR(255) NOT NULL,
+                old_price DECIMAL(10,2) NOT NULL,
+                new_price DECIMAL(10,2) NOT NULL,
+                notified_emails TEXT DEFAULT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )"
+        );
 
-        foreach ($sessionFiles as $file) {
-            $data = file_get_contents($file);
-            if (empty($data)) continue;
+        $this->db->insert('price_change_notifications', [
+            'trip_id' => $tripId,
+            'trip_title' => $tripTitle,
+            'old_price' => $oldPrice,
+            'new_price' => $newPrice,
+            'notified_emails' => '',
+        ]);
 
-            // Verificar se contém o trip_id no carrinho
-            if (strpos($data, '"trip_id"') === false && strpos($data, 'trip_id') === false) continue;
-            if (strpos($data, (string) $tripId) === false) continue;
-
-            // Tentar extrair email do usuário da sessão
-            // Formato: user|serializado...
-            if (preg_match('/billing_email["\s:]+["\']([^"\']+)["\']/', $data, $matches)) {
-                $email = $matches[1];
-            } elseif (preg_match('/"email"[;:]["s:\d+:"]*"([^"]+)"/', $data, $matches)) {
-                $email = $matches[1];
-            } else {
-                continue;
-            }
-
-            if (in_array($email, $notifiedEmails)) continue;
-            $notifiedEmails[] = $email;
-
-            // Determinar mudança de preço
-            $oldPrice = reset($oldPrices);
-            $newPrice = reset($newPrices);
-
-            // Enviar email ao cliente
+        // Notificar o admin imediatamente
+        $adminEmail = $this->setting('admin_email', '');
+        if ($adminEmail) {
             try {
                 $emailService = new \App\Services\EmailService();
-                $html = '<h3>Atualização de preço em seu carrinho</h3>';
-                $html .= '<p>Olá! O preço do passeio <strong>' . htmlspecialchars($tripTitle) . '</strong> que está no seu carrinho foi atualizado.</p>';
+                $html = '<h3>⚠️ Preço alterado: ' . htmlspecialchars($tripTitle) . '</h3>';
+                $html .= '<p>O preço foi alterado no painel admin.</p>';
                 $html .= '<p>Preço anterior: <s>$' . number_format($oldPrice, 2) . '</s></p>';
                 $html .= '<p>Novo preço: <strong style="color:#1B6F00;">$' . number_format($newPrice, 2) . '</strong></p>';
-                $html .= '<p>O valor no seu carrinho será atualizado automaticamente na próxima vez que acessar.</p>';
-                $html .= '<p><a href="' . rtrim($this->setting('site_url', ''), '/') . '/carrinho" style="background:#1B6F00;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:12px;">Ver meu carrinho</a></p>';
-                $emailService->send($email, 'Cliente', 'Atualização de preço: ' . $tripTitle, $html);
+                $html .= '<p>Clientes com este passeio no carrinho serão notificados automaticamente ao acessarem o site.</p>';
+                $emailService->send($adminEmail, 'Admin', 'Preço alterado: ' . $tripTitle, $html);
             } catch (\Throwable $e) {}
-
-            // Enviar WhatsApp se tiver telefone na sessão
-            if (preg_match('/"phone"[;:]["s:\d+:"]*"([^"]+)"/', $data, $phoneMatch)) {
-                try {
-                    $phone = preg_replace('/[^\d+]/', '', $phoneMatch[1]);
-                    if (strlen($phone) >= 10) {
-                        $evolutionApi = new \App\Services\EvolutionApi();
-                        $msg = "⚠️ *Atualização de preço*\n\n";
-                        $msg .= "O passeio *{$tripTitle}* que está no seu carrinho teve o preço atualizado.\n\n";
-                        $msg .= "Preço anterior: \$" . number_format($oldPrice, 2) . "\n";
-                        $msg .= "Novo preço: \$" . number_format($newPrice, 2) . "\n\n";
-                        $msg .= "Acesse seu carrinho para continuar a compra.";
-                        $evolutionApi->sendText($phone, $msg);
-                    }
-                } catch (\Throwable $e) {}
-            }
         }
+
+        // Notificar admin por WhatsApp
+        try {
+            $evolutionApi = new \App\Services\EvolutionApi();
+            $msg = "⚠️ *Preço alterado*\n\n";
+            $msg .= "Passeio: *{$tripTitle}*\n";
+            $msg .= "Preço anterior: \$" . number_format($oldPrice, 2) . "\n";
+            $msg .= "Novo preço: \$" . number_format($newPrice, 2) . "\n\n";
+            $msg .= "Clientes com este passeio no carrinho serão notificados ao acessar o site.";
+            $evolutionApi->sendText('18294582170', $msg);
+        } catch (\Throwable $e) {}
     }
 
     private function savePackages(int $tripId, Request $request): void

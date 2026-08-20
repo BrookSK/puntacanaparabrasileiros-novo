@@ -97,41 +97,74 @@ class CartController extends Controller
     }
 
     /**
-     * Notifica admin sobre mudança de preço.
+     * Notifica admin e cliente sobre mudança de preço.
      */
     private function notifyAdminPriceChange(array $changes): void
     {
         $user = $this->currentUser();
         $customerName = $user ? ($user['first_name'] . ' ' . ($user['last_name'] ?? '')) : 'Visitante';
-        $customerEmail = $user['email'] ?? 'não identificado';
+        $customerEmail = $user['email'] ?? '';
+        $customerPhone = $user['phone'] ?? '';
 
-        // WhatsApp
-        $msg = "⚠️ ALERTA: Preço alterado no carrinho\n\n";
-        $msg .= "Cliente: {$customerName} ({$customerEmail})\n\n";
-        foreach ($changes as $change) {
-            $msg .= "• {$change['title']} ({$change['date']})\n";
-            $msg .= "  Antes: \$" . number_format($change['old_price'], 2) . "\n";
-            $msg .= "  Agora: \$" . number_format($change['new_price'], 2) . "\n\n";
+        // Notificar o CLIENTE por email
+        if ($customerEmail) {
+            try {
+                $emailService = new \App\Services\EmailService();
+                $html = '<h3>Atualização de preço no seu carrinho</h3>';
+                $html .= '<p>Olá, ' . htmlspecialchars($customerName) . '!</p>';
+                $html .= '<p>O preço de um item no seu carrinho foi atualizado:</p>';
+                $html .= '<ul>';
+                foreach ($changes as $change) {
+                    $html .= '<li><strong>' . htmlspecialchars($change['title']) . '</strong>: de <s>$' . number_format($change['old_price'], 2) . '</s> para <strong style="color:#1B6F00;">$' . number_format($change['new_price'], 2) . '</strong></li>';
+                }
+                $html .= '</ul>';
+                $html .= '<p>O valor foi atualizado automaticamente no seu carrinho.</p>';
+                $html .= '<p><a href="' . rtrim(\Core\App::getInstance()->setting('site_url', ''), '/') . '/carrinho" style="background:#1B6F00;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:12px;">Ver meu carrinho</a></p>';
+                $emailService->send($customerEmail, $customerName, 'Atualização de preço no seu carrinho', $html);
+            } catch (\Throwable $e) {}
         }
 
+        // Notificar o CLIENTE por WhatsApp
+        if ($customerPhone) {
+            try {
+                $phone = preg_replace('/[^\d+]/', '', $customerPhone);
+                if (strlen($phone) >= 10) {
+                    $evolutionApi = new \App\Services\EvolutionApi();
+                    $msg = "⚠️ *Atualização de preço no seu carrinho*\n\n";
+                    $msg .= "Olá, {$customerName}!\n\n";
+                    foreach ($changes as $change) {
+                        $msg .= "• *{$change['title']}*\n";
+                        $msg .= "  Preço anterior: \$" . number_format($change['old_price'], 2) . "\n";
+                        $msg .= "  Novo preço: \$" . number_format($change['new_price'], 2) . "\n\n";
+                    }
+                    $msg .= "O valor foi atualizado automaticamente no seu carrinho.";
+                    $evolutionApi->sendText($phone, $msg);
+                }
+            } catch (\Throwable $e) {}
+        }
+
+        // Notificar o ADMIN
+        $msg = "⚠️ Preço alterado no carrinho de: {$customerName}\n\n";
+        foreach ($changes as $change) {
+            $msg .= "• {$change['title']}: \$" . number_format($change['old_price'], 2) . " → \$" . number_format($change['new_price'], 2) . "\n";
+        }
         try {
             $evolutionApi = new \App\Services\EvolutionApi();
             $evolutionApi->sendText('18294582170', $msg);
         } catch (\Throwable $e) {}
 
-        // Email
         try {
             $adminEmail = \Core\App::getInstance()->setting('admin_email', '');
             if ($adminEmail) {
                 $emailService = new \App\Services\EmailService();
-                $html = '<h3>⚠️ Preço alterado no carrinho de cliente</h3>';
+                $html = '<h3>Preço atualizado no carrinho de cliente</h3>';
                 $html .= '<p><strong>Cliente:</strong> ' . htmlspecialchars($customerName) . ' (' . htmlspecialchars($customerEmail) . ')</p>';
                 $html .= '<ul>';
                 foreach ($changes as $change) {
-                    $html .= '<li><strong>' . htmlspecialchars($change['title']) . '</strong> (' . htmlspecialchars($change['date']) . '): de $' . number_format($change['old_price'], 2) . ' para <strong>$' . number_format($change['new_price'], 2) . '</strong></li>';
+                    $html .= '<li>' . htmlspecialchars($change['title']) . ': $' . number_format($change['old_price'], 2) . ' → $' . number_format($change['new_price'], 2) . '</li>';
                 }
                 $html .= '</ul>';
-                $emailService->send($adminEmail, 'Admin', 'Alerta: Preço alterado no carrinho', $html);
+                $emailService->send($adminEmail, 'Admin', 'Preço atualizado no carrinho de ' . $customerName, $html);
             }
         } catch (\Throwable $e) {}
     }
