@@ -149,6 +149,7 @@
                     <!-- Método de Pagamento -->
                     <div class="checkout-section">
                         <h3>Forma de Pagamento</h3>
+                        <?php if ($checkoutOnlineEnabled ?? true): ?>
                         <div class="payment-methods">
                             <?php foreach ($gateways as $gw): ?>
                             <label class="payment-option <?= $gw['id'] === ($gateways[0]['id'] ?? '') ? 'active' : '' ?>">
@@ -174,13 +175,18 @@
                             </label>
                             <?php endforeach; ?>
                         </div>
+                        <?php endif; ?>
 
-                        <!-- Opção: Finalizar por WhatsApp -->
+                        <?php if (($checkoutWhatsappEnabled ?? true) && ($checkoutOnlineEnabled ?? true)): ?>
+                        <!-- Divisor "ou" entre pagamento online e WhatsApp -->
                         <div style="display:flex;align-items:center;gap:12px;margin:24px 0 16px;">
                             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
                             <span style="font-size:0.8rem;color:#94a3b8;font-weight:500;text-transform:uppercase;letter-spacing:0.5px;">ou</span>
                             <div style="flex:1;height:1px;background:#e2e8f0;"></div>
                         </div>
+                        <?php endif; ?>
+
+                        <?php if ($checkoutWhatsappEnabled ?? true): ?>
                         <?php
                         // Montar mensagem detalhada para WhatsApp
                         $whatsappMsg = "Olá! Estou no checkout e gostaria de finalizar minha reserva com ajuda.\n\n";
@@ -224,6 +230,7 @@
                         <style>
                             .whatsapp-checkout-btn:hover { background: #f0fdf4 !important; border-color: #16a34a !important; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37,211,102,0.15); }
                         </style>
+                        <?php endif; ?>
 
                         <!-- CPF para PIX -->
                         <div class="pix-cpf-field" id="pixCpfField" style="display:none;">

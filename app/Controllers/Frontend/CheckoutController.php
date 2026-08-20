@@ -76,6 +76,8 @@ class CheckoutController extends Controller
             'partialAmount' => $effectivePayAmount,
             'paypalClientId' => $paypalService->getClientId(),
             'stripePublishableKey' => $stripeService->getPublishableKey(),
+            'checkoutOnlineEnabled' => $this->setting('checkout_online_enabled', '1') === '1',
+            'checkoutWhatsappEnabled' => $this->setting('checkout_whatsapp_enabled', '1') === '1',
             'pageTitle' => 'Checkout',
         ], 'app');
     }
