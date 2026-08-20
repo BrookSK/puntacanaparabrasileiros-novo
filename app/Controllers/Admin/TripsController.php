@@ -254,22 +254,145 @@ class TripsController extends Controller
             $this->db->delete('trip_day_pricing', 'package_id = ?', [(int) $pkg['id']]);
         }
 
+        // Guardar preços antigos para detectar mudanças
+        $oldPrices = [];
+        foreach ($packages as $pkg) {
+            $oldPrices[(int)$pkg['id']] = $this->packageModel->getBasePrice((int)$pkg['id']);
+        }
+
         foreach ($rules as $rule) {
             if (empty($rule['package_id']) || empty($rule['category_id']) || empty($rule['price'])) continue;
+
+            $packageId = (int) $rule['package_id'];
+            $categoryId = (int) $rule['category_id'];
+            $price = (float) $rule['price'];
+            $salePrice = !empty($rule['sale_price']) ? (float) $rule['sale_price'] : null;
+
+            // Inserir regra dinâmica
             $this->db->insert('trip_day_pricing', [
-                'package_id' => (int) $rule['package_id'],
-                'traveler_category_id' => (int) $rule['category_id'],
+                'package_id' => $packageId,
+                'traveler_category_id' => $categoryId,
                 'rule_type' => $rule['rule_type'] ?? 'weekday',
                 'day_key' => $rule['day_key'] ?? '0',
-                'price' => (float) $rule['price'],
-                'sale_price' => !empty($rule['sale_price']) ? (float) $rule['sale_price'] : null,
+                'price' => $price,
+                'sale_price' => $salePrice,
                 'label' => $rule['label'] ?? null,
                 'active' => 1,
             ]);
+
+            // TAMBÉM atualizar o preço base na trip_package_categories
+            $existing = $this->db->fetchOne(
+                "SELECT id FROM trip_package_categories WHERE package_id = ? AND traveler_category_id = ?",
+                [$packageId, $categoryId]
+            );
+            if ($existing) {
+                $this->db->update('trip_package_categories', [
+                    'price' => $price,
+                    'sale_price' => $salePrice,
+                ], 'id = ?', [(int) $existing['id']]);
+            } else {
+                // Criar se não existe
+                $this->db->insert('trip_package_categories', [
+                    'package_id' => $packageId,
+                    'traveler_category_id' => $categoryId,
+                    'price' => $price,
+                    'sale_price' => $salePrice,
+                    'min_pax' => 1,
+                    'max_pax' => null,
+                ]);
+            }
+        }
+
+        // Verificar se o preço mudou e notificar clientes
+        $newPrices = [];
+        foreach ($packages as $pkg) {
+            $newPrices[(int)$pkg['id']] = $this->packageModel->getBasePrice((int)$pkg['id']);
+        }
+
+        $trip = $this->tripModel->find($id);
+        $priceChanged = false;
+        foreach ($oldPrices as $pkgId => $oldPrice) {
+            $newPrice = $newPrices[$pkgId] ?? $oldPrice;
+            if (abs($newPrice - $oldPrice) > 0.01) {
+                $priceChanged = true;
+                break;
+            }
+        }
+
+        // Se preço mudou, notificar clientes que têm este passeio no carrinho
+        if ($priceChanged && $trip) {
+            $this->notifyClientsOfPriceChange($id, $trip['title'], $oldPrices, $newPrices);
         }
 
         $this->flash('success', 'Regras de preço salvas com sucesso!');
         $this->redirect('/admin/passeios/' . $id . '/precos');
+    }
+
+    /**
+     * Notifica clientes logados que possuem o passeio no carrinho sobre mudança de preço.
+     */
+    private function notifyClientsOfPriceChange(int $tripId, string $tripTitle, array $oldPrices, array $newPrices): void
+    {
+        // Buscar sessões ativas que possam ter este passeio no carrinho
+        $sessionsPath = BASE_PATH . '/storage/sessions';
+        if (!is_dir($sessionsPath)) return;
+
+        $sessionFiles = glob($sessionsPath . '/sess_*');
+        $notifiedEmails = [];
+
+        foreach ($sessionFiles as $file) {
+            $data = file_get_contents($file);
+            if (empty($data)) continue;
+
+            // Verificar se contém o trip_id no carrinho
+            if (strpos($data, '"trip_id"') === false && strpos($data, 'trip_id') === false) continue;
+            if (strpos($data, (string) $tripId) === false) continue;
+
+            // Tentar extrair email do usuário da sessão
+            // Formato: user|serializado...
+            if (preg_match('/billing_email["\s:]+["\']([^"\']+)["\']/', $data, $matches)) {
+                $email = $matches[1];
+            } elseif (preg_match('/"email"[;:]["s:\d+:"]*"([^"]+)"/', $data, $matches)) {
+                $email = $matches[1];
+            } else {
+                continue;
+            }
+
+            if (in_array($email, $notifiedEmails)) continue;
+            $notifiedEmails[] = $email;
+
+            // Determinar mudança de preço
+            $oldPrice = reset($oldPrices);
+            $newPrice = reset($newPrices);
+
+            // Enviar email ao cliente
+            try {
+                $emailService = new \App\Services\EmailService();
+                $html = '<h3>Atualização de preço em seu carrinho</h3>';
+                $html .= '<p>Olá! O preço do passeio <strong>' . htmlspecialchars($tripTitle) . '</strong> que está no seu carrinho foi atualizado.</p>';
+                $html .= '<p>Preço anterior: <s>$' . number_format($oldPrice, 2) . '</s></p>';
+                $html .= '<p>Novo preço: <strong style="color:#1B6F00;">$' . number_format($newPrice, 2) . '</strong></p>';
+                $html .= '<p>O valor no seu carrinho será atualizado automaticamente na próxima vez que acessar.</p>';
+                $html .= '<p><a href="' . rtrim($this->setting('site_url', ''), '/') . '/carrinho" style="background:#1B6F00;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:12px;">Ver meu carrinho</a></p>';
+                $emailService->send($email, 'Cliente', 'Atualização de preço: ' . $tripTitle, $html);
+            } catch (\Throwable $e) {}
+
+            // Enviar WhatsApp se tiver telefone na sessão
+            if (preg_match('/"phone"[;:]["s:\d+:"]*"([^"]+)"/', $data, $phoneMatch)) {
+                try {
+                    $phone = preg_replace('/[^\d+]/', '', $phoneMatch[1]);
+                    if (strlen($phone) >= 10) {
+                        $evolutionApi = new \App\Services\EvolutionApi();
+                        $msg = "⚠️ *Atualização de preço*\n\n";
+                        $msg .= "O passeio *{$tripTitle}* que está no seu carrinho teve o preço atualizado.\n\n";
+                        $msg .= "Preço anterior: \$" . number_format($oldPrice, 2) . "\n";
+                        $msg .= "Novo preço: \$" . number_format($newPrice, 2) . "\n\n";
+                        $msg .= "Acesse seu carrinho para continuar a compra.";
+                        $evolutionApi->sendText($phone, $msg);
+                    }
+                } catch (\Throwable $e) {}
+            }
+        }
     }
 
     private function savePackages(int $tripId, Request $request): void
