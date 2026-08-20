@@ -106,3 +106,28 @@
         <?php endif; ?>
     </div>
 </section>
+
+<?php if (has_flash('warning')): ?>
+<!-- Pop-up de aviso de mudança de preço -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var msg = <?= json_encode(flash('warning')) ?>;
+    if (!msg) return;
+    var overlay = document.createElement('div');
+    overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+    var modal = document.createElement('div');
+    modal.style.cssText = 'background:#fff;border-radius:12px;padding:32px 28px 24px;max-width:460px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.3);text-align:center;animation:modalFadeIn 0.3s ease;';
+    modal.innerHTML = '<div style="margin-bottom:16px;"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>'
+        + '<h3 style="margin:0 0 12px;font-size:1.25rem;color:#1a1a1a;font-weight:600;">Preço Atualizado</h3>'
+        + '<p style="margin:0 0 24px;font-size:0.95rem;color:#555;line-height:1.5;">' + msg + '</p>'
+        + '<button id="priceChangeOkBtn" style="background:#1B6F00;color:#fff;border:none;padding:12px 40px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;">OK, entendi</button>';
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+    document.getElementById('priceChangeOkBtn').addEventListener('click', function() {
+        overlay.remove();
+        document.body.style.overflow = '';
+    });
+});
+</script>
+<?php endif; ?>

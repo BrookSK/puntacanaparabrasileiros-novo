@@ -110,16 +110,12 @@ class CartController extends Controller
         if ($customerEmail) {
             try {
                 $emailService = new \App\Services\EmailService();
-                $html = '<h3>Atualização de preço no seu carrinho</h3>';
-                $html .= '<p>Olá, ' . htmlspecialchars($customerName) . '!</p>';
-                $html .= '<p>O preço de um item no seu carrinho foi atualizado:</p>';
-                $html .= '<ul>';
-                foreach ($changes as $change) {
-                    $html .= '<li><strong>' . htmlspecialchars($change['title']) . '</strong>: de <s>$' . number_format($change['old_price'], 2) . '</s> para <strong style="color:#1B6F00;">$' . number_format($change['new_price'], 2) . '</strong></li>';
-                }
-                $html .= '</ul>';
-                $html .= '<p>O valor foi atualizado automaticamente no seu carrinho.</p>';
-                $html .= '<p><a href="' . rtrim(\Core\App::getInstance()->setting('site_url', ''), '/') . '/carrinho" style="background:#1B6F00;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;margin-top:12px;">Ver meu carrinho</a></p>';
+                $siteUrl = rtrim(\Core\App::getInstance()->setting('site_url', 'https://puntacananovo.lrvweb.com.br'), '/');
+                $html = \Core\View::render('emails/price-change', [
+                    'customerName' => $customerName,
+                    'changes' => $changes,
+                    'siteUrl' => $siteUrl,
+                ]);
                 $emailService->send($customerEmail, $customerName, 'Atualização de preço no seu carrinho', $html);
             } catch (\Throwable $e) {}
         }
@@ -127,7 +123,13 @@ class CartController extends Controller
         // Notificar o CLIENTE por WhatsApp
         if ($customerPhone) {
             try {
-                $phone = preg_replace('/[^\d+]/', '', $customerPhone);
+                // Limpar telefone: remover tudo que não é dígito
+                $phone = preg_replace('/[^\d]/', '', $customerPhone);
+                // Se começa com 0, remover
+                if (str_starts_with($phone, '0')) $phone = substr($phone, 1);
+                // Se não tem código de país (menos de 12 dígitos), assumir Brasil (+55)
+                if (strlen($phone) <= 11) $phone = '55' . $phone;
+
                 if (strlen($phone) >= 10) {
                     $evolutionApi = new \App\Services\EvolutionApi();
                     $msg = "⚠️ *Atualização de preço no seu carrinho*\n\n";
