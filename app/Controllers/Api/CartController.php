@@ -198,7 +198,7 @@ class CartController extends Controller
     public function uploadFlightVoucher(Request $request, Response $response): void
     {
         if (!$request->hasFile('flight_voucher')) {
-            $this->json(['error' => 'Nenhum arquivo enviado.'], 400);
+            $this->json(['error' => 'Nenhum arquivo enviado.', 'debug' => 'hasFile=false'], 400);
             return;
         }
 
@@ -216,11 +216,13 @@ class CartController extends Controller
 
         $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
         $filename = 'flight-voucher-' . uniqid() . '-' . time() . '.' . $ext;
-        $destination = BASE_PATH . '/public/uploads/flight-vouchers/' . $filename;
+        $dir = BASE_PATH . '/public/uploads/flight-vouchers';
+        $destination = $dir . '/' . $filename;
 
         // Criar diretório se não existir
-        $dir = dirname($destination);
-        if (!is_dir($dir)) mkdir($dir, 0755, true);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0775, true);
+        }
 
         if (move_uploaded_file($file['tmp_name'], $destination)) {
             $this->json([
@@ -229,7 +231,7 @@ class CartController extends Controller
                 'filename' => $file['name'],
             ]);
         } else {
-            $this->json(['error' => 'Erro ao salvar arquivo.'], 500);
+            $this->json(['error' => 'Erro ao salvar arquivo. Verifique permissões do servidor.'], 500);
         }
     }
 }

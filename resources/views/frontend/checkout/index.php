@@ -162,7 +162,7 @@
                             var formData = new FormData();
                             formData.append('flight_voucher', file);
                             formData.append('_token', '<?= e(csrf_token()) ?>');
-                            fetch('/api/checkout/upload-flight-voucher', { method: 'POST', headers: { 'X-CSRF-TOKEN': '<?= e(csrf_token()) ?>' }, body: formData })
+                            fetch('/api/checkout/upload-flight-voucher', { method: 'POST', headers: { 'X-CSRF-TOKEN': '<?= e(csrf_token()) ?>', 'X-Requested-With': 'XMLHttpRequest' }, body: formData })
                                 .then(function(r) { return r.json(); })
                                 .then(function(data) {
                                     if (data.success) {
@@ -171,12 +171,14 @@
                                         label.style.background = '#f0fdf4';
                                         hiddenPath.value = data.path;
                                     } else {
-                                        text.textContent = 'Erro no upload. Tente novamente.';
+                                        text.textContent = 'Erro: ' + (data.error || 'Falha no upload');
                                         label.style.borderColor = '#dc2626';
+                                        console.error('Upload error:', data);
                                     }
-                                }).catch(function() {
-                                    text.textContent = 'Erro no upload. Tente novamente.';
+                                }).catch(function(err) {
+                                    text.textContent = 'Erro de conexão. Tente novamente.';
                                     label.style.borderColor = '#dc2626';
+                                    console.error('Upload fetch error:', err);
                                 });
                         } else {
                             text.textContent = 'Clique para enviar voucher da passagem aérea';
