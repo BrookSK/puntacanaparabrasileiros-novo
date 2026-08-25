@@ -298,7 +298,7 @@ class VoucherService
     }
 
     /**
-     * Envia vouchers por WhatsApp ao cliente.
+     * Envia vouchers por WhatsApp ao cliente — consolidado em poucas mensagens.
      */
     public function sendVouchersByWhatsApp(int $bookingId): bool
     {
@@ -311,7 +311,6 @@ class VoucherService
         // Buscar instância WhatsApp ativa
         $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE connection_status = 'open' LIMIT 1");
         if (!$instance) {
-            // Tentar instância padrão
             $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE is_default = 1 LIMIT 1");
             if (!$instance) {
                 error_log("[VoucherService] WhatsApp: Nenhuma instância disponível para enviar vouchers booking #{$bookingId}");
@@ -324,68 +323,128 @@ class VoucherService
         $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
         $siteUrl = rtrim(App::getInstance()->setting('site_url', 'https://puntacananovo.lrvweb.com.br'), '/');
 
-        // Mensagem introdutória
-        $intro = "🎉 *Seus Vouchers - Punta Cana para Brasileiros*\n\n";
-        $intro .= "Olá, *{$customerName}*!\n\n";
-        $intro .= "Sua reserva *{$booking['booking_number']}* foi confirmada! 🎊\n\n";
-        $intro .= "Seguem seus vouchers abaixo. Apresente-os pelo celular no dia do passeio/transfer. *Não é necessário imprimir.*\n\n";
-        $intro .= "━━━━━━━━━━━━━━━━━━━━";
+        // ─── MENSAGEM 1: Documentos importantes + boas-vindas ───
+        $msg1 = "*Punta Cana para Brasileiros* 🌴\n\n";
+        $msg1 .= "Olá, *{$customerName}*! Sua reserva *{$booking['booking_number']}* foi confirmada! ✅\n\n";
+        $msg1 .= "Apresente os vouchers abaixo pelo celular. *Não é necessário imprimir.*\n\n";
+        $msg1 .= "📄 *Documentos Importantes:*\n";
+        $msg1 .= "• Termos e Condições: {$siteUrl}/termos-e-condicoes\n";
+        $msg1 .= "• Política de Cancelamento: {$siteUrl}/politicas-de-cancelamento\n\n";
+        $msg1 .= "📱 Acesse online: {$siteUrl}/minha-conta/reservas\n\n";
+        $msg1 .= "Dúvidas? Estamos à disposição!\n";
+        $msg1 .= "Av. Barceló, nº 91, Local 7 - Plaza Arrecife, Verón, Punta Cana";
 
-        $evolutionApi->sendText($phone, $intro);
+        $evolutionApi->sendText($phone, $msg1);
+        usleep(1000000); // 1s entre mensagens
 
-        // Enviar cada voucher como documento
+        // ─── Preparar dados dos vouchers com info completa ───
+        $bookingItems = $this->db->fetchAll(
+            "SELECT bi.*, t.title as trip_title FROM booking_items bi INNER JOIN trips t ON bi.trip_id = t.id WHERE bi.booking_id = ?",
+            [$bookingId]
+        );
+        $transferBookings = $this->db->fetchAll(
+            "SELECT tb.*, tv.title as vehicle_title, tlo.title as origin_title, tld.title as destination_title
+             FROM transfer_bookings tb
+             INNER JOIN transfer_vehicles tv ON tb.vehicle_id = tv.id
+             INNER JOIN transfer_locations tlo ON tb.origin_id = tlo.id
+             INNER JOIN transfer_locations tld ON tb.destination_id = tld.id
+             WHERE tb.booking_id = ?",
+            [$bookingId]
+        );
+
+        // ─── ENVIAR CADA VOUCHER COM PDF + INFO ───
         $sentCount = 0;
         foreach ($vouchers as $voucher) {
             $filePath = $this->vouchersPath . '/' . $voucher['file_path'];
             if (!file_exists($filePath)) continue;
 
-            // Determinar nome e caption do voucher
+            // Montar caption com informações completas
             if ($voucher['type'] === 'trip') {
-                $name = $voucher['trip_name'] ?? 'Passeio';
-                $caption = "📋 *VOUCHER PASSEIO*\n{$name}\nCódigo: {$voucher['reference_code']}";
+                // Buscar info do passeio
+                $tripInfo = null;
+                foreach ($bookingItems as $bi) {
+                    if ((int)$bi['id'] === (int)($voucher['booking_item_id'] ?? 0)) {
+                        $tripInfo = $bi;
+                        break;
+                    }
+                }
+                $tripName = $tripInfo['trip_title'] ?? ($voucher['trip_name'] ?? 'Passeio');
+                $tripDate = $tripInfo['trip_date'] ?? '';
+                $tripTime = $tripInfo['trip_time'] ?? '';
+                $tripPax = (int)($tripInfo['total_pax'] ?? 1);
+
+                $caption = "🎯 *VOUCHER PASSEIO*\n\n";
+                $caption .= "📍 *{$tripName}*\n";
+                $caption .= "📅 Data: {$tripDate}\n";
+                $caption .= "⏰ Horário: {$tripTime}\n";
+                $caption .= "👥 {$tripPax} passageiro(s)\n";
+                $caption .= "🔢 Código: {$voucher['reference_code']}";
+
+                $fileName = 'Voucher-Passeio-' . $voucher['reference_code'] . '.html';
             } else {
-                $routeName = $voucher['route_name'] ?? 'Transfer';
-                $name = $routeName;
-                $caption = "🚐 *VOUCHER TRANSFER*\n{$routeName}\nCódigo: {$voucher['reference_code']}";
+                // Buscar info do transfer
+                $transferInfo = null;
+                foreach ($transferBookings as $tb) {
+                    if ((int)$tb['id'] === (int)($voucher['transfer_booking_id'] ?? 0)) {
+                        $transferInfo = $tb;
+                        break;
+                    }
+                }
+                $vehicleName = $transferInfo['vehicle_title'] ?? 'Transfer';
+                $origin = $transferInfo['origin_title'] ?? '';
+                $destination = $transferInfo['destination_title'] ?? '';
+                $date = $transferInfo['date'] ?? '';
+                $time = $transferInfo['time'] ?? '';
+                $pax = (int)($transferInfo['adults'] ?? 0) + (int)($transferInfo['children'] ?? 0) + (int)($transferInfo['infants'] ?? 0);
+
+                $caption = "🚐 *VOUCHER TRANSFER*\n\n";
+                $caption .= "🚗 *{$vehicleName}*\n";
+                $caption .= "📍 {$origin} → {$destination}\n";
+                $caption .= "📅 Data: {$date}\n";
+                $caption .= "⏰ Horário: {$time}\n";
+                $caption .= "👥 {$pax} passageiro(s)\n";
+                $caption .= "🔢 Código: {$voucher['reference_code']}";
+
+                $fileName = 'Voucher-Transfer-' . $voucher['reference_code'] . '.html';
             }
 
-            // Converter HTML do voucher para enviar como documento
-            $fileContent = base64_encode(file_get_contents($filePath));
-            $fileName = 'Voucher-' . ($voucher['type'] === 'trip' ? 'Passeio' : 'Transfer') . '-' . $voucher['reference_code'] . '.html';
+            // Enviar como documento PDF
+            $fileContent = file_get_contents($filePath);
+
+            // Converter HTML para PDF
+            $pdfContent = null;
+            if (class_exists('\\Dompdf\\Dompdf')) {
+                try {
+                    $dompdf = new \Dompdf\Dompdf(['isRemoteEnabled' => true]);
+                    $dompdf->loadHtml($fileContent);
+                    $dompdf->setPaper('A4', 'portrait');
+                    $dompdf->render();
+                    $pdfContent = $dompdf->output();
+                    $fileName = str_replace('.html', '.pdf', $fileName);
+                    $mimeType = 'application/pdf';
+                } catch (\Throwable $e) {
+                    error_log("[VoucherService] PDF generation error: " . $e->getMessage());
+                    $pdfContent = null;
+                }
+            }
+
+            // Se não conseguiu gerar PDF, envia HTML como fallback
+            if ($pdfContent) {
+                $fileBase64 = base64_encode($pdfContent);
+            } else {
+                $fileBase64 = base64_encode($fileContent);
+                $mimeType = 'text/html';
+            }
 
             try {
-                $evolutionApi->sendMedia(
-                    $phone,
-                    'document',
-                    $fileContent,
-                    $caption,
-                    $fileName,
-                    'text/html'
-                );
+                $evolutionApi->sendMedia($phone, 'document', $fileBase64, $caption, $fileName, $mimeType);
                 $this->voucherModel->markWhatsAppSent((int) $voucher['id']);
                 $sentCount++;
             } catch (\Throwable $e) {
                 error_log("[VoucherService] WhatsApp send error: " . $e->getMessage());
             }
 
-            // Pequena pausa entre envios para não sobrecarregar a API
-            usleep(500000); // 0.5s
-        }
-
-        // Mensagem final com link, documentos importantes e contato
-        if ($sentCount > 0) {
-            $final = "━━━━━━━━━━━━━━━━━━━━\n\n";
-            $final .= "✅ Total de *{$sentCount} voucher(s)* enviados.\n\n";
-            $final .= "📄 *DOCUMENTOS IMPORTANTES:*\n";
-            $final .= "• Termos e Condições: {$siteUrl}/termos-e-condicoes\n";
-            $final .= "• Política de Cancelamento: {$siteUrl}/politicas-de-cancelamento\n\n";
-            $final .= "📱 Acesse seus vouchers online:\n{$siteUrl}/minha-conta/reservas\n\n";
-            $final .= "Dúvidas? Estamos à disposição! 🇧🇷\n";
-            $final .= "*Punta Cana para Brasileiros*\n";
-            $final .= "Av. Barceló, nº 91, Local 7 - Plaza Arrecife\nVerón, Punta Cana";
-
-            usleep(500000);
-            $evolutionApi->sendText($phone, $final);
+            usleep(1000000); // 1s entre cada voucher
         }
 
         return $sentCount > 0;

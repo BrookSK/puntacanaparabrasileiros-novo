@@ -482,41 +482,13 @@ class CheckoutController extends Controller
             );
         }
 
-        // ── WHATSAPP ───────────────────────────────────────────────────────
+        // ── WHATSAPP (VOUCHERS + NOTIFICAÇÃO ADMIN) ─────────────────────────
 
-        $whatsappService = new WhatsAppService();
+        // Enviar vouchers por WhatsApp ao cliente (já envia tudo consolidado)
+        $voucherService->sendVouchersByWhatsApp($bookingId);
 
-        // WhatsApp para passeios
-        if (!empty($items)) {
-            try {
-                $whatsappService->sendTripConfirmation($booking, [
-                    'title'     => $items[0]['trip_title'] ?? '',
-                    'date'      => $items[0]['trip_date'] ?? '',
-                    'time'      => $items[0]['trip_time'] ?? '',
-                    'pax_info'  => '',
-                    'reference' => $booking['booking_number'],
-                ]);
-            } catch (\Throwable $e) { /* continua */ }
-        }
-
-        // WhatsApp para transfers (todos os tipos)
-        if (!empty($transfers)) {
-            foreach ($transfers as $tr) {
-                try {
-                    $whatsappService->sendTransferConfirmation([
-                        'customer_name' => trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '')),
-                        'customer_phone' => $booking['billing_phone'] ?? '',
-                        'vehicle_name' => $tr['vehicle_title'] ?? 'Transfer',
-                        'origin' => $tr['origin_title'] ?? '',
-                        'destination' => $tr['destination_title'] ?? '',
-                        'date' => $tr['date'] ?? '',
-                        'time' => $tr['time'] ?? '',
-                        'pax_info' => ($tr['adults'] ?? 1) . ' adulto(s)',
-                        'reference' => $booking['booking_number'],
-                    ]);
-                } catch (\Throwable $e) { /* continua */ }
-            }
-        }
+        // Notificar admin por WhatsApp sobre nova venda
+        $this->notifyAdminNewBooking($booking, $items, $transfers);
 
         // ── COMISSÃO DE AFILIADO ───────────────────────────────────────────
 
@@ -528,6 +500,52 @@ class CheckoutController extends Controller
                 (float) $booking['total']
             );
         }
+    }
+
+    /**
+     * Notifica admin por WhatsApp sobre nova venda.
+     */
+    private function notifyAdminNewBooking(array $booking, array $items, array $transfers): void
+    {
+        try {
+            $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE connection_status = 'open' LIMIT 1");
+            if (!$instance) $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE is_default = 1 LIMIT 1");
+            if (!$instance) return;
+
+            $evolutionApi = \App\Services\EvolutionApi::fromInstance($instance);
+            $adminPhone = '18294582170';
+            $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
+
+            $msg = "🛒 *NOVA VENDA!*\n\n";
+            $msg .= "👤 Cliente: *{$customerName}*\n";
+            $msg .= "📧 Email: {$booking['billing_email']}\n";
+            $msg .= "📱 Tel: {$booking['billing_phone']}\n";
+            $msg .= "🔢 Reserva: *{$booking['booking_number']}*\n";
+            $msg .= "💰 Total: *\$" . number_format((float)$booking['total'], 2) . " USD*\n";
+            $msg .= "💳 Pago agora: \$" . number_format((float)$booking['paid_amount'], 2) . " USD\n\n";
+
+            if (!empty($items)) {
+                $msg .= "🎯 *PASSEIOS:*\n";
+                foreach ($items as $item) {
+                    $msg .= "• {$item['trip_title']}\n";
+                    $msg .= "  📅 {$item['trip_date']} às {$item['trip_time']}\n";
+                    $msg .= "  👥 {$item['total_pax']} passageiro(s)\n\n";
+                }
+            }
+
+            if (!empty($transfers)) {
+                $msg .= "🚐 *TRANSFERS:*\n";
+                foreach ($transfers as $tr) {
+                    $msg .= "• {$tr['vehicle_title']}\n";
+                    $msg .= "  📍 {$tr['origin_title']} → {$tr['destination_title']}\n";
+                    $msg .= "  📅 {$tr['date']} às {$tr['time']}\n";
+                    $pax = (int)($tr['adults'] ?? 0) + (int)($tr['children'] ?? 0) + (int)($tr['infants'] ?? 0);
+                    $msg .= "  👥 {$pax} passageiro(s)\n\n";
+                }
+            }
+
+            $evolutionApi->sendText($adminPhone, $msg);
+        } catch (\Throwable $e) {}
     }
 
     /**
