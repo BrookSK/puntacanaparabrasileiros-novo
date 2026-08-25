@@ -462,6 +462,9 @@ class CheckoutController extends Controller
         // Email único com vouchers (já inclui detalhes da reserva + vouchers para passeios e transfers)
         $voucherService->sendVouchersByEmail($bookingId);
 
+        // Enviar vouchers por WhatsApp também
+        $voucherService->sendVouchersByWhatsApp($bookingId);
+
         // ── NOTIFICAÇÃO ADMIN ──────────────────────────────────────────────
 
         $adminEmail = $this->setting('admin_email', '');

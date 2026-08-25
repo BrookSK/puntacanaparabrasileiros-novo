@@ -298,6 +298,90 @@ class VoucherService
     }
 
     /**
+     * Envia vouchers por WhatsApp ao cliente.
+     */
+    public function sendVouchersByWhatsApp(int $bookingId): bool
+    {
+        $vouchers = $this->voucherModel->getByBooking($bookingId);
+        if (empty($vouchers)) return false;
+
+        $booking = $this->db->fetchOne("SELECT * FROM bookings WHERE id = ?", [$bookingId]);
+        if (!$booking || empty($booking['billing_phone'])) return false;
+
+        // Buscar instância WhatsApp ativa
+        $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE status = 'connected' LIMIT 1");
+        if (!$instance) return false;
+
+        $evolutionApi = EvolutionApi::fromInstance($instance);
+        $phone = EvolutionApi::normalizePhone($booking['billing_phone']);
+        $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
+        $siteUrl = rtrim(App::getInstance()->setting('site_url', 'https://puntacananovo.lrvweb.com.br'), '/');
+
+        // Mensagem introdutória
+        $intro = "🎉 *Seus Vouchers - Punta Cana para Brasileiros*\n\n";
+        $intro .= "Olá, *{$customerName}*!\n\n";
+        $intro .= "Sua reserva *{$booking['booking_number']}* foi confirmada! 🎊\n\n";
+        $intro .= "Seguem seus vouchers abaixo. Apresente-os pelo celular no dia do passeio/transfer. *Não é necessário imprimir.*\n\n";
+        $intro .= "━━━━━━━━━━━━━━━━━━━━";
+
+        $evolutionApi->sendText($phone, $intro);
+
+        // Enviar cada voucher como documento
+        $sentCount = 0;
+        foreach ($vouchers as $voucher) {
+            $filePath = $this->vouchersPath . '/' . $voucher['file_path'];
+            if (!file_exists($filePath)) continue;
+
+            // Determinar nome e caption do voucher
+            if ($voucher['type'] === 'trip') {
+                $name = $voucher['trip_name'] ?? 'Passeio';
+                $caption = "📋 *VOUCHER PASSEIO*\n{$name}\nCódigo: {$voucher['reference_code']}";
+            } else {
+                $routeName = $voucher['route_name'] ?? 'Transfer';
+                $name = $routeName;
+                $caption = "🚐 *VOUCHER TRANSFER*\n{$routeName}\nCódigo: {$voucher['reference_code']}";
+            }
+
+            // Converter HTML do voucher para enviar como documento
+            $fileContent = base64_encode(file_get_contents($filePath));
+            $fileName = 'Voucher-' . ($voucher['type'] === 'trip' ? 'Passeio' : 'Transfer') . '-' . $voucher['reference_code'] . '.html';
+
+            try {
+                $evolutionApi->sendMedia(
+                    $phone,
+                    'document',
+                    $fileContent,
+                    $caption,
+                    $fileName,
+                    'text/html'
+                );
+                $this->voucherModel->markWhatsAppSent((int) $voucher['id']);
+                $sentCount++;
+            } catch (\Throwable $e) {
+                error_log("[VoucherService] WhatsApp send error: " . $e->getMessage());
+            }
+
+            // Pequena pausa entre envios para não sobrecarregar a API
+            usleep(500000); // 0.5s
+        }
+
+        // Mensagem final com link e contato
+        if ($sentCount > 0) {
+            $final = "━━━━━━━━━━━━━━━━━━━━\n\n";
+            $final .= "✅ Total de *{$sentCount} voucher(s)* enviados.\n\n";
+            $final .= "📱 Você também pode acessar seus vouchers online:\n{$siteUrl}/minha-conta/reservas\n\n";
+            $final .= "Dúvidas? Estamos à disposição! 🇧🇷\n";
+            $final .= "*Punta Cana para Brasileiros*\n";
+            $final .= "Av. Barceló, nº 91, Local 7 - Plaza Arrecife\nVerón, Punta Cana";
+
+            usleep(500000);
+            $evolutionApi->sendText($phone, $final);
+        }
+
+        return $sentCount > 0;
+    }
+
+    /**
      * Retorna documentos extras dos passeios de um booking.
      */
     private function getTripDocuments(int $bookingId): array
