@@ -211,6 +211,13 @@
             <h4 style="margin: 24px 0 12px; font-size: 14px; color: #475569;">OpenAI (Transcrição de Áudio)</h4>
             <div class="form-group"><label>API Key OpenAI</label><input type="text" name="openai_api_key" class="form-control" value="<?= e($settings['integrations']['openai_api_key']['setting_value'] ?? $settings['whatsapp']['openai_api_key']['setting_value'] ?? '') ?>" placeholder="sk-..."><small style="color:#6b7280;">Usada para transcrever áudios com Whisper (modelo whisper-1)</small></div>
 
+            <h4 style="margin: 24px 0 12px; font-size: 14px; color: #475569;">WhatsApp para Notificações do Admin</h4>
+            <div class="form-group">
+                <label>Números de WhatsApp (Admin)</label>
+                <input type="text" name="admin_whatsapp_numbers" class="form-control" value="<?= e($settings['whatsapp']['admin_whatsapp_numbers']['setting_value'] ?? ($settings['general']['admin_whatsapp_numbers']['setting_value'] ?? '18294582170')) ?>" placeholder="18294582170, 5511999999999">
+                <small style="color:#6b7280;">Números que receberão notificações de novas vendas. Separe múltiplos números com vírgula. Use formato internacional sem + (ex: 18294582170, 5511999999999).</small>
+            </div>
+
             <h4 style="margin: 24px 0 12px; font-size: 14px; color: #475569;">Notificações de Reservas (Legado)</h4>
             <div class="form-group"><label><input type="checkbox" name="whatsapp_enabled" value="1" <?= ($settings['whatsapp']['whatsapp_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar Notificações WhatsApp para reservas</label></div>
             <div class="form-group"><label>URL do Webhook (legado)</label><input type="url" name="whatsapp_webhook_url" class="form-control" value="<?= e($settings['whatsapp']['whatsapp_webhook_url']['setting_value'] ?? '') ?>" placeholder="https://n8n.seusite.com/webhook/..."><small style="color:#6b7280;">Usado como fallback se a Evolution API não estiver conectada</small></div>

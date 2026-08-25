@@ -462,9 +462,6 @@ class CheckoutController extends Controller
         // Email único com vouchers (já inclui detalhes da reserva + vouchers para passeios e transfers)
         $voucherService->sendVouchersByEmail($bookingId);
 
-        // Enviar vouchers por WhatsApp também
-        $voucherService->sendVouchersByWhatsApp($bookingId);
-
         // ── NOTIFICAÇÃO ADMIN ──────────────────────────────────────────────
 
         $adminEmail = $this->setting('admin_email', '');
@@ -513,7 +510,6 @@ class CheckoutController extends Controller
             if (!$instance) return;
 
             $evolutionApi = \App\Services\EvolutionApi::fromInstance($instance);
-            $adminPhone = '18294582170';
             $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? ''));
 
             $msg = "🛒 *NOVA VENDA!*\n\n";
@@ -527,24 +523,33 @@ class CheckoutController extends Controller
             if (!empty($items)) {
                 $msg .= "🎯 *PASSEIOS:*\n";
                 foreach ($items as $item) {
+                    $pax = (int)($item['total_pax'] ?? 1);
                     $msg .= "• {$item['trip_title']}\n";
                     $msg .= "  📅 {$item['trip_date']} às {$item['trip_time']}\n";
-                    $msg .= "  👥 {$item['total_pax']} passageiro(s)\n\n";
+                    $msg .= "  👥 {$pax} passageiro(s)\n\n";
                 }
             }
 
             if (!empty($transfers)) {
                 $msg .= "🚐 *TRANSFERS:*\n";
                 foreach ($transfers as $tr) {
+                    $pax = (int)($tr['adults'] ?? 0) + (int)($tr['children'] ?? 0) + (int)($tr['infants'] ?? 0);
                     $msg .= "• {$tr['vehicle_title']}\n";
                     $msg .= "  📍 {$tr['origin_title']} → {$tr['destination_title']}\n";
                     $msg .= "  📅 {$tr['date']} às {$tr['time']}\n";
-                    $pax = (int)($tr['adults'] ?? 0) + (int)($tr['children'] ?? 0) + (int)($tr['infants'] ?? 0);
                     $msg .= "  👥 {$pax} passageiro(s)\n\n";
                 }
             }
 
-            $evolutionApi->sendText($adminPhone, $msg);
+            // Enviar para todos os números de admin configurados
+            $adminPhones = $this->setting('admin_whatsapp_numbers', '18294582170');
+            $phoneList = array_filter(array_map('trim', explode(',', $adminPhones)));
+
+            foreach ($phoneList as $adminPhone) {
+                $phone = \App\Services\EvolutionApi::normalizePhone($adminPhone);
+                $evolutionApi->sendText($phone, $msg);
+                usleep(500000);
+            }
         } catch (\Throwable $e) {}
     }
 

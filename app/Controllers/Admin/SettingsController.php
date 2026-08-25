@@ -80,7 +80,7 @@ class SettingsController extends Controller
             'pagbank_enabled' => 'payments', 'pagbank_token' => 'payments', 'pagbank_mode' => 'payments', 'pagbank_usd_brl_rate' => 'payments',
             'partial_payment_enabled' => 'payments', 'partial_payment_percent' => 'payments',
             'checkout_online_enabled' => 'payments', 'checkout_whatsapp_enabled' => 'payments',
-            'whatsapp_enabled' => 'whatsapp',
+            'whatsapp_enabled' => 'whatsapp', 'admin_whatsapp_numbers' => 'whatsapp',
             'affiliate_enabled' => 'affiliates', 'affiliate_auto_approve' => 'affiliates',
         ];
 
