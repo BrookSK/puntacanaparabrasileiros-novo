@@ -194,4 +194,42 @@ class CartController extends Controller
             $this->json(['success' => true, 'message' => 'Este email já está inscrito.']);
         }
     }
+
+    public function uploadFlightVoucher(Request $request, Response $response): void
+    {
+        if (!$request->hasFile('flight_voucher')) {
+            $this->json(['error' => 'Nenhum arquivo enviado.'], 400);
+            return;
+        }
+
+        $file = $request->file('flight_voucher');
+        $allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+        if (!in_array($file['type'], $allowedTypes)) {
+            $this->json(['error' => 'Formato não permitido. Use PDF, JPG ou PNG.'], 400);
+            return;
+        }
+
+        if ($file['size'] > 5 * 1024 * 1024) {
+            $this->json(['error' => 'Arquivo muito grande. Máximo 5MB.'], 400);
+            return;
+        }
+
+        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
+        $filename = 'flight-voucher-' . uniqid() . '-' . time() . '.' . $ext;
+        $destination = BASE_PATH . '/public/uploads/flight-vouchers/' . $filename;
+
+        // Criar diretório se não existir
+        $dir = dirname($destination);
+        if (!is_dir($dir)) mkdir($dir, 0755, true);
+
+        if (move_uploaded_file($file['tmp_name'], $destination)) {
+            $this->json([
+                'success' => true,
+                'path' => '/uploads/flight-vouchers/' . $filename,
+                'filename' => $file['name'],
+            ]);
+        } else {
+            $this->json(['error' => 'Erro ao salvar arquivo.'], 500);
+        }
+    }
 }

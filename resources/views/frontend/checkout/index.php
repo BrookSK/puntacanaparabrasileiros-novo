@@ -134,6 +134,60 @@
                         </div>
                     </div>
 
+                    <!-- Upload de Passagem Aérea (opcional) -->
+                    <?php if (!empty($cart['transfers'])): ?>
+                    <div class="checkout-section">
+                        <h3>Passagem Aérea <span style="font-size:0.8rem;font-weight:400;color:#6b7280;">(opcional)</span></h3>
+                        <p style="font-size:0.85rem;color:#6b7280;margin-bottom:14px;">Se já tiver sua passagem aérea, envie um print ou PDF com os horários de chegada e saída. Isso nos ajuda a organizar seu transfer.</p>
+                        <div class="form-group">
+                            <label style="display:flex;align-items:center;gap:10px;padding:16px;border:2px dashed #d1d5db;border-radius:10px;cursor:pointer;transition:all 0.2s;" id="flightUploadLabel">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="flex-shrink:0;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                                <span style="font-size:0.9rem;color:#374151;" id="flightUploadText">Clique para enviar voucher da passagem aérea</span>
+                                <input type="file" accept=".pdf,.jpg,.jpeg,.png,.webp" style="display:none;" id="flightVoucherInput">
+                            </label>
+                            <input type="hidden" name="flight_voucher_path" id="flightVoucherPath">
+                            <p style="font-size:0.75rem;color:#9ca3af;margin-top:6px;">Formatos aceitos: PDF, JPG, PNG. Máximo 5MB.</p>
+                        </div>
+                    </div>
+                    <script>
+                    document.getElementById('flightVoucherInput')?.addEventListener('change', function() {
+                        var label = document.getElementById('flightUploadLabel');
+                        var text = document.getElementById('flightUploadText');
+                        var hiddenPath = document.getElementById('flightVoucherPath');
+                        if (this.files && this.files[0]) {
+                            var file = this.files[0];
+                            if (file.size > 5 * 1024 * 1024) { alert('Arquivo muito grande. Máximo 5MB.'); this.value = ''; return; }
+                            text.textContent = 'Enviando...';
+                            // Upload imediato via AJAX
+                            var formData = new FormData();
+                            formData.append('flight_voucher', file);
+                            formData.append('_token', '<?= e(csrf_token()) ?>');
+                            fetch('/api/checkout/upload-flight-voucher', { method: 'POST', headers: { 'X-CSRF-TOKEN': '<?= e(csrf_token()) ?>' }, body: formData })
+                                .then(function(r) { return r.json(); })
+                                .then(function(data) {
+                                    if (data.success) {
+                                        text.textContent = '✓ ' + file.name;
+                                        label.style.borderColor = '#1B6F00';
+                                        label.style.background = '#f0fdf4';
+                                        hiddenPath.value = data.path;
+                                    } else {
+                                        text.textContent = 'Erro no upload. Tente novamente.';
+                                        label.style.borderColor = '#dc2626';
+                                    }
+                                }).catch(function() {
+                                    text.textContent = 'Erro no upload. Tente novamente.';
+                                    label.style.borderColor = '#dc2626';
+                                });
+                        } else {
+                            text.textContent = 'Clique para enviar voucher da passagem aérea';
+                            label.style.borderColor = '#d1d5db';
+                            label.style.background = '';
+                            hiddenPath.value = '';
+                        }
+                    });
+                    </script>
+                    <?php endif; ?>
+
                     <!-- Botão ir para pagamento -->
                     <div class="checkout-section checkout-next-step" id="checkoutStep3Actions">
                         <button type="button" class="btn btn-primary btn-block btn-lg" id="goToPaymentBtn">

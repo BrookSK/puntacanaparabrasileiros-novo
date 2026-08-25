@@ -136,6 +136,7 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->post('/cart/add-transfer', [ApiCartController::class, 'addTransfer'], [], 'api.cart.add_transfer');
     $router->post('/cart/remove-transfer', [ApiCartController::class, 'removeTransfer'], [], 'api.cart.remove_transfer');
     $router->get('/cart/count', [ApiCartController::class, 'count'], [], 'api.cart.count');
+    $router->post('/checkout/upload-flight-voucher', [ApiCartController::class, 'uploadFlightVoucher'], [], 'api.checkout.upload_flight');
     $router->get('/wishlist/count', [ApiCartController::class, 'wishlistCount'], [], 'api.wishlist.count');
     $router->post('/webhook/payment', [WebhookController::class, 'handlePayment'], [], 'api.webhook.payment');
     $router->post('/webhook/stripe', [WebhookController::class, 'handleStripe'], [], 'api.webhook.stripe');

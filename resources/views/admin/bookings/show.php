@@ -352,6 +352,46 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
         </div>
         <?php endif; ?>
 
+        <!-- Card: Passagem Aérea -->
+        <?php if (!empty($booking['flight_voucher_path'])): ?>
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-icon admin-card-icon-blue">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+                </div>
+                <div>
+                    <h3>Passagem Aérea</h3>
+                    <p class="admin-card-subtitle">Voucher/print da passagem enviado pelo cliente</p>
+                </div>
+            </div>
+            <div style="display:flex;align-items:center;gap:14px;padding:16px 0;">
+                <div style="width:44px;height:44px;background:#f0f9ff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                    <?php
+                    $flightExt = pathinfo($booking['flight_voucher_path'], PATHINFO_EXTENSION);
+                    if ($flightExt === 'pdf'): ?>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <?php else: ?>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0077b6" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    <?php endif; ?>
+                </div>
+                <div style="flex:1;min-width:0;">
+                    <strong style="font-size:14px;display:block;margin-bottom:2px;">Arquivo da Passagem</strong>
+                    <span style="font-size:12px;color:#6b7280;"><?= e(basename($booking['flight_voucher_path'])) ?></span>
+                </div>
+                <div style="display:flex;gap:8px;">
+                    <a href="<?= e($booking['flight_voucher_path']) ?>" target="_blank" class="btn btn-sm btn-outline" title="Visualizar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        Ver
+                    </a>
+                    <a href="<?= e($booking['flight_voucher_path']) ?>" download class="btn btn-sm btn-outline" title="Baixar">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        Baixar
+                    </a>
+                </div>
+            </div>
+        </div>
+        <?php endif; ?>
+
         <!-- Card: Observações -->
         <?php if (!empty($booking['notes']) || !empty($booking['admin_notes'])): ?>
         <div class="admin-card">

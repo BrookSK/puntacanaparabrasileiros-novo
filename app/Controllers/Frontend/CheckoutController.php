@@ -169,6 +169,8 @@ class CheckoutController extends Controller
                 'billing_country' => $billing['country'] ?? null,
                 'affiliate_id' => $affiliateId,
                 'ip_address' => $request->ip(),
+                'notes' => $request->input('notes', '') ?: null,
+                'flight_voucher_path' => $request->input('flight_voucher_path', '') ?: null,
             ]);
 
             // Criar booking items (trips)
