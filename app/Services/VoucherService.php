@@ -378,7 +378,7 @@ class VoucherService
             $final .= "✅ Total de *{$sentCount} voucher(s)* enviados.\n\n";
             $final .= "📄 *DOCUMENTOS IMPORTANTES:*\n";
             $final .= "• Termos e Condições: {$siteUrl}/termos-e-condicoes\n";
-            $final .= "• Política de Cancelamento: {$siteUrl}/cancelamentos\n\n";
+            $final .= "• Política de Cancelamento: {$siteUrl}/politicas-de-cancelamento\n\n";
             $final .= "📱 Acesse seus vouchers online:\n{$siteUrl}/minha-conta/reservas\n\n";
             $final .= "Dúvidas? Estamos à disposição! 🇧🇷\n";
             $final .= "*Punta Cana para Brasileiros*\n";

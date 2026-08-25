@@ -134,8 +134,22 @@
                         </div>
                     </div>
 
-                    <!-- Upload de Passagem Aérea (opcional) -->
-                    <?php if (!empty($cart['transfers'])): ?>
+                    <!-- Upload de Passagem Aérea (opcional - só quando envolve aeroporto) -->
+                    <?php
+                    $hasAirportTransfer = false;
+                    if (!empty($cart['transfers'])) {
+                        $locationModel = new \App\Models\TransferLocation();
+                        foreach ($cart['transfers'] as $transferItem) {
+                            $origin = $locationModel->find((int)($transferItem['origin_id'] ?? 0));
+                            $dest = $locationModel->find((int)($transferItem['destination_id'] ?? 0));
+                            if (($origin['location_type'] ?? '') === 'airport' || ($dest['location_type'] ?? '') === 'airport') {
+                                $hasAirportTransfer = true;
+                                break;
+                            }
+                        }
+                    }
+                    ?>
+                    <?php if ($hasAirportTransfer): ?>
                     <div class="checkout-section">
                         <h3>Passagem Aérea <span style="font-size:0.8rem;font-weight:400;color:#6b7280;">(opcional)</span></h3>
                         <p style="font-size:0.85rem;color:#6b7280;margin-bottom:14px;">Se já tiver sua passagem aérea, envie um print ou PDF com os horários de chegada e saída. Isso nos ajuda a organizar seu transfer.</p>

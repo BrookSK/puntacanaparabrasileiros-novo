@@ -503,19 +503,15 @@ class CheckoutController extends Controller
         if (!empty($transfers)) {
             foreach ($transfers as $tr) {
                 try {
-                    // Detecta tipo para label amigável
-                    $trType = match(strtolower($tr['type'] ?? '')) {
-                        'arrival'   => 'Chegada',
-                        'departure' => 'Partida',
-                        default     => 'Transfer',
-                    };
-                    $trTitle = $trType . ': ' . ($tr['origin_title'] ?? '') . ' → ' . ($tr['destination_title'] ?? '');
-
-                    $whatsappService->sendTripConfirmation($booking, [
-                        'title'     => $trTitle,
-                        'date'      => $tr['date'] ?? '',
-                        'time'      => $tr['time'] ?? '',
-                        'pax_info'  => ($tr['adults'] ?? 1) . ' adulto(s)',
+                    $whatsappService->sendTransferConfirmation([
+                        'customer_name' => trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '')),
+                        'customer_phone' => $booking['billing_phone'] ?? '',
+                        'vehicle_name' => $tr['vehicle_title'] ?? 'Transfer',
+                        'origin' => $tr['origin_title'] ?? '',
+                        'destination' => $tr['destination_title'] ?? '',
+                        'date' => $tr['date'] ?? '',
+                        'time' => $tr['time'] ?? '',
+                        'pax_info' => ($tr['adults'] ?? 1) . ' adulto(s)',
                         'reference' => $booking['booking_number'],
                     ]);
                 } catch (\Throwable $e) { /* continua */ }
