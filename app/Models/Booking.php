@@ -13,7 +13,7 @@ class Booking extends Model
         'total', 'paid_amount', 'due_amount', 'payment_mode', 'currency',
         'billing_first_name', 'billing_last_name', 'billing_email',
         'billing_phone', 'billing_address', 'billing_city', 'billing_country',
-        'notes', 'admin_notes', 'affiliate_id', 'ip_address',
+        'notes', 'admin_notes', 'affiliate_id', 'ip_address', 'flight_voucher_path',
     ];
 
     public function findByNumber(string $bookingNumber): ?array
