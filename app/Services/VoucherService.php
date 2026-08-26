@@ -372,12 +372,16 @@ class VoucherService
                 $tripDate = $tripInfo['trip_date'] ?? '';
                 $tripTime = $tripInfo['trip_time'] ?? '';
                 $tripPax = (int)($tripInfo['total_pax'] ?? 1);
+                $tripHotel = $tripInfo['hotel_name'] ?? '';
 
                 $caption = "🎯 *VOUCHER PASSEIO*\n\n";
                 $caption .= "📍 *{$tripName}*\n";
                 $caption .= "📅 Data: " . (!empty($tripDate) ? date('d/m/Y', strtotime($tripDate)) : '') . "\n";
                 $caption .= "⏰ Horário: {$tripTime}\n";
                 $caption .= "👥 {$tripPax} passageiro(s)\n";
+                if (!empty($tripHotel)) {
+                    $caption .= "🏨 Hotel: {$tripHotel}\n";
+                }
                 $caption .= "🔢 Código: {$voucher['reference_code']}";
 
                 $fileName = 'Voucher-Passeio-' . $voucher['reference_code'] . '.html';

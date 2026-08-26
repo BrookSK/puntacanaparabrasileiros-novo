@@ -525,8 +525,12 @@ class CheckoutController extends Controller
                 foreach ($items as $item) {
                     $pax = (int)($item['total_pax'] ?? 1);
                     $msg .= "• {$item['trip_title']}\n";
-                    $msg .= "  📅 {$item['trip_date']} às {$item['trip_time']}\n";
-                    $msg .= "  👥 {$pax} passageiro(s)\n\n";
+                    $msg .= "  📅 " . (!empty($item['trip_date']) ? date('d/m/Y', strtotime($item['trip_date'])) : '') . " às {$item['trip_time']}\n";
+                    $msg .= "  👥 {$pax} passageiro(s)\n";
+                    if (!empty($item['hotel_name'])) {
+                        $msg .= "  🏨 Hotel: {$item['hotel_name']}\n";
+                    }
+                    $msg .= "\n";
                 }
             }
 
@@ -536,7 +540,7 @@ class CheckoutController extends Controller
                     $pax = (int)($tr['adults'] ?? 0) + (int)($tr['children'] ?? 0) + (int)($tr['infants'] ?? 0);
                     $msg .= "• {$tr['vehicle_title']}\n";
                     $msg .= "  📍 {$tr['origin_title']} → {$tr['destination_title']}\n";
-                    $msg .= "  📅 {$tr['date']} às {$tr['time']}\n";
+                    $msg .= "  📅 " . (!empty($tr['date']) ? date('d/m/Y', strtotime($tr['date'])) : '') . " às {$tr['time']}\n";
                     $msg .= "  👥 {$pax} passageiro(s)\n\n";
                 }
             }
