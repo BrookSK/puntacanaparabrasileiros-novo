@@ -147,9 +147,6 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
     </div>
 </div>
 
-<div class="no-print" style="text-align:center;padding:20px;">
-    <button onclick="window.print()" style="padding:12px 32px;background:#1B6F00;color:#fff;border:none;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer;">Baixar como PDF</button>
-    <p style="font-size:11px;color:#888;margin-top:8px;">Use Ctrl+P → "Salvar como PDF" para gerar o arquivo.</p>
-</div>
+
 </body>
 </html>

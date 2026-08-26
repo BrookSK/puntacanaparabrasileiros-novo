@@ -375,7 +375,7 @@ class VoucherService
 
                 $caption = "🎯 *VOUCHER PASSEIO*\n\n";
                 $caption .= "📍 *{$tripName}*\n";
-                $caption .= "📅 Data: {$tripDate}\n";
+                $caption .= "📅 Data: " . (!empty($tripDate) ? date('d/m/Y', strtotime($tripDate)) : '') . "\n";
                 $caption .= "⏰ Horário: {$tripTime}\n";
                 $caption .= "👥 {$tripPax} passageiro(s)\n";
                 $caption .= "🔢 Código: {$voucher['reference_code']}";
@@ -400,7 +400,7 @@ class VoucherService
                 $caption = "🚐 *VOUCHER TRANSFER*\n\n";
                 $caption .= "🚗 *{$vehicleName}*\n";
                 $caption .= "📍 {$origin} → {$destination}\n";
-                $caption .= "📅 Data: {$date}\n";
+                $caption .= "📅 Data: " . (!empty($date) ? date('d/m/Y', strtotime($date)) : '') . "\n";
                 $caption .= "⏰ Horário: {$time}\n";
                 $caption .= "👥 {$pax} passageiro(s)\n";
                 $caption .= "🔢 Código: {$voucher['reference_code']}";
