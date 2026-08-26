@@ -28,6 +28,31 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 <div class="form-group"><label>Notas Importantes</label><textarea name="important_notes" class="form-control" rows="3" placeholder="Informações importantes..."><?= e($trip['important_notes'] ?? '') ?></textarea></div>
             </div>
 
+            <!-- Vídeo YouTube -->
+            <div class="admin-card">
+                <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div><h3>Vídeo do Passeio</h3><p class="admin-card-subtitle">Link do YouTube para exibir na página do passeio</p></div></div>
+                <div class="form-group"><label>URL do YouTube</label><input type="url" name="youtube_url" value="<?= e($trip['youtube_url'] ?? '') ?>" class="form-control" placeholder="https://www.youtube.com/watch?v=XXXXXXXXX"><small style="color:#6b7280;">Cole o link do vídeo. Aceita links do youtube.com ou youtu.be</small></div>
+            </div>
+
+            <!-- FAQs por Passeio -->
+            <div class="admin-card">
+                <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div><div><h3>FAQ do Passeio</h3><p class="admin-card-subtitle">Perguntas frequentes específicas deste passeio</p></div></div>
+                <div id="faqsList">
+                    <?php
+                    $faqs = json_decode($trip['faqs'] ?? '[]', true) ?: [];
+                    if (empty($faqs)) $faqs = [['question' => '', 'answer' => '']];
+                    foreach ($faqs as $fi => $faq):
+                    ?>
+                    <div class="faq-item-admin" style="padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;">
+                        <div class="form-group" style="margin-bottom:8px;"><label>Pergunta</label><input type="text" name="faqs[<?= $fi ?>][question]" value="<?= e($faq['question'] ?? '') ?>" class="form-control" placeholder="Ex: Preciso saber nadar?"></div>
+                        <div class="form-group" style="margin-bottom:0;"><label>Resposta</label><textarea name="faqs[<?= $fi ?>][answer]" class="form-control" rows="2" placeholder="Resposta..."><?= e($faq['answer'] ?? '') ?></textarea></div>
+                        <?php if ($fi > 0): ?><button type="button" class="btn btn-sm btn-danger" style="margin-top:8px;" onclick="this.closest('.faq-item-admin').remove()">Remover</button><?php endif; ?>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <button type="button" class="btn btn-outline" id="addFaqBtn">+ Adicionar Pergunta</button>
+            </div>
+
             <!-- Categorias - Multi-select com pesquisa v2 -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-green"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg></div><div><h3>Categorias</h3><p class="admin-card-subtitle">Selecione as categorias deste passeio</p></div></div>
@@ -357,6 +382,17 @@ document.getElementById('addPackageBtn')?.addEventListener('click', function() {
         });
     }
 })();
+
+// FAQ - Adicionar pergunta
+document.getElementById('addFaqBtn')?.addEventListener('click', function() {
+    var list = document.getElementById('faqsList');
+    var i = list.children.length;
+    var div = document.createElement('div');
+    div.className = 'faq-item-admin';
+    div.style.cssText = 'padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;';
+    div.innerHTML = '<div class="form-group" style="margin-bottom:8px;"><label>Pergunta</label><input type="text" name="faqs[' + i + '][question]" class="form-control" placeholder="Ex: Preciso saber nadar?"></div><div class="form-group" style="margin-bottom:0;"><label>Resposta</label><textarea name="faqs[' + i + '][answer]" class="form-control" rows="2" placeholder="Resposta..."></textarea></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:8px;" onclick="this.closest(\'.faq-item-admin\').remove()">Remover</button>';
+    list.appendChild(div);
+});
 </script>
 
 <style>

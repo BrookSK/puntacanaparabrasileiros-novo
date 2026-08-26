@@ -228,11 +228,17 @@ class TripsController extends Controller
         $rating = $this->tripModel->getAverageRating($tripId);
         $relatedTrips = $this->tripModel->getRelated($tripId);
 
-        // FAQs do passeio
-        $tripFaqs = $this->db->fetchAll(
-            "SELECT * FROM trip_faqs WHERE trip_id = ? ORDER BY sort_order ASC",
-            [$tripId]
-        );
+        // FAQs do passeio (primeiro tenta do campo JSON, depois da tabela)
+        $tripFaqs = [];
+        if (!empty($trip['faqs'])) {
+            $tripFaqs = json_decode($trip['faqs'], true) ?: [];
+        }
+        if (empty($tripFaqs)) {
+            $tripFaqs = $this->db->fetchAll(
+                "SELECT * FROM trip_faqs WHERE trip_id = ? ORDER BY sort_order ASC",
+                [$tripId]
+            );
+        }
 
         // Verificar wishlist
         $inWishlist = false;

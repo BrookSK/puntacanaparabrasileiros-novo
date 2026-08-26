@@ -139,6 +139,25 @@
                         </div>
                     </div>
                     <?php endif; ?>
+
+                    <?php if (!empty($trip['youtube_url'])): ?>
+                    <!-- Vídeo do Passeio -->
+                    <div style="margin-top:24px;">
+                        <h3 style="font-size:1.1rem;margin-bottom:12px;">Vídeo do Passeio</h3>
+                        <?php
+                        $ytUrl = $trip['youtube_url'];
+                        $ytId = '';
+                        if (preg_match('/[?&]v=([^&]+)/', $ytUrl, $m)) $ytId = $m[1];
+                        elseif (preg_match('/youtu\.be\/([^?]+)/', $ytUrl, $m)) $ytId = $m[1];
+                        elseif (preg_match('/embed\/([^?]+)/', $ytUrl, $m)) $ytId = $m[1];
+                        ?>
+                        <?php if ($ytId): ?>
+                        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;">
+                            <iframe src="https://www.youtube.com/embed/<?= e($ytId) ?>" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                        </div>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Tab: Custo -->
