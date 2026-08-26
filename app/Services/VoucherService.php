@@ -415,7 +415,7 @@ class VoucherService
             $pdfContent = null;
             if (class_exists('\\Dompdf\\Dompdf')) {
                 try {
-                    $dompdf = new \Dompdf\Dompdf(['isRemoteEnabled' => true]);
+                    $dompdf = new \Dompdf\Dompdf(['isRemoteEnabled' => true, 'defaultFont' => 'sans-serif']);
                     $dompdf->loadHtml($fileContent);
                     $dompdf->setPaper('A4', 'portrait');
                     $dompdf->render();
