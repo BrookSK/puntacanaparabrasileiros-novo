@@ -167,6 +167,7 @@ class TripsController extends Controller
             'difficulty', 'min_pax', 'max_pax', 'meeting_point', 'important_notes',
             'partial_payment_enabled', 'partial_payment_percent',
             'group_discount_enabled', 'group_discount_rules',
+            'youtube_url',
             'meta_title', 'meta_description', 'sort_order', 'featured', 'status',
         ]);
 
@@ -177,6 +178,11 @@ class TripsController extends Controller
         $data['partial_payment_enabled'] = isset($data['partial_payment_enabled']) ? 1 : 0;
         $data['group_discount_enabled'] = isset($data['group_discount_enabled']) ? 1 : 0;
         $data['featured'] = isset($data['featured']) ? 1 : 0;
+
+        // FAQs como JSON
+        $faqs = $request->input('faqs', []);
+        $faqs = array_filter($faqs, fn($f) => !empty($f['question']));
+        $data['faqs'] = !empty($faqs) ? json_encode(array_values($faqs)) : null;
 
         $includes = $request->input('includes', []);
         $excludes = $request->input('excludes', []);
