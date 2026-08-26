@@ -5,38 +5,39 @@
 <title>Voucher - Transfer - <?= e(($transfer['origin_title'] ?? '') . ' - ' . ($transfer['destination_title'] ?? '')) ?></title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#fff;padding:0;margin:0}
-.voucher-page{width:210mm;min-height:auto;margin:0 auto;padding:12mm 15mm;position:relative}
-.v-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:#f5f5f5;border-bottom:2px solid #E4B505;margin-bottom:16px;border-radius:6px 6px 0 0}
-.v-header-left{display:flex;align-items:center;gap:12px}
-.v-logo{width:60px;height:auto}
-.v-company-info h2{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:2px}
-.v-company-info p{font-size:9px;color:#555;line-height:1.4}
+body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#fff;padding:0;margin:0;font-size:11px}
+.voucher-page{width:100%;max-width:180mm;margin:0 auto;padding:8mm 0;position:relative}
+
+.v-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:#f5f5f5;border-bottom:2px solid #E4B505;margin-bottom:10px;border-radius:4px 4px 0 0;overflow:hidden}
+.v-header-left{display:flex;align-items:center;gap:10px;flex:1;min-width:0}
+.v-logo{width:50px;height:auto}
+.v-company-info h2{font-size:11px;font-weight:700;color:#1a1a1a;margin-bottom:1px}
+.v-company-info p{font-size:8px;color:#555;line-height:1.3}
 .v-header-right{text-align:right}
-.v-header-right p{font-size:9px;color:#444;line-height:1.6}
+.v-header-right p{font-size:8px;color:#444;line-height:1.5}
 .v-header-right strong{color:#1B6F00}
-.v-type-badge{display:inline-block;background:#0077b6;color:#fff;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;padding:6px 16px;border-radius:4px;margin-bottom:10px}
-.v-title{font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
-.v-code{font-size:11px;color:#666;margin-bottom:16px}
-.v-code strong{color:#1a1a1a;font-size:12px}
-.v-route-card{background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:12px 16px;margin-bottom:14px}
-.v-route-type{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#16a34a;font-weight:700;margin-bottom:4px}
-.v-route-name{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
-.v-route-details{display:flex;gap:16px;font-size:11px;color:#555}
-.v-section{margin-bottom:14px}
-.v-section-title{font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;font-weight:600;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid #eee}
-.v-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.v-cell{padding:8px 10px;background:#fafafa;border:1px solid #f0f0f0;border-radius:4px}
-.v-cell-label{font-size:8px;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:2px}
-.v-cell-value{font-size:12px;font-weight:600;color:#1a1a1a}
-.v-instructions{padding:10px 14px;background:#fefce8;border:1px solid #fde047;border-radius:4px;margin-top:14px}
-.v-instructions-title{font-size:9px;font-weight:700;text-transform:uppercase;color:#854d0e;margin-bottom:4px}
-.v-instructions p{font-size:10px;color:#713f12;line-height:1.5}
-.v-qr{text-align:center;margin-top:16px;padding-top:12px;border-top:1px solid #eee}
-.v-qr img{width:80px;height:80px}
-.v-qr p{font-size:8px;color:#aaa;margin-top:3px}
-.v-footer{text-align:center;padding-top:10px;border-top:1px solid #eee;margin-top:14px}
-.v-footer p{font-size:8px;color:#888;line-height:1.5}
+.v-type-badge{display:inline-block;background:#0077b6;color:#fff;font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:4px 12px;border-radius:3px;margin-bottom:6px}
+.v-title{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:3px}
+.v-code{font-size:10px;color:#666;margin-bottom:10px}
+.v-code strong{color:#1a1a1a;font-size:11px}
+.v-route-card{background:#f0fdf4;border:1px solid #86efac;border-radius:4px;padding:8px 12px;margin-bottom:10px}
+.v-route-type{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#16a34a;font-weight:700;margin-bottom:2px}
+.v-route-name{font-size:13px;font-weight:700;color:#1a1a1a;margin-bottom:4px;word-wrap:break-word}
+.v-route-details{display:flex;gap:12px;font-size:10px;color:#555;flex-wrap:wrap}
+.v-section{margin-bottom:8px}
+.v-section-title{font-size:8px;text-transform:uppercase;letter-spacing:1px;color:#888;font-weight:600;margin-bottom:5px;padding-bottom:3px;border-bottom:1px solid #eee}
+.v-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.v-cell{padding:5px 8px;background:#fafafa;border:1px solid #f0f0f0;border-radius:3px;overflow:hidden;word-wrap:break-word}
+.v-cell-label{font-size:7px;text-transform:uppercase;letter-spacing:0.5px;color:#888;margin-bottom:1px}
+.v-cell-value{font-size:11px;font-weight:600;color:#1a1a1a}
+.v-instructions{padding:8px 10px;background:#fefce8;border:1px solid #fde047;border-radius:3px;margin-top:8px}
+.v-instructions-title{font-size:8px;font-weight:700;text-transform:uppercase;color:#854d0e;margin-bottom:3px}
+.v-instructions p{font-size:9px;color:#713f12;line-height:1.4;word-wrap:break-word}
+.v-qr{text-align:center;margin-top:10px;padding-top:8px;border-top:1px solid #eee}
+.v-qr img{width:60px;height:60px}
+.v-qr p{font-size:7px;color:#aaa;margin-top:2px}
+.v-footer{text-align:center;padding-top:6px;border-top:1px solid #eee;margin-top:8px}
+.v-footer p{font-size:7px;color:#888;line-height:1.4}
 .v-footer .v-footer-brand{font-weight:600;color:#555}
 @media print{body{padding:0}.voucher-page{padding:15mm;width:100%;min-height:auto}.v-footer{position:relative;bottom:auto;left:auto;right:auto;margin-top:30px}.no-print{display:none!important}}
 @media screen{body{background:#f0f0f0;padding:20px}.voucher-page{box-shadow:0 2px 20px rgba(0,0,0,0.1);border-radius:4px}}
