@@ -343,7 +343,6 @@ class PricingService
         // Fallback: menor regra
         return !empty($rules[0]) ? (float) $rules[0]['price'] : null;
     }
-    }
 
     /**
      * Resolve o preço fixo de grupo para o número de passageiros dado.
