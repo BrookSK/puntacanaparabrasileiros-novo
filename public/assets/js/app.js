@@ -1484,27 +1484,10 @@
         const compPackages = typeof COMPOSITION_PACKAGES !== 'undefined' ? COMPOSITION_PACKAGES : [];
 
         if (compEnabled && compPackages.length > 0) {
-            // ─── MODO COMPOSIÇÃO: mostrar pacotes + seletores de viajantes ───
-            window._selectedCompositionPkg = compPackages[0].id;
+            // ─── MODO COMPOSIÇÃO: primeiro viajantes, depois pacotes filtrados ───
+            window._selectedCompositionPkg = null;
 
-            let compHtml = '<div style="margin-bottom:14px;font-size:13px;font-weight:600;color:#1e40af;">Selecione o pacote:</div>';
-            compHtml += compPackages.map((cp, idx) => {
-                const unitInfo = cp.unit_label ? (cp.units + ' ' + cp.unit_label + (cp.units > 1 ? 's' : '')) : '';
-                const paxInfo = cp.pax + ' pessoa' + (cp.pax > 1 ? 's' : '');
-                const desc = cp.label || (paxInfo + (unitInfo ? ' em ' + unitInfo : ''));
-                return `<label class="bm-composition-option" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:${idx === 0 ? '#eff6ff' : '#f9fafb'};border:2px solid ${idx === 0 ? '#3b82f6' : '#e5e7eb'};border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;" onclick="selectCompositionPkg(${cp.id}, this)">
-                    <input type="radio" name="composition_pkg_radio" value="${cp.id}" ${idx === 0 ? 'checked' : ''} style="accent-color:#3b82f6;width:18px;height:18px;">
-                    <div style="flex:1;">
-                        <div style="font-size:14px;font-weight:600;color:#1e293b;">${desc}</div>
-                        ${unitInfo && cp.label ? '<div style="font-size:12px;color:#64748b;">' + paxInfo + ' &bull; ' + unitInfo + (cp.pax_per_unit ? ' (' + cp.pax_per_unit + '/unid)' : '') + '</div>' : ''}
-                    </div>
-                    <div style="font-size:16px;font-weight:700;color:#059669;">$${parseFloat(cp.price).toFixed(2)}</div>
-                </label>`;
-            }).join('');
-
-            compHtml += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid #e5e7eb;"><div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:10px;">Viajantes:</div></div>';
-
-            // Montar seletores de viajantes normalmente
+            // Montar seletores de viajantes primeiro
             let cats = selectedPackage.categories || [];
             const filtered = cats.filter(c => {
                 const slug = (c.category_slug || '').toLowerCase();
@@ -1519,7 +1502,8 @@
             cats = cats.filter(c => { const k = (c.category_slug || c.category_name || '').toLowerCase(); if (seen[k]) return false; seen[k] = true; return true; });
 
             travelerCounts = {};
-            compHtml += cats.map(cat => {
+            let travelersHtml = '<div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:10px;">Quantos viajantes?</div>';
+            travelersHtml += cats.map(cat => {
                 const catId = cat.traveler_category_id || cat.id || 0;
                 const defaultQty = (cat.category_slug || '').toLowerCase() === 'adulto' ? 1 : 0;
                 travelerCounts[catId] = defaultQty;
@@ -1535,7 +1519,11 @@
                 </div>`;
             }).join('');
 
-            container.innerHTML = compHtml;
+            // Container para pacotes (será preenchido dinamicamente)
+            travelersHtml += '<div id="compositionOptionsContainer" style="margin-top:16px;padding-top:14px;border-top:1px solid #e5e7eb;"></div>';
+
+            container.innerHTML = travelersHtml;
+            updateCompositionOptions();
             updateSidebar();
             return;
         }
@@ -1624,8 +1612,57 @@
         if (val < 0) val = 0;
         travelerCounts[catId] = val;
         document.getElementById('traveler_' + catId).value = val;
+        updateCompositionOptions();
         updateSidebar();
     };
+
+    // Atualiza as opções de composição baseado no total de viajantes selecionados
+    function updateCompositionOptions() {
+        const compContainer = document.getElementById('compositionOptionsContainer');
+        if (!compContainer) return;
+
+        const compEnabled = typeof COMPOSITION_PRICING_ENABLED !== 'undefined' && COMPOSITION_PRICING_ENABLED;
+        const compPackages = typeof COMPOSITION_PACKAGES !== 'undefined' ? COMPOSITION_PACKAGES : [];
+        if (!compEnabled || compPackages.length === 0) return;
+
+        // Calcular total de viajantes
+        let totalPax = 0;
+        Object.keys(travelerCounts).forEach(k => { totalPax += (travelerCounts[k] || 0); });
+
+        // Filtrar pacotes que atendem a quantidade de viajantes
+        const available = compPackages.filter(cp => parseInt(cp.pax) === totalPax);
+
+        if (totalPax === 0) {
+            compContainer.innerHTML = '<div style="font-size:13px;color:#94a3b8;padding:8px 0;">Selecione a quantidade de viajantes acima.</div>';
+            window._selectedCompositionPkg = null;
+            return;
+        }
+
+        if (available.length === 0) {
+            compContainer.innerHTML = '<div style="font-size:13px;color:#ef4444;padding:8px 0;">Nenhum pacote disponível para ' + totalPax + ' viajante' + (totalPax > 1 ? 's' : '') + '.</div>';
+            window._selectedCompositionPkg = null;
+            return;
+        }
+
+        // Selecionar o primeiro por padrão
+        window._selectedCompositionPkg = available[0].id;
+
+        let html = '<div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:10px;">Escolha a composição para ' + totalPax + ' viajante' + (totalPax > 1 ? 's' : '') + ':</div>';
+        html += available.map((cp, idx) => {
+            const unitInfo = cp.unit_label ? (cp.units + ' ' + cp.unit_label + (parseInt(cp.units) > 1 ? 's' : '')) : '';
+            const desc = cp.label || (cp.pax + ' pessoa' + (parseInt(cp.pax) > 1 ? 's' : '') + (unitInfo ? ' em ' + unitInfo : ''));
+            return `<label class="bm-composition-option" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:${idx === 0 ? '#eff6ff' : '#f9fafb'};border:2px solid ${idx === 0 ? '#3b82f6' : '#e5e7eb'};border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;" onclick="selectCompositionPkg(${cp.id}, this)">
+                <input type="radio" name="composition_pkg_radio" value="${cp.id}" ${idx === 0 ? 'checked' : ''} style="accent-color:#3b82f6;width:18px;height:18px;">
+                <div style="flex:1;">
+                    <div style="font-size:14px;font-weight:600;color:#1e293b;">${desc}</div>
+                    ${unitInfo && cp.label ? '<div style="font-size:12px;color:#64748b;">' + unitInfo + (cp.pax_per_unit ? ' (' + cp.pax_per_unit + ' por unid)' : '') + '</div>' : ''}
+                </div>
+                <div style="font-size:16px;font-weight:700;color:#059669;">$${parseFloat(cp.price).toFixed(2)}</div>
+            </label>`;
+        }).join('');
+
+        compContainer.innerHTML = html;
+    }
 
     function updateSidebar() {
         // Hotel
