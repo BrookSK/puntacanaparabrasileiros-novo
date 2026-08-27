@@ -34,25 +34,41 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 <div class="form-group"><label>URL do YouTube</label>
                     <div style="display:flex;gap:8px;align-items:center;">
                         <input type="url" name="youtube_url" id="youtubeUrlInput" value="<?= e($trip['youtube_url'] ?? '') ?>" class="form-control" placeholder="https://www.youtube.com/watch?v=XXXXXXXXX" style="flex:1;">
-                        <button type="button" class="btn btn-sm btn-primary" id="previewYoutubeBtn" style="white-space:nowrap;">▶ Visualizar</button>
+                        <button type="button" class="btn btn-sm btn-primary" id="addYoutubeBtn" style="white-space:nowrap;">+ Adicionar Vídeo</button>
                     </div>
-                    <small style="color:#6b7280;">Cole o link do vídeo. Aceita links do youtube.com ou youtu.be</small>
-                    <div id="youtubePreview" style="margin-top:12px;display:none;">
-                        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;border:1px solid #e5e7eb;">
-                            <iframe id="youtubeIframe" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+                    <small style="color:#6b7280;">Cole o link do vídeo e clique em "Adicionar Vídeo"</small>
+                    <div id="youtubeThumbnail" style="margin-top:12px;<?= empty($trip['youtube_url']) ? 'display:none;' : '' ?>">
+                        <?php
+                        $ytId = '';
+                        if (!empty($trip['youtube_url'])) {
+                            if (preg_match('/[?&]v=([^&]+)/', $trip['youtube_url'], $m)) $ytId = $m[1];
+                            elseif (preg_match('/youtu\.be\/([^?]+)/', $trip['youtube_url'], $m)) $ytId = $m[1];
+                            elseif (preg_match('/embed\/([^?]+)/', $trip['youtube_url'], $m)) $ytId = $m[1];
+                        }
+                        ?>
+                        <div style="position:relative;display:inline-block;border-radius:8px;overflow:hidden;border:1px solid #e5e7eb;">
+                            <img id="ytThumb" src="<?= $ytId ? 'https://img.youtube.com/vi/' . e($ytId) . '/mqdefault.jpg' : '' ?>" alt="Thumbnail" style="width:240px;height:135px;object-fit:cover;display:block;">
+                            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;background:rgba(0,0,0,0.7);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </div>
+                            <button type="button" id="removeYoutubeBtn" style="position:absolute;top:6px;right:6px;background:#dc2626;color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;">&times;</button>
                         </div>
                     </div>
                 </div>
                 <script>
-                document.getElementById('previewYoutubeBtn')?.addEventListener('click', function() {
+                document.getElementById('addYoutubeBtn')?.addEventListener('click', function() {
                     var url = document.getElementById('youtubeUrlInput').value.trim();
                     if (!url) { alert('Cole um link do YouTube primeiro.'); return; }
                     var ytId = '';
                     var m = url.match(/[?&]v=([^&]+)/) || url.match(/youtu\.be\/([^?]+)/) || url.match(/embed\/([^?]+)/);
                     if (m) ytId = m[1];
                     if (!ytId) { alert('Link inválido. Use um link do YouTube válido.'); return; }
-                    document.getElementById('youtubeIframe').src = 'https://www.youtube.com/embed/' + ytId;
-                    document.getElementById('youtubePreview').style.display = 'block';
+                    document.getElementById('ytThumb').src = 'https://img.youtube.com/vi/' + ytId + '/mqdefault.jpg';
+                    document.getElementById('youtubeThumbnail').style.display = 'block';
+                });
+                document.getElementById('removeYoutubeBtn')?.addEventListener('click', function() {
+                    document.getElementById('youtubeUrlInput').value = '';
+                    document.getElementById('youtubeThumbnail').style.display = 'none';
                 });
                 </script>
             </div>
