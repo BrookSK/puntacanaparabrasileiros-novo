@@ -415,13 +415,8 @@
                             <?php
                             $basePrice = 0;
                             $priceLabel = '/ Adulto';
-                            if (!empty($trip['composition_pricing_enabled']) && !empty($compositionPackages)) {
-                                // Composition pricing: usar menor preço entre os pacotes
-                                $minComp = min(array_column($compositionPackages, 'price'));
-                                $basePrice = (float) $minComp;
-                                $priceLabel = '';
-                            } elseif (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
-                                // Group pricing ativo: usar preço da primeira faixa (1 pessoa)
+                            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing']) && empty($trip['composition_pricing_enabled'])) {
+                                // Group pricing ativo (sem composition): usar preço da primeira faixa
                                 $gpRules = json_decode($trip['group_pricing'], true);
                                 if (is_array($gpRules) && !empty($gpRules)) {
                                     usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
