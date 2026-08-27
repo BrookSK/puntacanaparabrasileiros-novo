@@ -134,22 +134,62 @@ class PricingService
 
     /**
      * Calcula preço total de um booking item (trip + pax + extras + desconto grupo).
+     * @param int|null $compositionPackageId ID do pacote de composição selecionado (opcional)
      */
-    public function calculateItemTotal(int $packageId, string $date, array $paxByCategory, array $extraServiceIds = []): array
+    public function calculateItemTotal(int $packageId, string $date, array $paxByCategory, array $extraServiceIds = [], ?int $compositionPackageId = null): array
     {
         $totalPax = array_sum(array_map('intval', $paxByCategory));
 
-        // Buscar categorias do pacote para identificar quem é adulto/criança/infantil
-        $prices = $this->getPriceForDate($packageId, $date);
-
-        // Verificar se o trip tem tabela de preços por grupo ativa
+        // Buscar dados do trip
         $package = $this->db->fetchOne("SELECT trip_id FROM trip_packages WHERE id = ?", [$packageId]);
         $trip = $package ? $this->db->fetchOne(
-            "SELECT group_pricing_enabled, group_pricing FROM trips WHERE id = ?",
+            "SELECT group_pricing_enabled, group_pricing, composition_pricing_enabled FROM trips WHERE id = ?",
             [$package['trip_id']]
         ) : null;
 
-        $groupPricingEnabled = $trip && $trip['group_pricing_enabled'] && $trip['group_pricing'];
+        // ─── MODO COMPOSITION PRICING ───
+        // Se composition pricing está ativo e um pacote foi selecionado
+        if ($trip && $trip['composition_pricing_enabled'] && $compositionPackageId) {
+            $compPkg = $this->db->fetchOne(
+                "SELECT * FROM trip_composition_packages WHERE id = ? AND trip_id = ? AND status = 'active'",
+                [$compositionPackageId, $package['trip_id']]
+            );
+
+            if ($compPkg) {
+                $subtotal = (float) $compPkg['price'];
+                $breakdown = [[
+                    'category_name' => $compPkg['label'] ?: ($compPkg['pax'] . ' pessoa(s), ' . $compPkg['units'] . ' ' . ($compPkg['unit_label'] ?: 'unidade(s)')),
+                    'quantity' => (int) $compPkg['pax'],
+                    'unit_price' => $subtotal / max(1, (int) $compPkg['pax']),
+                    'total' => $subtotal,
+                    'pricing_mode' => 'composition',
+                    'composition_package_id' => (int) $compPkg['id'],
+                    'units' => (int) $compPkg['units'],
+                    'unit_label' => $compPkg['unit_label'],
+                ]];
+
+                // Serviços extras
+                $extrasTotal = $this->calculateExtrasTotal($extraServiceIds, $totalPax);
+                $total = $subtotal + $extrasTotal;
+
+                return [
+                    'subtotal' => $subtotal,
+                    'extras_total' => $extrasTotal,
+                    'group_discount' => 0.0,
+                    'total' => max(0, $total),
+                    'breakdown' => $breakdown,
+                    'total_pax' => (int) $compPkg['pax'],
+                    'pricing_mode' => 'composition',
+                    'composition_package_id' => (int) $compPkg['id'],
+                ];
+            }
+        }
+
+        // ─── MODO GROUP PRICING ───
+        // Buscar categorias do pacote para identificar quem é adulto/criança/infantil
+        $prices = $this->getPriceForDate($packageId, $date);
+
+        $groupPricingEnabled = $trip && $trip['group_pricing_enabled'] && ($trip['group_pricing'] ?? null);
 
         if ($groupPricingEnabled) {
             $gpRules = json_decode($trip['group_pricing'], true);
@@ -409,6 +449,35 @@ class PricingService
         usort($rules, fn($a, $b) => (int) ($a['pax'] ?? 0) - (int) ($b['pax'] ?? 0));
 
         return $rules;
+    }
+
+    /**
+     * Retorna os pacotes de composição ativos de um trip (via packageId).
+     * Retorna null se composition pricing não estiver ativo.
+     */
+    public function getCompositionPackages(int $packageId): ?array
+    {
+        $package = $this->db->fetchOne("SELECT trip_id FROM trip_packages WHERE id = ?", [$packageId]);
+        if (!$package) return null;
+
+        $trip = $this->db->fetchOne(
+            "SELECT composition_pricing_enabled FROM trips WHERE id = ?",
+            [$package['trip_id']]
+        );
+
+        if (!$trip || !$trip['composition_pricing_enabled']) {
+            return null;
+        }
+
+        $packages = $this->db->fetchAll(
+            "SELECT id, label, pax, units, unit_label, pax_per_unit, price, sort_order
+             FROM trip_composition_packages
+             WHERE trip_id = ? AND status = 'active'
+             ORDER BY sort_order ASC, pax ASC",
+            [$package['trip_id']]
+        );
+
+        return !empty($packages) ? $packages : null;
     }
 
     /**

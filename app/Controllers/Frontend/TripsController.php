@@ -57,8 +57,13 @@ class TripsController extends Controller
             $packages = $this->packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
             $trip['regular_price'] = 0;
-            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
-                // Group pricing: usar preço da primeira faixa
+            if (!empty($trip['composition_pricing_enabled'])) {
+                $compPkgs = $this->db->fetchAll("SELECT price FROM trip_composition_packages WHERE trip_id = ? AND status = 'active'", [(int)$trip['id']]);
+                if (!empty($compPkgs)) {
+                    $trip['min_price'] = (float) min(array_column($compPkgs, 'price'));
+                    $trip['regular_price'] = $trip['min_price'];
+                }
+            } elseif (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
                 $gpRules = json_decode($trip['group_pricing'], true);
                 if (is_array($gpRules) && !empty($gpRules)) {
                     usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
@@ -80,7 +85,13 @@ class TripsController extends Controller
             $packages = $this->packageModel->getByTrip((int) $ft['id']);
             $ft['min_price'] = 0;
             $ft['regular_price'] = 0;
-            if (!empty($ft['group_pricing_enabled']) && !empty($ft['group_pricing'])) {
+            if (!empty($ft['composition_pricing_enabled'])) {
+                $compPkgs = $this->db->fetchAll("SELECT price FROM trip_composition_packages WHERE trip_id = ? AND status = 'active'", [(int)$ft['id']]);
+                if (!empty($compPkgs)) {
+                    $ft['min_price'] = (float) min(array_column($compPkgs, 'price'));
+                    $ft['regular_price'] = $ft['min_price'];
+                }
+            } elseif (!empty($ft['group_pricing_enabled']) && !empty($ft['group_pricing'])) {
                 $gpRules = json_decode($ft['group_pricing'], true);
                 if (is_array($gpRules) && !empty($gpRules)) {
                     usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
@@ -161,7 +172,13 @@ class TripsController extends Controller
             $packages = $this->packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
             $trip['regular_price'] = 0;
-            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+            if (!empty($trip['composition_pricing_enabled'])) {
+                $compPkgs = $this->db->fetchAll("SELECT price FROM trip_composition_packages WHERE trip_id = ? AND status = 'active'", [(int)$trip['id']]);
+                if (!empty($compPkgs)) {
+                    $trip['min_price'] = (float) min(array_column($compPkgs, 'price'));
+                    $trip['regular_price'] = $trip['min_price'];
+                }
+            } elseif (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
                 $gpRules = json_decode($trip['group_pricing'], true);
                 if (is_array($gpRules) && !empty($gpRules)) {
                     usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
@@ -287,6 +304,13 @@ class TripsController extends Controller
         $includes = $trip['includes'] ? json_decode($trip['includes'], true) : [];
         $excludes = $trip['excludes'] ? json_decode($trip['excludes'], true) : [];
 
+        // Pacotes de composição
+        $compositionPackages = [];
+        if (!empty($trip['composition_pricing_enabled'])) {
+            $compositionModel = new \App\Models\TripCompositionPackage();
+            $compositionPackages = $compositionModel->getByTrip($tripId);
+        }
+
         $this->view('frontend/trips/show', [
             'trip' => $trip,
             'packages' => $packages,
@@ -302,6 +326,7 @@ class TripsController extends Controller
             'gallery' => $gallery,
             'includes' => $includes,
             'excludes' => $excludes,
+            'compositionPackages' => $compositionPackages,
             'pageTitle' => $trip['meta_title'] ?: $trip['title'],
             'metaDescription' => $trip['meta_description'] ?: $trip['short_description'],
         ], 'app');

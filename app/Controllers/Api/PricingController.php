@@ -33,6 +33,9 @@ class PricingController extends Controller
         // Verificar se há tabela de preços por grupo ativa
         $groupPricingTable = $pricingService->getGroupPricingTable($packageId);
 
+        // Verificar se há pacotes de composição ativos
+        $compositionPackages = $pricingService->getCompositionPackages($packageId);
+
         $this->json([
             'success' => true,
             'package_id' => $packageId,
@@ -40,6 +43,8 @@ class PricingController extends Controller
             'prices' => $prices,
             'group_pricing_enabled' => $groupPricingTable !== null,
             'group_pricing_table' => $groupPricingTable,
+            'composition_pricing_enabled' => $compositionPackages !== null,
+            'composition_packages' => $compositionPackages,
         ]);
     }
 }

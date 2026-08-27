@@ -67,6 +67,7 @@ class TripsController extends Controller
             'partial_payment_enabled', 'partial_payment_percent',
             'group_discount_enabled', 'group_discount_rules',
             'group_pricing_enabled',
+            'composition_pricing_enabled',
             'youtube_url',
             'meta_title', 'meta_description', 'sort_order', 'featured', 'status',
         ]);
@@ -75,6 +76,7 @@ class TripsController extends Controller
         $data['partial_payment_enabled'] = isset($data['partial_payment_enabled']) ? 1 : 0;
         $data['group_discount_enabled'] = isset($data['group_discount_enabled']) ? 1 : 0;
         $data['group_pricing_enabled'] = isset($data['group_pricing_enabled']) ? 1 : 0;
+        $data['composition_pricing_enabled'] = isset($data['composition_pricing_enabled']) ? 1 : 0;
         $data['featured'] = isset($data['featured']) ? 1 : 0;
 
         // Group pricing (tabela de preço fixo por número de passageiros)
@@ -121,6 +123,9 @@ class TripsController extends Controller
         // Serviços extras
         $this->saveExtraServices($tripId, $request);
 
+        // Pacotes de composição
+        $this->saveCompositionPackages($tripId, $request);
+
         $this->flash('success', 'Passeio criado com sucesso!');
         $this->redirect('/admin/passeios/' . $tripId . '/editar');
     }
@@ -149,6 +154,10 @@ class TripsController extends Controller
             $th['schedules'] = $tripHotelModel->getSchedules((int) $th['id']);
         }
 
+        // Pacotes de composição
+        $compositionModel = new \App\Models\TripCompositionPackage();
+        $compositionPackages = $compositionModel->getAllByTrip($id);
+
         $this->view('admin/trips/form', [
             'trip' => $trip,
             'categories' => $categories,
@@ -159,6 +168,7 @@ class TripsController extends Controller
             'fixedDates' => $fixedDates,
             'travelerCategories' => $travelerCategories,
             'tripHotels' => $tripHotels,
+            'compositionPackages' => $compositionPackages,
             'pageTitle' => 'Editar: ' . $trip['title'],
         ], 'admin');
     }
@@ -228,6 +238,9 @@ class TripsController extends Controller
 
         // Serviços extras
         $this->saveExtraServices($id, $request);
+
+        // Pacotes de composição
+        $this->saveCompositionPackages($id, $request);
 
         // Datas fixas
         $this->saveFixedDates($id, $request);
@@ -512,6 +525,13 @@ class TripsController extends Controller
                 'status' => $fd['status'] ?? 'available',
             ]);
         }
+    }
+
+    private function saveCompositionPackages(int $tripId, Request $request): void
+    {
+        $packages = $request->input('composition_packages', []);
+        $compositionModel = new \App\Models\TripCompositionPackage();
+        $compositionModel->syncForTrip($tripId, $packages);
     }
 
     private function uploadImage(array $file): ?string

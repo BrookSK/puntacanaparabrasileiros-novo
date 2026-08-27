@@ -66,7 +66,8 @@ class CartController extends Controller
             if (!$packageId || !$date || empty($pax)) continue;
 
             try {
-                $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extras);
+                $compPkgId = isset($item['composition_package_id']) ? (int) $item['composition_package_id'] : null;
+                $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extras, $compPkgId);
                 $newTotal = (float) $calculation['total'];
                 $oldTotal = (float) ($item['total'] ?? 0);
 
@@ -201,7 +202,8 @@ class CartController extends Controller
         }
 
         $pricingService = new PricingService();
-        $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extraServiceIds);
+        $compositionPackageId = $request->input('composition_package_id') ? (int) $request->input('composition_package_id') : null;
+        $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extraServiceIds, $compositionPackageId);
 
         // Buscar nome do pacote
         $packageModel = new TripPackage();
@@ -214,6 +216,7 @@ class CartController extends Controller
             'trip_image' => $trip['featured_image'],
             'package_id' => $packageId,
             'package_title' => $package['title'] ?? '',
+            'composition_package_id' => $compositionPackageId,
             'date' => $date,
             'time' => $time,
             'hotel_id' => $request->input('hotel_id', ''),

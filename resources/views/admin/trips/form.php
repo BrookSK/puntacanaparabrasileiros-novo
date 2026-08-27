@@ -206,6 +206,68 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 </div>
             </div>
 
+            <!-- Pacotes por Composição -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon" style="background:#fce7f3;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#db2777" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="23 7 16 12 16 2 23 7"/><line x1="1" y1="20" x2="23" y2="20"/><line x1="1" y1="23" x2="23" y2="23"/></svg>
+                    </div>
+                    <div>
+                        <h3>Pacotes por Composição</h3>
+                        <p class="admin-card-subtitle">Preço por combinação de pessoas + veículos/unidades (ex: buggies, quadriciclos)</p>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label class="checkbox-label"><input type="checkbox" name="composition_pricing_enabled" id="compositionPricingEnabled" <?= !empty($trip['composition_pricing_enabled']) ? 'checked' : '' ?>> Ativar pacotes por composição</label>
+                    <small style="display:block;color:#6b7280;margin-top:4px;">Quando ativo, o cliente escolhe um pacote/composição ao reservar. Cada pacote define: pessoas, unidades, preço fixo.</small>
+                </div>
+                <div id="compositionPricingSection" style="<?= empty($trip['composition_pricing_enabled']) ? 'display:none;' : '' ?>">
+                    <div id="compositionPackagesList">
+                        <?php
+                        $compPkgs = $compositionPackages ?? [];
+                        if (empty($compPkgs)) $compPkgs = [['label' => '', 'pax' => '', 'units' => '1', 'unit_label' => '', 'pax_per_unit' => '', 'price' => '']];
+                        foreach ($compPkgs as $cpi => $cp):
+                        ?>
+                        <div class="composition-pkg-item card-inner" style="padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;">
+                            <div class="form-row" style="grid-template-columns: 1fr; gap:10px;">
+                                <div class="form-group" style="margin-bottom:8px;">
+                                    <label>Nome/Descrição do Pacote</label>
+                                    <input type="text" name="composition_packages[<?= $cpi ?>][label]" value="<?= e($cp['label'] ?? '') ?>" class="form-control" placeholder="Ex: 2 pessoas em 1 Buggy">
+                                </div>
+                            </div>
+                            <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap:10px;">
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Pessoas</label>
+                                    <input type="number" name="composition_packages[<?= $cpi ?>][pax]" value="<?= e($cp['pax'] ?? '') ?>" class="form-control" min="1" placeholder="Qtd" required>
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Unidades</label>
+                                    <input type="number" name="composition_packages[<?= $cpi ?>][units]" value="<?= e($cp['units'] ?? '1') ?>" class="form-control" min="1" placeholder="1">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Nome Unidade</label>
+                                    <input type="text" name="composition_packages[<?= $cpi ?>][unit_label]" value="<?= e($cp['unit_label'] ?? '') ?>" class="form-control" placeholder="Ex: Buggy">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Pax/Unidade</label>
+                                    <input type="number" name="composition_packages[<?= $cpi ?>][pax_per_unit]" value="<?= e($cp['pax_per_unit'] ?? '') ?>" class="form-control" min="1" placeholder="Opcional">
+                                </div>
+                                <div class="form-group" style="margin-bottom:0;">
+                                    <label>Preço (USD)</label>
+                                    <input type="number" name="composition_packages[<?= $cpi ?>][price]" value="<?= e($cp['price'] ?? '') ?>" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required>
+                                </div>
+                            </div>
+                            <?php if ($cpi > 0): ?>
+                            <button type="button" class="btn btn-sm btn-danger" style="margin-top:10px;" onclick="this.closest('.composition-pkg-item').remove();">Remover</button>
+                            <?php endif; ?>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="addCompositionPkgBtn" style="margin-top:4px;">+ Adicionar Pacote</button>
+                    <p style="font-size:11px;color:#94a3b8;margin-top:8px;">Configure cada combinação com seu preço. O cliente escolherá o pacote ao reservar.</p>
+                </div>
+            </div>
+
             <!-- Pacotes -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/></svg></div><div><h3>Pacotes</h3><p class="admin-card-subtitle">Pacotes de preço disponíveis</p></div></div>
@@ -487,6 +549,21 @@ document.getElementById('addGroupPricingBtn')?.addEventListener('click', functio
     div.className = 'group-pricing-item';
     div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;';
     div.innerHTML = '<div style="flex:0 0 120px;"><label style="font-size:12px;font-weight:600;color:#475569;">Adultos</label><input type="number" name="group_pricing[' + i + '][pax]" class="form-control" min="1" max="50" placeholder="Qtd" required></div><div style="flex:1;"><label style="font-size:12px;font-weight:600;color:#475569;">Preço Total (USD)</label><input type="number" name="group_pricing[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:18px;" onclick="this.closest(\'.group-pricing-item\').remove();">&times;</button>';
+    list.appendChild(div);
+});
+
+// Composition Pricing - Toggle e adicionar pacotes
+document.getElementById('compositionPricingEnabled')?.addEventListener('change', function() {
+    document.getElementById('compositionPricingSection').style.display = this.checked ? '' : 'none';
+});
+
+document.getElementById('addCompositionPkgBtn')?.addEventListener('click', function() {
+    var list = document.getElementById('compositionPackagesList');
+    var i = list.children.length;
+    var div = document.createElement('div');
+    div.className = 'composition-pkg-item card-inner';
+    div.style.cssText = 'padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;';
+    div.innerHTML = '<div class="form-row" style="grid-template-columns:1fr;gap:10px;"><div class="form-group" style="margin-bottom:8px;"><label>Nome/Descrição do Pacote</label><input type="text" name="composition_packages[' + i + '][label]" class="form-control" placeholder="Ex: 2 pessoas em 1 Buggy"></div></div><div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;"><div class="form-group" style="margin-bottom:0;"><label>Pessoas</label><input type="number" name="composition_packages[' + i + '][pax]" class="form-control" min="1" placeholder="Qtd" required></div><div class="form-group" style="margin-bottom:0;"><label>Unidades</label><input type="number" name="composition_packages[' + i + '][units]" class="form-control" min="1" placeholder="1" value="1"></div><div class="form-group" style="margin-bottom:0;"><label>Nome Unidade</label><input type="text" name="composition_packages[' + i + '][unit_label]" class="form-control" placeholder="Ex: Buggy"></div><div class="form-group" style="margin-bottom:0;"><label>Pax/Unidade</label><input type="number" name="composition_packages[' + i + '][pax_per_unit]" class="form-control" min="1" placeholder="Opcional"></div><div class="form-group" style="margin-bottom:0;"><label>Preço (USD)</label><input type="number" name="composition_packages[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required></div></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:10px;" onclick="this.closest(\'.composition-pkg-item\').remove();">Remover</button>';
     list.appendChild(div);
 });
 </script>

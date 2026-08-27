@@ -415,7 +415,12 @@
                             <?php
                             $basePrice = 0;
                             $priceLabel = '/ Adulto';
-                            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+                            if (!empty($trip['composition_pricing_enabled']) && !empty($compositionPackages)) {
+                                // Composition pricing: usar menor preço entre os pacotes
+                                $minComp = min(array_column($compositionPackages, 'price'));
+                                $basePrice = (float) $minComp;
+                                $priceLabel = '';
+                            } elseif (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
                                 // Group pricing ativo: usar preço da primeira faixa (1 pessoa)
                                 $gpRules = json_decode($trip['group_pricing'], true);
                                 if (is_array($gpRules) && !empty($gpRules)) {
@@ -553,6 +558,8 @@ const TRIP_ID = <?= (int)$trip['id'] ?>;
 const PACKAGES = <?= json_encode($packages) ?>;
 const GROUP_PRICING_ENABLED = <?= !empty($trip['group_pricing_enabled']) ? 'true' : 'false' ?>;
 const GROUP_PRICING_TABLE = <?= !empty($trip['group_pricing']) ? $trip['group_pricing'] : '[]' ?>;
+const COMPOSITION_PRICING_ENABLED = <?= !empty($trip['composition_pricing_enabled']) ? 'true' : 'false' ?>;
+const COMPOSITION_PACKAGES = <?= json_encode($compositionPackages ?? []) ?>;
 
 // Trip Tabs
 document.querySelectorAll('.trip-tab').forEach(tab => {
