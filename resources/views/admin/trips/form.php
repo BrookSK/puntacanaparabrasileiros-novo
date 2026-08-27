@@ -221,7 +221,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                     <label class="checkbox-label"><input type="checkbox" name="composition_pricing_enabled" id="compositionPricingEnabled" <?= !empty($trip['composition_pricing_enabled']) ? 'checked' : '' ?>> Ativar pacotes por composição</label>
                     <small style="display:block;color:#6b7280;margin-top:4px;">Quando ativo, o cliente escolhe um pacote/composição ao reservar. Cada pacote define: pessoas, unidades, preço fixo.</small>
                 </div>
-                <div id="compositionPricingSection" style="<?= empty($trip['composition_pricing_enabled']) ? 'display:none;' : '' ?>">
+                <div id="compositionPricingSection" style="<?= empty($trip['composition_pricing_enabled'] ?? null) ? 'display:none;' : '' ?>">
                     <div id="compositionPackagesList">
                         <?php
                         $compPkgs = $compositionPackages ?? [];

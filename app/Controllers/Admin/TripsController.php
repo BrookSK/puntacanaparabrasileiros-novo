@@ -155,8 +155,13 @@ class TripsController extends Controller
         }
 
         // Pacotes de composição
-        $compositionModel = new \App\Models\TripCompositionPackage();
-        $compositionPackages = $compositionModel->getAllByTrip($id);
+        $compositionPackages = [];
+        try {
+            $compositionModel = new \App\Models\TripCompositionPackage();
+            $compositionPackages = $compositionModel->getAllByTrip($id);
+        } catch (\Throwable $e) {
+            $compositionPackages = [];
+        }
 
         $this->view('admin/trips/form', [
             'trip' => $trip,
