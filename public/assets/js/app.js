@@ -291,14 +291,43 @@
         // Update price when pax or date changes
         const updatePrice = () => {
             const paxInputs = bookingForm.querySelectorAll('.pax-input');
-            let total = 0;
-            paxInputs.forEach(input => {
-                const price = parseFloat(input.dataset.price) || 0;
-                const qty = parseInt(input.value) || 0;
-                total += price * qty;
-            });
-            const totalEl = document.getElementById('widgetTotal');
-            if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
+
+            // Verificar group pricing
+            const gpEnabled = typeof GROUP_PRICING_ENABLED !== 'undefined' && GROUP_PRICING_ENABLED;
+            const gpTable = typeof GROUP_PRICING_TABLE !== 'undefined' ? GROUP_PRICING_TABLE : [];
+
+            if (gpEnabled && gpTable.length > 0) {
+                // Modo GROUP PRICING: calcular total de pax e buscar preço fixo
+                let totalPax = 0;
+                paxInputs.forEach(input => { totalPax += parseInt(input.value) || 0; });
+
+                let groupPrice = null;
+                // Match exato
+                for (let i = 0; i < gpTable.length; i++) {
+                    if (parseInt(gpTable[i].pax) === totalPax) { groupPrice = parseFloat(gpTable[i].price); break; }
+                }
+                // Nearest lower
+                if (groupPrice === null) {
+                    const sorted = [...gpTable].sort((a, b) => parseInt(a.pax) - parseInt(b.pax));
+                    for (let i = sorted.length - 1; i >= 0; i--) {
+                        if (parseInt(sorted[i].pax) <= totalPax) { groupPrice = parseFloat(sorted[i].price); break; }
+                    }
+                    if (groupPrice === null && sorted.length > 0) groupPrice = parseFloat(sorted[0].price);
+                }
+
+                const totalEl = document.getElementById('widgetTotal');
+                if (totalEl) totalEl.textContent = '$' + (groupPrice || 0).toFixed(2);
+            } else {
+                // Modo PER-PERSON
+                let total = 0;
+                paxInputs.forEach(input => {
+                    const price = parseFloat(input.dataset.price) || 0;
+                    const qty = parseInt(input.value) || 0;
+                    total += price * qty;
+                });
+                const totalEl = document.getElementById('widgetTotal');
+                if (totalEl) totalEl.textContent = '$' + total.toFixed(2);
+            }
         };
         bookingForm.querySelectorAll('.pax-input').forEach(input => input.addEventListener('change', updatePrice));
 
@@ -1464,16 +1493,32 @@
             return true;
         });
 
+        // Verificar se group pricing está ativo
+        const gpEnabled = typeof GROUP_PRICING_ENABLED !== 'undefined' && GROUP_PRICING_ENABLED;
+        const gpTable = typeof GROUP_PRICING_TABLE !== 'undefined' ? GROUP_PRICING_TABLE : [];
+
         travelerCounts = {};
-        container.innerHTML = cats.map(cat => {
+
+        // Se group pricing ativo, mostrar tabela de preços por grupo acima dos seletores
+        let gpHtml = '';
+        if (gpEnabled && gpTable.length > 0) {
+            gpHtml = '<div class="bm-group-pricing-info" style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px 14px;margin-bottom:12px;"><div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:6px;">Preço por Grupo (total fixo):</div>';
+            gpTable.forEach(gp => {
+                gpHtml += `<div style="display:flex;justify-content:space-between;font-size:13px;color:#334155;padding:2px 0;"><span>${gp.pax} pessoa${parseInt(gp.pax) > 1 ? 's' : ''}</span><span style="font-weight:600;">$${parseFloat(gp.price).toFixed(2)}</span></div>`;
+            });
+            gpHtml += '</div>';
+        }
+
+        container.innerHTML = gpHtml + cats.map(cat => {
             const catId = cat.traveler_category_id || cat.id || 0;
             const defaultQty = (cat.category_slug || '').toLowerCase() === 'adulto' ? 1 : 0;
             travelerCounts[catId] = defaultQty;
             const price = parseFloat(cat.sale_price || cat.price || 0);
+            const priceLabel = gpEnabled ? '' : (price > 0 ? '$' + price.toFixed(2) + ' / Pessoa' : 'Gratuito');
             return `<div class="bm-traveler-row">
                 <div class="bm-traveler-info">
                     <span class="bm-traveler-name">${cat.category_name}${cat.age_group ? ' (' + cat.age_group + ')' : ''}</span>
-                    <span class="bm-traveler-price">${price > 0 ? '$' + price.toFixed(2) + ' / Pessoa' : 'Gratuito'}</span>
+                    ${priceLabel ? '<span class="bm-traveler-price">' + priceLabel + '</span>' : ''}
                 </div>
                 <div class="bm-traveler-counter">
                     <button type="button" onclick="changeTraveler(${catId}, -1)">&#8722;</button>
@@ -1522,30 +1567,73 @@
         const totalEl = document.getElementById('bmSidebarTotal');
         let total = 0;
         let travHtml = '';
+
+        // Verificar group pricing
+        const gpEnabled = typeof GROUP_PRICING_ENABLED !== 'undefined' && GROUP_PRICING_ENABLED;
+        const gpTable = typeof GROUP_PRICING_TABLE !== 'undefined' ? GROUP_PRICING_TABLE : [];
+
         if (selectedPackage) {
-            let cats = selectedPackage.categories || [];
-            const filtered = cats.filter(c => {
-                const slug = (c.category_slug || '').toLowerCase();
-                return slug === 'adulto' || slug === 'crianca' || slug === 'infantil';
-            });
-            cats = filtered.length > 0 ? filtered : [
-                { traveler_category_id: 0, category_name: 'Adulto', price: selectedPackage.base_price || '0', sale_price: null },
-                { traveler_category_id: 1, category_name: 'Criança', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null },
-                { traveler_category_id: 2, category_name: 'Infantil', price: '0', sale_price: null }
-            ];
-            // Deduplicar
-            const seen = {};
-            cats = cats.filter(c => { const k = (c.category_slug || c.category_name || '').toLowerCase(); if (seen[k]) return false; seen[k] = true; return true; });
-            cats.forEach(cat => {
-                const catId = cat.traveler_category_id || cat.id || 0;
-                const qty = travelerCounts[catId] || 0;
-                if (qty > 0) {
-                    const price = parseFloat(cat.sale_price || cat.price || 0);
-                    const line = price * qty;
-                    total += line;
-                    travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty} x $${price.toFixed(2)}</span><span>$${line.toFixed(2)}</span></div>`;
+            // Calcular total de passageiros
+            let totalPax = 0;
+            Object.keys(travelerCounts).forEach(k => { totalPax += (travelerCounts[k] || 0); });
+
+            if (gpEnabled && gpTable.length > 0 && totalPax > 0) {
+                // Modo GROUP PRICING: buscar preço fixo pela quantidade total
+                let groupPrice = null;
+
+                // Match exato
+                for (let i = 0; i < gpTable.length; i++) {
+                    if (parseInt(gpTable[i].pax) === totalPax) {
+                        groupPrice = parseFloat(gpTable[i].price);
+                        break;
+                    }
                 }
-            });
+
+                // Se não encontrou exato, usar nearest lower
+                if (groupPrice === null) {
+                    const sorted = [...gpTable].sort((a, b) => parseInt(a.pax) - parseInt(b.pax));
+                    for (let i = sorted.length - 1; i >= 0; i--) {
+                        if (parseInt(sorted[i].pax) <= totalPax) {
+                            groupPrice = parseFloat(sorted[i].price);
+                            break;
+                        }
+                    }
+                    // Fallback: menor faixa
+                    if (groupPrice === null && sorted.length > 0) {
+                        groupPrice = parseFloat(sorted[0].price);
+                    }
+                }
+
+                if (groupPrice !== null) {
+                    total = groupPrice;
+                    travHtml = `<div class="bm-sidebar-traveler-line"><span>Grupo (${totalPax} pessoa${totalPax > 1 ? 's' : ''})</span><span>$${groupPrice.toFixed(2)}</span></div>`;
+                }
+            } else {
+                // Modo PER-PERSON: preço por categoria × quantidade
+                let cats = selectedPackage.categories || [];
+                const filtered = cats.filter(c => {
+                    const slug = (c.category_slug || '').toLowerCase();
+                    return slug === 'adulto' || slug === 'crianca' || slug === 'infantil';
+                });
+                cats = filtered.length > 0 ? filtered : [
+                    { traveler_category_id: 0, category_name: 'Adulto', price: selectedPackage.base_price || '0', sale_price: null },
+                    { traveler_category_id: 1, category_name: 'Criança', price: selectedPackage.base_price ? (parseFloat(selectedPackage.base_price) * 0.5).toFixed(2) : '0', sale_price: null },
+                    { traveler_category_id: 2, category_name: 'Infantil', price: '0', sale_price: null }
+                ];
+                // Deduplicar
+                const seen = {};
+                cats = cats.filter(c => { const k = (c.category_slug || c.category_name || '').toLowerCase(); if (seen[k]) return false; seen[k] = true; return true; });
+                cats.forEach(cat => {
+                    const catId = cat.traveler_category_id || cat.id || 0;
+                    const qty = travelerCounts[catId] || 0;
+                    if (qty > 0) {
+                        const price = parseFloat(cat.sale_price || cat.price || 0);
+                        const line = price * qty;
+                        total += line;
+                        travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty} x $${price.toFixed(2)}</span><span>$${line.toFixed(2)}</span></div>`;
+                    }
+                });
+            }
         }
         if (travHtml) {
             travDiv.style.display = 'block';

@@ -164,6 +164,48 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 <div class="form-group"><label>Não Inclui</label><div id="excludes-list" class="repeater-list"><?php $excludes = $isEdit && !empty($trip['excludes']) ? json_decode($trip['excludes'], true) : ['']; foreach ($excludes as $exc): ?><div class="repeater-item"><input type="text" name="excludes[]" value="<?= e($exc) ?>" class="form-control" placeholder="Ex: Bebidas alcoólicas"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div><?php endforeach; ?></div><button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('excludes-list', 'excludes[]', 'Ex: Bebidas alcoólicas')">+ Adicionar</button></div>
             </div>
 
+            <!-- Tabela de Preços por Grupo -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon" style="background:#dbeafe;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+                    </div>
+                    <div>
+                        <h3>Tabela de Preços por Grupo</h3>
+                        <p class="admin-card-subtitle">Preço fixo total por número de passageiros (não multiplicativo)</p>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label class="checkbox-label"><input type="checkbox" name="group_pricing_enabled" id="groupPricingEnabled" <?= !empty($trip['group_pricing_enabled']) ? 'checked' : '' ?>> Ativar tabela de preços por grupo</label>
+                    <small style="display:block;color:#6b7280;margin-top:4px;">Quando ativo, o preço cobrado será o valor fixo definido abaixo de acordo com o número total de passageiros, ignorando o preço por pessoa.</small>
+                </div>
+                <div id="groupPricingSection" style="<?= empty($trip['group_pricing_enabled']) ? 'display:none;' : '' ?>">
+                    <div id="groupPricingList">
+                        <?php
+                        $groupPricing = ($isEdit && !empty($trip['group_pricing'])) ? json_decode($trip['group_pricing'], true) : [];
+                        if (empty($groupPricing)) $groupPricing = [['pax' => '1', 'price' => '']];
+                        foreach ($groupPricing as $gpi => $gp):
+                        ?>
+                        <div class="group-pricing-item" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
+                            <div style="flex:0 0 120px;">
+                                <label style="font-size:12px;font-weight:600;color:#475569;">Passageiros</label>
+                                <input type="number" name="group_pricing[<?= $gpi ?>][pax]" value="<?= e($gp['pax'] ?? '') ?>" class="form-control" min="1" max="50" placeholder="Qtd" required>
+                            </div>
+                            <div style="flex:1;">
+                                <label style="font-size:12px;font-weight:600;color:#475569;">Preço Total (USD)</label>
+                                <input type="number" name="group_pricing[<?= $gpi ?>][price]" value="<?= e($gp['price'] ?? '') ?>" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required>
+                            </div>
+                            <?php if ($gpi > 0): ?>
+                            <button type="button" class="btn btn-sm btn-danger" style="margin-top:18px;" onclick="this.closest('.group-pricing-item').remove();">&times;</button>
+                            <?php endif; ?>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="btn btn-outline" id="addGroupPricingBtn" style="margin-top:4px;">+ Adicionar Faixa</button>
+                    <p style="font-size:11px;color:#94a3b8;margin-top:8px;">Ex: 1 pessoa = US$70, 2 pessoas = US$120, 3 pessoas = US$160. O sistema usará o valor correspondente ao número total de passageiros.</p>
+                </div>
+            </div>
+
             <!-- Pacotes -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/></svg></div><div><h3>Pacotes</h3><p class="admin-card-subtitle">Pacotes de preço disponíveis</p></div></div>
@@ -430,6 +472,21 @@ document.getElementById('addFaqBtn')?.addEventListener('click', function() {
     div.className = 'faq-item-admin';
     div.style.cssText = 'padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;';
     div.innerHTML = '<div class="form-group" style="margin-bottom:8px;"><label>Pergunta</label><input type="text" name="faqs[' + i + '][question]" class="form-control" placeholder="Ex: Preciso saber nadar?"></div><div class="form-group" style="margin-bottom:0;"><label>Resposta</label><textarea name="faqs[' + i + '][answer]" class="form-control" rows="2" placeholder="Resposta..."></textarea></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:8px;" onclick="this.closest(\'.faq-item-admin\').remove()">Remover</button>';
+    list.appendChild(div);
+});
+
+// Group Pricing - Toggle e adicionar faixas
+document.getElementById('groupPricingEnabled')?.addEventListener('change', function() {
+    document.getElementById('groupPricingSection').style.display = this.checked ? '' : 'none';
+});
+
+document.getElementById('addGroupPricingBtn')?.addEventListener('click', function() {
+    var list = document.getElementById('groupPricingList');
+    var i = list.children.length;
+    var div = document.createElement('div');
+    div.className = 'group-pricing-item';
+    div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;';
+    div.innerHTML = '<div style="flex:0 0 120px;"><label style="font-size:12px;font-weight:600;color:#475569;">Passageiros</label><input type="number" name="group_pricing[' + i + '][pax]" class="form-control" min="1" max="50" placeholder="Qtd" required></div><div style="flex:1;"><label style="font-size:12px;font-weight:600;color:#475569;">Preço Total (USD)</label><input type="number" name="group_pricing[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:18px;" onclick="this.closest(\'.group-pricing-item\').remove();">&times;</button>';
     list.appendChild(div);
 });
 </script>

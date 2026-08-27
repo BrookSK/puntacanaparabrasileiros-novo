@@ -15,6 +15,7 @@ class Trip extends Model
         'weather_info', 'meeting_point', 'important_notes',
         'partial_payment_enabled', 'partial_payment_percent',
         'group_discount_enabled', 'group_discount_rules',
+        'group_pricing_enabled', 'group_pricing',
         'youtube_url', 'faqs',
         'meta_title', 'meta_description', 'sort_order', 'featured', 'status',
     ];

@@ -137,6 +137,39 @@ class PricingService
      */
     public function calculateItemTotal(int $packageId, string $date, array $paxByCategory, array $extraServiceIds = []): array
     {
+        $totalPax = array_sum(array_map('intval', $paxByCategory));
+
+        // Verificar se o trip tem tabela de preços por grupo ativa
+        $groupPricingResult = $this->resolveGroupPricing($packageId, $totalPax);
+
+        if ($groupPricingResult !== null) {
+            // Modo GROUP PRICING: preço fixo total por número de passageiros
+            $subtotal = $groupPricingResult['price'];
+            $breakdown = [[
+                'category_name' => 'Grupo (' . $totalPax . ' pessoa' . ($totalPax > 1 ? 's' : '') . ')',
+                'quantity' => $totalPax,
+                'unit_price' => $subtotal / max(1, $totalPax),
+                'total' => $subtotal,
+                'pricing_mode' => 'group_fixed',
+            ]];
+
+            // Serviços extras
+            $extrasTotal = $this->calculateExtrasTotal($extraServiceIds, $totalPax);
+
+            $total = $subtotal + $extrasTotal;
+
+            return [
+                'subtotal' => $subtotal,
+                'extras_total' => $extrasTotal,
+                'group_discount' => 0.0,
+                'total' => max(0, $total),
+                'breakdown' => $breakdown,
+                'total_pax' => $totalPax,
+                'pricing_mode' => 'group_fixed',
+            ];
+        }
+
+        // Modo PER-PERSON: preço por categoria × quantidade
         $prices = $this->getPriceForDate($packageId, $date);
         $subtotal = 0.0;
         $breakdown = [];
@@ -157,26 +190,9 @@ class PricingService
         }
 
         // Serviços extras
-        $extrasTotal = 0.0;
-        $totalPax = array_sum(array_map('intval', $paxByCategory));
-        if (!empty($extraServiceIds)) {
-            $placeholders = implode(',', array_fill(0, count($extraServiceIds), '?'));
-            $extras = $this->db->fetchAll(
-                "SELECT * FROM trip_extra_services WHERE id IN ({$placeholders})",
-                array_values($extraServiceIds)
-            );
-            foreach ($extras as $extra) {
-                $extraPrice = match ($extra['price_type']) {
-                    'per_person' => (float) $extra['price'] * $totalPax,
-                    'per_group' => (float) $extra['price'],
-                    'fixed' => (float) $extra['price'],
-                    default => (float) $extra['price'],
-                };
-                $extrasTotal += $extraPrice;
-            }
-        }
+        $extrasTotal = $this->calculateExtrasTotal($extraServiceIds, $totalPax);
 
-        // Desconto de grupo
+        // Desconto de grupo (percentual)
         $groupDiscount = $this->calculateGroupDiscount($packageId, $totalPax, $subtotal);
 
         $total = $subtotal + $extrasTotal - $groupDiscount;
@@ -188,7 +204,114 @@ class PricingService
             'total' => max(0, $total),
             'breakdown' => $breakdown,
             'total_pax' => $totalPax,
+            'pricing_mode' => 'per_person',
         ];
+    }
+
+    /**
+     * Resolve o preço fixo de grupo para o número de passageiros dado.
+     * Retorna null se group pricing não estiver ativo ou não houver regra para esse número.
+     */
+    public function resolveGroupPricing(int $packageId, int $totalPax): ?array
+    {
+        $package = $this->db->fetchOne("SELECT trip_id FROM trip_packages WHERE id = ?", [$packageId]);
+        if (!$package) return null;
+
+        $trip = $this->db->fetchOne(
+            "SELECT group_pricing_enabled, group_pricing FROM trips WHERE id = ?",
+            [$package['trip_id']]
+        );
+
+        if (!$trip || !$trip['group_pricing_enabled'] || !$trip['group_pricing']) {
+            return null;
+        }
+
+        $rules = json_decode($trip['group_pricing'], true);
+        if (!is_array($rules) || empty($rules)) return null;
+
+        // Buscar regra exata para o número de passageiros
+        foreach ($rules as $rule) {
+            if ((int) ($rule['pax'] ?? 0) === $totalPax) {
+                return ['price' => (float) $rule['price'], 'pax' => $totalPax, 'match' => 'exact'];
+            }
+        }
+
+        // Se não encontrou exato, usar a regra do maior pax menor ou igual ao total
+        usort($rules, fn($a, $b) => (int) ($a['pax'] ?? 0) - (int) ($b['pax'] ?? 0));
+
+        $bestMatch = null;
+        foreach ($rules as $rule) {
+            $rulePax = (int) ($rule['pax'] ?? 0);
+            if ($rulePax <= $totalPax) {
+                $bestMatch = $rule;
+            }
+        }
+
+        if ($bestMatch) {
+            return ['price' => (float) $bestMatch['price'], 'pax' => (int) $bestMatch['pax'], 'match' => 'nearest_lower'];
+        }
+
+        // Fallback: usar a menor regra disponível (para 1 passageiro se existir)
+        $smallest = $rules[0] ?? null;
+        if ($smallest) {
+            return ['price' => (float) $smallest['price'], 'pax' => (int) $smallest['pax'], 'match' => 'fallback'];
+        }
+
+        return null;
+    }
+
+    /**
+     * Calcula o total dos serviços extras.
+     */
+    private function calculateExtrasTotal(array $extraServiceIds, int $totalPax): float
+    {
+        if (empty($extraServiceIds)) return 0.0;
+
+        $placeholders = implode(',', array_fill(0, count($extraServiceIds), '?'));
+        $extras = $this->db->fetchAll(
+            "SELECT * FROM trip_extra_services WHERE id IN ({$placeholders})",
+            array_values($extraServiceIds)
+        );
+
+        $extrasTotal = 0.0;
+        foreach ($extras as $extra) {
+            $extraPrice = match ($extra['price_type']) {
+                'per_person' => (float) $extra['price'] * $totalPax,
+                'per_group' => (float) $extra['price'],
+                'fixed' => (float) $extra['price'],
+                default => (float) $extra['price'],
+            };
+            $extrasTotal += $extraPrice;
+        }
+
+        return $extrasTotal;
+    }
+
+    /**
+     * Retorna a tabela de group pricing de um trip (via packageId).
+     * Retorna null se não estiver ativo.
+     */
+    public function getGroupPricingTable(int $packageId): ?array
+    {
+        $package = $this->db->fetchOne("SELECT trip_id FROM trip_packages WHERE id = ?", [$packageId]);
+        if (!$package) return null;
+
+        $trip = $this->db->fetchOne(
+            "SELECT group_pricing_enabled, group_pricing FROM trips WHERE id = ?",
+            [$package['trip_id']]
+        );
+
+        if (!$trip || !$trip['group_pricing_enabled'] || !$trip['group_pricing']) {
+            return null;
+        }
+
+        $rules = json_decode($trip['group_pricing'], true);
+        if (!is_array($rules) || empty($rules)) return null;
+
+        // Ordenar por pax
+        usort($rules, fn($a, $b) => (int) ($a['pax'] ?? 0) - (int) ($b['pax'] ?? 0));
+
+        return $rules;
     }
 
     /**

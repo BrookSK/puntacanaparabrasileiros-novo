@@ -486,6 +486,8 @@
 <script>
 const TRIP_ID = <?= (int)$trip['id'] ?>;
 const PACKAGES = <?= json_encode($packages) ?>;
+const GROUP_PRICING_ENABLED = <?= !empty($trip['group_pricing_enabled']) ? 'true' : 'false' ?>;
+const GROUP_PRICING_TABLE = <?= !empty($trip['group_pricing']) ? $trip['group_pricing'] : '[]' ?>;
 
 // Trip Tabs
 document.querySelectorAll('.trip-tab').forEach(tab => {

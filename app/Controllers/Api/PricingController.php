@@ -30,11 +30,16 @@ class PricingController extends Controller
         $pricingService = new PricingService();
         $prices = $pricingService->getPriceForDate($packageId, $date);
 
+        // Verificar se há tabela de preços por grupo ativa
+        $groupPricingTable = $pricingService->getGroupPricingTable($packageId);
+
         $this->json([
             'success' => true,
             'package_id' => $packageId,
             'date' => $date,
             'prices' => $prices,
+            'group_pricing_enabled' => $groupPricingTable !== null,
+            'group_pricing_table' => $groupPricingTable,
         ]);
     }
 }
