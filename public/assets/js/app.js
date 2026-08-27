@@ -1623,9 +1623,7 @@
                         const price = parseFloat(cat.sale_price || cat.price || 0);
                         const line = price * qty;
                         childTotal += line;
-                        if (line > 0) {
-                            travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty} x $${price.toFixed(2)}</span><span>$${line.toFixed(2)}</span></div>`;
-                        }
+                        travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}${price > 0 ? ' x $' + price.toFixed(2) : ''}</span><span>${price > 0 ? '$' + line.toFixed(2) : 'Gratuito'}</span></div>`;
                     }
                 });
 
@@ -1662,7 +1660,7 @@
                         const price = parseFloat(cat.sale_price || cat.price || 0);
                         const line = price * qty;
                         total += line;
-                        travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty} x $${price.toFixed(2)}</span><span>$${line.toFixed(2)}</span></div>`;
+                        travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}${price > 0 ? ' x $' + price.toFixed(2) : ''}</span><span>${price > 0 ? '$' + line.toFixed(2) : 'Gratuito'}</span></div>`;
                     }
                 });
             }
