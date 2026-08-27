@@ -26,8 +26,17 @@ class HomeController extends Controller
         foreach ($featuredTrips as &$trip) {
             $packages = $packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
-            if (!empty($packages)) {
+            $trip['regular_price'] = 0;
+            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+                $gpRules = json_decode($trip['group_pricing'], true);
+                if (is_array($gpRules) && !empty($gpRules)) {
+                    usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                    $trip['min_price'] = (float) $gpRules[0]['price'];
+                    $trip['regular_price'] = $trip['min_price'];
+                }
+            } elseif (!empty($packages)) {
                 $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
+                $trip['regular_price'] = $packageModel->getRegularPrice((int) $packages[0]['id']);
             }
             $trip['rating'] = $tripModel->getAverageRating((int) $trip['id']);
         }

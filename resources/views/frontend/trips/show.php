@@ -190,7 +190,24 @@
                     <?php foreach ($packages as $pkg): ?>
                     <div class="trip-package-card">
                         <h4><?= e($pkg['title']) ?></h4>
-                        <?php if (!empty($pkg['categories'])): ?>
+                        <?php if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])): ?>
+                        <?php $gpRulesDisplay = json_decode($trip['group_pricing'], true); ?>
+                        <?php if (is_array($gpRulesDisplay) && !empty($gpRulesDisplay)): ?>
+                        <?php usort($gpRulesDisplay, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0)); ?>
+                        <table class="table">
+                            <thead><tr><th>Passageiros</th><th>Preço Total</th></tr></thead>
+                            <tbody>
+                            <?php foreach ($gpRulesDisplay as $gpRule): ?>
+                            <tr>
+                                <td><?= (int)$gpRule['pax'] ?> pessoa<?= (int)$gpRule['pax'] > 1 ? 's' : '' ?></td>
+                                <td><strong><?= money((float)$gpRule['price']) ?></strong></td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <p style="font-size:12px;color:#6b7280;margin-top:8px;">* Preço fixo total por grupo (não multiplicativo por pessoa)</p>
+                        <?php endif; ?>
+                        <?php elseif (!empty($pkg['categories'])): ?>
                         <table class="table">
                             <thead><tr><th>Categoria</th><th>Idade</th><th>Preço</th></tr></thead>
                             <tbody>
@@ -368,13 +385,23 @@
                         <span class="trip-price-value">
                             <?php
                             $basePrice = 0;
-                            if (!empty($packages)) {
+                            $priceLabel = '/ Adulto';
+                            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+                                // Group pricing ativo: usar preço da primeira faixa (1 pessoa)
+                                $gpRules = json_decode($trip['group_pricing'], true);
+                                if (is_array($gpRules) && !empty($gpRules)) {
+                                    usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                                    $basePrice = (float) $gpRules[0]['price'];
+                                    $paxLabel = (int) $gpRules[0]['pax'];
+                                    $priceLabel = $paxLabel === 1 ? '/ Pessoa' : '/ ' . $paxLabel . ' pessoas';
+                                }
+                            } elseif (!empty($packages)) {
                                 $basePrice = $packages[0]['base_price'] ?? 0;
                             }
                             echo money($basePrice);
                             ?>
                         </span>
-                        <span class="price-per">/ Adulto</span>
+                        <span class="price-per"><?= $priceLabel ?></span>
                     </div>
                     <a href="#booking-section" class="btn-verificar">Verificar Disponibilidade</a>
                     <?php if (current_user()): ?>
@@ -446,8 +473,17 @@
                                 Punta Cana
                             </span>
                             <span class="related-trip-price"><?php
-                                $rpkg = (new \App\Models\TripPackage())->getByTrip((int)$related['id']);
-                                $rprice = !empty($rpkg) ? (new \App\Models\TripPackage())->getBasePrice((int)$rpkg[0]['id']) : 0;
+                                $rprice = 0;
+                                if (!empty($related['group_pricing_enabled']) && !empty($related['group_pricing'])) {
+                                    $rgp = json_decode($related['group_pricing'], true);
+                                    if (is_array($rgp) && !empty($rgp)) {
+                                        usort($rgp, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                                        $rprice = (float) $rgp[0]['price'];
+                                    }
+                                } else {
+                                    $rpkg = (new \App\Models\TripPackage())->getByTrip((int)$related['id']);
+                                    $rprice = !empty($rpkg) ? (new \App\Models\TripPackage())->getBasePrice((int)$rpkg[0]['id']) : 0;
+                                }
                                 echo money($rprice);
                             ?></span>
                         </div>
@@ -506,7 +542,7 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
 <div class="trip-mobile-cta">
     <div class="trip-mobile-cta-price">
         <span class="trip-mobile-cta-from">A partir de</span>
-        <span class="trip-mobile-cta-value"><?= money($basePrice) ?> <small>/ Adulto</small></span>
+        <span class="trip-mobile-cta-value"><?= money($basePrice) ?> <small><?= $priceLabel ?></small></span>
     </div>
     <a href="#booking-section" class="trip-mobile-cta-btn btn-verificar">Verificar Disponibilidade</a>
 </div>

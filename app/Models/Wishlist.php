@@ -13,7 +13,7 @@ class Wishlist extends Model
     public function getByUser(int $userId): array
     {
         return $this->db->fetchAll(
-            "SELECT w.*, t.title, t.slug, t.featured_image, t.short_description, t.duration
+            "SELECT w.*, t.title, t.slug, t.featured_image, t.short_description, t.duration, t.group_pricing_enabled, t.group_pricing
              FROM wishlists w
              INNER JOIN trips t ON w.trip_id = t.id
              WHERE w.user_id = ? AND t.status = 'published'

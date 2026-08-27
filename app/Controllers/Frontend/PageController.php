@@ -309,7 +309,13 @@ class PageController extends Controller
             foreach ($tripResults['items'] as &$trip) {
                 $packages = $packageModel->getByTrip((int) $trip['id']);
                 $trip['min_price'] = 0;
-                if (!empty($packages)) {
+                if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+                    $gpRules = json_decode($trip['group_pricing'], true);
+                    if (is_array($gpRules) && !empty($gpRules)) {
+                        usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                        $trip['min_price'] = (float) $gpRules[0]['price'];
+                    }
+                } elseif (!empty($packages)) {
                     $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
                 }
             }
@@ -400,7 +406,13 @@ class PageController extends Controller
         foreach ($trips['items'] as &$trip) {
             $packages = $packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
-            if (!empty($packages)) {
+            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+                $gpRules = json_decode($trip['group_pricing'], true);
+                if (is_array($gpRules) && !empty($gpRules)) {
+                    usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                    $trip['min_price'] = (float) $gpRules[0]['price'];
+                }
+            } elseif (!empty($packages)) {
                 $trip['min_price'] = $packageModel->getBasePrice((int) $packages[0]['id']);
                 $raw = $packageModel->getCategories((int) $packages[0]['id']);
                 $trip['price_categories'] = $this->deduplicateCategories($raw);

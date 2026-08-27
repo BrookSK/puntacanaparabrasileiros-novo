@@ -57,7 +57,15 @@ class TripsController extends Controller
             $packages = $this->packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
             $trip['regular_price'] = 0;
-            if (!empty($packages)) {
+            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+                // Group pricing: usar preço da primeira faixa
+                $gpRules = json_decode($trip['group_pricing'], true);
+                if (is_array($gpRules) && !empty($gpRules)) {
+                    usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                    $trip['min_price'] = (float) $gpRules[0]['price'];
+                    $trip['regular_price'] = $trip['min_price'];
+                }
+            } elseif (!empty($packages)) {
                 $trip['min_price'] = $this->packageModel->getBasePrice((int) $packages[0]['id']);
                 $trip['regular_price'] = $this->packageModel->getRegularPrice((int) $packages[0]['id']);
             }
@@ -72,7 +80,14 @@ class TripsController extends Controller
             $packages = $this->packageModel->getByTrip((int) $ft['id']);
             $ft['min_price'] = 0;
             $ft['regular_price'] = 0;
-            if (!empty($packages)) {
+            if (!empty($ft['group_pricing_enabled']) && !empty($ft['group_pricing'])) {
+                $gpRules = json_decode($ft['group_pricing'], true);
+                if (is_array($gpRules) && !empty($gpRules)) {
+                    usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                    $ft['min_price'] = (float) $gpRules[0]['price'];
+                    $ft['regular_price'] = $ft['min_price'];
+                }
+            } elseif (!empty($packages)) {
                 $ft['min_price'] = $this->packageModel->getBasePrice((int) $packages[0]['id']);
                 $ft['regular_price'] = $this->packageModel->getRegularPrice((int) $packages[0]['id']);
             }
@@ -146,7 +161,14 @@ class TripsController extends Controller
             $packages = $this->packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
             $trip['regular_price'] = 0;
-            if (!empty($packages)) {
+            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+                $gpRules = json_decode($trip['group_pricing'], true);
+                if (is_array($gpRules) && !empty($gpRules)) {
+                    usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                    $trip['min_price'] = (float) $gpRules[0]['price'];
+                    $trip['regular_price'] = $trip['min_price'];
+                }
+            } elseif (!empty($packages)) {
                 $trip['min_price'] = $this->packageModel->getBasePrice((int) $packages[0]['id']);
                 $trip['regular_price'] = $this->packageModel->getRegularPrice((int) $packages[0]['id']);
             }
@@ -218,6 +240,18 @@ class TripsController extends Controller
         foreach ($packages as &$pkg) {
             $pkg['categories'] = $this->packageModel->getCategories((int) $pkg['id']);
             $pkg['base_price'] = $this->packageModel->getBasePrice((int) $pkg['id']);
+        }
+
+        // Se group pricing ativo, sobrescrever base_price com preço da 1ª faixa
+        if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+            $gpRules = json_decode($trip['group_pricing'], true);
+            if (is_array($gpRules) && !empty($gpRules)) {
+                usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                $gpFirstPrice = (float) $gpRules[0]['price'];
+                foreach ($packages as &$pkg) {
+                    $pkg['base_price'] = $gpFirstPrice;
+                }
+            }
         }
 
         $categories = $this->tripModel->getCategories($tripId);

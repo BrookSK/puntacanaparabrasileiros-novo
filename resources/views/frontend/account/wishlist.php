@@ -48,11 +48,20 @@
                         <?php
                         $minPrice = 0;
                         $regularPrice = 0;
-                        $packageModel = new \App\Models\TripPackage();
-                        $packages = $packageModel->getByTrip((int) $item['trip_id']);
-                        if (!empty($packages)) {
-                            $minPrice = $packageModel->getBasePrice((int) $packages[0]['id']);
-                            $regularPrice = $packageModel->getRegularPrice((int) $packages[0]['id']);
+                        if (!empty($item['group_pricing_enabled']) && !empty($item['group_pricing'])) {
+                            $gpRules = json_decode($item['group_pricing'], true);
+                            if (is_array($gpRules) && !empty($gpRules)) {
+                                usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                                $minPrice = (float) $gpRules[0]['price'];
+                                $regularPrice = $minPrice;
+                            }
+                        } else {
+                            $packageModel = new \App\Models\TripPackage();
+                            $packages = $packageModel->getByTrip((int) $item['trip_id']);
+                            if (!empty($packages)) {
+                                $minPrice = $packageModel->getBasePrice((int) $packages[0]['id']);
+                                $regularPrice = $packageModel->getRegularPrice((int) $packages[0]['id']);
+                            }
                         }
                         $hasDiscount = $regularPrice > $minPrice && $minPrice > 0;
                         $discountPercent = $hasDiscount ? round(100 - ($minPrice / $regularPrice * 100)) : 0;
