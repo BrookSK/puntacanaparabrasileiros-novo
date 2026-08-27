@@ -1484,25 +1484,58 @@
         const compPackages = typeof COMPOSITION_PACKAGES !== 'undefined' ? COMPOSITION_PACKAGES : [];
 
         if (compEnabled && compPackages.length > 0) {
-            // ─── MODO COMPOSIÇÃO: mostrar lista de pacotes para seleção ───
+            // ─── MODO COMPOSIÇÃO: mostrar pacotes + seletores de viajantes ───
             window._selectedCompositionPkg = compPackages[0].id;
+
+            let compHtml = '<div style="margin-bottom:14px;font-size:13px;font-weight:600;color:#1e40af;">Selecione o pacote:</div>';
+            compHtml += compPackages.map((cp, idx) => {
+                const unitInfo = cp.unit_label ? (cp.units + ' ' + cp.unit_label + (cp.units > 1 ? 's' : '')) : '';
+                const paxInfo = cp.pax + ' pessoa' + (cp.pax > 1 ? 's' : '');
+                const desc = cp.label || (paxInfo + (unitInfo ? ' em ' + unitInfo : ''));
+                return `<label class="bm-composition-option" style="display:flex;align-items:center;gap:12px;padding:12px 14px;background:${idx === 0 ? '#eff6ff' : '#f9fafb'};border:2px solid ${idx === 0 ? '#3b82f6' : '#e5e7eb'};border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;" onclick="selectCompositionPkg(${cp.id}, this)">
+                    <input type="radio" name="composition_pkg_radio" value="${cp.id}" ${idx === 0 ? 'checked' : ''} style="accent-color:#3b82f6;width:18px;height:18px;">
+                    <div style="flex:1;">
+                        <div style="font-size:14px;font-weight:600;color:#1e293b;">${desc}</div>
+                        ${unitInfo && cp.label ? '<div style="font-size:12px;color:#64748b;">' + paxInfo + ' &bull; ' + unitInfo + (cp.pax_per_unit ? ' (' + cp.pax_per_unit + '/unid)' : '') + '</div>' : ''}
+                    </div>
+                    <div style="font-size:16px;font-weight:700;color:#059669;">$${parseFloat(cp.price).toFixed(2)}</div>
+                </label>`;
+            }).join('');
+
+            compHtml += '<div style="margin-top:16px;padding-top:14px;border-top:1px solid #e5e7eb;"><div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:10px;">Viajantes:</div></div>';
+
+            // Montar seletores de viajantes normalmente
+            let cats = selectedPackage.categories || [];
+            const filtered = cats.filter(c => {
+                const slug = (c.category_slug || '').toLowerCase();
+                return slug === 'adulto' || slug === 'crianca' || slug === 'infantil';
+            });
+            cats = filtered.length > 0 ? filtered : [
+                { traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto', age_group: '18-85', price: '0', sale_price: null },
+                { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca', age_group: '4-11', price: '0', sale_price: null },
+                { traveler_category_id: 2, category_name: 'Infantil', category_slug: 'infantil', age_group: '0-3', price: '0', sale_price: null }
+            ];
+            const seen = {};
+            cats = cats.filter(c => { const k = (c.category_slug || c.category_name || '').toLowerCase(); if (seen[k]) return false; seen[k] = true; return true; });
+
             travelerCounts = {};
+            compHtml += cats.map(cat => {
+                const catId = cat.traveler_category_id || cat.id || 0;
+                const defaultQty = (cat.category_slug || '').toLowerCase() === 'adulto' ? 1 : 0;
+                travelerCounts[catId] = defaultQty;
+                return `<div class="bm-traveler-row">
+                    <div class="bm-traveler-info">
+                        <span class="bm-traveler-name">${cat.category_name}${cat.age_group ? ' (' + cat.age_group + ')' : ''}</span>
+                    </div>
+                    <div class="bm-traveler-counter">
+                        <button type="button" onclick="changeTraveler(${catId}, -1)">&#8722;</button>
+                        <input type="text" value="${defaultQty}" id="traveler_${catId}" readonly>
+                        <button type="button" onclick="changeTraveler(${catId}, 1)">&#43;</button>
+                    </div>
+                </div>`;
+            }).join('');
 
-            container.innerHTML = '<div style="margin-bottom:10px;font-size:13px;font-weight:600;color:#1e40af;">Selecione o pacote:</div>' +
-                compPackages.map((cp, idx) => {
-                    const unitInfo = cp.unit_label ? (cp.units + ' ' + cp.unit_label + (cp.units > 1 ? 's' : '')) : '';
-                    const paxInfo = cp.pax + ' pessoa' + (cp.pax > 1 ? 's' : '');
-                    const desc = cp.label || (paxInfo + (unitInfo ? ' em ' + unitInfo : ''));
-                    return `<label class="bm-composition-option" style="display:flex;align-items:center;gap:12px;padding:14px 16px;background:${idx === 0 ? '#eff6ff' : '#f9fafb'};border:2px solid ${idx === 0 ? '#3b82f6' : '#e5e7eb'};border-radius:10px;margin-bottom:8px;cursor:pointer;transition:all .15s;" onclick="selectCompositionPkg(${cp.id}, this)">
-                        <input type="radio" name="composition_pkg_radio" value="${cp.id}" ${idx === 0 ? 'checked' : ''} style="accent-color:#3b82f6;width:18px;height:18px;">
-                        <div style="flex:1;">
-                            <div style="font-size:14px;font-weight:600;color:#1e293b;">${desc}</div>
-                            ${unitInfo && cp.label ? '<div style="font-size:12px;color:#64748b;">' + paxInfo + ' &bull; ' + unitInfo + (cp.pax_per_unit ? ' (' + cp.pax_per_unit + '/unid)' : '') + '</div>' : ''}
-                        </div>
-                        <div style="font-size:16px;font-weight:700;color:#059669;">$${parseFloat(cp.price).toFixed(2)}</div>
-                    </label>`;
-                }).join('');
-
+            container.innerHTML = compHtml;
             updateSidebar();
             return;
         }
@@ -1762,13 +1795,9 @@
         let compositionPkgId = '';
 
         if (compEnabled && compPackages.length > 0 && window._selectedCompositionPkg) {
-            // Modo composição: usar pax do pacote selecionado
-            const selPkg = compPackages.find(p => p.id == window._selectedCompositionPkg);
-            if (selPkg) {
-                compositionPkgId = selPkg.id;
-                // Preencher pax com o total do pacote (como "adulto" genérico)
-                pax[0] = parseInt(selPkg.pax);
-            }
+            // Modo composição: enviar pacote selecionado + viajantes
+            compositionPkgId = window._selectedCompositionPkg;
+            Object.keys(travelerCounts).forEach(k => { if (travelerCounts[k] > 0) pax[k] = travelerCounts[k]; });
         } else {
             Object.keys(travelerCounts).forEach(k => { if (travelerCounts[k] > 0) pax[k] = travelerCounts[k]; });
         }
