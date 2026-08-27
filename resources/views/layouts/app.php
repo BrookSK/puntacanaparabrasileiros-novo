@@ -72,7 +72,7 @@
     </a>
 
     <!-- JavaScript -->
-    <script src="<?= asset('js/app.js') ?>?v=7.0"></script>
+    <script src="<?= asset('js/app.js') ?>?v=7.2"></script>
     <script src="<?= asset('js/phone-country.js') ?>?v=1.1"></script>
 
     <!-- Google Translate -->
