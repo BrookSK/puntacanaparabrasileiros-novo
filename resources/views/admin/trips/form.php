@@ -31,7 +31,30 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
             <!-- Vídeo YouTube -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div><h3>Vídeo do Passeio</h3><p class="admin-card-subtitle">Link do YouTube para exibir na página do passeio</p></div></div>
-                <div class="form-group"><label>URL do YouTube</label><input type="url" name="youtube_url" value="<?= e($trip['youtube_url'] ?? '') ?>" class="form-control" placeholder="https://www.youtube.com/watch?v=XXXXXXXXX"><small style="color:#6b7280;">Cole o link do vídeo. Aceita links do youtube.com ou youtu.be</small></div>
+                <div class="form-group"><label>URL do YouTube</label>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input type="url" name="youtube_url" id="youtubeUrlInput" value="<?= e($trip['youtube_url'] ?? '') ?>" class="form-control" placeholder="https://www.youtube.com/watch?v=XXXXXXXXX" style="flex:1;">
+                        <button type="button" class="btn btn-sm btn-primary" id="previewYoutubeBtn" style="white-space:nowrap;">▶ Visualizar</button>
+                    </div>
+                    <small style="color:#6b7280;">Cole o link do vídeo. Aceita links do youtube.com ou youtu.be</small>
+                    <div id="youtubePreview" style="margin-top:12px;display:none;">
+                        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:8px;border:1px solid #e5e7eb;">
+                            <iframe id="youtubeIframe" src="" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+                <script>
+                document.getElementById('previewYoutubeBtn')?.addEventListener('click', function() {
+                    var url = document.getElementById('youtubeUrlInput').value.trim();
+                    if (!url) { alert('Cole um link do YouTube primeiro.'); return; }
+                    var ytId = '';
+                    var m = url.match(/[?&]v=([^&]+)/) || url.match(/youtu\.be\/([^?]+)/) || url.match(/embed\/([^?]+)/);
+                    if (m) ytId = m[1];
+                    if (!ytId) { alert('Link inválido. Use um link do YouTube válido.'); return; }
+                    document.getElementById('youtubeIframe').src = 'https://www.youtube.com/embed/' + ytId;
+                    document.getElementById('youtubePreview').style.display = 'block';
+                });
+                </script>
             </div>
 
             <!-- FAQs por Passeio -->
