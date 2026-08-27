@@ -5,7 +5,7 @@
 
 CREATE TABLE IF NOT EXISTS trip_composition_packages (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    trip_id INT NOT NULL,
+    trip_id INT UNSIGNED NOT NULL,
     label VARCHAR(255) NOT NULL COMMENT 'Nome/descrição do pacote. Ex: 2 pessoas em 1 buggy',
     pax INT NOT NULL COMMENT 'Quantidade de pessoas nesta composição',
     units INT NOT NULL DEFAULT 1 COMMENT 'Quantidade de veículos/equipamentos/unidades',
@@ -17,8 +17,7 @@ CREATE TABLE IF NOT EXISTS trip_composition_packages (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_trip_id (trip_id),
-    INDEX idx_trip_pax (trip_id, pax),
-    FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE
+    INDEX idx_trip_pax (trip_id, pax)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Flag no trip para ativar modo composição
