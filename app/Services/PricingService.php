@@ -139,23 +139,89 @@ class PricingService
     {
         $totalPax = array_sum(array_map('intval', $paxByCategory));
 
-        // Verificar se o trip tem tabela de preços por grupo ativa
-        $groupPricingResult = $this->resolveGroupPricing($packageId, $totalPax);
+        // Buscar categorias do pacote para identificar quem é adulto/criança/infantil
+        $prices = $this->getPriceForDate($packageId, $date);
 
-        if ($groupPricingResult !== null) {
-            // Modo GROUP PRICING: preço fixo total por número de passageiros
-            $subtotal = $groupPricingResult['price'];
-            $breakdown = [[
-                'category_name' => 'Grupo (' . $totalPax . ' pessoa' . ($totalPax > 1 ? 's' : '') . ')',
-                'quantity' => $totalPax,
-                'unit_price' => $subtotal / max(1, $totalPax),
-                'total' => $subtotal,
-                'pricing_mode' => 'group_fixed',
-            ]];
+        // Verificar se o trip tem tabela de preços por grupo ativa
+        $package = $this->db->fetchOne("SELECT trip_id FROM trip_packages WHERE id = ?", [$packageId]);
+        $trip = $package ? $this->db->fetchOne(
+            "SELECT group_pricing_enabled, group_pricing FROM trips WHERE id = ?",
+            [$package['trip_id']]
+        ) : null;
+
+        $groupPricingEnabled = $trip && $trip['group_pricing_enabled'] && $trip['group_pricing'];
+
+        if ($groupPricingEnabled) {
+            $gpRules = json_decode($trip['group_pricing'], true);
+            if (!is_array($gpRules) || empty($gpRules)) {
+                $groupPricingEnabled = false;
+            }
+        }
+
+        if ($groupPricingEnabled) {
+            // Modo GROUP PRICING: tabela de grupo aplica APENAS para adultos
+            // Criança e infantil usam preço por pessoa normal
+            $adultPax = 0;
+            $childTotal = 0.0;
+            $breakdown = [];
+
+            foreach ($prices as $catPrice) {
+                $catId = $catPrice['traveler_category_id'];
+                $quantity = (int) ($paxByCategory[$catId] ?? 0);
+                if ($quantity <= 0) continue;
+
+                $slug = strtolower($catPrice['category_slug'] ?? '');
+
+                if ($slug === 'adulto') {
+                    $adultPax += $quantity;
+                } else {
+                    // Criança, infantil, etc. — preço normal por pessoa
+                    $lineTotal = $catPrice['effective_price'] * $quantity;
+                    $childTotal += $lineTotal;
+                    $breakdown[] = [
+                        'category_name' => $catPrice['category_name'],
+                        'quantity' => $quantity,
+                        'unit_price' => $catPrice['effective_price'],
+                        'total' => $lineTotal,
+                    ];
+                }
+            }
+
+            // Resolver preço de grupo para os adultos
+            $groupPrice = $this->resolveGroupPriceFromRules($gpRules, $adultPax);
+            if ($groupPrice !== null && $adultPax > 0) {
+                $breakdown = array_merge([[
+                    'category_name' => 'Adulto' . ($adultPax > 1 ? 's' : '') . ' (' . $adultPax . ')',
+                    'quantity' => $adultPax,
+                    'unit_price' => $groupPrice / max(1, $adultPax),
+                    'total' => $groupPrice,
+                    'pricing_mode' => 'group_fixed',
+                ]], $breakdown);
+
+                $subtotal = $groupPrice + $childTotal;
+            } else {
+                // Fallback: adultos com preço normal por pessoa
+                foreach ($prices as $catPrice) {
+                    $catId = $catPrice['traveler_category_id'];
+                    $quantity = (int) ($paxByCategory[$catId] ?? 0);
+                    if ($quantity <= 0) continue;
+                    $slug = strtolower($catPrice['category_slug'] ?? '');
+                    if ($slug === 'adulto') {
+                        $lineTotal = $catPrice['effective_price'] * $quantity;
+                        $childTotal += $lineTotal;
+                        $breakdown = array_merge([[
+                            'category_name' => $catPrice['category_name'],
+                            'quantity' => $quantity,
+                            'unit_price' => $catPrice['effective_price'],
+                            'total' => $lineTotal,
+                        ]], $breakdown);
+                    }
+                }
+                $subtotal = $childTotal;
+            }
 
             // Serviços extras
             $extrasTotal = $this->calculateExtrasTotal($extraServiceIds, $totalPax);
-
             $total = $subtotal + $extrasTotal;
 
             return [
@@ -170,7 +236,6 @@ class PricingService
         }
 
         // Modo PER-PERSON: preço por categoria × quantidade
-        $prices = $this->getPriceForDate($packageId, $date);
         $subtotal = 0.0;
         $breakdown = [];
 
@@ -206,6 +271,38 @@ class PricingService
             'total_pax' => $totalPax,
             'pricing_mode' => 'per_person',
         ];
+    }
+
+    /**
+     * Resolve o preço fixo de grupo a partir das regras JSON para X adultos.
+     */
+    private function resolveGroupPriceFromRules(array $rules, int $adultPax): ?float
+    {
+        if ($adultPax <= 0) return null;
+
+        // Match exato
+        foreach ($rules as $rule) {
+            if ((int) ($rule['pax'] ?? 0) === $adultPax) {
+                return (float) $rule['price'];
+            }
+        }
+
+        // Nearest lower
+        usort($rules, fn($a, $b) => (int) ($a['pax'] ?? 0) - (int) ($b['pax'] ?? 0));
+        $bestMatch = null;
+        foreach ($rules as $rule) {
+            if ((int) ($rule['pax'] ?? 0) <= $adultPax) {
+                $bestMatch = $rule;
+            }
+        }
+
+        if ($bestMatch) {
+            return (float) $bestMatch['price'];
+        }
+
+        // Fallback: menor regra
+        return !empty($rules[0]) ? (float) $rules[0]['price'] : null;
+    }
     }
 
     /**

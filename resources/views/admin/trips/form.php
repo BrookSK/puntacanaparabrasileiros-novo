@@ -177,7 +177,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 </div>
                 <div class="form-group" style="margin-bottom:16px;">
                     <label class="checkbox-label"><input type="checkbox" name="group_pricing_enabled" id="groupPricingEnabled" <?= !empty($trip['group_pricing_enabled']) ? 'checked' : '' ?>> Ativar tabela de preços por grupo</label>
-                    <small style="display:block;color:#6b7280;margin-top:4px;">Quando ativo, o preço cobrado será o valor fixo definido abaixo de acordo com o número total de passageiros, ignorando o preço por pessoa.</small>
+                    <small style="display:block;color:#6b7280;margin-top:4px;">Quando ativo, o preço dos adultos será o valor fixo definido abaixo de acordo com o número de adultos. Crianças e infantis mantêm preço por pessoa.</small>
                 </div>
                 <div id="groupPricingSection" style="<?= empty($trip['group_pricing_enabled']) ? 'display:none;' : '' ?>">
                     <div id="groupPricingList">
@@ -188,7 +188,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                         ?>
                         <div class="group-pricing-item" style="display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;">
                             <div style="flex:0 0 120px;">
-                                <label style="font-size:12px;font-weight:600;color:#475569;">Passageiros</label>
+                                <label style="font-size:12px;font-weight:600;color:#475569;">Adultos</label>
                                 <input type="number" name="group_pricing[<?= $gpi ?>][pax]" value="<?= e($gp['pax'] ?? '') ?>" class="form-control" min="1" max="50" placeholder="Qtd" required>
                             </div>
                             <div style="flex:1;">
@@ -202,7 +202,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                         <?php endforeach; ?>
                     </div>
                     <button type="button" class="btn btn-outline" id="addGroupPricingBtn" style="margin-top:4px;">+ Adicionar Faixa</button>
-                    <p style="font-size:11px;color:#94a3b8;margin-top:8px;">Ex: 1 pessoa = US$70, 2 pessoas = US$120, 3 pessoas = US$160. O sistema usará o valor correspondente ao número total de passageiros.</p>
+                    <p style="font-size:11px;color:#94a3b8;margin-top:8px;">Ex: 1 adulto = US$70, 2 adultos = US$120, 3 adultos = US$160. Crianças e infantis somam separadamente pelo preço por pessoa.</p>
                 </div>
             </div>
 
@@ -486,7 +486,7 @@ document.getElementById('addGroupPricingBtn')?.addEventListener('click', functio
     var div = document.createElement('div');
     div.className = 'group-pricing-item';
     div.style.cssText = 'display:flex;align-items:center;gap:12px;padding:12px 16px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;';
-    div.innerHTML = '<div style="flex:0 0 120px;"><label style="font-size:12px;font-weight:600;color:#475569;">Passageiros</label><input type="number" name="group_pricing[' + i + '][pax]" class="form-control" min="1" max="50" placeholder="Qtd" required></div><div style="flex:1;"><label style="font-size:12px;font-weight:600;color:#475569;">Preço Total (USD)</label><input type="number" name="group_pricing[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:18px;" onclick="this.closest(\'.group-pricing-item\').remove();">&times;</button>';
+    div.innerHTML = '<div style="flex:0 0 120px;"><label style="font-size:12px;font-weight:600;color:#475569;">Adultos</label><input type="number" name="group_pricing[' + i + '][pax]" class="form-control" min="1" max="50" placeholder="Qtd" required></div><div style="flex:1;"><label style="font-size:12px;font-weight:600;color:#475569;">Preço Total (USD)</label><input type="number" name="group_pricing[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:18px;" onclick="this.closest(\'.group-pricing-item\').remove();">&times;</button>';
     list.appendChild(div);
 });
 </script>

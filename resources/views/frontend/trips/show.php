@@ -194,18 +194,47 @@
                         <?php $gpRulesDisplay = json_decode($trip['group_pricing'], true); ?>
                         <?php if (is_array($gpRulesDisplay) && !empty($gpRulesDisplay)): ?>
                         <?php usort($gpRulesDisplay, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0)); ?>
+                        <h5 style="margin-bottom:8px;font-size:14px;color:#1e40af;">Preço por Grupo (Adultos)</h5>
                         <table class="table">
-                            <thead><tr><th>Passageiros</th><th>Preço Total</th></tr></thead>
+                            <thead><tr><th>Adultos</th><th>Preço Total</th></tr></thead>
                             <tbody>
                             <?php foreach ($gpRulesDisplay as $gpRule): ?>
                             <tr>
-                                <td><?= (int)$gpRule['pax'] ?> pessoa<?= (int)$gpRule['pax'] > 1 ? 's' : '' ?></td>
+                                <td><?= (int)$gpRule['pax'] ?> adulto<?= (int)$gpRule['pax'] > 1 ? 's' : '' ?></td>
                                 <td><strong><?= money((float)$gpRule['price']) ?></strong></td>
                             </tr>
                             <?php endforeach; ?>
                             </tbody>
                         </table>
-                        <p style="font-size:12px;color:#6b7280;margin-top:8px;">* Preço fixo total por grupo (não multiplicativo por pessoa)</p>
+                        <p style="font-size:12px;color:#6b7280;margin-top:8px;">* Preço fixo por grupo de adultos. Crianças e infantis somam separadamente.</p>
+
+                        <?php if (!empty($pkg['categories'])): ?>
+                        <?php
+                        $nonAdultCats = array_filter($pkg['categories'], fn($c) => strtolower($c['category_slug'] ?? '') !== 'adulto');
+                        ?>
+                        <?php if (!empty($nonAdultCats)): ?>
+                        <h5 style="margin:16px 0 8px;font-size:14px;color:#475569;">Crianças / Infantis</h5>
+                        <table class="table">
+                            <thead><tr><th>Categoria</th><th>Idade</th><th>Preço / Pessoa</th></tr></thead>
+                            <tbody>
+                            <?php foreach ($nonAdultCats as $cat): ?>
+                            <tr>
+                                <td><?= e($cat['category_name']) ?></td>
+                                <td><?= e($cat['age_group'] ?? '') ?></td>
+                                <td>
+                                    <?php if ($cat['sale_price']): ?>
+                                    <span style="text-decoration:line-through;color:#999"><?= money((float)$cat['price']) ?></span>
+                                    <strong><?= money((float)$cat['sale_price']) ?></strong>
+                                    <?php else: ?>
+                                    <strong><?= (float)$cat['price'] > 0 ? money((float)$cat['price']) : 'Gratuito' ?></strong>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <?php endif; ?>
+                        <?php endif; ?>
                         <?php endif; ?>
                         <?php elseif (!empty($pkg['categories'])): ?>
                         <table class="table">
