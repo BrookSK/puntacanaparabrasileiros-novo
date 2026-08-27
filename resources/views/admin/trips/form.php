@@ -214,12 +214,12 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                     </div>
                     <div>
                         <h3>Pacotes por Composição</h3>
-                        <p class="admin-card-subtitle">Preço por combinação de pessoas + veículos/unidades (ex: buggies, quadriciclos)</p>
+                        <p class="admin-card-subtitle">Configure combinações de pessoas + veículos/equipamentos com preço fixo por pacote</p>
                     </div>
                 </div>
                 <div class="form-group" style="margin-bottom:16px;">
                     <label class="checkbox-label"><input type="checkbox" name="composition_pricing_enabled" id="compositionPricingEnabled" <?= !empty($trip['composition_pricing_enabled']) ? 'checked' : '' ?>> Ativar pacotes por composição</label>
-                    <small style="display:block;color:#6b7280;margin-top:4px;">Quando ativo, o cliente escolhe um pacote/composição ao reservar. Cada pacote define: pessoas, unidades, preço fixo.</small>
+                    <small style="display:block;color:#6b7280;margin-top:4px;">Quando ativo, o cliente escolhe um pacote na hora de reservar. Cada pacote tem um preço fixo total.</small>
                 </div>
                 <div id="compositionPricingSection" style="<?= empty($trip['composition_pricing_enabled'] ?? null) ? 'display:none;' : '' ?>">
                     <div id="compositionPackagesList">
@@ -231,29 +231,29 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                         <div class="composition-pkg-item card-inner" style="padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;">
                             <div class="form-row" style="grid-template-columns: 1fr; gap:10px;">
                                 <div class="form-group" style="margin-bottom:8px;">
-                                    <label>Nome/Descrição do Pacote</label>
+                                    <label>Nome do Pacote (o que o cliente verá)</label>
                                     <input type="text" name="composition_packages[<?= $cpi ?>][label]" value="<?= e($cp['label'] ?? '') ?>" class="form-control" placeholder="Ex: 2 pessoas em 1 Buggy">
                                 </div>
                             </div>
                             <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr 1fr 1fr; gap:10px;">
                                 <div class="form-group" style="margin-bottom:0;">
-                                    <label>Pessoas</label>
-                                    <input type="number" name="composition_packages[<?= $cpi ?>][pax]" value="<?= e($cp['pax'] ?? '') ?>" class="form-control" min="1" placeholder="Qtd" required>
+                                    <label>Qtd Pessoas</label>
+                                    <input type="number" name="composition_packages[<?= $cpi ?>][pax]" value="<?= e($cp['pax'] ?? '') ?>" class="form-control" min="1" placeholder="Ex: 2" required>
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
-                                    <label>Unidades</label>
-                                    <input type="number" name="composition_packages[<?= $cpi ?>][units]" value="<?= e($cp['units'] ?? '1') ?>" class="form-control" min="1" placeholder="1">
+                                    <label>Qtd Veículos</label>
+                                    <input type="number" name="composition_packages[<?= $cpi ?>][units]" value="<?= e($cp['units'] ?? '1') ?>" class="form-control" min="1" placeholder="Ex: 1">
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
-                                    <label>Nome Unidade</label>
+                                    <label>Tipo de Veículo</label>
                                     <input type="text" name="composition_packages[<?= $cpi ?>][unit_label]" value="<?= e($cp['unit_label'] ?? '') ?>" class="form-control" placeholder="Ex: Buggy">
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
-                                    <label>Pax/Unidade</label>
+                                    <label>Pessoas por Veículo</label>
                                     <input type="number" name="composition_packages[<?= $cpi ?>][pax_per_unit]" value="<?= e($cp['pax_per_unit'] ?? '') ?>" class="form-control" min="1" placeholder="Opcional">
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
-                                    <label>Preço (USD)</label>
+                                    <label>Preço Total (USD)</label>
                                     <input type="number" name="composition_packages[<?= $cpi ?>][price]" value="<?= e($cp['price'] ?? '') ?>" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required>
                                 </div>
                             </div>
@@ -264,7 +264,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                         <?php endforeach; ?>
                     </div>
                     <button type="button" class="btn btn-outline" id="addCompositionPkgBtn" style="margin-top:4px;">+ Adicionar Pacote</button>
-                    <p style="font-size:11px;color:#94a3b8;margin-top:8px;">Configure cada combinação com seu preço. O cliente escolherá o pacote ao reservar.</p>
+                    <p style="font-size:11px;color:#94a3b8;margin-top:8px;">Cadastre cada combinação disponível. Ex: 1 pessoa/1 buggy = $70, 2 pessoas/1 buggy = $120, 4 pessoas/2 buggies = $220.</p>
                 </div>
             </div>
 
@@ -563,7 +563,7 @@ document.getElementById('addCompositionPkgBtn')?.addEventListener('click', funct
     var div = document.createElement('div');
     div.className = 'composition-pkg-item card-inner';
     div.style.cssText = 'padding:14px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;margin-bottom:10px;';
-    div.innerHTML = '<div class="form-row" style="grid-template-columns:1fr;gap:10px;"><div class="form-group" style="margin-bottom:8px;"><label>Nome/Descrição do Pacote</label><input type="text" name="composition_packages[' + i + '][label]" class="form-control" placeholder="Ex: 2 pessoas em 1 Buggy"></div></div><div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;"><div class="form-group" style="margin-bottom:0;"><label>Pessoas</label><input type="number" name="composition_packages[' + i + '][pax]" class="form-control" min="1" placeholder="Qtd" required></div><div class="form-group" style="margin-bottom:0;"><label>Unidades</label><input type="number" name="composition_packages[' + i + '][units]" class="form-control" min="1" placeholder="1" value="1"></div><div class="form-group" style="margin-bottom:0;"><label>Nome Unidade</label><input type="text" name="composition_packages[' + i + '][unit_label]" class="form-control" placeholder="Ex: Buggy"></div><div class="form-group" style="margin-bottom:0;"><label>Pax/Unidade</label><input type="number" name="composition_packages[' + i + '][pax_per_unit]" class="form-control" min="1" placeholder="Opcional"></div><div class="form-group" style="margin-bottom:0;"><label>Preço (USD)</label><input type="number" name="composition_packages[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required></div></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:10px;" onclick="this.closest(\'.composition-pkg-item\').remove();">Remover</button>';
+    div.innerHTML = '<div class="form-row" style="grid-template-columns:1fr;gap:10px;"><div class="form-group" style="margin-bottom:8px;"><label>Nome do Pacote (o que o cliente verá)</label><input type="text" name="composition_packages[' + i + '][label]" class="form-control" placeholder="Ex: 2 pessoas em 1 Buggy"></div></div><div class="form-row" style="grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px;"><div class="form-group" style="margin-bottom:0;"><label>Qtd Pessoas</label><input type="number" name="composition_packages[' + i + '][pax]" class="form-control" min="1" placeholder="Ex: 2" required></div><div class="form-group" style="margin-bottom:0;"><label>Qtd Veículos</label><input type="number" name="composition_packages[' + i + '][units]" class="form-control" min="1" placeholder="Ex: 1" value="1"></div><div class="form-group" style="margin-bottom:0;"><label>Tipo de Veículo</label><input type="text" name="composition_packages[' + i + '][unit_label]" class="form-control" placeholder="Ex: Buggy"></div><div class="form-group" style="margin-bottom:0;"><label>Pessoas por Veículo</label><input type="number" name="composition_packages[' + i + '][pax_per_unit]" class="form-control" min="1" placeholder="Opcional"></div><div class="form-group" style="margin-bottom:0;"><label>Preço Total (USD)</label><input type="number" name="composition_packages[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required></div></div><button type="button" class="btn btn-sm btn-danger" style="margin-top:10px;" onclick="this.closest(\'.composition-pkg-item\').remove();">Remover</button>';
     list.appendChild(div);
 });
 </script>
