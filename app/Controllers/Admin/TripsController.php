@@ -190,6 +190,7 @@ class TripsController extends Controller
             'partial_payment_enabled', 'partial_payment_percent',
             'group_discount_enabled', 'group_discount_rules',
             'group_pricing_enabled',
+            'composition_pricing_enabled',
             'youtube_url',
             'meta_title', 'meta_description', 'sort_order', 'featured', 'status',
         ]);
@@ -201,6 +202,7 @@ class TripsController extends Controller
         $data['partial_payment_enabled'] = isset($data['partial_payment_enabled']) ? 1 : 0;
         $data['group_discount_enabled'] = isset($data['group_discount_enabled']) ? 1 : 0;
         $data['group_pricing_enabled'] = isset($data['group_pricing_enabled']) ? 1 : 0;
+        $data['composition_pricing_enabled'] = isset($data['composition_pricing_enabled']) ? 1 : 0;
         $data['featured'] = isset($data['featured']) ? 1 : 0;
 
         // Group pricing (tabela de preço fixo por número de passageiros)
