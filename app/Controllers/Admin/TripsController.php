@@ -197,6 +197,8 @@ class TripsController extends Controller
             'group_discount_enabled', 'group_discount_rules',
             'group_pricing_enabled',
             'composition_pricing_enabled',
+            'companion_enabled', 'companion_label', 'companion_price',
+            'companion_max_per_participant', 'companion_max_total', 'companion_description',
             'youtube_url',
             'meta_title', 'meta_description', 'sort_order', 'featured', 'status',
         ]);
@@ -209,6 +211,10 @@ class TripsController extends Controller
         $data['group_discount_enabled'] = isset($data['group_discount_enabled']) ? 1 : 0;
         $data['group_pricing_enabled'] = isset($data['group_pricing_enabled']) ? 1 : 0;
         $data['composition_pricing_enabled'] = isset($data['composition_pricing_enabled']) ? 1 : 0;
+        $data['companion_enabled'] = isset($data['companion_enabled']) ? 1 : 0;
+        $data['companion_price'] = !empty($data['companion_price']) ? (float) $data['companion_price'] : null;
+        $data['companion_max_per_participant'] = !empty($data['companion_max_per_participant']) ? (int) $data['companion_max_per_participant'] : null;
+        $data['companion_max_total'] = !empty($data['companion_max_total']) ? (int) $data['companion_max_total'] : null;
         $data['featured'] = isset($data['featured']) ? 1 : 0;
 
         // Group pricing (tabela de preço fixo por número de passageiros)
