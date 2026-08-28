@@ -140,6 +140,28 @@
                     </div>
                     <?php endif; ?>
 
+                    <?php if (!empty($trip['companion_enabled']) && !empty($trip['companion_description'])): ?>
+                    <!-- Regras de Acompanhantes -->
+                    <div class="trip-section" style="margin-top:24px;">
+                        <h3 style="font-size:1.1rem;margin-bottom:12px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                            Regras de <?= e($trip['companion_label'] ?? 'Acompanhante') ?>
+                        </h3>
+                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;">
+                            <p style="font-size:14px;color:#334155;margin:0;line-height:1.6;"><?= nl2br(e($trip['companion_description'])) ?></p>
+                            <?php if (!empty($trip['companion_price'])): ?>
+                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;display:flex;align-items:center;gap:8px;">
+                                <span style="font-size:13px;color:#475569;">Valor por acompanhante:</span>
+                                <span style="font-size:15px;font-weight:700;color:#059669;"><?= money((float)$trip['companion_price']) ?></span>
+                            </div>
+                            <?php endif; ?>
+                            <?php if (!empty($trip['companion_max_per_participant'])): ?>
+                            <p style="font-size:12px;color:#6b7280;margin:6px 0 0;">Máximo de <?= (int)$trip['companion_max_per_participant'] ?> acompanhante<?= (int)$trip['companion_max_per_participant'] > 1 ? 's' : '' ?> por participante.</p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <?php if (!empty($trip['youtube_url'])): ?>
                     <!-- Vídeo do Passeio -->
                     <div style="margin-top:24px;">
@@ -432,18 +454,6 @@
                         </span>
                         <span class="price-per"><?= $priceLabel ?></span>
                     </div>
-                    <?php if (!empty($trip['companion_enabled']) && !empty($trip['companion_description'])): ?>
-                    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
-                        <div style="font-size:13px;font-weight:600;color:#0369a1;margin-bottom:4px;">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                            <?= e($trip['companion_label'] ?? 'Acompanhante') ?>
-                        </div>
-                        <p style="font-size:12px;color:#334155;margin:0;line-height:1.4;"><?= e($trip['companion_description']) ?></p>
-                        <?php if (!empty($trip['companion_price'])): ?>
-                        <p style="font-size:12px;color:#059669;margin:4px 0 0;font-weight:600;"><?= money((float)$trip['companion_price']) ?> por acompanhante</p>
-                        <?php endif; ?>
-                    </div>
-                    <?php endif; ?>
                     <a href="#booking-section" class="btn-verificar">Verificar Disponibilidade</a>
                     <?php if (current_user()): ?>
                     <button type="button" class="btn-wishlist-trip" id="btnWishlist" onclick="toggleWishlist(<?= (int)$trip['id'] ?>)">
