@@ -557,6 +557,14 @@ const COMPOSITION_PRICING_ENABLED = <?= !empty($trip['composition_pricing_enable
 const COMPOSITION_PACKAGES = <?= json_encode($compositionPackages ?? []) ?>;
 const PARTIAL_PAYMENT_ENABLED = <?= !empty($trip['partial_payment_enabled']) ? 'true' : 'false' ?>;
 const PARTIAL_PAYMENT_PERCENT = <?= (int)($trip['partial_payment_percent'] ?? 50) ?>;
+const COMPANION_CONFIG = <?= json_encode([
+    'enabled' => !empty($trip['companion_enabled']),
+    'label' => $trip['companion_label'] ?? 'Acompanhante',
+    'price' => (float)($trip['companion_price'] ?? 0),
+    'max_per_participant' => $trip['companion_max_per_participant'] ? (int)$trip['companion_max_per_participant'] : null,
+    'max_total' => $trip['companion_max_total'] ? (int)$trip['companion_max_total'] : null,
+    'description' => $trip['companion_description'] ?? '',
+]) ?>;
 
 // Trip Tabs
 document.querySelectorAll('.trip-tab').forEach(tab => {

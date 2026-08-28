@@ -17,6 +17,8 @@ class Trip extends Model
         'group_discount_enabled', 'group_discount_rules',
         'group_pricing_enabled', 'group_pricing',
         'composition_pricing_enabled',
+        'companion_enabled', 'companion_label', 'companion_price',
+        'companion_max_per_participant', 'companion_max_total', 'companion_description',
         'youtube_url', 'faqs',
         'meta_title', 'meta_description', 'sort_order', 'featured', 'status',
     ];

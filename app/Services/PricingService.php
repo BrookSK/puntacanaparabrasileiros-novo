@@ -135,8 +135,9 @@ class PricingService
     /**
      * Calcula preço total de um booking item (trip + pax + extras + desconto grupo).
      * @param int|null $compositionPackageId ID do pacote de composição selecionado (opcional)
+     * @param int $companionCount Quantidade de acompanhantes (opcional)
      */
-    public function calculateItemTotal(int $packageId, string $date, array $paxByCategory, array $extraServiceIds = [], ?int $compositionPackageId = null): array
+    public function calculateItemTotal(int $packageId, string $date, array $paxByCategory, array $extraServiceIds = [], ?int $compositionPackageId = null, int $companionCount = 0): array
     {
         $totalPax = array_sum(array_map('intval', $paxByCategory));
 
@@ -170,11 +171,17 @@ class PricingService
 
                 // Serviços extras
                 $extrasTotal = $this->calculateExtrasTotal($extraServiceIds, $totalPax);
-                $total = $subtotal + $extrasTotal;
+
+                // Acompanhantes
+                $companionTotal = $this->calculateCompanionTotal($package['trip_id'], $companionCount);
+
+                $total = $subtotal + $extrasTotal + $companionTotal;
 
                 return [
                     'subtotal' => $subtotal,
                     'extras_total' => $extrasTotal,
+                    'companion_total' => $companionTotal,
+                    'companion_count' => $companionCount,
                     'group_discount' => 0.0,
                     'total' => max(0, $total),
                     'breakdown' => $breakdown,
@@ -262,11 +269,17 @@ class PricingService
 
             // Serviços extras
             $extrasTotal = $this->calculateExtrasTotal($extraServiceIds, $totalPax);
-            $total = $subtotal + $extrasTotal;
+
+            // Acompanhantes
+            $companionTotal = $this->calculateCompanionTotal($package['trip_id'], $companionCount);
+
+            $total = $subtotal + $extrasTotal + $companionTotal;
 
             return [
                 'subtotal' => $subtotal,
                 'extras_total' => $extrasTotal,
+                'companion_total' => $companionTotal,
+                'companion_count' => $companionCount,
                 'group_discount' => 0.0,
                 'total' => max(0, $total),
                 'breakdown' => $breakdown,
@@ -300,11 +313,16 @@ class PricingService
         // Desconto de grupo (percentual)
         $groupDiscount = $this->calculateGroupDiscount($packageId, $totalPax, $subtotal);
 
-        $total = $subtotal + $extrasTotal - $groupDiscount;
+        // Acompanhantes
+        $companionTotal = $this->calculateCompanionTotal($package['trip_id'], $companionCount);
+
+        $total = $subtotal + $extrasTotal - $groupDiscount + $companionTotal;
 
         return [
             'subtotal' => $subtotal,
             'extras_total' => $extrasTotal,
+            'companion_total' => $companionTotal,
+            'companion_count' => $companionCount,
             'group_discount' => $groupDiscount,
             'total' => max(0, $total),
             'breakdown' => $breakdown,
@@ -421,6 +439,25 @@ class PricingService
         }
 
         return $extrasTotal;
+    }
+
+    /**
+     * Calcula o total de acompanhantes.
+     */
+    private function calculateCompanionTotal(int $tripId, int $companionCount): float
+    {
+        if ($companionCount <= 0) return 0.0;
+
+        $trip = $this->db->fetchOne(
+            "SELECT companion_enabled, companion_price FROM trips WHERE id = ?",
+            [$tripId]
+        );
+
+        if (!$trip || !$trip['companion_enabled'] || !$trip['companion_price']) {
+            return 0.0;
+        }
+
+        return (float) $trip['companion_price'] * $companionCount;
     }
 
     /**

@@ -67,7 +67,8 @@ class CartController extends Controller
 
             try {
                 $compPkgId = isset($item['composition_package_id']) ? (int) $item['composition_package_id'] : null;
-                $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extras, $compPkgId);
+                $companionQty = (int) ($item['companion_count'] ?? 0);
+                $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extras, $compPkgId, $companionQty);
                 $newTotal = (float) $calculation['total'];
                 $oldTotal = (float) ($item['total'] ?? 0);
 
@@ -203,7 +204,8 @@ class CartController extends Controller
 
         $pricingService = new PricingService();
         $compositionPackageId = $request->input('composition_package_id') ? (int) $request->input('composition_package_id') : null;
-        $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extraServiceIds, $compositionPackageId);
+        $companionCount = (int) $request->input('companion_count', 0);
+        $calculation = $pricingService->calculateItemTotal($packageId, $date, $pax, $extraServiceIds, $compositionPackageId, $companionCount);
 
         // Buscar nome do pacote
         $packageModel = new TripPackage();
@@ -217,6 +219,7 @@ class CartController extends Controller
             'package_id' => $packageId,
             'package_title' => $package['title'] ?? '',
             'composition_package_id' => $compositionPackageId,
+            'companion_count' => $companionCount,
             'date' => $date,
             'time' => $time,
             'hotel_id' => $request->input('hotel_id', ''),

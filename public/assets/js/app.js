@@ -1521,6 +1521,7 @@
 
             // Container para pacotes (será preenchido dinamicamente)
             travelersHtml += '<div id="compositionOptionsContainer" style="margin-top:16px;padding-top:14px;border-top:1px solid #e5e7eb;"></div>';
+            travelersHtml += getCompanionHtml();
 
             container.innerHTML = travelersHtml;
             updateCompositionOptions();
@@ -1591,7 +1592,7 @@
                     <button type="button" onclick="changeTraveler(${catId}, 1)">&#43;</button>
                 </div>
             </div>`;
-        }).join('');
+        }).join('') + getCompanionHtml();
         updateSidebar();
     }
 
@@ -1606,6 +1607,61 @@
         el.style.borderColor = '#3b82f6';
         updateSidebar();
     };
+
+    // Acompanhantes
+    window._companionCount = 0;
+
+    window.changeCompanion = function(delta) {
+        const cfg = typeof COMPANION_CONFIG !== 'undefined' ? COMPANION_CONFIG : null;
+        if (!cfg || !cfg.enabled) return;
+
+        let val = window._companionCount + delta;
+        if (val < 0) val = 0;
+
+        // Limite por participante
+        if (cfg.max_per_participant) {
+            let totalParticipants = 0;
+            Object.keys(travelerCounts).forEach(k => { totalParticipants += (travelerCounts[k] || 0); });
+            const maxByParticipant = totalParticipants * cfg.max_per_participant;
+            if (val > maxByParticipant) val = maxByParticipant;
+        }
+
+        // Limite total
+        if (cfg.max_total && val > cfg.max_total) val = cfg.max_total;
+
+        window._companionCount = val;
+        const el = document.getElementById('companion_count');
+        if (el) el.value = val;
+        updateSidebar();
+    };
+
+    // Renderiza o seletor de acompanhantes (chamado dentro do renderTravelers)
+    function getCompanionHtml() {
+        const cfg = typeof COMPANION_CONFIG !== 'undefined' ? COMPANION_CONFIG : null;
+        if (!cfg || !cfg.enabled) return '';
+
+        window._companionCount = 0;
+        let html = '<div style="margin-top:14px;padding-top:12px;border-top:1px solid #e5e7eb;">';
+        html += `<div class="bm-traveler-row">
+            <div class="bm-traveler-info">
+                <span class="bm-traveler-name">${cfg.label}</span>
+                <span class="bm-traveler-price">${cfg.price > 0 ? '$' + parseFloat(cfg.price).toFixed(2) + ' / pessoa' : 'Gratuito'}</span>
+            </div>
+            <div class="bm-traveler-counter">
+                <button type="button" onclick="changeCompanion(-1)">&#8722;</button>
+                <input type="text" value="0" id="companion_count" readonly>
+                <button type="button" onclick="changeCompanion(1)">&#43;</button>
+            </div>
+        </div>`;
+        if (cfg.description) {
+            html += `<p style="font-size:11px;color:#6b7280;margin:6px 0 0;padding-left:2px;">${cfg.description}</p>`;
+        }
+        if (cfg.max_per_participant) {
+            html += `<p style="font-size:11px;color:#94a3b8;margin:2px 0 0;padding-left:2px;">Máx. ${cfg.max_per_participant} por participante</p>`;
+        }
+        html += '</div>';
+        return html;
+    }
 
     window.changeTraveler = function(catId, delta) {
         let val = (travelerCounts[catId] || 0) + delta;
@@ -1799,6 +1855,19 @@
             travDiv.style.display = 'block';
             travList.innerHTML = travHtml;
         }
+
+        // Somar acompanhantes ao total
+        const companionCfg = typeof COMPANION_CONFIG !== 'undefined' ? COMPANION_CONFIG : null;
+        const companionQty = window._companionCount || 0;
+        let companionTotal = 0;
+        if (companionCfg && companionCfg.enabled && companionQty > 0) {
+            companionTotal = companionQty * (companionCfg.price || 0);
+            total += companionTotal;
+            // Adicionar linha no sidebar
+            const companionLine = `<div class="bm-sidebar-traveler-line"><span>${companionCfg.label}: ${companionQty}</span><span>${companionCfg.price > 0 ? '$' + companionTotal.toFixed(2) : 'Gratuito'}</span></div>`;
+            if (travList) travList.innerHTML += companionLine;
+        }
+
         totalEl.textContent = '$' + total.toFixed(0);
 
         // Mostrar informação de pagamento parcial
@@ -1875,7 +1944,8 @@
             <input name="hotel_id" value="${selectedHotel ? selectedHotel.id : ''}">
             <input name="hotel_name" value="${selectedHotel ? selectedHotel.hotel_name : ''}">
             <input name="pickup_time" value="${selectedPickupTime || ''}">
-            <input name="redirect" value="${redirect}">`;
+            <input name="redirect" value="${redirect}">
+            <input name="companion_count" value="${window._companionCount || 0}">`;
         Object.entries(pax).forEach(([k, v]) => { form.innerHTML += `<input name="pax[${k}]" value="${v}">`; });
         document.body.appendChild(form);
         form.submit();

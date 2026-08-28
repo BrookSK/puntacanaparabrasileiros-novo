@@ -268,6 +268,54 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 </div>
             </div>
 
+            <!-- Acompanhantes -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon" style="background:#e0e7ff;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                    </div>
+                    <div>
+                        <h3>Acompanhantes</h3>
+                        <p class="admin-card-subtitle">Configurar opção de acompanhante com preço e regras para este passeio</p>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom:16px;">
+                    <label class="checkbox-label"><input type="checkbox" name="companion_enabled" id="companionEnabled" <?= !empty($trip['companion_enabled']) ? 'checked' : '' ?>> Permitir acompanhantes neste passeio</label>
+                    <small style="display:block;color:#6b7280;margin-top:4px;">Quando ativo, o cliente pode adicionar acompanhantes com preço diferenciado.</small>
+                </div>
+                <div id="companionSection" style="<?= empty($trip['companion_enabled']) ? 'display:none;' : '' ?>">
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr; gap:14px;">
+                        <div class="form-group">
+                            <label>Nome da opção</label>
+                            <input type="text" name="companion_label" value="<?= e($trip['companion_label'] ?? 'Acompanhante') ?>" class="form-control" placeholder="Ex: Acompanhante, Espectador, Observador">
+                            <small style="color:#94a3b8;">Como será chamado no site (ex: "Acompanhante")</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Preço por Acompanhante (USD)</label>
+                            <input type="number" name="companion_price" value="<?= e($trip['companion_price'] ?? '') ?>" class="form-control" min="0" step="0.01" placeholder="Ex: 25.00">
+                            <small style="color:#94a3b8;">Valor cobrado por cada acompanhante</small>
+                        </div>
+                    </div>
+                    <div class="form-row" style="grid-template-columns: 1fr 1fr; gap:14px;">
+                        <div class="form-group">
+                            <label>Máx. acompanhantes por participante</label>
+                            <input type="number" name="companion_max_per_participant" value="<?= e($trip['companion_max_per_participant'] ?? '') ?>" class="form-control" min="1" placeholder="Ex: 1 (deixe vazio = sem limite)">
+                            <small style="color:#94a3b8;">Quantos acompanhantes cada participante pode levar</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Máx. total de acompanhantes</label>
+                            <input type="number" name="companion_max_total" value="<?= e($trip['companion_max_total'] ?? '') ?>" class="form-control" min="1" placeholder="Ex: 5 (deixe vazio = sem limite)">
+                            <small style="color:#94a3b8;">Limite total de acompanhantes por reserva</small>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição / Regras</label>
+                        <textarea name="companion_description" class="form-control" rows="2" placeholder="Ex: Acompanhante não participa da atividade, apenas observa. Inclui transporte e acesso ao local."><?= e($trip['companion_description'] ?? '') ?></textarea>
+                        <small style="color:#94a3b8;">Informação exibida ao cliente sobre o que o acompanhante inclui</small>
+                    </div>
+                </div>
+            </div>
+
             <!-- Pacotes -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-orange"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/></svg></div><div><h3>Pacotes</h3><p class="admin-card-subtitle">Pacotes de preço disponíveis</p></div></div>
@@ -555,6 +603,11 @@ document.getElementById('addGroupPricingBtn')?.addEventListener('click', functio
 // Composition Pricing - Toggle e adicionar pacotes
 document.getElementById('compositionPricingEnabled')?.addEventListener('change', function() {
     document.getElementById('compositionPricingSection').style.display = this.checked ? '' : 'none';
+});
+
+// Acompanhantes - Toggle
+document.getElementById('companionEnabled')?.addEventListener('change', function() {
+    document.getElementById('companionSection').style.display = this.checked ? '' : 'none';
 });
 
 document.getElementById('addCompositionPkgBtn')?.addEventListener('click', function() {
