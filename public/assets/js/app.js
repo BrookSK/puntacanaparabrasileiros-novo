@@ -1806,14 +1806,23 @@
         if (!partialEl) {
             partialEl = document.createElement('div');
             partialEl.id = 'bmSidebarPartial';
-            partialEl.style.cssText = 'margin-top:8px;padding:8px 12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;font-size:12px;color:#92400e;';
             totalEl.parentNode.insertBefore(partialEl, totalEl.nextSibling);
         }
         const ppEnabled = typeof PARTIAL_PAYMENT_ENABLED !== 'undefined' && PARTIAL_PAYMENT_ENABLED;
         const ppPercent = typeof PARTIAL_PAYMENT_PERCENT !== 'undefined' ? PARTIAL_PAYMENT_PERCENT : 50;
         if (ppEnabled && total > 0) {
             const partialAmount = Math.round(total * ppPercent / 100);
-            partialEl.innerHTML = `<strong>Pague agora: $${partialAmount}</strong> (${ppPercent}%)<br><span style="font-size:11px;">Restante: $${total - partialAmount} no local</span>`;
+            const restante = total - partialAmount;
+            partialEl.innerHTML = `<div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                    <span style="font-size:13px;color:#166534;font-weight:600;">Pague agora (${ppPercent}%)</span>
+                    <span style="font-size:15px;color:#166534;font-weight:700;">$${partialAmount}</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <span style="font-size:12px;color:#6b7280;">Restante no local</span>
+                    <span style="font-size:13px;color:#6b7280;">$${restante}</span>
+                </div>
+            </div>`;
             partialEl.style.display = '';
         } else {
             partialEl.style.display = 'none';
