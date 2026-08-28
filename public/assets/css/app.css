@@ -6476,6 +6476,41 @@ img { max-width: 100%; height: auto; }
     gap: 12px;
 }
 
+/* Accordion no booking modal */
+.bm-accordion {
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+}
+.bm-accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #f9fafb;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    user-select: none;
+    transition: background .15s;
+}
+.bm-accordion-header:hover {
+    background: #f1f5f9;
+}
+.bm-accordion-header.active .bm-accordion-arrow {
+    transform: rotate(180deg);
+}
+.bm-accordion-arrow {
+    transition: transform .2s;
+    flex-shrink: 0;
+}
+.bm-accordion-body {
+    padding: 12px 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
 /* Hotel Selection Step */
 .bm-hotel-section { margin-bottom: 20px; }
 .bm-section-title { font-size: 18px; font-weight: 700; color: var(--dark); margin: 0 0 6px; font-family: var(--font); }

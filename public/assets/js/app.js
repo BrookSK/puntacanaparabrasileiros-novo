@@ -1502,7 +1502,15 @@
             cats = cats.filter(c => { const k = (c.category_slug || c.category_name || '').toLowerCase(); if (seen[k]) return false; seen[k] = true; return true; });
 
             travelerCounts = {};
-            let travelersHtml = '<div style="font-size:13px;font-weight:600;color:#334155;margin-bottom:10px;">Quantos viajantes?</div>';
+
+            // Accordion: Viajantes (aberto por padrão)
+            let travelersHtml = `<div class="bm-accordion">
+                <div class="bm-accordion-header active" onclick="toggleAccordion(this)">
+                    <span>Viajantes</span>
+                    <svg class="bm-accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="bm-accordion-body" style="display:block;">`;
+
             travelersHtml += cats.map(cat => {
                 const catId = cat.traveler_category_id || cat.id || 0;
                 const defaultQty = (cat.category_slug || '').toLowerCase() === 'adulto' ? 1 : 0;
@@ -1519,9 +1527,32 @@
                 </div>`;
             }).join('');
 
-            // Container para pacotes (será preenchido dinamicamente)
-            travelersHtml += '<div id="compositionOptionsContainer" style="margin-top:16px;padding-top:14px;border-top:1px solid #e5e7eb;"></div>';
-            travelersHtml += getCompanionHtml();
+            travelersHtml += `</div></div>`;
+
+            // Accordion: Composição (fechado por padrão, abre quando seleciona viajantes)
+            travelersHtml += `<div class="bm-accordion">
+                <div class="bm-accordion-header" onclick="toggleAccordion(this)">
+                    <span>Pacotes / Composição</span>
+                    <svg class="bm-accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                </div>
+                <div class="bm-accordion-body" style="display:none;">
+                    <div id="compositionOptionsContainer"></div>
+                </div>
+            </div>`;
+
+            // Accordion: Acompanhante
+            const companionAccHtml = getCompanionHtml();
+            if (companionAccHtml) {
+                travelersHtml += `<div class="bm-accordion">
+                    <div class="bm-accordion-header" onclick="toggleAccordion(this)">
+                        <span>${(typeof COMPANION_CONFIG !== 'undefined' && COMPANION_CONFIG.label) || 'Acompanhante'}</span>
+                        <svg class="bm-accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                    </div>
+                    <div class="bm-accordion-body" style="display:none;">
+                        ${companionAccHtml}
+                    </div>
+                </div>`;
+            }
 
             container.innerHTML = travelersHtml;
             updateCompositionOptions();
@@ -1595,6 +1626,14 @@
         }).join('') + getCompanionHtml();
         updateSidebar();
     }
+
+    // Toggle accordion
+    window.toggleAccordion = function(header) {
+        const body = header.nextElementSibling;
+        const isOpen = body.style.display !== 'none';
+        body.style.display = isOpen ? 'none' : 'block';
+        header.classList.toggle('active', !isOpen);
+    };
 
     // Seleção de pacote de composição
     window.selectCompositionPkg = function(pkgId, el) {
@@ -1687,6 +1726,14 @@
 
         // Filtrar pacotes que atendem a quantidade de viajantes
         const available = compPackages.filter(cp => parseInt(cp.pax) === totalPax);
+
+        // Abrir accordion de composição automaticamente se tem opções
+        const compAccordion = compContainer.closest('.bm-accordion-body');
+        if (compAccordion && available.length > 0) {
+            compAccordion.style.display = 'block';
+            const header = compAccordion.previousElementSibling;
+            if (header) header.classList.add('active');
+        }
 
         if (totalPax === 0) {
             compContainer.innerHTML = '<div style="font-size:13px;color:#94a3b8;padding:8px 0;">Selecione a quantidade de viajantes acima.</div>';

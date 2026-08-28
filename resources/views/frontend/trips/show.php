@@ -432,6 +432,18 @@
                         </span>
                         <span class="price-per"><?= $priceLabel ?></span>
                     </div>
+                    <?php if (!empty($trip['companion_enabled']) && !empty($trip['companion_description'])): ?>
+                    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;padding:10px 14px;margin-bottom:12px;">
+                        <div style="font-size:13px;font-weight:600;color:#0369a1;margin-bottom:4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+                            <?= e($trip['companion_label'] ?? 'Acompanhante') ?>
+                        </div>
+                        <p style="font-size:12px;color:#334155;margin:0;line-height:1.4;"><?= e($trip['companion_description']) ?></p>
+                        <?php if (!empty($trip['companion_price'])): ?>
+                        <p style="font-size:12px;color:#059669;margin:4px 0 0;font-weight:600;"><?= money((float)$trip['companion_price']) ?> por acompanhante</p>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                     <a href="#booking-section" class="btn-verificar">Verificar Disponibilidade</a>
                     <?php if (current_user()): ?>
                     <button type="button" class="btn-wishlist-trip" id="btnWishlist" onclick="toggleWishlist(<?= (int)$trip['id'] ?>)">
