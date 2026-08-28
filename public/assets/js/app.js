@@ -1800,6 +1800,24 @@
             travList.innerHTML = travHtml;
         }
         totalEl.textContent = '$' + total.toFixed(0);
+
+        // Mostrar informação de pagamento parcial
+        let partialEl = document.getElementById('bmSidebarPartial');
+        if (!partialEl) {
+            partialEl = document.createElement('div');
+            partialEl.id = 'bmSidebarPartial';
+            partialEl.style.cssText = 'margin-top:8px;padding:8px 12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;font-size:12px;color:#92400e;';
+            totalEl.parentNode.insertBefore(partialEl, totalEl.nextSibling);
+        }
+        const ppEnabled = typeof PARTIAL_PAYMENT_ENABLED !== 'undefined' && PARTIAL_PAYMENT_ENABLED;
+        const ppPercent = typeof PARTIAL_PAYMENT_PERCENT !== 'undefined' ? PARTIAL_PAYMENT_PERCENT : 50;
+        if (ppEnabled && total > 0) {
+            const partialAmount = Math.round(total * ppPercent / 100);
+            partialEl.innerHTML = `<strong>Pague agora: $${partialAmount}</strong> (${ppPercent}%)<br><span style="font-size:11px;">Restante: $${total - partialAmount} no local</span>`;
+            partialEl.style.display = '';
+        } else {
+            partialEl.style.display = 'none';
+        }
     }
 
     // Navigation helper

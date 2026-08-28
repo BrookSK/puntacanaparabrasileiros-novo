@@ -555,6 +555,8 @@ const GROUP_PRICING_ENABLED = <?= !empty($trip['group_pricing_enabled']) ? 'true
 const GROUP_PRICING_TABLE = <?= !empty($trip['group_pricing']) ? $trip['group_pricing'] : '[]' ?>;
 const COMPOSITION_PRICING_ENABLED = <?= !empty($trip['composition_pricing_enabled']) ? 'true' : 'false' ?>;
 const COMPOSITION_PACKAGES = <?= json_encode($compositionPackages ?? []) ?>;
+const PARTIAL_PAYMENT_ENABLED = <?= !empty($trip['partial_payment_enabled']) ? 'true' : 'false' ?>;
+const PARTIAL_PAYMENT_PERCENT = <?= (int)($trip['partial_payment_percent'] ?? 50) ?>;
 
 // Trip Tabs
 document.querySelectorAll('.trip-tab').forEach(tab => {
