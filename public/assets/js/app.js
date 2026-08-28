@@ -1803,17 +1803,12 @@
 
         // Mostrar informação de pagamento parcial
         let partialEl = document.getElementById('bmSidebarPartial');
-        if (!partialEl) {
-            partialEl = document.createElement('div');
-            partialEl.id = 'bmSidebarPartial';
-            totalEl.parentNode.insertBefore(partialEl, totalEl.nextSibling);
-        }
         const ppEnabled = typeof PARTIAL_PAYMENT_ENABLED !== 'undefined' && PARTIAL_PAYMENT_ENABLED;
         const ppPercent = typeof PARTIAL_PAYMENT_PERCENT !== 'undefined' ? PARTIAL_PAYMENT_PERCENT : 50;
-        if (ppEnabled && total > 0) {
+        if (partialEl && ppEnabled && total > 0) {
             const partialAmount = Math.round(total * ppPercent / 100);
             const restante = total - partialAmount;
-            partialEl.innerHTML = `<div style="margin-top:12px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;">
+            partialEl.innerHTML = `<div style="padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;margin-bottom:12px;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
                     <span style="font-size:13px;color:#166534;font-weight:600;">Pague agora (${ppPercent}%)</span>
                     <span style="font-size:15px;color:#166534;font-weight:700;">$${partialAmount}</span>
@@ -1824,7 +1819,7 @@
                 </div>
             </div>`;
             partialEl.style.display = '';
-        } else {
+        } else if (partialEl) {
             partialEl.style.display = 'none';
         }
     }

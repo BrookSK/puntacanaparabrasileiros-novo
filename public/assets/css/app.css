@@ -6466,12 +6466,14 @@ img { max-width: 100%; height: auto; }
 .bm-sidebar-total {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 16px;
     font-weight: 700;
     color: var(--dark);
     padding-top: 12px;
     border-top: 1px solid #eee;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
+    gap: 12px;
 }
 
 /* Hotel Selection Step */

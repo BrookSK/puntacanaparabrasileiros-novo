@@ -137,9 +137,10 @@
                 </div>
 
                 <div class="bm-sidebar-total">
-                    <span>Total :</span>
+                    <span>Total:</span>
                     <span id="bmSidebarTotal">$0</span>
                 </div>
+                <div id="bmSidebarPartial"></div>
             </div>
         </div>
     </div>
