@@ -1671,6 +1671,7 @@
         window._companionCount = val;
         const el = document.getElementById('companion_count');
         if (el) el.value = val;
+        updateCompositionOptions();
         updateSidebar();
     };
 
@@ -1720,11 +1721,12 @@
         const compPackages = typeof COMPOSITION_PACKAGES !== 'undefined' ? COMPOSITION_PACKAGES : [];
         if (!compEnabled || compPackages.length === 0) return;
 
-        // Calcular total de viajantes
+        // Calcular total de viajantes + acompanhantes
         let totalPax = 0;
         Object.keys(travelerCounts).forEach(k => { totalPax += (travelerCounts[k] || 0); });
+        totalPax += (window._companionCount || 0);
 
-        // Filtrar pacotes que atendem a quantidade de viajantes
+        // Filtrar pacotes que atendem a quantidade total de pessoas
         const available = compPackages.filter(cp => parseInt(cp.pax) === totalPax);
 
         // Abrir accordion de composição automaticamente se tem opções
@@ -1742,7 +1744,7 @@
         }
 
         if (available.length === 0) {
-            compContainer.innerHTML = '<div style="font-size:13px;color:#ef4444;padding:8px 0;">Nenhum pacote disponível para ' + totalPax + ' viajante' + (totalPax > 1 ? 's' : '') + '.</div>';
+            compContainer.innerHTML = '<div style="font-size:13px;color:#ef4444;padding:8px 0;">Nenhum pacote disponível para ' + totalPax + ' pessoa' + (totalPax > 1 ? 's' : '') + '.</div>';
             window._selectedCompositionPkg = null;
             return;
         }
@@ -1750,7 +1752,7 @@
         // Selecionar o primeiro por padrão
         window._selectedCompositionPkg = available[0].id;
 
-        let html = '<div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:10px;">Escolha a composição para ' + totalPax + ' viajante' + (totalPax > 1 ? 's' : '') + ':</div>';
+        let html = '<div style="font-size:13px;font-weight:600;color:#1e40af;margin-bottom:10px;">Escolha a composição para ' + totalPax + ' pessoa' + (totalPax > 1 ? 's' : '') + ':</div>';
         html += available.map((cp, idx) => {
             const unitInfo = cp.unit_label ? (cp.units + ' ' + cp.unit_label + (parseInt(cp.units) > 1 ? 's' : '')) : '';
             const desc = cp.label || (cp.pax + ' pessoa' + (parseInt(cp.pax) > 1 ? 's' : '') + (unitInfo ? ' em ' + unitInfo : ''));
@@ -1808,10 +1810,27 @@
         if (compEnabled && compPackages.length > 0 && window._selectedCompositionPkg) {
             // ─── MODO COMPOSIÇÃO ───
             const selPkg = compPackages.find(p => p.id == window._selectedCompositionPkg);
+
+            // Mostrar viajantes detalhados
+            let cats = selectedPackage.categories || [];
+            const filteredCats = cats.filter(c => { const s = (c.category_slug || '').toLowerCase(); return s === 'adulto' || s === 'crianca' || s === 'infantil'; });
+            cats = filteredCats.length > 0 ? filteredCats : [{ traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto' }, { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca' }, { traveler_category_id: 2, category_name: 'Infantil', category_slug: 'infantil' }];
+            const seenCats = {};
+            cats = cats.filter(c => { const k = (c.category_slug || '').toLowerCase(); if (seenCats[k]) return false; seenCats[k] = true; return true; });
+
+            cats.forEach(cat => {
+                const catId = cat.traveler_category_id || cat.id || 0;
+                const qty = travelerCounts[catId] || 0;
+                if (qty > 0) {
+                    travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}</span><span></span></div>`;
+                }
+            });
+
+            // Mostrar pacote selecionado
             if (selPkg) {
                 total = parseFloat(selPkg.price);
                 const desc = selPkg.label || (selPkg.pax + ' pessoa(s)');
-                travHtml = `<div class="bm-sidebar-traveler-line"><span>${desc}</span><span>$${total.toFixed(2)}</span></div>`;
+                travHtml += `<div class="bm-sidebar-traveler-line" style="margin-top:6px;padding-top:6px;border-top:1px solid #f0f0f0;"><span style="font-weight:600;">Pacote: ${desc}</span><span>$${total.toFixed(2)}</span></div>`;
             }
         } else if (selectedPackage) {
             // Preparar categorias
