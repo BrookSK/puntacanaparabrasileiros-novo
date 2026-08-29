@@ -226,51 +226,54 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                         <p style="margin:0;font-size:13px;color:#1e40af;line-height:1.5;"><strong>Como funciona:</strong> Cadastre uma opção para cada combinação possível. O sistema filtra automaticamente pelo total de pessoas na reserva.</p>
                         <p style="margin:6px 0 0;font-size:12px;color:#3b82f6;">Exemplo: Para um passeio de Buggy com 2 pessoas, cadastre: "2 pessoas em 1 Buggy" e "1 pessoa por Buggy (2 buggies)".</p>
                     </div>
-                    <div id="compositionPackagesList">
+                    <div id="compositionPackagesList" style="max-height:340px;overflow-y:auto;padding-right:4px;">
                         <?php
                         $compPkgs = $compositionPackages ?? [];
                         if (empty($compPkgs)) $compPkgs = [['label' => '', 'pax' => '', 'units' => '1', 'unit_label' => '', 'pax_per_unit' => '', 'price' => '']];
                         foreach ($compPkgs as $cpi => $cp):
                         ?>
-                        <div class="composition-pkg-item" style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
-                            <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                                <span style="width:24px;height:24px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#166534;"><?= $cpi + 1 ?></span>
-                                <span style="font-size:13px;font-weight:600;color:#334155;">Opção <?= $cpi + 1 ?></span>
+                        <div class="composition-pkg-item" style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);overflow:hidden;">
+                            <div class="comp-pkg-header" style="display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;background:#f8fafc;" onclick="toggleCompPkg(this)">
+                                <span style="width:24px;height:24px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#166534;flex-shrink:0;"><?= $cpi + 1 ?></span>
+                                <span class="comp-pkg-title" style="font-size:13px;font-weight:600;color:#334155;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"><?= !empty($cp['label']) ? e($cp['label']) : 'Opção ' . ($cpi + 1) ?></span>
                                 <?php if ($cpi > 0): ?>
-                                <button type="button" class="btn btn-sm btn-danger" style="margin-left:auto;font-size:11px;padding:4px 10px;" onclick="this.closest('.composition-pkg-item').remove();">✕ Remover</button>
+                                <button type="button" class="btn btn-sm btn-danger" style="font-size:11px;padding:4px 10px;flex-shrink:0;" onclick="event.stopPropagation();this.closest('.composition-pkg-item').remove();">✕</button>
                                 <?php endif; ?>
+                                <svg class="comp-pkg-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s;<?= $cpi === 0 ? 'transform:rotate(180deg);' : '' ?>"><polyline points="6 9 12 15 18 9"/></svg>
                             </div>
-                            <div class="form-group" style="margin-bottom:12px;">
-                                <label style="font-size:12px;font-weight:600;color:#475569;">📝 Nome da opção (o que o cliente vai ver)</label>
-                                <input type="text" name="composition_packages[<?= $cpi ?>][label]" value="<?= e($cp['label'] ?? '') ?>" class="form-control" placeholder="Ex: 2 pessoas em 1 Buggy, ou 1 pessoa por Buggy">
-                            </div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
-                                <div class="form-group" style="margin-bottom:0;">
-                                    <label style="font-size:12px;font-weight:600;color:#475569;">👥 Total de pessoas</label>
-                                    <input type="number" name="composition_packages[<?= $cpi ?>][pax]" value="<?= e($cp['pax'] ?? '') ?>" class="form-control" min="1" placeholder="Ex: 2" required>
-                                    <small style="color:#94a3b8;font-size:11px;">Pra quantas pessoas é essa opção?</small>
+                            <div class="comp-pkg-body" style="padding:16px 18px;border-top:1px solid #e5e7eb;<?= $cpi === 0 ? '' : 'display:none;' ?>">
+                                <div class="form-group" style="margin-bottom:12px;">
+                                    <label style="font-size:12px;font-weight:600;color:#475569;">📝 Nome da opção (o que o cliente vai ver)</label>
+                                    <input type="text" name="composition_packages[<?= $cpi ?>][label]" value="<?= e($cp['label'] ?? '') ?>" class="form-control comp-label-input" placeholder="Ex: 2 pessoas em 1 Buggy, ou 1 pessoa por Buggy">
                                 </div>
-                                <div class="form-group" style="margin-bottom:0;">
-                                    <label style="font-size:12px;font-weight:600;color:#475569;">💰 Preço total (USD)</label>
-                                    <input type="number" name="composition_packages[<?= $cpi ?>][price]" value="<?= e($cp['price'] ?? '') ?>" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required>
-                                    <small style="color:#94a3b8;font-size:11px;">Quanto custa essa opção?</small>
+                                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label style="font-size:12px;font-weight:600;color:#475569;">👥 Total de pessoas</label>
+                                        <input type="number" name="composition_packages[<?= $cpi ?>][pax]" value="<?= e($cp['pax'] ?? '') ?>" class="form-control" min="1" placeholder="Ex: 2" required>
+                                        <small style="color:#94a3b8;font-size:11px;">Pra quantas pessoas é essa opção?</small>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label style="font-size:12px;font-weight:600;color:#475569;">💰 Preço total (USD)</label>
+                                        <input type="number" name="composition_packages[<?= $cpi ?>][price]" value="<?= e($cp['price'] ?? '') ?>" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required>
+                                        <small style="color:#94a3b8;font-size:11px;">Quanto custa essa opção?</small>
+                                    </div>
                                 </div>
-                            </div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
-                                <div class="form-group" style="margin-bottom:0;">
-                                    <label style="font-size:12px;font-weight:600;color:#475569;">🚗 Qtd de veículos</label>
-                                    <input type="number" name="composition_packages[<?= $cpi ?>][units]" value="<?= e($cp['units'] ?? '1') ?>" class="form-control" min="1" placeholder="1">
-                                    <small style="color:#94a3b8;font-size:11px;">Quantos buggies/veículos?</small>
-                                </div>
-                                <div class="form-group" style="margin-bottom:0;">
-                                    <label style="font-size:12px;font-weight:600;color:#475569;">🏷️ Nome do veículo</label>
-                                    <input type="text" name="composition_packages[<?= $cpi ?>][unit_label]" value="<?= e($cp['unit_label'] ?? '') ?>" class="form-control" placeholder="Ex: Buggy">
-                                    <small style="color:#94a3b8;font-size:11px;">Buggy, Quadriciclo, etc.</small>
-                                </div>
-                                <div class="form-group" style="margin-bottom:0;">
-                                    <label style="font-size:12px;font-weight:600;color:#475569;">👤 Pessoas por veículo</label>
-                                    <input type="number" name="composition_packages[<?= $cpi ?>][pax_per_unit]" value="<?= e($cp['pax_per_unit'] ?? '') ?>" class="form-control" min="1" placeholder="Opcional">
-                                    <small style="color:#94a3b8;font-size:11px;">Quantas em cada veículo?</small>
+                                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label style="font-size:12px;font-weight:600;color:#475569;">🚗 Qtd de veículos</label>
+                                        <input type="number" name="composition_packages[<?= $cpi ?>][units]" value="<?= e($cp['units'] ?? '1') ?>" class="form-control" min="1" placeholder="1">
+                                        <small style="color:#94a3b8;font-size:11px;">Quantos buggies/veículos?</small>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label style="font-size:12px;font-weight:600;color:#475569;">🏷️ Nome do veículo</label>
+                                        <input type="text" name="composition_packages[<?= $cpi ?>][unit_label]" value="<?= e($cp['unit_label'] ?? '') ?>" class="form-control" placeholder="Ex: Buggy">
+                                        <small style="color:#94a3b8;font-size:11px;">Buggy, Quadriciclo, etc.</small>
+                                    </div>
+                                    <div class="form-group" style="margin-bottom:0;">
+                                        <label style="font-size:12px;font-weight:600;color:#475569;">👤 Pessoas por veículo</label>
+                                        <input type="number" name="composition_packages[<?= $cpi ?>][pax_per_unit]" value="<?= e($cp['pax_per_unit'] ?? '') ?>" class="form-control" min="1" placeholder="Opcional">
+                                        <small style="color:#94a3b8;font-size:11px;">Quantas em cada veículo?</small>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -622,15 +625,38 @@ document.getElementById('companionEnabled')?.addEventListener('change', function
     document.getElementById('companionSection').style.display = this.checked ? '' : 'none';
 });
 
+// Toggle accordion de opção de composição
+window.toggleCompPkg = function(header) {
+    var body = header.nextElementSibling;
+    var arrow = header.querySelector('.comp-pkg-arrow');
+    var isOpen = body.style.display !== 'none';
+    body.style.display = isOpen ? 'none' : 'block';
+    if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(180deg)';
+};
+
+// Sincroniza título do header quando o nome da opção muda
+document.addEventListener('input', function(e) {
+    if (e.target.classList.contains('comp-label-input')) {
+        var item = e.target.closest('.composition-pkg-item');
+        var titleEl = item.querySelector('.comp-pkg-title');
+        if (titleEl) {
+            var idx = Array.from(document.getElementById('compositionPackagesList').children).indexOf(item);
+            titleEl.textContent = e.target.value.trim() || ('Opção ' + (idx + 1));
+        }
+    }
+});
+
 document.getElementById('addCompositionPkgBtn')?.addEventListener('click', function() {
     var list = document.getElementById('compositionPackagesList');
     var i = list.children.length;
     var num = i + 1;
     var div = document.createElement('div');
     div.className = 'composition-pkg-item';
-    div.style.cssText = 'background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px 18px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,0.04);';
-    div.innerHTML = '<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;"><span style="width:24px;height:24px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#166534;">' + num + '</span><span style="font-size:13px;font-weight:600;color:#334155;">Opção ' + num + '</span><button type="button" class="btn btn-sm btn-danger" style="margin-left:auto;font-size:11px;padding:4px 10px;" onclick="this.closest(\'.composition-pkg-item\').remove();">✕ Remover</button></div><div class="form-group" style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#475569;">📝 Nome da opção (o que o cliente vai ver)</label><input type="text" name="composition_packages[' + i + '][label]" class="form-control" placeholder="Ex: 2 pessoas em 1 Buggy, ou 1 pessoa por Buggy"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;"><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">👥 Total de pessoas</label><input type="number" name="composition_packages[' + i + '][pax]" class="form-control" min="1" placeholder="Ex: 2" required><small style="color:#94a3b8;font-size:11px;">Pra quantas pessoas é essa opção?</small></div><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">💰 Preço total (USD)</label><input type="number" name="composition_packages[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required><small style="color:#94a3b8;font-size:11px;">Quanto custa essa opção?</small></div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;"><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">🚗 Qtd de veículos</label><input type="number" name="composition_packages[' + i + '][units]" class="form-control" min="1" placeholder="1" value="1"><small style="color:#94a3b8;font-size:11px;">Quantos buggies/veículos?</small></div><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">🏷️ Nome do veículo</label><input type="text" name="composition_packages[' + i + '][unit_label]" class="form-control" placeholder="Ex: Buggy"><small style="color:#94a3b8;font-size:11px;">Buggy, Quadriciclo, etc.</small></div><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">👤 Pessoas por veículo</label><input type="number" name="composition_packages[' + i + '][pax_per_unit]" class="form-control" min="1" placeholder="Opcional"><small style="color:#94a3b8;font-size:11px;">Quantas em cada veículo?</small></div></div>';
+    div.style.cssText = 'background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04);overflow:hidden;';
+    div.innerHTML = '<div class="comp-pkg-header" style="display:flex;align-items:center;gap:8px;padding:12px 16px;cursor:pointer;background:#f8fafc;" onclick="toggleCompPkg(this)"><span style="width:24px;height:24px;background:#f0fdf4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#166534;flex-shrink:0;">' + num + '</span><span class="comp-pkg-title" style="font-size:13px;font-weight:600;color:#334155;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Opção ' + num + '</span><button type="button" class="btn btn-sm btn-danger" style="font-size:11px;padding:4px 10px;flex-shrink:0;" onclick="event.stopPropagation();this.closest(\'.composition-pkg-item\').remove();">✕</button><svg class="comp-pkg-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" style="flex-shrink:0;transition:transform .2s;transform:rotate(180deg);"><polyline points="6 9 12 15 18 9"/></svg></div><div class="comp-pkg-body" style="padding:16px 18px;border-top:1px solid #e5e7eb;"><div class="form-group" style="margin-bottom:12px;"><label style="font-size:12px;font-weight:600;color:#475569;">📝 Nome da opção (o que o cliente vai ver)</label><input type="text" name="composition_packages[' + i + '][label]" class="form-control comp-label-input" placeholder="Ex: 2 pessoas em 1 Buggy, ou 1 pessoa por Buggy"></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;"><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">👥 Total de pessoas</label><input type="number" name="composition_packages[' + i + '][pax]" class="form-control" min="1" placeholder="Ex: 2" required><small style="color:#94a3b8;font-size:11px;">Pra quantas pessoas é essa opção?</small></div><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">💰 Preço total (USD)</label><input type="number" name="composition_packages[' + i + '][price]" class="form-control" min="0" step="0.01" placeholder="Ex: 120.00" required><small style="color:#94a3b8;font-size:11px;">Quanto custa essa opção?</small></div></div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;"><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">🚗 Qtd de veículos</label><input type="number" name="composition_packages[' + i + '][units]" class="form-control" min="1" placeholder="1" value="1"><small style="color:#94a3b8;font-size:11px;">Quantos buggies/veículos?</small></div><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">🏷️ Nome do veículo</label><input type="text" name="composition_packages[' + i + '][unit_label]" class="form-control" placeholder="Ex: Buggy"><small style="color:#94a3b8;font-size:11px;">Buggy, Quadriciclo, etc.</small></div><div class="form-group" style="margin-bottom:0;"><label style="font-size:12px;font-weight:600;color:#475569;">👤 Pessoas por veículo</label><input type="number" name="composition_packages[' + i + '][pax_per_unit]" class="form-control" min="1" placeholder="Opcional"><small style="color:#94a3b8;font-size:11px;">Quantas em cada veículo?</small></div></div></div>';
     list.appendChild(div);
+    // Rolar até a nova opção
+    div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 });
 </script>
 
