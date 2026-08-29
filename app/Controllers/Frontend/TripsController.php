@@ -105,6 +105,74 @@ class TripsController extends Controller
         ], 'app');
     }
 
+    /**
+     * Comparador automático de passeios.
+     * O cliente seleciona até 4 passeios e o sistema monta uma tabela comparativa
+     * usando os dados já cadastrados (preço, duração, dificuldade, inclui/não inclui, etc.).
+     */
+    public function compare(Request $request, Response $response): void
+    {
+        // IDs vindos da query string: ?ids=1,2,3
+        $idsParam = $request->query('ids', '');
+        $ids = array_filter(array_map('intval', explode(',', (string) $idsParam)));
+        $ids = array_slice(array_values($ids), 0, 4); // máximo 4
+
+        $compareTrips = [];
+        $allIncludeItems = [];
+
+        if (!empty($ids)) {
+            $found = $this->tripModel->findByIds($ids);
+
+            // Reordenar conforme a ordem dos IDs enviados
+            $byId = [];
+            foreach ($found as $t) $byId[(int) $t['id']] = $t;
+
+            foreach ($ids as $id) {
+                if (!isset($byId[$id])) continue;
+                $trip = $byId[$id];
+
+                // Preço
+                $packages = $this->packageModel->getByTrip((int) $trip['id']);
+                $trip['min_price'] = 0;
+                if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])) {
+                    $gpRules = json_decode($trip['group_pricing'], true);
+                    if (is_array($gpRules) && !empty($gpRules)) {
+                        usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                        $trip['min_price'] = (float) $gpRules[0]['price'];
+                    }
+                } elseif (!empty($packages)) {
+                    $trip['min_price'] = $this->packageModel->getBasePrice((int) $packages[0]['id']);
+                }
+
+                $trip['rating'] = $this->tripModel->getAverageRating((int) $trip['id']);
+                $trip['includes_arr'] = !empty($trip['includes']) ? (json_decode($trip['includes'], true) ?: []) : [];
+                $trip['excludes_arr'] = !empty($trip['excludes']) ? (json_decode($trip['excludes'], true) ?: []) : [];
+
+                // Coletar todos os itens de "inclui" para a tabela cruzada
+                foreach ($trip['includes_arr'] as $inc) {
+                    $key = mb_strtolower(trim($inc));
+                    if ($key !== '') $allIncludeItems[$key] = trim($inc);
+                }
+
+                $compareTrips[] = $trip;
+            }
+        }
+
+        // Ordenar itens de inclui alfabeticamente
+        asort($allIncludeItems);
+
+        // Lista de todos os passeios para o seletor
+        $allTrips = $this->tripModel->getAllForSelect();
+
+        $this->view('frontend/trips/compare', [
+            'compareTrips' => $compareTrips,
+            'allIncludeItems' => $allIncludeItems,
+            'allTrips' => $allTrips,
+            'selectedIds' => $ids,
+            'pageTitle' => 'Comparar Passeios',
+        ], 'app');
+    }
+
     public function category(Request $request, Response $response): void
     {
         $slug = $request->param('slug', '');

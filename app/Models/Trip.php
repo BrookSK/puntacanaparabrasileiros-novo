@@ -28,6 +28,30 @@ class Trip extends Model
         return $this->findWhere('slug', $slug);
     }
 
+    /**
+     * Busca múltiplos passeios publicados por lista de IDs (para comparador).
+     */
+    public function findByIds(array $ids): array
+    {
+        $ids = array_values(array_filter(array_map('intval', $ids)));
+        if (empty($ids)) return [];
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        return $this->db->fetchAll(
+            "SELECT * FROM `{$this->table}` WHERE id IN ({$placeholders}) AND status = 'published'",
+            $ids
+        );
+    }
+
+    /**
+     * Retorna todos os passeios publicados (id, title, slug) para seletor do comparador.
+     */
+    public function getAllForSelect(): array
+    {
+        return $this->db->fetchAll(
+            "SELECT id, title, slug FROM `{$this->table}` WHERE status = 'published' ORDER BY title ASC"
+        );
+    }
+
     public function getPublished(int $page = 1, int $perPage = 12, string $orderBy = 'relevancia'): array
     {
         $offset = ($page - 1) * $perPage;

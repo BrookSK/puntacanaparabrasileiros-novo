@@ -10,6 +10,7 @@
             <nav class="main-nav" id="mainNav">
                 <a href="/" class="nav-link <?= ($_SERVER['REQUEST_URI'] ?? '') === '/' ? 'active' : '' ?>">Home</a>
                 <a href="/passeios" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/passeios') ? 'active' : '' ?>">Passeios</a>
+                <a href="/comparar-passeios" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/comparar-passeios') ? 'active' : '' ?>">Comparar</a>
                 <a href="/transfers" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/transfers') ? 'active' : '' ?>">Transfer</a>
                 <a href="/blog" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/blog') ? 'active' : '' ?>">Blog</a>
                 <a href="/sobre-nos" class="nav-link <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/sobre-nos') ? 'active' : '' ?>">Sobre Nós</a>
