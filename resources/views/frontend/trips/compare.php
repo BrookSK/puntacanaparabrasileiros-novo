@@ -131,7 +131,7 @@
                         <?php if ($has): ?>
                         <span style="color:#059669;font-size:18px;font-weight:700;">✔</span>
                         <?php else: ?>
-                        <span style="color:#e2e8f0;font-size:18px;">✖</span>
+                        <span style="color:#dc2626;font-size:18px;font-weight:700;">✖</span>
                         <?php endif; ?>
                     </td>
                     <?php endforeach; ?>
