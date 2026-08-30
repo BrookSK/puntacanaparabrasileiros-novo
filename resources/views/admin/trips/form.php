@@ -365,10 +365,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                         Importar Planilha
                     </a>
                     <?php if (!empty($tripHotels ?? [])): ?>
-                    <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/limpar" class="inline-form" style="margin-left:auto;" onsubmit="return confirm('Remover todos os hotéis e horários deste passeio?')">
-                        <?= csrf_field() ?>
-                        <button class="btn-schedule btn-schedule--danger">Limpar Tudo</button>
-                    </form>
+                    <button type="button" class="btn-schedule btn-schedule--danger" style="margin-left:auto;" onclick="submitHotelAction('/admin/passeios/<?= (int)$trip['id'] ?>/horarios/limpar', 'Remover todos os hotéis e horários deste passeio?')">Limpar Tudo</button>
                     <?php endif; ?>
                 </div>
 
@@ -401,10 +398,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                         </div>
                         <div class="hotel-schedule-row__actions">
                             <a href="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/editar" class="btn-schedule btn-schedule--default">Editar</a>
-                            <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir este hotel e seus horários?')">
-                                <?= csrf_field() ?>
-                                <button class="btn-schedule btn-schedule--danger">&#10005;</button>
-                            </form>
+                            <button type="button" class="btn-schedule btn-schedule--danger" onclick="submitHotelAction('/admin/passeios/<?= (int)$trip['id'] ?>/horarios/hotel/<?= (int)$th['id'] ?>/excluir', 'Excluir este hotel e seus horários?')">&#10005;</button>
                         </div>
                     </div>
                     <?php endforeach; ?>
@@ -658,6 +652,20 @@ document.getElementById('addCompositionPkgBtn')?.addEventListener('click', funct
     // Rolar até a nova opção
     div.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 });
+
+// Submeter ação de hotel (limpar/excluir) via form dinâmico fora do form principal
+window.submitHotelAction = function(actionUrl, confirmMsg) {
+    if (!confirm(confirmMsg)) return;
+    var f = document.createElement('form');
+    f.method = 'POST';
+    f.action = actionUrl;
+    f.style.display = 'none';
+    var tokenInput = document.querySelector('meta[name="csrf-token"]');
+    var token = tokenInput ? tokenInput.getAttribute('content') : '';
+    f.innerHTML = '<input type="hidden" name="_token" value="' + token + '">';
+    document.body.appendChild(f);
+    f.submit();
+};
 </script>
 
 <style>
