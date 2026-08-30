@@ -71,6 +71,12 @@ class Affiliate extends Model
 
     public function trackVisit(int $affiliateId, string $ip, ?string $referrer, string $pageUrl, ?string $userAgent): int
     {
+        // Só registra se o afiliado existir (evita violação de FK)
+        $exists = $this->db->fetchColumn("SELECT id FROM affiliates WHERE id = ? LIMIT 1", [$affiliateId]);
+        if (!$exists) {
+            return 0;
+        }
+
         return $this->db->insert('affiliate_visits', [
             'affiliate_id' => $affiliateId,
             'ip_address' => $ip,
