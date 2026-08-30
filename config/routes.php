@@ -76,6 +76,7 @@ $router->group(['prefix' => '/painel-afiliado', 'middleware' => [AuthMiddleware:
     $router->get('/configuracoes', [AccountController::class, 'affiliateSettings'], [], 'affiliate.settings');
     $router->post('/configuracoes', [AccountController::class, 'affiliateSettingsUpdate'], [CsrfMiddleware::class], 'affiliate.settings.update');
     $router->get('/landing-page', [AccountController::class, 'affiliateLanding'], [], 'affiliate.landing');
+    $router->get('/testar-notificacao', [AccountController::class, 'affiliateTestNotification'], [], 'affiliate.test_notification');
 });
 $router->get('/blog', [BlogController::class, 'index'], [], 'blog.index');
 $router->get('/blog/categoria/{slug}', [BlogController::class, 'category'], [], 'blog.category');

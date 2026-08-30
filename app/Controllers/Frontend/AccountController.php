@@ -710,6 +710,21 @@ class AccountController extends Controller
         $this->view('frontend/affiliate/payments', ['affiliate' => $affiliate, 'payments' => $payments, 'pageTitle' => 'Pagamentos'], 'app');
     }
 
+    public function affiliateTestNotification(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        $affiliateModel = new \App\Models\Affiliate();
+        $affiliate = $affiliateModel->findByUser((int) $user['id']);
+        if (!$affiliate) { $this->redirect('/programa-de-afiliados'); return; }
+
+        $service = new \App\Services\AffiliateService();
+        $result = $service->testNotification((int) $affiliate['id']);
+
+        header('Content-Type: application/json');
+        echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
     public function affiliateSettings(Request $request, Response $response): void
     {
         $user = $this->currentUser();

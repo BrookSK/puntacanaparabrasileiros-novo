@@ -148,4 +148,41 @@ class AffiliateService
             'recent_commissions' => $recentCommissions,
         ];
     }
+
+    /**
+     * Teste de notificação WhatsApp de afiliado (diagnóstico).
+     * Retorna array com detalhes do que aconteceu.
+     */
+    public function testNotification(int $affiliateId): array
+    {
+        $result = ['affiliate_id' => $affiliateId, 'steps' => []];
+
+        $affiliate = $this->affiliateModel->find($affiliateId);
+        if (!$affiliate) {
+            $result['steps'][] = 'ERRO: afiliado não encontrado';
+            return $result;
+        }
+        $result['steps'][] = 'Afiliado encontrado (user_id=' . $affiliate['user_id'] . ')';
+
+        // Buscar telefone
+        $row = $this->db->fetchOne(
+            "SELECT u.phone, u.first_name, u.email FROM affiliates a INNER JOIN users u ON a.user_id = u.id WHERE a.id = ?",
+            [$affiliateId]
+        );
+        $result['user_phone'] = $row['phone'] ?? '(vazio)';
+        $result['user_name'] = $row['first_name'] ?? '(vazio)';
+
+        // Instância
+        $instance = $this->db->fetchOne("SELECT instance_name, connection_status, is_default FROM whatsapp_instances WHERE connection_status = 'open' LIMIT 1");
+        if (!$instance) {
+            $instance = $this->db->fetchOne("SELECT instance_name, connection_status, is_default FROM whatsapp_instances WHERE is_default = 1 LIMIT 1");
+        }
+        $result['instance'] = $instance ?: '(nenhuma instância disponível)';
+
+        // Tentar enviar
+        (new AffiliateNotifier())->notifyCommissionEarned($affiliateId, 14.00, 70.00);
+        $result['steps'][] = 'notifyCommissionEarned chamado';
+
+        return $result;
+    }
 }
