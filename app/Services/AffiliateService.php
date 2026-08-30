@@ -111,6 +111,13 @@ class AffiliateService
             [$affiliateId]
         );
 
+        // Notificar afiliado por WhatsApp sobre a comissão gerada
+        try {
+            (new AffiliateNotifier())->notifyCommissionEarned($affiliateId, $commissionAmount, $saleAmount);
+        } catch (\Throwable $e) {
+            // Silenciar erro de notificação
+        }
+
         return $commissionId;
     }
 

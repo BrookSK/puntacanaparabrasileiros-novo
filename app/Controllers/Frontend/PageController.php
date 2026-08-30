@@ -279,6 +279,16 @@ class PageController extends Controller
             // Silenciar erro de email - não impedir o fluxo
         }
 
+        // Notificar solicitante por WhatsApp
+        try {
+            (new \App\Services\AffiliateNotifier())->notifyRegistration(
+                $data['phone'],
+                $data['first_name'] . ' ' . $data['last_name']
+            );
+        } catch (\Throwable $e) {
+            // Silenciar erro de WhatsApp
+        }
+
         $this->flash('success', 'Solicitação enviada com sucesso! Nossa equipe analisará seu perfil e entrará em contato em até 48 horas.');
         $this->redirect('/cadastro-afiliado');
     }

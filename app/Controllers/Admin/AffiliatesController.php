@@ -224,6 +224,17 @@ class AffiliatesController extends Controller
                 // Silenciar erro de email - não impedir o fluxo
             }
 
+            // 5. Notificar afiliado por WhatsApp
+            try {
+                (new \App\Services\AffiliateNotifier())->notifyApproved(
+                    $req['phone'],
+                    $req['first_name'] . ' ' . $req['last_name'],
+                    $this->setting('site_url', 'https://puntacananovo.lrvweb.com.br')
+                );
+            } catch (\Throwable $e) {
+                // Silenciar erro de WhatsApp
+            }
+
             $this->flash('success', 'Afiliado aprovado com sucesso! ' . $req['first_name'] . ' ' . $req['last_name'] . ' agora tem acesso ao painel.');
         } catch (\Exception $e) {
             $this->flash('error', 'Erro ao aprovar: ' . $e->getMessage());
@@ -282,6 +293,17 @@ class AffiliatesController extends Controller
             );
         } catch (\Exception $e) {
             // Silenciar erro de email
+        }
+
+        // Notificar solicitante por WhatsApp
+        try {
+            (new \App\Services\AffiliateNotifier())->notifyRejected(
+                $req['phone'],
+                $req['first_name'] . ' ' . $req['last_name'],
+                $reason
+            );
+        } catch (\Throwable $e) {
+            // Silenciar erro de WhatsApp
         }
 
         $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi bloqueada.');
@@ -476,6 +498,17 @@ class AffiliatesController extends Controller
                 "UPDATE affiliates SET total_paid = total_paid + ? WHERE id = ?",
                 [(float) $commission['amount'], (int) $commission['affiliate_id']]
             );
+
+            // Notificar afiliado por WhatsApp
+            try {
+                (new \App\Services\AffiliateNotifier())->notifyCommissionPaid(
+                    (int) $commission['affiliate_id'],
+                    (float) $commission['amount'],
+                    $reference ?: null
+                );
+            } catch (\Throwable $e) {
+                // Silenciar erro de WhatsApp
+            }
         }
 
         $this->flash('success', 'Comissão marcada como paga!');
@@ -496,7 +529,22 @@ class AffiliatesController extends Controller
             return;
         }
 
+        $commission = $this->commissionModel->find($id);
+
         $this->commissionModel->cancel($id, $reason);
+
+        // Notificar afiliado por WhatsApp
+        if ($commission) {
+            try {
+                (new \App\Services\AffiliateNotifier())->notifyCommissionCancelled(
+                    (int) $commission['affiliate_id'],
+                    (float) $commission['amount'],
+                    $reason
+                );
+            } catch (\Throwable $e) {
+                // Silenciar erro de WhatsApp
+            }
+        }
 
         $this->flash('success', 'Comissão cancelada com sucesso.');
         $this->redirect('/admin/afiliados/comissoes?status=rejected');
