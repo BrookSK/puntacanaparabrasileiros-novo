@@ -13,12 +13,10 @@ use Core\Database;
  */
 class AffiliateNotifier
 {
-    private WhatsappNotifier $notifier;
     private Database $db;
 
     public function __construct()
     {
-        $this->notifier = new WhatsappNotifier();
         $this->db = Database::getInstance();
     }
 
@@ -29,32 +27,61 @@ class AffiliateNotifier
 
     /**
      * Envia mensagem WhatsApp de forma segura.
+     * Usa o mesmo método comprovado do checkout (EvolutionApi direto).
      */
     private function send(?string $phone, string $name, string $message): void
     {
         if (empty($phone)) return;
         try {
-            $this->notifier->sendToPhone($phone, $message, $name);
+            // Buscar instância conectada (mesmo padrão do checkout)
+            $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE connection_status = 'open' LIMIT 1");
+            if (!$instance) {
+                $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE is_default = 1 LIMIT 1");
+            }
+            if (!$instance) {
+                error_log("[AffiliateNotifier] Nenhuma instância WhatsApp disponível");
+                return;
+            }
+
+            $api = EvolutionApi::fromInstance($instance);
+            $normalizedPhone = EvolutionApi::normalizePhone($phone);
+            $api->sendText($normalizedPhone, $message);
         } catch (\Throwable $e) {
-            // Nunca quebrar o fluxo por causa de notificação
+            error_log("[AffiliateNotifier] Erro ao enviar: " . $e->getMessage());
         }
     }
 
     /**
-     * Busca telefone e nome de um afiliado ativo (via users).
+     * Busca telefone e nome de um afiliado ativo (via users, com fallback em affiliate_requests).
      */
     private function getAffiliateContact(int $affiliateId): ?array
     {
         $row = $this->db->fetchOne(
-            "SELECT u.phone, u.first_name, u.last_name
+            "SELECT u.phone, u.first_name, u.last_name, u.email
              FROM affiliates a
              INNER JOIN users u ON a.user_id = u.id
              WHERE a.id = ?",
             [$affiliateId]
         );
-        if (!$row || empty($row['phone'])) return null;
+        if (!$row) return null;
+
+        $phone = $row['phone'] ?? '';
+
+        // Fallback: buscar telefone na solicitação original pelo email
+        if (empty($phone) && !empty($row['email'])) {
+            $req = $this->db->fetchOne(
+                "SELECT phone FROM affiliate_requests WHERE email = ? ORDER BY id DESC LIMIT 1",
+                [$row['email']]
+            );
+            if ($req && !empty($req['phone'])) {
+                $phone = $req['phone'];
+            }
+        }
+
+        if (empty($phone)) return null;
+
         return [
-            'phone' => $row['phone'],
+            'phone' => $phone,
             'name' => trim($row['first_name'] . ' ' . $row['last_name']),
         ];
     }
