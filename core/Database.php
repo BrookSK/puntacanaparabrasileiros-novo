@@ -19,18 +19,59 @@ class Database
     {
         $config = require BASE_PATH . '/config/database.php';
 
+        // Suporta o formato novo (lista de conexões em 'connections') e o
+        // formato antigo (uma única conexão no nível raiz do array).
+        $connections = $config['connections'] ?? [$config];
+
+        $lastError = null;
+
+        foreach ($connections as $index => $conn) {
+            try {
+                $this->pdo = $this->connect($conn);
+                return; // Conectou com sucesso: usa esta conexão.
+            } catch (\PDOException $e) {
+                // Falhou nesta conexão: guarda o erro e tenta a próxima da lista.
+                $lastError = $e;
+                error_log(sprintf(
+                    'Falha ao conectar no banco (conexão #%d, host=%s): %s',
+                    (int) $index + 1,
+                    $conn['host'] ?? '?',
+                    $e->getMessage()
+                ));
+            }
+        }
+
+        // Nenhuma conexão da lista funcionou.
+        throw new \RuntimeException(
+            'Não foi possível conectar a nenhum dos bancos de dados configurados.',
+            0,
+            $lastError
+        );
+    }
+
+    /**
+     * Cria uma conexão PDO a partir de uma configuração individual.
+     *
+     * @param array $conn Configuração com host, port, database, username, password.
+     */
+    private function connect(array $conn): PDO
+    {
+        $charset = $conn['charset'] ?? 'utf8mb4';
+        $collation = $conn['collation'] ?? 'utf8mb4_unicode_ci';
+
         $dsn = sprintf(
-            'mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4',
-            $config['host'],
-            $config['port'],
-            $config['database']
+            'mysql:host=%s;port=%s;dbname=%s;charset=%s',
+            $conn['host'],
+            $conn['port'],
+            $conn['database'],
+            $charset
         );
 
-        $this->pdo = new PDO($dsn, $config['username'], $config['password'], [
+        return new PDO($dsn, $conn['username'], $conn['password'], [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
-            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES {$charset} COLLATE {$collation}",
         ]);
     }
 
