@@ -24,7 +24,7 @@ return [
         [
             'host' => 'localhost',
             'port' => '3306',
-            'database' => 'puntacana_novo_db',
+            'database' => 'db_12_puntacana_novo_db',
             'username' => 'puntacana_novo_db',
             'password' => 'TB*yaCqwkrh5p81$',
             'charset' => 'utf8mb4',
@@ -37,7 +37,7 @@ return [
         [
             'host' => 'localhost',
             'port' => '3306',
-            'database' => 'db_12_puntacana_novo_db',
+            'database' => 'puntacana_novo_db',
             'username' => 'puntacana_novo_db',
             'password' => 'TB*yaCqwkrh5p81$',
             'charset' => 'utf8mb4',
