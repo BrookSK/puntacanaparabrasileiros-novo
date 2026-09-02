@@ -123,6 +123,10 @@
 
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/relatorios')): ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-array@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-geo@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-geo@4.3.0/build/index.umd.min.js"></script>
     <?php endif; ?>
     <script src="<?= asset('js/admin.js') ?>?v=2.3"></script>
     <script src="<?= asset('js/phone-country.js') ?>?v=1.1"></script>
