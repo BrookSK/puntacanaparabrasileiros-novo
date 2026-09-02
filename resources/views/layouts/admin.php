@@ -30,6 +30,9 @@
                 <a href="/admin" class="nav-item <?= ($_SERVER['REQUEST_URI'] ?? '') === '/admin' ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span> Dashboard
                 </a>
+                <a href="/admin/relatorios" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/relatorios') ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span> Relatórios
+                </a>
                 <a href="/admin/passeios" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/passeios') ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 010 20 14.5 14.5 0 010-20"/><path d="M2 12h20"/></svg></span> Passeios
                 </a>
@@ -118,6 +121,9 @@
         </div>
     </div>
 
+    <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/relatorios')): ?>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <?php endif; ?>
     <script src="<?= asset('js/admin.js') ?>?v=2.3"></script>
     <script src="<?= asset('js/phone-country.js') ?>?v=1.1"></script>
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp/chat')): ?>

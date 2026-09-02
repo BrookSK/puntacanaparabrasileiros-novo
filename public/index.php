@@ -78,6 +78,30 @@ require BASE_PATH . '/config/routes.php';
 $refParam = $_GET['ref'] ?? null;
 $affiliateCookie = $_COOKIE['pcb_ref'] ?? null;
 
+// Capturar parâmetros UTM (tráfego pago) e salvar em cookie por 30 dias
+try {
+    $utmKeys = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
+    $hasUtm = false;
+    foreach ($utmKeys as $k) {
+        if (!empty($_GET[$k])) { $hasUtm = true; break; }
+    }
+    if ($hasUtm) {
+        $utmData = [];
+        foreach ($utmKeys as $k) {
+            $utmData[$k] = isset($_GET[$k]) ? substr((string) $_GET[$k], 0, 200) : '';
+        }
+        $utmData['referrer'] = $_SERVER['HTTP_REFERER'] ?? '';
+        setcookie('pcb_utm', json_encode($utmData), [
+            'expires' => time() + (30 * 86400),
+            'path' => '/',
+            'httponly' => false,
+            'samesite' => 'Lax',
+        ]);
+    }
+} catch (\Throwable $e) {
+    // Nunca quebrar por causa de UTM
+}
+
 if ($refParam && ctype_digit($refParam)) {
     // Primeira visita com ?ref= — registra e seta cookie
     try {

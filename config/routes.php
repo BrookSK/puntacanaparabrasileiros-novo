@@ -23,6 +23,7 @@ use App\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Controllers\Admin\NewsletterController as AdminNewsletterController;
 use App\Controllers\Admin\CancellationsController as AdminCancellationsController;
 use App\Controllers\Admin\SchedulesController as AdminSchedulesController;
+use App\Controllers\Admin\ReportsController as AdminReportsController;
 use App\Controllers\Api\TransferSearchController;
 use App\Controllers\Api\ScheduleController as ApiScheduleController;
 use App\Controllers\Api\PricingController;
@@ -154,6 +155,9 @@ $router->group(['prefix' => '/api'], function ($router) {
 $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, AdminMiddleware::class]], function ($router) {
     // Dashboard
     $router->get('', [DashboardController::class, 'index'], [], 'admin.dashboard');
+
+    // Relatórios
+    $router->get('/relatorios', [AdminReportsController::class, 'index'], [], 'admin.reports.index');
 
     // Passeios
     $router->get('/passeios', [AdminTripsController::class, 'index'], [], 'admin.trips.index');

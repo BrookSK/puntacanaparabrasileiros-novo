@@ -150,6 +150,13 @@ class CheckoutController extends Controller
             $affiliateService = new AffiliateService();
             $affiliateId = $affiliateService->getActiveAffiliateId();
 
+            // Ler dados UTM do cookie (tráfego pago)
+            $utm = [];
+            if (!empty($_COOKIE['pcb_utm'])) {
+                $decoded = json_decode($_COOKIE['pcb_utm'], true);
+                if (is_array($decoded)) $utm = $decoded;
+            }
+
             $bookingId = $this->bookingModel->create([
                 'user_id' => $this->currentUser() ? (int) $this->currentUser()['id'] : null,
                 'booking_number' => $bookingNumber,
@@ -171,6 +178,12 @@ class CheckoutController extends Controller
                 'ip_address' => $request->ip(),
                 'notes' => $request->input('notes', '') ?: null,
                 'flight_voucher_path' => $request->input('flight_voucher_path', '') ?: null,
+                'utm_source' => $utm['utm_source'] ?? null,
+                'utm_medium' => $utm['utm_medium'] ?? null,
+                'utm_campaign' => $utm['utm_campaign'] ?? null,
+                'utm_term' => $utm['utm_term'] ?? null,
+                'utm_content' => $utm['utm_content'] ?? null,
+                'referrer' => $utm['referrer'] ?? null,
             ]);
 
             // Criar booking items (trips)
