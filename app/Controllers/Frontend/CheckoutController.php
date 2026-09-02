@@ -180,9 +180,9 @@ class CheckoutController extends Controller
                     'trip_id' => (int) $tripItem['trip_id'],
                     'package_id' => (int) $tripItem['package_id'],
                     'trip_date' => $tripItem['date'],
-                    'trip_time' => $tripItem['time'] ?? null,
+                    'trip_time' => $this->normalizeTime($tripItem['time'] ?? null),
                     'hotel_name' => $tripItem['hotel_name'] ?? null,
-                    'pickup_time' => $tripItem['pickup_time'] ?? null,
+                    'pickup_time' => $this->normalizeTime($tripItem['pickup_time'] ?? null),
                     'pax' => json_encode($tripItem['pax']),
                     'extra_services' => !empty($tripItem['extra_services']) ? json_encode($tripItem['extra_services']) : null,
                     'price' => $tripItem['total'],
@@ -226,7 +226,7 @@ class CheckoutController extends Controller
                     'origin_id' => (int) $transfer['origin_id'],
                     'destination_id' => (int) $transfer['destination_id'],
                     'date' => $transfer['date'],
-                    'time' => $transfer['time'],
+                    'time' => $this->normalizeTime($transfer['time']),
                     'type' => $transfer['type'],
                     'service_type' => $transfer['service_type'],
                     'price' => (float) $transfer['price'],
@@ -497,6 +497,39 @@ class CheckoutController extends Controller
                 (float) $booking['total']
             );
         }
+    }
+
+    /**
+     * Normaliza horário para o formato TIME do MySQL (HH:MM:SS).
+     * Aceita formatos como "3:00 PM", "15:00", "3:00 PM PM", etc.
+     */
+    private function normalizeTime(?string $time): ?string
+    {
+        if (empty($time)) return null;
+
+        $time = trim($time);
+
+        // Se for um intervalo (ex: "3:00 PM – 6:00 PM"), pegar só o horário de início
+        $time = preg_replace('/\s*[–\-—].*$/u', '', $time);
+        $time = trim($time);
+
+        // Remover "PM PM" ou "AM AM" duplicados
+        $time = preg_replace('/\s*(AM|PM)\s*(AM|PM)/i', ' $1', $time);
+
+        // Se já está no formato 24h (HH:MM ou HH:MM:SS), retornar direto
+        if (preg_match('/^(\d{1,2}):(\d{2})(:(\d{2}))?$/', $time, $m) && stripos($time, 'M') === false) {
+            $h = str_pad($m[1], 2, '0', STR_PAD_LEFT);
+            $s = isset($m[4]) ? $m[4] : '00';
+            return "{$h}:{$m[2]}:{$s}";
+        }
+
+        // Tentar converter formato AM/PM para 24h
+        $ts = strtotime($time);
+        if ($ts !== false) {
+            return date('H:i:s', $ts);
+        }
+
+        return null;
     }
 
     /**
