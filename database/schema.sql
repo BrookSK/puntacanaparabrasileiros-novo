@@ -564,7 +564,7 @@ CREATE TABLE IF NOT EXISTS `transfer_bookings` (
 CREATE TABLE IF NOT EXISTS `payments` (
     `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
     `booking_id` INT UNSIGNED NOT NULL,
-    `gateway` ENUM('paypal','stripe','manual','free') NOT NULL,
+    `gateway` ENUM('paypal','stripe','pix','pagbank','manual','free','simulate') NOT NULL,
     `transaction_id` VARCHAR(255) DEFAULT NULL,
     `amount` DECIMAL(10,2) NOT NULL,
     `currency` VARCHAR(3) NOT NULL DEFAULT 'USD',
