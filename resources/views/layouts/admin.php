@@ -118,8 +118,6 @@
             <div class="admin-content">
                 <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/relatorios')): ?>
                 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/svgmap@2.10.1/dist/svgMap.min.css">
-                <script src="https://cdn.jsdelivr.net/npm/svgmap@2.10.1/dist/svgMap.min.js"></script>
                 <?php endif; ?>
                 <?= $content ?>
             </div>

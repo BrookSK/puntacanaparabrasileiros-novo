@@ -81,16 +81,36 @@ $originData = array_map(fn($r) => (float) $r['revenue'], $byOrigin);
         <?php endif; ?>
     </div>
 
-    <!-- País (mapa-múndi) -->
+    <!-- País (mapa-múndi SVG inline) -->
     <div class="admin-card" style="padding:20px;">
         <h3 style="font-size:15px;margin-bottom:16px;">Vendas por País</h3>
         <?php if (empty($countryMapData)): ?>
         <p class="text-muted" style="text-align:center;padding:30px;">Sem dados de país no período. Os países aparecem no mapa conforme as reservas informam o país.</p>
         <?php else: ?>
-        <div id="svgMapContainer" style="width:100%;"></div>
+        <div id="worldMapWrap" style="width:100%;">
+            <?php
+            $svgFile = BASE_PATH . '/resources/views/components/world-map.svg';
+            if (is_file($svgFile)) {
+                echo file_get_contents($svgFile);
+            } else {
+                echo '<p class="text-muted" style="text-align:center;padding:30px;">Mapa não disponível.</p>';
+            }
+            ?>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:12px;font-size:12px;color:#64748b;flex-wrap:wrap;">
+            <span style="width:14px;height:14px;background:#a7f3d0;border-radius:3px;display:inline-block;"></span> Poucas vendas
+            <span style="width:14px;height:14px;background:#047857;border-radius:3px;display:inline-block;margin-left:4px;"></span> Muitas vendas
+            <span style="width:14px;height:14px;background:#e5e7eb;border-radius:3px;display:inline-block;margin-left:12px;"></span> Sem vendas
+        </div>
         <?php endif; ?>
     </div>
 </div>
+
+<style>
+#worldMapWrap svg { width: 100%; height: auto; max-height: 320px; }
+#worldMapWrap svg path { fill: #e5e7eb; stroke: #fff; stroke-width: 0.5; transition: fill .2s; cursor: default; }
+#worldMapWrap svg path.has-sales { cursor: pointer; }
+</style>
 
 <!-- Tabelas -->
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;">
@@ -238,52 +258,46 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // País (mapa-múndi via svgMap)
-    const mapContainer = document.getElementById('svgMapContainer');
-    if (mapContainer && typeof svgMap !== 'undefined') {
-        // Dados por código alpha-2
+    // País (mapa-múndi SVG inline) — pinta os países que venderam
+    const mapWrap = document.getElementById('worldMapWrap');
+    if (mapWrap) {
         const salesByCode = {};
+        let maxRev = 1;
         <?php foreach ($countryMapData as $cm): ?>
-        salesByCode['<?= e($cm['code']) ?>'] = { revenue: <?= $cm['revenue'] ?>, bookings: <?= $cm['bookings'] ?> };
+        salesByCode['<?= strtolower(e($cm['code'])) ?>'] = { revenue: <?= $cm['revenue'] ?>, bookings: <?= $cm['bookings'] ?> };
+        <?php if ($cm['revenue'] > 0): ?>if (<?= $cm['revenue'] ?> > maxRev) maxRev = <?= $cm['revenue'] ?>;<?php endif; ?>
         <?php endforeach; ?>
 
-        try {
-            // Montar dados no formato do svgMap
-            const mapValues = {};
-            let maxRev = 1;
-            Object.keys(salesByCode).forEach(code => {
-                if (salesByCode[code].revenue > maxRev) maxRev = salesByCode[code].revenue;
-            });
-            Object.keys(salesByCode).forEach(code => {
-                mapValues[code] = {
-                    revenue: salesByCode[code].revenue,
-                    bookings: salesByCode[code].bookings,
-                };
-            });
+        const greenFor = (revenue) => {
+            const ratio = Math.min(1, revenue / maxRev);
+            // interpolar #a7f3d0 (claro) -> #047857 (escuro)
+            const r = Math.round(167 - ratio * 163); // 167 -> 4
+            const g = Math.round(243 - ratio * 123); // 243 -> 120
+            const b = Math.round(208 - ratio * 121); // 208 -> 87
+            return `rgb(${r}, ${g}, ${b})`;
+        };
 
-            new svgMap({
-                targetElementID: 'svgMapContainer',
-                data: {
-                    data: {
-                        revenue: { name: 'Receita', format: '${0}', thousandSeparator: ',' },
-                        bookings: { name: 'Reservas', format: '{0}' },
-                    },
-                    applyData: 'revenue',
-                    values: mapValues,
-                },
-                colorMax: '#047857',   // verde escuro (mais vendas)
-                colorMin: '#a7f3d0',   // verde claro (poucas vendas)
-                colorNoData: '#e5e7eb', // cinza (sem vendas)
-                flagType: 'emoji',
-                hideFlag: true,
-                noDataText: 'Sem vendas',
+        Object.keys(salesByCode).forEach((code) => {
+            // No SVG os países têm id em minúsculo (ex: "br")
+            const el = mapWrap.querySelector('#' + CSS.escape(code));
+            const targets = el ? [el] : [];
+            // Alguns países são grupos <g> com vários paths
+            targets.forEach((t) => {
+                const paths = t.tagName.toLowerCase() === 'path' ? [t] : t.querySelectorAll('path');
+                const nodes = paths.length ? paths : [t];
+                nodes.forEach((p) => {
+                    p.style.fill = greenFor(salesByCode[code].revenue);
+                    p.classList.add('has-sales');
+                    const rev = salesByCode[code].revenue;
+                    const bk = salesByCode[code].bookings;
+                    p.setAttribute('data-tooltip', code.toUpperCase() + ': $' + rev.toFixed(2) + ' (' + bk + ' reserva(s))');
+                    // Tooltip nativo
+                    let title = p.querySelector('title');
+                    if (!title) { title = document.createElementNS('http://www.w3.org/2000/svg', 'title'); p.appendChild(title); }
+                    title.textContent = code.toUpperCase() + ': $' + rev.toFixed(2) + ' (' + bk + ' reserva(s))';
+                });
             });
-        } catch (err) {
-            console.error('[Relatórios] Erro ao renderizar mapa:', err);
-            mapContainer.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível renderizar o mapa.</p>';
-        }
-    } else if (mapContainer) {
-        mapContainer.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Mapa indisponível (biblioteca não carregada).</p>';
+        });
     }
 });
 </script>
