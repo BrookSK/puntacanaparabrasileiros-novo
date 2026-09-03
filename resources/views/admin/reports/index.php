@@ -254,17 +254,31 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // País (mapa-múndi choropleth)
     const mapEl = document.getElementById('chartCountryMap');
-    if (mapEl && typeof ChartGeo !== 'undefined') {
+    if (mapEl) {
         // Mapa: código alpha-2 => {revenue, bookings}
         const salesByCode = {};
         <?php foreach ($countryMapData as $cm): ?>
         salesByCode['<?= e($cm['code']) ?>'] = { revenue: <?= $cm['revenue'] ?>, bookings: <?= $cm['bookings'] ?> };
         <?php endforeach; ?>
 
-        fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-50m.json')
-            .then(r => r.json())
+        // Resolver a função topojson.feature de onde estiver disponível
+        const topojsonFeature = (window.topojson && window.topojson.feature)
+            || (window.ChartGeo && window.ChartGeo.topojson && window.ChartGeo.topojson.feature)
+            || null;
+
+        if (!topojsonFeature) {
+            console.error('[Relatórios] topojson não carregado', {ChartGeo: typeof window.ChartGeo, topojson: typeof window.topojson});
+            mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Mapa indisponível (biblioteca não carregada).</p>';
+            return;
+        }
+
+        fetch('https://unpkg.com/world-atlas@2/countries-110m.json')
+            .then(r => {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            })
             .then(topology => {
-                const countries = ChartGeo.topojson.feature(topology, topology.objects.countries).features;
+                const countries = topojsonFeature(topology, topology.objects.countries).features;
 
                 // Mapeamento de código numérico ISO (do atlas) para alpha-2
                 // O world-atlas usa id numérico ISO 3166-1. Usamos o nome como fallback de match.
@@ -330,8 +344,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             })
-            .catch(() => {
-                mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível carregar o mapa.</p>';
+            .catch((err) => {
+                console.error('[Relatórios] Erro ao carregar mapa:', err);
+                mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível carregar o mapa. Verifique a conexão com a internet.</p>';
             });
     }
 });
