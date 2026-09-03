@@ -17,6 +17,65 @@ use App\Services\VideoCallNotifier;
 class WebhookController extends Controller
 {
     /**
+     * DIAGNÓSTICO TEMPORÁRIO do envio de WhatsApp do módulo de videochamada.
+     * Mostra na tela cada etapa (instância encontrada, telefone normalizado, retorno do sendText).
+     *
+     * GET /api/cron/videocall-test?token=SEU_TOKEN&phone=5511999999999
+     */
+    public function videocallTest(Request $request, Response $response): void
+    {
+        $configuredToken = (string) $this->setting('videocall_reminder_token', '');
+        $providedToken = (string) $request->query('token', '');
+        if ($configuredToken === '' || !hash_equals($configuredToken, $providedToken)) {
+            $this->json(['success' => false, 'message' => 'Token inválido.'], 403);
+            return;
+        }
+
+        $out = [];
+
+        // 1. Instância
+        $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE connection_status = 'open' LIMIT 1");
+        $out['instancia_conectada'] = $instance ? true : false;
+        if (!$instance) {
+            $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE is_default = 1 LIMIT 1");
+            $out['usando_fallback_default'] = $instance ? true : false;
+        }
+        if (!$instance) {
+            $out['erro'] = 'Nenhuma instância WhatsApp encontrada no banco.';
+            $this->json($out);
+            return;
+        }
+
+        $out['instance_name'] = $instance['instance_name'] ?? null;
+        $out['connection_status'] = $instance['connection_status'] ?? null;
+        $out['api_url_preenchida'] = !empty($instance['api_url']);
+        $out['api_key_preenchida'] = !empty($instance['api_key']);
+
+        // 2. Telefone
+        $phone = (string) $request->query('phone', '');
+        if ($phone === '') {
+            $out['erro'] = 'Informe ?phone=NUMERO na URL para testar o envio.';
+            $this->json($out);
+            return;
+        }
+        $normalized = \App\Services\EvolutionApi::normalizePhone($phone);
+        $out['telefone_original'] = $phone;
+        $out['telefone_normalizado'] = $normalized;
+
+        // 3. Envio
+        try {
+            $api = \App\Services\EvolutionApi::fromInstance($instance);
+            $result = $api->sendText($normalized, '✅ Teste de WhatsApp do módulo de agendamento - ' . date('H:i:s'));
+            $out['sendText_retorno'] = $result;
+            $out['enviado'] = $result !== null;
+        } catch (\Throwable $e) {
+            $out['excecao'] = $e->getMessage();
+        }
+
+        $this->json($out);
+    }
+
+    /**
      * Endpoint chamado por um cron externo para disparar lembretes de chamadas
      * de vídeo próximas do horário. Protegido por token (setting videocall_reminder_token).
      *
