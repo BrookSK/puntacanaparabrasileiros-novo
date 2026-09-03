@@ -68,9 +68,16 @@ class SettingsController extends Controller
             'paypal_enabled', 'stripe_enabled', 'pagbank_enabled', 'partial_payment_enabled',
             'whatsapp_enabled', 'affiliate_enabled', 'affiliate_auto_approve',
             'checkout_online_enabled', 'checkout_whatsapp_enabled',
+            'videocall_enabled',
         ];
         foreach ($booleanFields as $field) {
             $data[$field] = isset($data[$field]) ? '1' : '0';
+        }
+
+        // Campos que chegam como array (checkbox múltiplo) → salvar como CSV
+        if (array_key_exists('videocall_days', $data) && is_array($data['videocall_days'])) {
+            $days = array_values(array_filter($data['videocall_days'], static fn($d) => $d !== '' && $d !== null));
+            $data['videocall_days'] = implode(',', $days);
         }
 
         // Mapeamento de campo → grupo para garantir que novos campos sejam criados no grupo correto
@@ -82,6 +89,9 @@ class SettingsController extends Controller
             'checkout_online_enabled' => 'payments', 'checkout_whatsapp_enabled' => 'payments',
             'whatsapp_enabled' => 'whatsapp', 'admin_whatsapp_numbers' => 'whatsapp',
             'affiliate_enabled' => 'affiliates', 'affiliate_auto_approve' => 'affiliates',
+            'videocall_enabled' => 'videocall', 'videocall_days' => 'videocall',
+            'videocall_hour_start' => 'videocall', 'videocall_hour_end' => 'videocall',
+            'videocall_duration' => 'videocall', 'videocall_reminder_token' => 'videocall',
         ];
 
         // Salvar no banco

@@ -455,6 +455,12 @@
                         <span class="price-per"><?= $priceLabel ?></span>
                     </div>
                     <a href="#booking-section" class="btn-verificar">Verificar Disponibilidade</a>
+                    <?php if (setting('videocall_enabled', '0') === '1'): ?>
+                    <button type="button" class="btn-videocall" id="btnOpenVideoCall">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                        Agendar Chamada de Vídeo
+                    </button>
+                    <?php endif; ?>
                     <?php if (current_user()): ?>
                     <button type="button" class="btn-wishlist-trip" id="btnWishlist" onclick="toggleWishlist(<?= (int)$trip['id'] ?>)">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="<?= !empty($inWishlist) ? 'currentColor' : 'none' ?>" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
@@ -609,3 +615,213 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
     </div>
     <a href="#booking-section" class="trip-mobile-cta-btn btn-verificar">Verificar Disponibilidade</a>
 </div>
+
+<?php if (setting('videocall_enabled', '0') === '1'): ?>
+<!-- ============================================================ -->
+<!-- Modal: Agendar Chamada de Vídeo                              -->
+<!-- ============================================================ -->
+<div class="vc-modal-overlay" id="vcModalOverlay" aria-hidden="true">
+    <div class="vc-modal" role="dialog" aria-modal="true" aria-labelledby="vcModalTitle">
+        <button type="button" class="vc-modal-close" id="vcModalClose" aria-label="Fechar">&times;</button>
+
+        <div class="vc-modal-head">
+            <div class="vc-modal-icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            </div>
+            <div>
+                <h3 id="vcModalTitle">Agendar Chamada de Vídeo</h3>
+                <p>Tire suas dúvidas sobre o passeio numa conversa por vídeo com a nossa equipe.</p>
+            </div>
+        </div>
+
+        <!-- Formulário -->
+        <form id="vcForm" class="vc-form">
+            <div class="vc-field">
+                <label>Nome completo *</label>
+                <input type="text" name="customer_name" required>
+            </div>
+            <div class="vc-row">
+                <div class="vc-field">
+                    <label>E-mail *</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="vc-field">
+                    <label>WhatsApp *</label>
+                    <input type="text" name="phone" placeholder="Ex: 5511999999999" required>
+                </div>
+            </div>
+            <div class="vc-field">
+                <label>Escolha o dia *</label>
+                <input type="date" name="date" id="vcDate" required min="<?= date('Y-m-d') ?>">
+            </div>
+            <div class="vc-field">
+                <label>Horário disponível *</label>
+                <div class="vc-slots" id="vcSlots">
+                    <span class="vc-slots-hint">Selecione uma data para ver os horários.</span>
+                </div>
+                <input type="hidden" name="time" id="vcTime" required>
+            </div>
+            <div class="vc-field">
+                <label>Mensagem (opcional)</label>
+                <textarea name="notes" rows="2" placeholder="Conte o que gostaria de saber..."></textarea>
+            </div>
+
+            <div class="vc-alert" id="vcAlert" style="display:none;"></div>
+
+            <button type="submit" class="vc-submit" id="vcSubmit">Confirmar Agendamento</button>
+        </form>
+
+        <!-- Sucesso -->
+        <div class="vc-success" id="vcSuccess" style="display:none;">
+            <div class="vc-success-icon">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <h3>Chamada agendada!</h3>
+            <p id="vcSuccessWhen"></p>
+            <p class="vc-success-note">Enviamos os detalhes e o link da reunião no seu WhatsApp e e-mail.</p>
+            <a href="#" class="vc-success-link" id="vcMeetingLink" target="_blank" rel="noopener">Abrir sala da reunião</a>
+            <a href="#" class="vc-success-cal" id="vcCalLink" target="_blank" rel="noopener">Adicionar ao Google Agenda</a>
+        </div>
+    </div>
+</div>
+
+<style>
+.btn-videocall{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:13px 16px;background:#fff;color:#0a8060;border:2px solid #0a8060;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;transition:all .18s}
+.btn-videocall:hover{background:#0a8060;color:#fff}
+.vc-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.vc-modal-overlay.open{display:flex}
+.vc-modal{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;padding:28px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.vc-modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:28px;line-height:1;color:#94a3b8;cursor:pointer}
+.vc-modal-close:hover{color:#334155}
+.vc-modal-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:22px}
+.vc-modal-icon{flex-shrink:0;width:46px;height:46px;border-radius:12px;background:#dcfce7;color:#0a8060;display:flex;align-items:center;justify-content:center}
+.vc-modal-head h3{margin:0 0 4px;font-size:19px;color:#0f172a}
+.vc-modal-head p{margin:0;font-size:13.5px;color:#64748b;line-height:1.4}
+.vc-form .vc-field{margin-bottom:14px}
+.vc-form label{display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px}
+.vc-form input,.vc-form textarea{width:100%;padding:11px 13px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-family:inherit;box-sizing:border-box}
+.vc-form input:focus,.vc-form textarea:focus{outline:none;border-color:#0a8060}
+.vc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.vc-slots{display:flex;flex-wrap:wrap;gap:8px;min-height:40px;align-items:center}
+.vc-slots-hint{font-size:13px;color:#94a3b8}
+.vc-slot{padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;font-size:13.5px;cursor:pointer;transition:all .15s}
+.vc-slot:hover{border-color:#0a8060}
+.vc-slot.selected{background:#0a8060;color:#fff;border-color:#0a8060}
+.vc-alert{padding:11px 14px;border-radius:9px;font-size:13.5px;margin-bottom:14px}
+.vc-alert.error{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.vc-submit{width:100%;padding:14px;background:#0a8060;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background .18s}
+.vc-submit:hover{background:#086b50}
+.vc-submit:disabled{opacity:.6;cursor:not-allowed}
+.vc-success{text-align:center;padding:14px 0}
+.vc-success-icon{width:64px;height:64px;border-radius:50%;background:#dcfce7;color:#0a8060;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.vc-success h3{margin:0 0 8px;color:#0f172a}
+.vc-success p{margin:0 0 6px;color:#475569;font-size:14px}
+.vc-success-note{font-size:13px;color:#64748b;margin-bottom:18px !important}
+.vc-success-link,.vc-success-cal{display:block;padding:12px;border-radius:9px;font-weight:600;font-size:14px;text-decoration:none;margin-top:10px}
+.vc-success-link{background:#0a8060;color:#fff}
+.vc-success-cal{background:#fff;color:#0a8060;border:1.5px solid #0a8060}
+@media(max-width:480px){.vc-row{grid-template-columns:1fr}}
+</style>
+
+<script>
+(function(){
+    var overlay = document.getElementById('vcModalOverlay');
+    var openBtn = document.getElementById('btnOpenVideoCall');
+    var closeBtn = document.getElementById('vcModalClose');
+    var dateInput = document.getElementById('vcDate');
+    var slotsBox = document.getElementById('vcSlots');
+    var timeInput = document.getElementById('vcTime');
+    var form = document.getElementById('vcForm');
+    var alertBox = document.getElementById('vcAlert');
+    var submitBtn = document.getElementById('vcSubmit');
+    var successBox = document.getElementById('vcSuccess');
+    var TRIP_SLUG = <?= json_encode($trip['slug']) ?>;
+    var CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '';
+
+    if (!openBtn || !overlay) return;
+
+    function open(){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+    function close(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
+
+    openBtn.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', function(e){ if(e.target === overlay) close(); });
+
+    function showError(msg){
+        alertBox.textContent = msg;
+        alertBox.className = 'vc-alert error';
+        alertBox.style.display = 'block';
+    }
+    function clearError(){ alertBox.style.display = 'none'; }
+
+    dateInput.addEventListener('change', function(){
+        timeInput.value = '';
+        slotsBox.innerHTML = '<span class="vc-slots-hint">Carregando horários...</span>';
+        if (!dateInput.value) { slotsBox.innerHTML = '<span class="vc-slots-hint">Selecione uma data.</span>'; return; }
+        fetch('/api/videocall/slots?date=' + encodeURIComponent(dateInput.value), { headers: {'X-Requested-With':'XMLHttpRequest'} })
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                if (!data.success || !data.slots || data.slots.length === 0){
+                    slotsBox.innerHTML = '<span class="vc-slots-hint">Nenhum horário disponível nesta data.</span>';
+                    return;
+                }
+                slotsBox.innerHTML = '';
+                data.slots.forEach(function(slot){
+                    var b = document.createElement('button');
+                    b.type = 'button';
+                    b.className = 'vc-slot';
+                    b.textContent = slot;
+                    b.addEventListener('click', function(){
+                        slotsBox.querySelectorAll('.vc-slot').forEach(function(s){ s.classList.remove('selected'); });
+                        b.classList.add('selected');
+                        timeInput.value = slot;
+                    });
+                    slotsBox.appendChild(b);
+                });
+            })
+            .catch(function(){ slotsBox.innerHTML = '<span class="vc-slots-hint">Erro ao carregar horários.</span>'; });
+    });
+
+    form.addEventListener('submit', function(e){
+        e.preventDefault();
+        clearError();
+        if (!timeInput.value){ showError('Selecione um horário disponível.'); return; }
+
+        var fd = new URLSearchParams();
+        fd.append('_token', CSRF);
+        fd.append('customer_name', form.customer_name.value);
+        fd.append('email', form.email.value);
+        fd.append('phone', form.phone.value);
+        fd.append('date', dateInput.value);
+        fd.append('time', timeInput.value);
+        fd.append('notes', form.notes.value);
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Agendando...';
+
+        fetch('/passeios/' + TRIP_SLUG + '/agendar-chamada', {
+            method: 'POST',
+            headers: {'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},
+            body: fd.toString()
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Confirmar Agendamento';
+            if (!data.success){ showError(data.message || 'Não foi possível agendar.'); return; }
+            form.style.display = 'none';
+            document.getElementById('vcSuccessWhen').textContent = 'Sua chamada está marcada para ' + data.scheduled_at + '.';
+            document.getElementById('vcMeetingLink').href = data.meeting_link;
+            var cal = document.getElementById('vcCalLink');
+            if (data.add_to_calendar){ cal.href = data.add_to_calendar; } else { cal.style.display = 'none'; }
+            successBox.style.display = 'block';
+        })
+        .catch(function(){
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Confirmar Agendamento';
+            showError('Erro de conexão. Tente novamente.');
+        });
+    });
+})();
+</script>
+<?php endif; ?>

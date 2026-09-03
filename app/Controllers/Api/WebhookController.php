@@ -11,9 +11,54 @@ use App\Services\PayPalService;
 use App\Services\StripeService;
 use App\Services\PagBankService;
 use App\Controllers\Frontend\CheckoutController;
+use App\Models\VideoCallBooking;
+use App\Services\VideoCallNotifier;
 
 class WebhookController extends Controller
 {
+    /**
+     * Endpoint chamado por um cron externo para disparar lembretes de chamadas
+     * de vídeo próximas do horário. Protegido por token (setting videocall_reminder_token).
+     *
+     * GET /api/cron/videocall-reminders?token=SEU_TOKEN[&window=60]
+     */
+    public function videocallReminders(Request $request, Response $response): void
+    {
+        $configuredToken = (string) $this->setting('videocall_reminder_token', '');
+        $providedToken = (string) $request->query('token', '');
+
+        if ($configuredToken === '' || !hash_equals($configuredToken, $providedToken)) {
+            $this->json(['success' => false, 'message' => 'Token inválido.'], 403);
+            return;
+        }
+
+        if ($this->setting('videocall_enabled', '0') !== '1') {
+            $this->json(['success' => true, 'message' => 'Módulo desativado.', 'sent' => 0]);
+            return;
+        }
+
+        // Janela em minutos (padrão 60): lembretes de chamadas que ocorrem em até X min
+        $window = (int) $request->query('window', '60');
+        if ($window < 5) $window = 60;
+
+        $model = new VideoCallBooking();
+        $due = $model->dueForReminder($window);
+
+        $notifier = new VideoCallNotifier();
+        $sent = 0;
+        foreach ($due as $booking) {
+            try {
+                $notifier->notifyReminder($booking);
+                $model->markReminderSent((int) $booking['id']);
+                $sent++;
+            } catch (\Throwable $e) {
+                error_log('[VideoCall cron] Falha no lembrete #' . ($booking['id'] ?? '?') . ': ' . $e->getMessage());
+            }
+        }
+
+        $this->json(['success' => true, 'sent' => $sent, 'checked' => count($due)]);
+    }
+
     /**
      * Dispara ações pós-pagamento (emails, vouchers, WhatsApp) de forma segura.
      */

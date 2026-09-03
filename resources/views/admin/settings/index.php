@@ -27,6 +27,10 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
             Afiliados
         </button>
+        <button type="button" class="settings-tab" data-tab="videocall">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+            Agendamento
+        </button>
         <button type="button" class="settings-tab" data-tab="seo">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             SEO
@@ -262,6 +266,57 @@
                 <div class="form-group col-6"><label>Duração do Cookie (dias)</label><input type="number" name="affiliate_cookie_days" class="form-control" value="<?= e($settings['affiliates']['affiliate_cookie_days']['setting_value'] ?? '30') ?>"></div>
             </div>
             <div class="form-group"><label><input type="checkbox" name="affiliate_auto_approve" value="1" <?= ($settings['affiliates']['affiliate_auto_approve']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Auto-aprovar novos afiliados</label></div>
+        </div>
+    </div>
+
+    <!-- Tab: Agendamento de Chamadas -->
+    <div class="settings-panel" id="tab-videocall">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-icon admin-card-icon-green">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+                </div>
+                <div><h3>Agendamento de Chamadas de Vídeo</h3><p class="admin-card-subtitle">Permite que clientes agendem uma chamada de vídeo na página do passeio</p></div>
+            </div>
+
+            <div class="form-group"><label><input type="checkbox" name="videocall_enabled" value="1" <?= ($settings['videocall']['videocall_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar módulo de agendamento de chamadas</label></div>
+            <p style="font-size:12px;color:#6b7280;margin:-4px 0 20px;">Quando desativado, o botão "Agendar Chamada" não aparece na página dos passeios.</p>
+
+            <h4 class="settings-section-title">Disponibilidade</h4>
+            <div class="form-group">
+                <label>Dias da semana disponíveis</label>
+                <?php
+                    $vcDaysRaw = $settings['videocall']['videocall_days']['setting_value'] ?? '1,2,3,4,5';
+                    $vcDays = array_filter(array_map('trim', explode(',', (string) $vcDaysRaw)), fn($v) => $v !== '');
+                    $weekLabels = [0 => 'Dom', 1 => 'Seg', 2 => 'Ter', 3 => 'Qua', 4 => 'Qui', 5 => 'Sex', 6 => 'Sáb'];
+                ?>
+                <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;">
+                    <?php foreach ($weekLabels as $dayNum => $label): ?>
+                    <label style="display:flex;align-items:center;gap:5px;font-weight:400;">
+                        <input type="checkbox" name="videocall_days[]" value="<?= $dayNum ?>" <?= in_array((string) $dayNum, $vcDays, true) ? 'checked' : '' ?>>
+                        <?= $label ?>
+                    </label>
+                    <?php endforeach; ?>
+                </div>
+                <small style="color:#6b7280;">Selecione os dias em que os clientes podem agendar chamadas.</small>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group col-6"><label>Horário inicial</label><input type="time" name="videocall_hour_start" class="form-control" value="<?= e($settings['videocall']['videocall_hour_start']['setting_value'] ?? '09:00') ?>"></div>
+                <div class="form-group col-6"><label>Horário final</label><input type="time" name="videocall_hour_end" class="form-control" value="<?= e($settings['videocall']['videocall_hour_end']['setting_value'] ?? '18:00') ?>"></div>
+            </div>
+            <div class="form-group"><label>Duração de cada chamada (minutos)</label><input type="number" name="videocall_duration" class="form-control" value="<?= e($settings['videocall']['videocall_duration']['setting_value'] ?? '30') ?>" min="10" max="180" step="5" style="max-width:140px;"><small style="color:#6b7280;">Também define o intervalo entre horários disponíveis.</small></div>
+
+            <h4 class="settings-section-title">Lembretes Automáticos</h4>
+            <p class="admin-card-subtitle" style="margin-bottom:12px;">Os lembretes são enviados por um agendador externo (cron) que chama o endpoint abaixo. Defina um token secreto para proteger o endpoint.</p>
+            <div class="form-group"><label>Token do endpoint de lembretes</label><input type="text" name="videocall_reminder_token" class="form-control" value="<?= e($settings['videocall']['videocall_reminder_token']['setting_value'] ?? '') ?>" placeholder="ex: um-token-secreto-aleatorio"></div>
+            <?php $vcToken = $settings['videocall']['videocall_reminder_token']['setting_value'] ?? ''; ?>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 14px;font-size:13px;color:#166534;">
+                <strong>URL do cron:</strong><br>
+                <code style="word-break:break-all;"><?= e(rtrim($settings['general']['site_url']['setting_value'] ?? '', '/')) ?>/api/cron/videocall-reminders?token=<?= e($vcToken ?: 'SEU_TOKEN') ?></code>
+                <br><br>
+                Configure um cron externo (ex: cron-job.org ou o cron do servidor) para chamar essa URL a cada 15 minutos. Só é enviado 1 lembrete por agendamento, pouco antes do horário marcado.
+            </div>
         </div>
     </div>
 

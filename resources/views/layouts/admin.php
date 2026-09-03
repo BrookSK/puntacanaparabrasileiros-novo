@@ -49,6 +49,10 @@
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></span> Cancelamentos
                 </a>
 
+                <a href="/admin/agendamentos" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/agendamentos') ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></span> Agendamentos
+                </a>
+
                 <a href="/admin/afiliados" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/admin/afiliados') ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></span> Afiliados
                 </a>

@@ -9,6 +9,7 @@ use App\Controllers\Frontend\CheckoutController;
 use App\Controllers\Frontend\AccountController;
 use App\Controllers\Frontend\PageController;
 use App\Controllers\Frontend\BlogController;
+use App\Controllers\Frontend\VideoCallController;
 use App\Controllers\Auth\LoginController;
 use App\Controllers\Auth\RegisterController;
 use App\Controllers\Admin\DashboardController;
@@ -24,6 +25,7 @@ use App\Controllers\Admin\NewsletterController as AdminNewsletterController;
 use App\Controllers\Admin\CancellationsController as AdminCancellationsController;
 use App\Controllers\Admin\SchedulesController as AdminSchedulesController;
 use App\Controllers\Admin\ReportsController as AdminReportsController;
+use App\Controllers\Admin\VideoCallController as AdminVideoCallController;
 use App\Controllers\Api\TransferSearchController;
 use App\Controllers\Api\ScheduleController as ApiScheduleController;
 use App\Controllers\Api\PricingController;
@@ -46,6 +48,7 @@ $router->get('/passeios', [TripsController::class, 'index'], [], 'trips.index');
 $router->get('/comparar-passeios', [TripsController::class, 'compare'], [], 'trips.compare');
 $router->get('/passeios/categoria/{slug}', [TripsController::class, 'category'], [], 'trips.category');
 $router->get('/passeios/{slug}', [TripsController::class, 'show'], [], 'trips.show');
+$router->post('/passeios/{slug}/agendar-chamada', [VideoCallController::class, 'schedule'], [CsrfMiddleware::class], 'trips.videocall.schedule');
 $router->get('/voucher/{reference}', [App\Controllers\Frontend\AccountController::class, 'viewVoucherPublic'], [], 'voucher.public');
 $router->get('/voucher/{reference}/confirmar', [App\Controllers\Frontend\AccountController::class, 'confirmVoucherPublic'], [], 'voucher.confirm');
 $router->get('/transfers', [TransferController::class, 'index'], [], 'transfers.index');
@@ -145,6 +148,8 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->post('/webhook/stripe', [WebhookController::class, 'handleStripe'], [], 'api.webhook.stripe');
     $router->post('/webhook/pix-status', [WebhookController::class, 'pixStatus'], [], 'api.webhook.pix_status');
     $router->post('/webhooks/pagbank', [WebhookController::class, 'handlePagBank'], [], 'api.webhook.pagbank');
+    $router->get('/videocall/slots', [VideoCallController::class, 'slots'], [], 'api.videocall.slots');
+    $router->get('/cron/videocall-reminders', [WebhookController::class, 'videocallReminders'], [], 'api.cron.videocall_reminders');
     $router->get('/schedules/hotel/{hotel_id}', [ApiScheduleController::class, 'getByHotel'], [], 'api.schedules.hotel');
     $router->get('/schedules/{trip_id}', [ApiScheduleController::class, 'getByTrip'], [], 'api.schedules.trip');
 });
@@ -262,6 +267,11 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/cancelamentos/{id}/aprovar', [AdminCancellationsController::class, 'approve'], [CsrfMiddleware::class], 'admin.cancellations.approve');
     $router->post('/cancelamentos/{id}/rejeitar', [AdminCancellationsController::class, 'reject'], [CsrfMiddleware::class], 'admin.cancellations.reject');
     $router->post('/cancelamentos/{id}/reembolsar', [AdminCancellationsController::class, 'refund'], [CsrfMiddleware::class], 'admin.cancellations.refund');
+
+    // Agendamentos de Chamadas de Vídeo
+    $router->get('/agendamentos', [AdminVideoCallController::class, 'index'], [], 'admin.videocall.index');
+    $router->post('/agendamentos/{id}/status', [AdminVideoCallController::class, 'updateStatus'], [CsrfMiddleware::class], 'admin.videocall.status');
+    $router->post('/agendamentos/{id}/excluir', [AdminVideoCallController::class, 'destroy'], [CsrfMiddleware::class], 'admin.videocall.destroy');
 
 });
 
