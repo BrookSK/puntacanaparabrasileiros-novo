@@ -87,12 +87,7 @@ $originData = array_map(fn($r) => (float) $r['revenue'], $byOrigin);
         <?php if (empty($countryMapData)): ?>
         <p class="text-muted" style="text-align:center;padding:30px;">Sem dados de país no período. Os países aparecem no mapa conforme as reservas informam o país.</p>
         <?php else: ?>
-        <div style="height:280px;"><canvas id="chartCountryMap"></canvas></div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:#64748b;flex-wrap:wrap;">
-            <span style="width:14px;height:14px;background:#6ee7b7;border-radius:3px;display:inline-block;"></span> Poucas vendas
-            <span style="width:14px;height:14px;background:#047857;border-radius:3px;display:inline-block;margin-left:4px;"></span> Muitas vendas
-            <span style="width:14px;height:14px;background:#e5e7eb;border-radius:3px;display:inline-block;margin-left:12px;"></span> Sem vendas
-        </div>
+        <div id="svgMapContainer" style="width:100%;"></div>
         <?php endif; ?>
     </div>
 </div>
@@ -183,15 +178,6 @@ $originData = array_map(fn($r) => (float) $r['revenue'], $byOrigin);
 </div>
 
 <script>
-// Tabela de conversão ISO numérico (world-atlas) -> alpha-2 (nossos dados)
-const numericToAlpha2 = {
-    '076':'BR','840':'US','032':'AR','152':'CL','170':'CO','604':'PE','858':'UY','600':'PY','068':'BO','218':'EC','862':'VE',
-    '620':'PT','724':'ES','250':'FR','276':'DE','380':'IT','826':'GB','372':'IE','528':'NL','056':'BE','756':'CH','040':'AT',
-    '752':'SE','578':'NO','208':'DK','246':'FI','616':'PL','203':'CZ','348':'HU','300':'GR','642':'RO',
-    '124':'CA','484':'MX','630':'PR','214':'DO','388':'JM','192':'CU',
-    '036':'AU','554':'NZ','392':'JP','410':'KR','156':'CN','356':'IN','710':'ZA','818':'EG','504':'MA'
-};
-
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof Chart === 'undefined') return;
 
@@ -252,114 +238,52 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // País (mapa-múndi choropleth)
-    const mapEl = document.getElementById('chartCountryMap');
-    if (mapEl) {
-        // Mapa: código alpha-2 => {revenue, bookings}
+    // País (mapa-múndi via svgMap)
+    const mapContainer = document.getElementById('svgMapContainer');
+    if (mapContainer && typeof svgMap !== 'undefined') {
+        // Dados por código alpha-2
         const salesByCode = {};
         <?php foreach ($countryMapData as $cm): ?>
         salesByCode['<?= e($cm['code']) ?>'] = { revenue: <?= $cm['revenue'] ?>, bookings: <?= $cm['bookings'] ?> };
         <?php endforeach; ?>
 
-        // Resolver a função topojson.feature de onde estiver disponível
-        const topojsonFeature = (window.topojson && window.topojson.feature)
-            || (window.ChartGeo && window.ChartGeo.topojson && window.ChartGeo.topojson.feature)
-            || null;
-
-        if (!topojsonFeature) {
-            console.error('[Relatórios] topojson não carregado', {ChartGeo: typeof window.ChartGeo, topojson: typeof window.topojson});
-            mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Mapa indisponível (biblioteca não carregada).</p>';
-            return;
-        }
-
-        // TopoJSON embutido (sem fetch externo)
-        const worldTopology = <?= !empty($worldTopoJson) ? $worldTopoJson : 'null' ?>;
-
-        function renderMap(topology) {
-            try {
-                const countries = topojsonFeature(topology, topology.objects.countries).features;
-
-                // Mapeamento de código numérico ISO (do atlas) para alpha-2
-                // O world-atlas usa id numérico ISO 3166-1. Usamos o nome como fallback de match.
-                const data = countries.map((feature) => {
-                    // O world-atlas usa id numérico ISO. Normalizar para 3 dígitos com zero à esquerda.
-                    const idPadded = String(feature.id).padStart(3, '0');
-                    const iso2 = numericToAlpha2[idPadded] || numericToAlpha2[String(feature.id)] || null;
-                    const sale = iso2 ? salesByCode[iso2] : null;
-                    return {
-                        feature: feature,
-                        value: sale ? sale.revenue : 0,
-                        bookings: sale ? sale.bookings : 0,
-                    };
-                });
-
-                // Determinar intensidade de verde por volume (mais vendas = verde mais escuro)
-                const maxRevenue = Math.max(1, ...data.map(d => d.value));
-                const colorFor = (d) => {
-                    if (!d || d.value <= 0) return '#e5e7eb'; // cinza claro (sem vendas)
-                    const ratio = d.value / maxRevenue; // 0..1
-                    // Verde Punta Cana: mais claro (pouca venda) -> mais escuro (muita venda)
-                    // #6ee7b7 (claro) -> #047857 (escuro)
-                    const r = Math.round(110 - ratio * 106);   // 110 -> 4
-                    const g = Math.round(231 - ratio * 111);   // 231 -> 120
-                    const b = Math.round(183 - ratio * 96);    // 183 -> 87
-                    return `rgb(${r}, ${g}, ${b})`;
+        try {
+            // Montar dados no formato do svgMap
+            const mapValues = {};
+            let maxRev = 1;
+            Object.keys(salesByCode).forEach(code => {
+                if (salesByCode[code].revenue > maxRev) maxRev = salesByCode[code].revenue;
+            });
+            Object.keys(salesByCode).forEach(code => {
+                mapValues[code] = {
+                    revenue: salesByCode[code].revenue,
+                    bookings: salesByCode[code].bookings,
                 };
+            });
 
-                new Chart(mapEl.getContext('2d'), {
-                    type: 'choropleth',
+            new svgMap({
+                targetElementID: 'svgMapContainer',
+                data: {
                     data: {
-                        labels: countries.map(d => d.properties.name),
-                        datasets: [{
-                            label: 'Vendas por país',
-                            data: data,
-                            outline: countries,
-                            backgroundColor: (ctx) => colorFor(ctx.raw),
-                            borderColor: '#ffffff',
-                            borderWidth: 0.4,
-                        }]
+                        revenue: { name: 'Receita', format: '${0}', thousandSeparator: ',' },
+                        bookings: { name: 'Reservas', format: '{0}' },
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        showOutline: true,
-                        showGraticule: false,
-                        plugins: {
-                            legend: { display: false },
-                            tooltip: {
-                                callbacks: {
-                                    label: (c) => {
-                                        const d = c.raw;
-                                        if (!d || d.value <= 0) return d.feature.properties.name + ': sem vendas';
-                                        return d.feature.properties.name + ': ' + brl(d.value) + ' (' + d.bookings + ' reserva(s))';
-                                    }
-                                }
-                            }
-                        },
-                        scales: {
-                            projection: { axis: 'x', projection: 'equalEarth' },
-                            color: { display: false }
-                        }
-                    }
-                });
-            } catch (err) {
-                console.error('[Relatórios] Erro ao renderizar mapa:', err);
-                mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível renderizar o mapa.</p>';
-            }
+                    applyData: 'revenue',
+                    values: mapValues,
+                },
+                colorMax: '#047857',   // verde escuro (mais vendas)
+                colorMin: '#a7f3d0',   // verde claro (poucas vendas)
+                colorNoData: '#e5e7eb', // cinza (sem vendas)
+                flagType: 'emoji',
+                hideFlag: true,
+                noDataText: 'Sem vendas',
+            });
+        } catch (err) {
+            console.error('[Relatórios] Erro ao renderizar mapa:', err);
+            mapContainer.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível renderizar o mapa.</p>';
         }
-
-        // Usar topojson embutido; se não houver, tentar buscar do servidor
-        if (worldTopology) {
-            renderMap(worldTopology);
-        } else {
-            fetch('/assets/data/countries-110m.json')
-                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-                .then(renderMap)
-                .catch((err) => {
-                    console.error('[Relatórios] Erro ao carregar mapa:', err);
-                    mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível carregar o mapa.</p>';
-                });
-        }
+    } else if (mapContainer) {
+        mapContainer.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Mapa indisponível (biblioteca não carregada).</p>';
     }
 });
 </script>

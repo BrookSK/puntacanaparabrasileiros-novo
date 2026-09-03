@@ -35,13 +35,6 @@ class ReportsController extends Controller
         $topTrips = $bookingModel->getTopTrips($from, $to);
         $byGateway = $bookingModel->getSalesByGateway($from, $to);
 
-        // Carregar topojson do mapa-múndi (embutido para não depender de fetch/CDN)
-        $worldTopoJson = '';
-        $topoPath = BASE_PATH . '/public/assets/data/countries-110m.json';
-        if (is_file($topoPath)) {
-            $worldTopoJson = file_get_contents($topoPath);
-        }
-
         $this->view('admin/reports/index', [
             'from' => $from,
             'to' => $to,
@@ -53,7 +46,6 @@ class ReportsController extends Controller
             'byCampaign' => $byCampaign,
             'topTrips' => $topTrips,
             'byGateway' => $byGateway,
-            'worldTopoJson' => $worldTopoJson,
             'pageTitle' => 'Relatórios',
         ], 'admin');
     }
