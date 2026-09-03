@@ -249,6 +249,7 @@ class VideoCallNotifier
 
     /**
      * Status atualizado pelo admin (confirmed/cancelled/completed).
+     * Notifica o cliente por WhatsApp E e-mail.
      */
     public function notifyStatusChange(array $booking, string $status): void
     {
@@ -256,22 +257,97 @@ class VideoCallNotifier
         $firstName = explode(' ', trim($name))[0] ?: $name;
         $when = $this->formatDateTime((string) ($booking['scheduled_at'] ?? ''));
         $link = (string) ($booking['meeting_link'] ?? '');
+        $tripTitle = trim((string) ($booking['trip_title'] ?? ''));
+        $adminNotes = trim((string) ($booking['admin_notes'] ?? ''));
         $site = $this->siteName();
 
+        // Monta a mensagem de WhatsApp e os dados do e-mail conforme o status
         if ($status === 'confirmed') {
-            $msg = "✅ *Chamada confirmada!*\n\nOlá, {$firstName}!\n\n";
-            $msg .= "Sua chamada de vídeo com a {$site} foi confirmada.\n\n";
-            $msg .= "🗓️ {$when}\n🔗 {$link}\n\nAté lá! 🌴";
+            $emailTitle = 'Chamada de vídeo confirmada!';
+            $emailSubject = 'Sua chamada de vídeo foi confirmada - ' . $site;
+            $emailIntro = 'Boa notícia! Sua chamada de vídeo com a equipe da <strong>' . e($site) . '</strong> foi <strong>confirmada</strong>.';
+
+            $msg = "✅ *Chamada de vídeo confirmada!*\n\nOlá, {$firstName}!\n\n";
+            $msg .= "Sua chamada de vídeo com a equipe da {$site} foi *confirmada*.\n\n";
+            $msg .= "🗓️ *Data e hora:* {$when}\n";
+            if ($tripTitle !== '') $msg .= "🏝️ *Passeio:* {$tripTitle}\n";
+            $msg .= "\n🔗 *Link da reunião:*\n{$link}\n\nAté lá! 🌴";
+        } elseif ($status === 'completed') {
+            $emailTitle = 'Chamada de vídeo concluída';
+            $emailSubject = 'Sua chamada de vídeo foi concluída - ' . $site;
+            $emailIntro = 'Sua chamada de vídeo com a equipe da <strong>' . e($site) . '</strong> foi marcada como <strong>concluída</strong>. Obrigado pela conversa!';
+
+            $msg = "✅ *Chamada de vídeo concluída*\n\nOlá, {$firstName}!\n\n";
+            $msg .= "Sua chamada de vídeo com a equipe da {$site} foi concluída. Obrigado pela conversa! 🌴\n\n";
+            $msg .= "Se ainda tiver dúvidas ou quiser reservar seu passeio, é só chamar a gente.";
         } elseif ($status === 'cancelled') {
-            $msg = "⚠️ *Chamada cancelada*\n\nOlá, {$firstName}!\n\n";
+            $emailTitle = 'Chamada de vídeo cancelada';
+            $emailSubject = 'Sua chamada de vídeo foi cancelada - ' . $site;
+            $emailIntro = 'Informamos que sua chamada de vídeo marcada para <strong>' . e($when) . '</strong> foi <strong>cancelada</strong>.'
+                . ($adminNotes !== '' ? '<br><br><strong>Motivo:</strong> ' . e($adminNotes) : '');
+
+            $msg = "⚠️ *Chamada de vídeo cancelada*\n\nOlá, {$firstName}!\n\n";
             $msg .= "Sua chamada de vídeo marcada para {$when} foi *cancelada*.\n\n";
-            if (!empty($booking['admin_notes'])) {
-                $msg .= "*Motivo:* " . $booking['admin_notes'] . "\n\n";
+            if ($adminNotes !== '') {
+                $msg .= "*Motivo:* {$adminNotes}\n\n";
             }
             $msg .= "Se quiser, é só agendar um novo horário no site. 🌴";
         } else {
-            return; // completed/pending não notificam o cliente
+            return; // pending não notifica o cliente
         }
+
+        // WhatsApp
         $this->sendWhatsApp($booking['phone'] ?? null, $msg);
+
+        // E-mail (mesmo template visual, com título/intro conforme o status)
+        $this->sendEmailTemplate(
+            $booking['email'] ?? null,
+            $name,
+            $emailSubject,
+            'videocall-status',
+            [
+                'firstName' => $firstName,
+                'title' => $emailTitle,
+                'intro' => $emailIntro,
+                'when' => $when,
+                'tripTitle' => $tripTitle,
+                'link' => $link,
+                'status' => $status,
+                'siteUrl' => $this->siteUrl(),
+            ]
+        );
+    }
+
+    /**
+     * Agendamento excluído pelo admin. Notifica o cliente por WhatsApp e e-mail.
+     */
+    public function notifyDeleted(array $booking): void
+    {
+        $name = (string) ($booking['customer_name'] ?? '');
+        $firstName = explode(' ', trim($name))[0] ?: $name;
+        $when = $this->formatDateTime((string) ($booking['scheduled_at'] ?? ''));
+        $site = $this->siteName();
+
+        $msg = "🗑️ *Chamada de vídeo removida*\n\nOlá, {$firstName}!\n\n";
+        $msg .= "Sua chamada de vídeo marcada para {$when} foi removida da nossa agenda.\n\n";
+        $msg .= "Se ainda quiser conversar com a gente, é só agendar um novo horário no site. 🌴";
+        $this->sendWhatsApp($booking['phone'] ?? null, $msg);
+
+        $this->sendEmailTemplate(
+            $booking['email'] ?? null,
+            $name,
+            'Sua chamada de vídeo foi removida - ' . $site,
+            'videocall-status',
+            [
+                'firstName' => $firstName,
+                'title' => 'Chamada de vídeo removida',
+                'intro' => 'Sua chamada de vídeo marcada para <strong>' . e($when) . '</strong> foi removida da nossa agenda. Se quiser, é só agendar um novo horário no nosso site.',
+                'when' => $when,
+                'tripTitle' => trim((string) ($booking['trip_title'] ?? '')),
+                'link' => '',
+                'status' => 'cancelled',
+                'siteUrl' => $this->siteUrl(),
+            ]
+        );
     }
 }

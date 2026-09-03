@@ -66,7 +66,7 @@ class VideoCallController extends Controller
             return;
         }
 
-        $booking = $this->model->find($id);
+        $booking = $this->findWithTrip($id);
         if (!$booking) {
             $this->flash('error', 'Agendamento não encontrado.');
             $this->redirect('/admin/agendamentos');
@@ -79,10 +79,10 @@ class VideoCallController extends Controller
         }
         $this->db->update('videocall_bookings', $update, 'id = ?', [$id]);
 
-        // Notificar o cliente sobre confirmação/cancelamento
-        if (in_array($status, ['confirmed', 'cancelled'], true)) {
+        // Notificar o cliente (WhatsApp + e-mail) em toda mudança relevante de status
+        if (in_array($status, ['confirmed', 'completed', 'cancelled'], true)) {
             try {
-                $booking['admin_notes'] = $adminNotes;
+                $booking['admin_notes'] = $adminNotes !== '' ? $adminNotes : ($booking['admin_notes'] ?? '');
                 (new VideoCallNotifier())->notifyStatusChange($booking, $status);
             } catch (\Throwable $e) {
                 error_log('[Admin\\VideoCallController] Falha ao notificar status: ' . $e->getMessage());
@@ -94,13 +94,37 @@ class VideoCallController extends Controller
     }
 
     /**
-     * Exclui um agendamento.
+     * Exclui um agendamento (notificando o cliente antes de remover).
      */
     public function destroy(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
+
+        $booking = $this->findWithTrip($id);
+        if ($booking) {
+            try {
+                (new VideoCallNotifier())->notifyDeleted($booking);
+            } catch (\Throwable $e) {
+                error_log('[Admin\\VideoCallController] Falha ao notificar exclusão: ' . $e->getMessage());
+            }
+        }
+
         $this->model->delete($id);
         $this->flash('success', 'Agendamento removido.');
         $this->redirect('/admin/agendamentos');
+    }
+
+    /**
+     * Busca um agendamento com o título do passeio associado.
+     */
+    private function findWithTrip(int $id): ?array
+    {
+        return $this->db->fetchOne(
+            "SELECT v.*, t.title AS trip_title
+             FROM videocall_bookings v
+             LEFT JOIN trips t ON v.trip_id = t.id
+             WHERE v.id = ?",
+            [$id]
+        );
     }
 }
