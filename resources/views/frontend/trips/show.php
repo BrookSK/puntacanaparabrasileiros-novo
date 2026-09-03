@@ -687,7 +687,8 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
 
 <style>
 .btn-videocall{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;margin-bottom:14px;padding:13px 16px;background:#fff;color:#1B6F00;border:2px solid #1B6F00;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;transition:all .18s}
-.btn-videocall:hover{background:#E4B505;color:#1C2011;border-color:#E4B505}
+.btn-videocall:hover{background:#E4B505;color:#3a2e00;border-color:#c9a004}
+.btn-videocall:hover svg{stroke:#3a2e00}
 .vc-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
 .vc-modal-overlay.open{display:flex}
 .vc-modal{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;padding:28px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25)}

@@ -115,7 +115,9 @@ class VideoCallNotifier
 
     private function companyEmail(): string
     {
-        return (string) $this->app()->setting('admin_email', 'contato@puntacanaparabrasileiros.com');
+        $email = trim((string) $this->app()->setting('admin_email', ''));
+        // Garante o e-mail institucional mesmo se a configuração estiver vazia.
+        return $email !== '' ? $email : 'contato@puntacanaparabrasileiros.com';
     }
 
     private function formatDateTime(string $scheduledAt): string
