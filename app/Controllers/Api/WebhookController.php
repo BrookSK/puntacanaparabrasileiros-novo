@@ -76,6 +76,62 @@ class WebhookController extends Controller
     }
 
     /**
+     * DIAGNÓSTICO TEMPORÁRIO do e-mail do ADMIN.
+     * Mostra o admin_email configurado, tenta enviar um e-mail de teste e
+     * exibe os últimos registros do email_log.
+     *
+     * GET /api/cron/videocall-email-test?token=SEU_TOKEN
+     */
+    public function videocallEmailTest(Request $request, Response $response): void
+    {
+        $configuredToken = (string) $this->setting('videocall_reminder_token', '');
+        $providedToken = (string) $request->query('token', '');
+        if ($configuredToken === '' || !hash_equals($configuredToken, $providedToken)) {
+            $this->json(['success' => false, 'message' => 'Token inválido.'], 403);
+            return;
+        }
+
+        $out = [];
+
+        // 1. Valor real das settings de e-mail
+        $adminEmailRaw = $this->setting('admin_email', null);
+        $out['admin_email_setting'] = $adminEmailRaw;
+        $out['admin_email_vazio'] = ($adminEmailRaw === null || trim((string) $adminEmailRaw) === '');
+        $out['mail_from_email'] = $this->setting('mail_from_email', null);
+        $out['smtp_host'] = $this->setting('smtp_host', null);
+
+        // Destino efetivo (mesma regra do VideoCallNotifier)
+        $destino = trim((string) ($adminEmailRaw ?? ''));
+        if ($destino === '') $destino = 'contato@puntacanaparabrasileiros.com';
+        $out['destino_efetivo'] = $destino;
+
+        // 2. Tenta enviar um e-mail de teste ao admin
+        try {
+            $ok = (new \App\Services\EmailService())->send(
+                $destino,
+                'Administrador',
+                'Teste de notificação admin - ' . date('H:i:s'),
+                '<p>Este é um e-mail de teste do módulo de agendamento para o admin.</p>'
+            );
+            $out['email_enviado_retorno'] = $ok;
+        } catch (\Throwable $e) {
+            $out['email_excecao'] = $e->getMessage();
+        }
+
+        // 3. Últimos registros do email_log
+        try {
+            $out['ultimos_email_log'] = $this->db->fetchAll(
+                "SELECT to_email, subject, status, error_message, created_at
+                 FROM email_log ORDER BY id DESC LIMIT 5"
+            );
+        } catch (\Throwable $e) {
+            $out['email_log_erro'] = $e->getMessage();
+        }
+
+        $this->json($out);
+    }
+
+    /**
      * Endpoint chamado por um cron externo para disparar lembretes de chamadas
      * de vídeo próximas do horário. Protegido por token (setting videocall_reminder_token).
      *

@@ -151,6 +151,7 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->get('/videocall/slots', [VideoCallController::class, 'slots'], [], 'api.videocall.slots');
     $router->get('/cron/videocall-reminders', [WebhookController::class, 'videocallReminders'], [], 'api.cron.videocall_reminders');
     $router->get('/cron/videocall-test', [WebhookController::class, 'videocallTest'], [], 'api.cron.videocall_test');
+    $router->get('/cron/videocall-email-test', [WebhookController::class, 'videocallEmailTest'], [], 'api.cron.videocall_email_test');
     $router->get('/schedules/hotel/{hotel_id}', [ApiScheduleController::class, 'getByHotel'], [], 'api.schedules.hotel');
     $router->get('/schedules/{trip_id}', [ApiScheduleController::class, 'getByTrip'], [], 'api.schedules.trip');
 });
