@@ -720,7 +720,9 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
 .vc-success-note{font-size:13px;color:#64748b;margin-bottom:18px !important}
 .vc-success-link,.vc-success-cal{display:block;padding:12px;border-radius:9px;font-weight:600;font-size:14px;text-decoration:none;margin-top:10px}
 .vc-success-link{background:#1B6F00;color:#fff}
+.vc-success-link:hover{background:#155700;color:#fff}
 .vc-success-cal{background:#fff;color:#1B6F00;border:1.5px solid #1B6F00}
+.vc-success-cal:hover{background:#1B6F00;color:#fff;border-color:#1B6F00}
 @media(max-width:480px){.vc-row{grid-template-columns:1fr}}
 </style>
 
