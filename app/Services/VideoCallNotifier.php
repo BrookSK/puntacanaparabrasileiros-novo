@@ -115,7 +115,7 @@ class VideoCallNotifier
 
     private function companyEmail(): string
     {
-        return (string) $this->app()->setting('admin_email', '');
+        return (string) $this->app()->setting('admin_email', 'contato@puntacanaparabrasileiros.com');
     }
 
     private function formatDateTime(string $scheduledAt): string
@@ -206,6 +206,7 @@ class VideoCallNotifier
                 'when' => $when,
                 'link' => $link,
                 'notes' => $notes,
+                'eventLabel' => 'Nova chamada de vídeo agendada',
                 'siteUrl' => $this->siteUrl(),
             ]
         );
@@ -296,10 +297,10 @@ class VideoCallNotifier
             return; // pending não notifica o cliente
         }
 
-        // WhatsApp
+        // WhatsApp (cliente)
         $this->sendWhatsApp($booking['phone'] ?? null, $msg);
 
-        // E-mail (mesmo template visual, com título/intro conforme o status)
+        // E-mail cliente (mesmo template visual, com título/intro conforme o status)
         $this->sendEmailTemplate(
             $booking['email'] ?? null,
             $name,
@@ -316,6 +317,18 @@ class VideoCallNotifier
                 'siteUrl' => $this->siteUrl(),
             ]
         );
+
+        // Notifica o admin também (WhatsApp + e-mail)
+        $statusLabels = [
+            'confirmed' => 'confirmada',
+            'completed' => 'concluída',
+            'cancelled' => 'cancelada',
+        ];
+        $this->notifyAdminEvent(
+            'Chamada de vídeo ' . ($statusLabels[$status] ?? $status),
+            $booking,
+            $adminNotes
+        );
     }
 
     /**
@@ -326,12 +339,20 @@ class VideoCallNotifier
         $name = (string) ($booking['customer_name'] ?? '');
         $firstName = explode(' ', trim($name))[0] ?: $name;
         $when = $this->formatDateTime((string) ($booking['scheduled_at'] ?? ''));
+        $reason = trim((string) ($booking['admin_notes'] ?? ''));
         $site = $this->siteName();
 
         $msg = "🗑️ *Chamada de vídeo removida*\n\nOlá, {$firstName}!\n\n";
         $msg .= "Sua chamada de vídeo marcada para {$when} foi removida da nossa agenda.\n\n";
+        if ($reason !== '') {
+            $msg .= "*Motivo:* {$reason}\n\n";
+        }
         $msg .= "Se ainda quiser conversar com a gente, é só agendar um novo horário no site. 🌴";
         $this->sendWhatsApp($booking['phone'] ?? null, $msg);
+
+        $intro = 'Sua chamada de vídeo marcada para <strong>' . e($when) . '</strong> foi removida da nossa agenda.'
+            . ($reason !== '' ? '<br><br><strong>Motivo:</strong> ' . e($reason) : '')
+            . '<br><br>Se quiser, é só agendar um novo horário no nosso site.';
 
         $this->sendEmailTemplate(
             $booking['email'] ?? null,
@@ -341,11 +362,62 @@ class VideoCallNotifier
             [
                 'firstName' => $firstName,
                 'title' => 'Chamada de vídeo removida',
-                'intro' => 'Sua chamada de vídeo marcada para <strong>' . e($when) . '</strong> foi removida da nossa agenda. Se quiser, é só agendar um novo horário no nosso site.',
+                'intro' => $intro,
                 'when' => $when,
                 'tripTitle' => trim((string) ($booking['trip_title'] ?? '')),
                 'link' => '',
                 'status' => 'cancelled',
+                'siteUrl' => $this->siteUrl(),
+            ]
+        );
+
+        // Notifica o admin também
+        $this->notifyAdminEvent('Chamada de vídeo removida', $booking, (string) ($booking['admin_notes'] ?? ''));
+    }
+
+    /**
+     * Notifica a empresa (WhatsApp de todos os números + e-mail) sobre um evento
+     * do ciclo de vida de um agendamento.
+     */
+    private function notifyAdminEvent(string $eventLabel, array $booking, string $reason = ''): void
+    {
+        $name = (string) ($booking['customer_name'] ?? '');
+        $when = $this->formatDateTime((string) ($booking['scheduled_at'] ?? ''));
+        $tripTitle = trim((string) ($booking['trip_title'] ?? ''));
+        $link = (string) ($booking['meeting_link'] ?? '');
+
+        // WhatsApp para a empresa
+        $adminMsg = "📹 *{$eventLabel}*\n\n";
+        $adminMsg .= "👤 *Cliente:* {$name}\n";
+        $adminMsg .= "📞 *Telefone:* " . ($booking['phone'] ?? '-') . "\n";
+        $adminMsg .= "✉️ *Email:* " . ($booking['email'] ?? '-') . "\n";
+        if ($tripTitle !== '') {
+            $adminMsg .= "🏝️ *Passeio:* {$tripTitle}\n";
+        }
+        $adminMsg .= "🗓️ *Data e hora:* {$when}\n";
+        if ($reason !== '') {
+            $adminMsg .= "📝 *Motivo:* {$reason}\n";
+        }
+        $adminMsg .= "\nGerencie em: " . $this->siteUrl() . "/admin/agendamentos";
+        foreach ($this->companyPhones() as $adminPhone) {
+            $this->sendWhatsApp($adminPhone, $adminMsg);
+        }
+
+        // E-mail para a empresa
+        $this->sendEmailTemplate(
+            $this->companyEmail() ?: null,
+            'Administrador',
+            $eventLabel . ' - ' . $name,
+            'videocall-admin',
+            [
+                'name' => $name,
+                'phone' => $booking['phone'] ?? '-',
+                'email' => $booking['email'] ?? '-',
+                'tripTitle' => $tripTitle,
+                'when' => $when,
+                'link' => $link,
+                'notes' => $reason,
+                'eventLabel' => $eventLabel,
                 'siteUrl' => $this->siteUrl(),
             ]
         );

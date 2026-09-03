@@ -90,6 +90,30 @@ $statusLabels = ['pending' => 'Pendente', 'confirmed' => 'Confirmada', 'complete
 </div>
 <?php endif; ?>
 
+<!-- Modal de motivo (cancelar / excluir) -->
+<div class="vca-modal-overlay" id="vcaModalOverlay">
+    <div class="vca-modal">
+        <h3 id="vcaModalTitle">Motivo</h3>
+        <p id="vcaModalDesc">Informe o motivo. Ele será enviado ao cliente por WhatsApp e e-mail.</p>
+        <textarea id="vcaReason" rows="3" placeholder="Descreva o motivo..."></textarea>
+        <div class="vca-modal-actions">
+            <button type="button" class="btn btn-outline" id="vcaCancel">Voltar</button>
+            <button type="button" class="btn btn-danger" id="vcaConfirm">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.vca-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.vca-modal-overlay.open{display:flex}
+.vca-modal{background:#fff;border-radius:12px;max-width:440px;width:100%;padding:24px;box-shadow:0 20px 50px rgba(0,0,0,.25)}
+.vca-modal h3{margin:0 0 8px;font-size:18px;color:#0f172a}
+.vca-modal p{margin:0 0 14px;font-size:13.5px;color:#64748b;line-height:1.5}
+.vca-modal textarea{width:100%;padding:11px 13px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical}
+.vca-modal textarea:focus{outline:none;border-color:#1B6F00}
+.vca-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+</style>
+
 <script>
 var VC_CSRF = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').content : '<?= e(csrf_token()) ?>';
 
@@ -111,14 +135,55 @@ function vcStatus(id, status){
     vcSubmit('/admin/agendamentos/' + id + '/status', {status: status});
 }
 
-function vcCancel(id){
-    var reason = prompt('Motivo do cancelamento (será enviado ao cliente):', '');
-    if (reason === null) return;
-    vcSubmit('/admin/agendamentos/' + id + '/status', {status: 'cancelled', admin_notes: reason});
-}
+/* Modal de motivo reutilizado por cancelar e excluir */
+(function(){
+    var overlay = document.getElementById('vcaModalOverlay');
+    var titleEl = document.getElementById('vcaModalTitle');
+    var descEl = document.getElementById('vcaModalDesc');
+    var reasonEl = document.getElementById('vcaReason');
+    var confirmBtn = document.getElementById('vcaConfirm');
+    var cancelBtn = document.getElementById('vcaCancel');
+    var pending = null; // {action, statusField}
 
-function vcDelete(id){
-    if (!confirm('Excluir permanentemente este agendamento?')) return;
-    vcSubmit('/admin/agendamentos/' + id + '/excluir', {});
-}
+    function openModal(cfg){
+        pending = cfg;
+        titleEl.textContent = cfg.title;
+        descEl.textContent = cfg.desc;
+        reasonEl.value = '';
+        confirmBtn.textContent = cfg.confirmText || 'Confirmar';
+        overlay.classList.add('open');
+        setTimeout(function(){ reasonEl.focus(); }, 50);
+    }
+    function closeModal(){ overlay.classList.remove('open'); pending = null; }
+
+    cancelBtn.addEventListener('click', closeModal);
+    overlay.addEventListener('click', function(e){ if(e.target === overlay) closeModal(); });
+
+    confirmBtn.addEventListener('click', function(){
+        if (!pending) return;
+        var reason = reasonEl.value.trim();
+        if (!reason){ reasonEl.focus(); reasonEl.style.borderColor = '#dc2626'; return; }
+        vcSubmit(pending.action, pending.fields(reason));
+    });
+
+    window.vcCancel = function(id){
+        openModal({
+            title: 'Cancelar chamada de vídeo',
+            desc: 'Informe o motivo do cancelamento. Ele será enviado ao cliente por WhatsApp e e-mail.',
+            confirmText: 'Cancelar chamada',
+            action: '/admin/agendamentos/' + id + '/status',
+            fields: function(reason){ return {status: 'cancelled', admin_notes: reason}; }
+        });
+    };
+
+    window.vcDelete = function(id){
+        openModal({
+            title: 'Excluir chamada de vídeo',
+            desc: 'Informe o motivo da exclusão. Ele será enviado ao cliente por WhatsApp e e-mail. Esta ação é permanente.',
+            confirmText: 'Excluir',
+            action: '/admin/agendamentos/' + id + '/excluir',
+            fields: function(reason){ return {reason: reason}; }
+        });
+    };
+})();
 </script>

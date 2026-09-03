@@ -99,10 +99,12 @@ class VideoCallController extends Controller
     public function destroy(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
+        $reason = trim((string) $request->input('reason', ''));
 
         $booking = $this->findWithTrip($id);
         if ($booking) {
             try {
+                $booking['admin_notes'] = $reason;
                 (new VideoCallNotifier())->notifyDeleted($booking);
             } catch (\Throwable $e) {
                 error_log('[Admin\\VideoCallController] Falha ao notificar exclusão: ' . $e->getMessage());

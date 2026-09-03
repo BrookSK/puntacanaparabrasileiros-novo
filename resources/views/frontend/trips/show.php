@@ -686,40 +686,40 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
 </div>
 
 <style>
-.btn-videocall{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:13px 16px;background:#fff;color:#0a8060;border:2px solid #0a8060;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;transition:all .18s}
-.btn-videocall:hover{background:#0a8060;color:#fff}
+.btn-videocall{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:14px;margin-bottom:14px;padding:13px 16px;background:#fff;color:#1B6F00;border:2px solid #1B6F00;border-radius:10px;font-weight:600;font-size:15px;cursor:pointer;transition:all .18s}
+.btn-videocall:hover{background:#E4B505;color:#1C2011;border-color:#E4B505}
 .vc-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
 .vc-modal-overlay.open{display:flex}
 .vc-modal{background:#fff;border-radius:16px;max-width:520px;width:100%;max-height:92vh;overflow-y:auto;padding:28px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.25)}
 .vc-modal-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:28px;line-height:1;color:#94a3b8;cursor:pointer}
 .vc-modal-close:hover{color:#334155}
 .vc-modal-head{display:flex;gap:14px;align-items:flex-start;margin-bottom:22px}
-.vc-modal-icon{flex-shrink:0;width:46px;height:46px;border-radius:12px;background:#dcfce7;color:#0a8060;display:flex;align-items:center;justify-content:center}
+.vc-modal-icon{flex-shrink:0;width:46px;height:46px;border-radius:12px;background:#dcfce7;color:#1B6F00;display:flex;align-items:center;justify-content:center}
 .vc-modal-head h3{margin:0 0 4px;font-size:19px;color:#0f172a}
 .vc-modal-head p{margin:0;font-size:13.5px;color:#64748b;line-height:1.4}
 .vc-form .vc-field{margin-bottom:14px}
 .vc-form label{display:block;font-size:13px;font-weight:600;color:#334155;margin-bottom:6px}
 .vc-form input,.vc-form textarea{width:100%;padding:11px 13px;border:1.5px solid #e2e8f0;border-radius:9px;font-size:14px;font-family:inherit;box-sizing:border-box}
-.vc-form input:focus,.vc-form textarea:focus{outline:none;border-color:#0a8060}
+.vc-form input:focus,.vc-form textarea:focus{outline:none;border-color:#1B6F00}
 .vc-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .vc-slots{display:flex;flex-wrap:wrap;gap:8px;min-height:40px;align-items:center}
 .vc-slots-hint{font-size:13px;color:#94a3b8}
 .vc-slot{padding:8px 14px;border:1.5px solid #e2e8f0;border-radius:8px;background:#fff;font-size:13.5px;cursor:pointer;transition:all .15s}
-.vc-slot:hover{border-color:#0a8060}
-.vc-slot.selected{background:#0a8060;color:#fff;border-color:#0a8060}
+.vc-slot:hover{border-color:#1B6F00}
+.vc-slot.selected{background:#1B6F00;color:#fff;border-color:#1B6F00}
 .vc-alert{padding:11px 14px;border-radius:9px;font-size:13.5px;margin-bottom:14px}
 .vc-alert.error{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
-.vc-submit{width:100%;padding:14px;background:#0a8060;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background .18s}
-.vc-submit:hover{background:#086b50}
+.vc-submit{width:100%;padding:14px;background:#1B6F00;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;transition:background .18s}
+.vc-submit:hover{background:#155700}
 .vc-submit:disabled{opacity:.6;cursor:not-allowed}
 .vc-success{text-align:center;padding:14px 0}
-.vc-success-icon{width:64px;height:64px;border-radius:50%;background:#dcfce7;color:#0a8060;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.vc-success-icon{width:64px;height:64px;border-radius:50%;background:#dcfce7;color:#1B6F00;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
 .vc-success h3{margin:0 0 8px;color:#0f172a}
 .vc-success p{margin:0 0 6px;color:#475569;font-size:14px}
 .vc-success-note{font-size:13px;color:#64748b;margin-bottom:18px !important}
 .vc-success-link,.vc-success-cal{display:block;padding:12px;border-radius:9px;font-weight:600;font-size:14px;text-decoration:none;margin-top:10px}
-.vc-success-link{background:#0a8060;color:#fff}
-.vc-success-cal{background:#fff;color:#0a8060;border:1.5px solid #0a8060}
+.vc-success-link{background:#1B6F00;color:#fff}
+.vc-success-cal{background:#fff;color:#1B6F00;border:1.5px solid #1B6F00}
 @media(max-width:480px){.vc-row{grid-template-columns:1fr}}
 </style>
 
