@@ -16,6 +16,8 @@ use Core\Database;
 class VideoCallNotifier
 {
     private Database $db;
+    private ?EvolutionApi $api = null;
+    private bool $apiResolved = false;
 
     public function __construct()
     {
@@ -34,37 +36,68 @@ class VideoCallNotifier
 
     private function siteUrl(): string
     {
-        return rtrim($this->app()->setting('site_url', ''), '/');
+        return rtrim((string) $this->app()->setting('site_url', 'https://puntacananovo.lrvweb.com.br'), '/');
     }
 
     /**
-     * Envia WhatsApp de forma segura (mesmo padrão do checkout/AffiliateNotifier).
+     * Resolve (uma única vez) a instância WhatsApp conectada — mesmo padrão do checkout.
+     */
+    private function getApi(): ?EvolutionApi
+    {
+        if ($this->apiResolved) {
+            return $this->api;
+        }
+        $this->apiResolved = true;
+
+        $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE connection_status = 'open' LIMIT 1");
+        if (!$instance) {
+            $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE is_default = 1 LIMIT 1");
+        }
+        if (!$instance) {
+            error_log('[VideoCallNotifier] Nenhuma instância WhatsApp disponível (nem conectada, nem default).');
+            $this->api = null;
+            return null;
+        }
+
+        $this->api = EvolutionApi::fromInstance($instance);
+        error_log('[VideoCallNotifier] Instância WhatsApp resolvida: ' . ($instance['instance_name'] ?? '?'));
+        return $this->api;
+    }
+
+    /**
+     * Envia WhatsApp de forma segura. Loga cada etapa para diagnóstico.
      */
     private function sendWhatsApp(?string $phone, string $message): void
     {
-        if (empty($phone)) return;
+        if (empty($phone)) {
+            error_log('[VideoCallNotifier] Telefone vazio, envio ignorado.');
+            return;
+        }
+
+        $api = $this->getApi();
+        if (!$api) {
+            return;
+        }
+
         try {
-            $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE connection_status = 'open' LIMIT 1");
-            if (!$instance) {
-                $instance = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE is_default = 1 LIMIT 1");
-            }
-            if (!$instance) {
-                error_log('[VideoCallNotifier] Nenhuma instância WhatsApp disponível');
-                return;
-            }
-            $api = EvolutionApi::fromInstance($instance);
             $normalizedPhone = EvolutionApi::normalizePhone($phone);
-            $api->sendText($normalizedPhone, $message);
+            $result = $api->sendText($normalizedPhone, $message);
+            if ($result === null) {
+                error_log('[VideoCallNotifier] sendText retornou null para ' . $normalizedPhone . ' (falha no envio).');
+            } else {
+                error_log('[VideoCallNotifier] Mensagem enviada para ' . $normalizedPhone . '.');
+            }
+            usleep(500000); // 0,5s entre mensagens (padrão do checkout)
         } catch (\Throwable $e) {
             error_log('[VideoCallNotifier] Erro ao enviar WhatsApp: ' . $e->getMessage());
         }
     }
 
-    private function sendEmail(?string $to, string $toName, string $subject, string $htmlBody): void
+    private function sendEmailTemplate(?string $to, string $toName, string $subject, string $template, array $data): void
     {
         if (empty($to)) return;
         try {
-            (new EmailService())->send($to, $toName, $subject, $htmlBody);
+            (new EmailService())->sendTemplate($to, $toName, $subject, $template, $data);
         } catch (\Throwable $e) {
             error_log('[VideoCallNotifier] Erro ao enviar email: ' . $e->getMessage());
         }
@@ -100,7 +133,7 @@ class VideoCallNotifier
      * Chamada agendada: notifica o cliente e a empresa.
      *
      * @param array $booking Dados do agendamento (customer_name, email, phone,
-     *                        scheduled_at, meeting_link, trip_title?)
+     *                        scheduled_at, meeting_link, trip_title?, notes?)
      */
     public function notifyScheduled(array $booking): void
     {
@@ -109,6 +142,7 @@ class VideoCallNotifier
         $when = $this->formatDateTime((string) ($booking['scheduled_at'] ?? ''));
         $link = (string) ($booking['meeting_link'] ?? '');
         $tripTitle = trim((string) ($booking['trip_title'] ?? ''));
+        $notes = trim((string) ($booking['notes'] ?? ''));
         $site = $this->siteName();
 
         // ── Cliente (WhatsApp)
@@ -123,17 +157,9 @@ class VideoCallNotifier
         $msg .= "É só clicar no link no horário marcado. Até lá! 🌴";
         $this->sendWhatsApp($booking['phone'] ?? null, $msg);
 
-        // ── Cliente (Email)
-        $htmlClient = $this->buildClientEmail($firstName, $when, $tripTitle, $link);
-        $this->sendEmail(
-            $booking['email'] ?? null,
-            $name,
-            'Sua chamada de vídeo foi agendada - ' . $site,
-            $htmlClient
-        );
-
         // ── Empresa (WhatsApp)
-        $adminMsg = "🔔 *Novo agendamento de chamada de vídeo*\n\n";
+        $adminMsg = "📹 *Nova chamada de vídeo agendada!*\n\n";
+        $adminMsg .= "Um cliente solicitou uma chamada de vídeo pelo site.\n\n";
         $adminMsg .= "👤 *Cliente:* {$name}\n";
         $adminMsg .= "📞 *Telefone:* " . ($booking['phone'] ?? '-') . "\n";
         $adminMsg .= "✉️ *Email:* " . ($booking['email'] ?? '-') . "\n";
@@ -142,19 +168,46 @@ class VideoCallNotifier
         }
         $adminMsg .= "🗓️ *Data e hora:* {$when}\n";
         $adminMsg .= "🔗 *Link:* {$link}\n";
-        if (!empty($booking['notes'])) {
-            $adminMsg .= "📝 *Observações:* " . $booking['notes'] . "\n";
+        if ($notes !== '') {
+            $adminMsg .= "📝 *Observações:* {$notes}\n";
         }
+        $adminMsg .= "\nGerencie em: " . $this->siteUrl() . "/admin/agendamentos";
         foreach ($this->companyPhones() as $adminPhone) {
             $this->sendWhatsApp($adminPhone, $adminMsg);
         }
 
-        // ── Empresa (Email)
-        $this->sendEmail(
+        // ── Cliente (Email) — template no padrão Punta Cana
+        $this->sendEmailTemplate(
+            $booking['email'] ?? null,
+            $name,
+            'Sua chamada de vídeo foi agendada - ' . $site,
+            'videocall-scheduled',
+            [
+                'firstName' => $firstName,
+                'when' => $when,
+                'tripTitle' => $tripTitle,
+                'link' => $link,
+                'siteUrl' => $this->siteUrl(),
+                'isReminder' => false,
+            ]
+        );
+
+        // ── Empresa (Email) — reaproveita o template de notificação do admin
+        $this->sendEmailTemplate(
             $this->companyEmail() ?: null,
             'Administrador',
-            'Novo agendamento de chamada - ' . $name,
-            nl2br(htmlspecialchars($adminMsg))
+            'Nova chamada de vídeo agendada - ' . $name,
+            'videocall-admin',
+            [
+                'name' => $name,
+                'phone' => $booking['phone'] ?? '-',
+                'email' => $booking['email'] ?? '-',
+                'tripTitle' => $tripTitle,
+                'when' => $when,
+                'link' => $link,
+                'notes' => $notes,
+                'siteUrl' => $this->siteUrl(),
+            ]
         );
     }
 
@@ -167,6 +220,7 @@ class VideoCallNotifier
         $firstName = explode(' ', trim($name))[0] ?: $name;
         $when = $this->formatDateTime((string) ($booking['scheduled_at'] ?? ''));
         $link = (string) ($booking['meeting_link'] ?? '');
+        $tripTitle = trim((string) ($booking['trip_title'] ?? ''));
         $site = $this->siteName();
 
         $msg = "⏰ *Lembrete: sua chamada de vídeo é logo mais!*\n\n";
@@ -177,14 +231,20 @@ class VideoCallNotifier
         $msg .= "Nos vemos em breve! 🌴";
         $this->sendWhatsApp($booking['phone'] ?? null, $msg);
 
-        $html = '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto">'
-            . '<h2 style="color:#0a8">Lembrete da sua chamada de vídeo</h2>'
-            . '<p>Olá, ' . htmlspecialchars($firstName) . '!</p>'
-            . '<p>Sua chamada com a equipe da ' . htmlspecialchars($site) . ' acontece em breve.</p>'
-            . '<p><strong>Quando:</strong> ' . htmlspecialchars($when) . '</p>'
-            . '<p><a href="' . htmlspecialchars($link) . '" style="background:#0a8;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;display:inline-block">Entrar na reunião</a></p>'
-            . '</div>';
-        $this->sendEmail($booking['email'] ?? null, $name, 'Lembrete: sua chamada de vídeo - ' . $site, $html);
+        $this->sendEmailTemplate(
+            $booking['email'] ?? null,
+            $name,
+            'Lembrete: sua chamada de vídeo - ' . $site,
+            'videocall-scheduled',
+            [
+                'firstName' => $firstName,
+                'when' => $when,
+                'tripTitle' => $tripTitle,
+                'link' => $link,
+                'siteUrl' => $this->siteUrl(),
+                'isReminder' => true,
+            ]
+        );
     }
 
     /**
@@ -213,22 +273,5 @@ class VideoCallNotifier
             return; // completed/pending não notificam o cliente
         }
         $this->sendWhatsApp($booking['phone'] ?? null, $msg);
-    }
-
-    private function buildClientEmail(string $firstName, string $when, string $tripTitle, string $link): string
-    {
-        $tripLine = $tripTitle !== ''
-            ? '<p><strong>Passeio:</strong> ' . htmlspecialchars($tripTitle) . '</p>'
-            : '';
-        return '<div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;color:#333">'
-            . '<h2 style="color:#0a8">Chamada de vídeo agendada 📹</h2>'
-            . '<p>Olá, ' . htmlspecialchars($firstName) . '!</p>'
-            . '<p>Sua chamada de vídeo com a equipe da ' . htmlspecialchars($this->siteName()) . ' está confirmada.</p>'
-            . '<p><strong>Data e hora:</strong> ' . htmlspecialchars($when) . '</p>'
-            . $tripLine
-            . '<p style="margin:24px 0"><a href="' . htmlspecialchars($link) . '" style="background:#0a8;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;display:inline-block">Entrar na reunião</a></p>'
-            . '<p style="color:#666;font-size:13px">Ou copie e cole o link no seu navegador:<br>' . htmlspecialchars($link) . '</p>'
-            . '<p>Até lá! 🌴</p>'
-            . '</div>';
     }
 }
