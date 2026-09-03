@@ -272,12 +272,11 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch('/assets/data/countries-110m.json')
-            .then(r => {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.json();
-            })
-            .then(topology => {
+        // TopoJSON embutido (sem fetch externo)
+        const worldTopology = <?= !empty($worldTopoJson) ? $worldTopoJson : 'null' ?>;
+
+        function renderMap(topology) {
+            try {
                 const countries = topojsonFeature(topology, topology.objects.countries).features;
 
                 // Mapeamento de código numérico ISO (do atlas) para alpha-2
@@ -343,11 +342,24 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                 });
-            })
-            .catch((err) => {
-                console.error('[Relatórios] Erro ao carregar mapa:', err);
-                mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível carregar o mapa. Verifique a conexão com a internet.</p>';
-            });
+            } catch (err) {
+                console.error('[Relatórios] Erro ao renderizar mapa:', err);
+                mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível renderizar o mapa.</p>';
+            }
+        }
+
+        // Usar topojson embutido; se não houver, tentar buscar do servidor
+        if (worldTopology) {
+            renderMap(worldTopology);
+        } else {
+            fetch('/assets/data/countries-110m.json')
+                .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+                .then(renderMap)
+                .catch((err) => {
+                    console.error('[Relatórios] Erro ao carregar mapa:', err);
+                    mapEl.parentElement.innerHTML = '<p style="text-align:center;color:#94a3b8;padding:30px;">Não foi possível carregar o mapa.</p>';
+                });
+        }
     }
 });
 </script>
