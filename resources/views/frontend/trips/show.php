@@ -647,7 +647,7 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
                 </div>
                 <div class="vc-field">
                     <label>WhatsApp *</label>
-                    <input type="text" name="phone" placeholder="Ex: 5511999999999" required>
+                    <input type="tel" name="phone" placeholder="DDD + Número" required data-phone-country>
                 </div>
             </div>
             <div class="vc-field">
@@ -740,7 +740,14 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
 
     if (!openBtn || !overlay) return;
 
-    function open(){ overlay.classList.add('open'); overlay.setAttribute('aria-hidden','false'); }
+    function open(){
+        overlay.classList.add('open');
+        overlay.setAttribute('aria-hidden','false');
+        // Inicializa o seletor de país (bandeira + DDI) no campo de WhatsApp
+        if (typeof window.initPhoneCountrySelector === 'function') {
+            window.initPhoneCountrySelector();
+        }
+    }
     function close(){ overlay.classList.remove('open'); overlay.setAttribute('aria-hidden','true'); }
 
     openBtn.addEventListener('click', open);
@@ -787,11 +794,16 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
         clearError();
         if (!timeInput.value){ showError('Selecione um horário disponível.'); return; }
 
+        // O seletor de país move o name="phone" para um input hidden com o valor "+DDI numero".
+        // Por isso capturamos via querySelector (pega o hidden), com fallback para o visível.
+        var phoneEl = form.querySelector('[name="phone"]');
+        var phoneVal = phoneEl ? phoneEl.value : (form.phone ? form.phone.value : '');
+
         var fd = new URLSearchParams();
         fd.append('_token', CSRF);
         fd.append('customer_name', form.customer_name.value);
         fd.append('email', form.email.value);
-        fd.append('phone', form.phone.value);
+        fd.append('phone', phoneVal);
         fd.append('date', dateInput.value);
         fd.append('time', timeInput.value);
         fd.append('notes', form.notes.value);
