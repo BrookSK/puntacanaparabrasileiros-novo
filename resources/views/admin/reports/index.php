@@ -272,7 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch('https://unpkg.com/world-atlas@2/countries-110m.json')
+        fetch('/assets/data/countries-110m.json')
             .then(r => {
                 if (!r.ok) throw new Error('HTTP ' + r.status);
                 return r.json();
