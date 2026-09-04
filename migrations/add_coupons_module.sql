@@ -26,9 +26,10 @@ CREATE TABLE IF NOT EXISTS `coupons` (
     PRIMARY KEY (`id`),
     UNIQUE KEY `uniq_coupon_code` (`code`),
     KEY `idx_coupon_affiliate` (`affiliate_id`),
-    KEY `idx_coupon_active` (`active`),
-    CONSTRAINT `fk_coupon_affiliate` FOREIGN KEY (`affiliate_id`) REFERENCES `affiliates` (`id`) ON DELETE SET NULL
+    KEY `idx_coupon_active` (`active`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+-- Obs.: o vínculo com afiliados é validado na aplicação (sem FOREIGN KEY,
+-- para evitar falhas de criação em hosts com engines/tipos divergentes).
 
 -- ─────────────────────────────────────────────
 -- Rastreamento do cupom usado em cada reserva
