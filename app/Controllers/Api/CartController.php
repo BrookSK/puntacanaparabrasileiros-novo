@@ -7,6 +7,7 @@ use Core\Controller;
 use Core\Request;
 use Core\Response;
 use App\Services\CartService;
+use App\Services\CouponService;
 use App\Models\TransferVehicle;
 use App\Models\TransferLocation;
 
@@ -233,5 +234,60 @@ class CartController extends Controller
         } else {
             $this->json(['error' => 'Erro ao salvar arquivo. Verifique permissões do servidor.'], 500);
         }
+    }
+
+    /**
+     * Aplica/valida um cupom de desconto sobre o total do carrinho.
+     * POST /api/coupon/validate  (body: code)
+     */
+    public function applyCoupon(Request $request, Response $response): void
+    {
+        $code = trim((string) $request->input('code', ''));
+        $subtotal = $this->cartService->getGrandTotal();
+
+        if ($this->cartService->isEmpty()) {
+            $this->json(['success' => false, 'message' => 'Seu carrinho está vazio.'], 400);
+            return;
+        }
+
+        $result = (new CouponService())->validate($code, $subtotal);
+
+        if (!$result['valid']) {
+            $this->cartService->clearCoupon();
+            $this->json(['success' => false, 'message' => $result['message']]);
+            return;
+        }
+
+        // Guarda o cupom na sessão para uso no checkout
+        $this->cartService->setCoupon($result['coupon']);
+
+        $discount = $result['discount'];
+        $newTotal = max(0, round($subtotal - $discount, 2));
+
+        $this->json([
+            'success' => true,
+            'message' => $result['message'],
+            'code' => $result['coupon']['code'],
+            'discount' => $discount,
+            'discount_formatted' => money($discount),
+            'subtotal' => $subtotal,
+            'new_total' => $newTotal,
+            'new_total_formatted' => money($newTotal),
+        ]);
+    }
+
+    /**
+     * Remove o cupom aplicado.
+     * POST /api/coupon/remove
+     */
+    public function removeCoupon(Request $request, Response $response): void
+    {
+        $this->cartService->clearCoupon();
+        $subtotal = $this->cartService->getGrandTotal();
+        $this->json([
+            'success' => true,
+            'new_total' => $subtotal,
+            'new_total_formatted' => money($subtotal),
+        ]);
     }
 }

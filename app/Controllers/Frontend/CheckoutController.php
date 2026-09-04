@@ -14,6 +14,7 @@ use App\Services\VoucherService;
 use App\Services\EmailService;
 use App\Services\WhatsAppService;
 use App\Services\AffiliateService;
+use App\Services\CouponService;
 use App\Models\Booking;
 use App\Models\TransferBooking;
 
@@ -78,12 +79,27 @@ class CheckoutController extends Controller
         // Calcular percentual efetivo para exibição
         $effectivePercent = $summary['grand_total'] > 0 ? round(($effectivePayAmount / $summary['grand_total']) * 100) : $globalPercent;
 
+        // Cupom aplicado (revalida sobre o total atual; descarta se inválido)
+        $appliedCoupon = $this->cartService->getCoupon();
+        $couponDiscount = 0.0;
+        if ($appliedCoupon && !empty($appliedCoupon['code'])) {
+            $cr = (new CouponService())->validate($appliedCoupon['code'], $summary['grand_total']);
+            if ($cr['valid']) {
+                $couponDiscount = (float) $cr['discount'];
+            } else {
+                $this->cartService->clearCoupon();
+                $appliedCoupon = null;
+            }
+        }
+
         $this->view('frontend/checkout/index', [
             'cart' => $summary,
             'gateways' => $gateways,
             'partialEnabled' => $partialEnabled,
             'partialPercent' => $effectivePercent,
             'partialAmount' => $effectivePayAmount,
+            'appliedCoupon' => $appliedCoupon,
+            'couponDiscount' => $couponDiscount,
             'paypalClientId' => $paypalService->getClientId(),
             'stripePublishableKey' => $stripeService->getPublishableKey(),
             'checkoutOnlineEnabled' => $this->setting('checkout_online_enabled', '1') === '1',
@@ -146,9 +162,39 @@ class CheckoutController extends Controller
                 $payAmount = round($total * ($globalPercent / 100), 2);
             }
 
-            // Verificar afiliado
+            // Verificar afiliado (via cookie)
             $affiliateService = new AffiliateService();
             $affiliateId = $affiliateService->getActiveAffiliateId();
+
+            // ── CUPOM DE DESCONTO ──────────────────────────────────────────
+            // Revalida o cupom guardado na sessão sobre o total bruto.
+            $discountAmount = 0.0;
+            $couponId = null;
+            $couponCode = null;
+            $appliedCoupon = $this->cartService->getCoupon();
+            if ($appliedCoupon && !empty($appliedCoupon['code'])) {
+                $couponResult = (new CouponService())->validate($appliedCoupon['code'], $total);
+                if ($couponResult['valid']) {
+                    $discountAmount = (float) $couponResult['discount'];
+                    $couponId = (int) $couponResult['coupon']['id'];
+                    $couponCode = $couponResult['coupon']['code'];
+
+                    // Cupom vinculado a afiliado sobrescreve o afiliado do cookie (é explícito)
+                    if (!empty($couponResult['coupon']['affiliate_id'])) {
+                        $affiliateId = (int) $couponResult['coupon']['affiliate_id'];
+                    }
+                } else {
+                    // Cupom deixou de ser válido: descarta silenciosamente
+                    $this->cartService->clearCoupon();
+                    $appliedCoupon = null;
+                }
+            }
+
+            // Total final e ajuste proporcional do valor a pagar agora (parcial)
+            $finalTotal = max(0, round($total - $discountAmount, 2));
+            if ($discountAmount > 0 && $total > 0) {
+                $payAmount = round($payAmount * ($finalTotal / $total), 2);
+            }
 
             // Ler dados UTM do cookie (tráfego pago)
             $utm = [];
@@ -162,9 +208,12 @@ class CheckoutController extends Controller
                 'booking_number' => $bookingNumber,
                 'status' => 'pending',
                 'subtotal' => $total,
-                'total' => $total,
+                'discount_amount' => $discountAmount,
+                'coupon_id' => $couponId,
+                'coupon_code' => $couponCode,
+                'total' => $finalTotal,
                 'paid_amount' => 0,
-                'due_amount' => $total,
+                'due_amount' => $finalTotal,
                 'payment_mode' => $paymentMode,
                 'currency' => 'USD',
                 'billing_first_name' => $billing['first_name'],
@@ -259,7 +308,17 @@ class CheckoutController extends Controller
             // Criar pagamento pendente
             $paymentId = $this->paymentService->createPendingPayment($bookingId, $gateway, $payAmount, $paymentMode === 'partial' ? 'partial' : 'full');
 
+            // Registrar uso do cupom (dentro da transação)
+            if ($couponId) {
+                (new \App\Models\Coupon())->incrementUsage($couponId);
+            }
+
             $this->db->commit();
+
+            // Cupom consumido: remove da sessão para não reaplicar em compras futuras
+            if ($couponId) {
+                $this->cartService->clearCoupon();
+            }
 
             // Retornar dados para o frontend processar o pagamento
             $responseData = [

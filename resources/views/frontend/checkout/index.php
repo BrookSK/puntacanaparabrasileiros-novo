@@ -416,6 +416,24 @@
                     </div>
                     <?php endif; ?>
 
+                    <?php
+                        $hasCoupon = !empty($appliedCoupon) && !empty($appliedCoupon['code']);
+                        $couponDiscount = (float) ($couponDiscount ?? 0);
+                        $totalAfterDiscount = max(0, $cart['grand_total'] - $couponDiscount);
+                    ?>
+                    <!-- Cupom de desconto -->
+                    <div class="coupon-box">
+                        <div class="coupon-input-row" id="couponInputRow" style="<?= $hasCoupon ? 'display:none;' : '' ?>">
+                            <input type="text" id="couponCode" placeholder="Código do cupom" autocomplete="off">
+                            <button type="button" id="couponApplyBtn">Aplicar</button>
+                        </div>
+                        <div class="coupon-applied" id="couponApplied" style="<?= $hasCoupon ? 'display:flex;' : 'display:none;' ?>">
+                            <span>Cupom <strong id="couponAppliedCode"><?= e($hasCoupon ? $appliedCoupon['code'] : '') ?></strong> aplicado</span>
+                            <button type="button" id="couponRemoveBtn" title="Remover cupom">&times;</button>
+                        </div>
+                        <div class="coupon-msg" id="couponMsg"></div>
+                    </div>
+
                     <div class="summary-totals">
                         <?php if ($cart['trip_total'] > 0): ?>
                         <div class="summary-row"><span>Subtotal Passeios:</span><span><?= money($cart['trip_total']) ?></span></div>
@@ -423,13 +441,17 @@
                         <?php if ($cart['transfer_total'] > 0): ?>
                         <div class="summary-row"><span>Subtotal Transfers:</span><span><?= money($cart['transfer_total']) ?></span></div>
                         <?php endif; ?>
+                        <div class="summary-row summary-discount" id="discountRow" style="<?= $hasCoupon && $couponDiscount > 0 ? 'display:flex;' : 'display:none;' ?>color:#1B6F00;">
+                            <span>Desconto (cupom):</span>
+                            <span id="discountAmount">-<?= money($couponDiscount) ?></span>
+                        </div>
                         <div class="summary-row summary-total">
                             <span>Total:</span>
-                            <span id="checkoutTotal"><?= money($cart['grand_total']) ?></span>
+                            <span id="checkoutTotal"><?= money($totalAfterDiscount) ?></span>
                         </div>
                         <div class="summary-row summary-partial" id="partialRow" style="display:flex;">
                             <span>Pagamento agora (<?= (int)$partialPercent ?>%):</span>
-                            <span id="partialAmount"><strong><?= money($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100)) ?></strong></span>
+                            <span id="partialAmount"><strong><?= money(($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100)) * ($cart['grand_total'] > 0 ? $totalAfterDiscount / $cart['grand_total'] : 1)) ?></strong></span>
                         </div>
                     </div>
                 </div>
@@ -437,6 +459,23 @@
         </div>
     </div>
 </section>
+
+<style>
+.coupon-box{margin:14px 0;padding:14px 0;border-top:1px solid #eee;border-bottom:1px solid #eee}
+.coupon-input-row{display:flex;gap:8px}
+.coupon-input-row input{flex:1;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:14px;text-transform:uppercase}
+.coupon-input-row input:focus{outline:none;border-color:#1B6F00}
+.coupon-input-row button{padding:10px 18px;background:#1B6F00;color:#fff;border:none;border-radius:8px;font-weight:600;font-size:14px;cursor:pointer;white-space:nowrap}
+.coupon-input-row button:hover{background:#155700}
+.coupon-input-row button:disabled{opacity:.6;cursor:not-allowed}
+.coupon-applied{align-items:center;justify-content:space-between;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:14px;color:#166534}
+.coupon-applied strong{color:#1B6F00}
+.coupon-applied button{background:none;border:none;color:#166534;font-size:20px;line-height:1;cursor:pointer;padding:0 4px}
+.coupon-msg{font-size:13px;margin-top:8px}
+.coupon-msg.ok{color:#1B6F00}
+.coupon-msg.error{color:#dc2626}
+.summary-discount{color:#1B6F00}
+</style>
 
 <!-- Loading Overlay -->
 <div class="checkout-loading" id="checkoutLoading" style="display:none;">
@@ -456,6 +495,64 @@ const CHECKOUT_CONFIG = {
     stripeActive: <?= !empty($stripePublishableKey) ? 'true' : 'false' ?>,
     paypalActive: <?= !empty($paypalClientId) ? 'true' : 'false' ?>
 };
+
+// ── CUPOM DE DESCONTO ──────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    var applyBtn = document.getElementById('couponApplyBtn');
+    var removeBtn = document.getElementById('couponRemoveBtn');
+    var codeInput = document.getElementById('couponCode');
+    var msgBox = document.getElementById('couponMsg');
+
+    function showMsg(text, ok){
+        if (!msgBox) return;
+        msgBox.textContent = text;
+        msgBox.className = 'coupon-msg ' + (ok ? 'ok' : 'error');
+    }
+
+    if (applyBtn) {
+        applyBtn.addEventListener('click', function(){
+            var code = (codeInput.value || '').trim();
+            if (!code){ showMsg('Digite um código de cupom.', false); return; }
+            applyBtn.disabled = true;
+            applyBtn.textContent = 'Aplicando...';
+            fetch('/api/coupon/validate', {
+                method: 'POST',
+                headers: {'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},
+                body: 'code=' + encodeURIComponent(code)
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(data){
+                applyBtn.disabled = false;
+                applyBtn.textContent = 'Aplicar';
+                if (!data.success){ showMsg(data.message || 'Cupom inválido.', false); return; }
+                // Recarrega para recalcular total/parcial/gateways no servidor
+                window.location.reload();
+            })
+            .catch(function(){
+                applyBtn.disabled = false;
+                applyBtn.textContent = 'Aplicar';
+                showMsg('Erro ao validar o cupom. Tente novamente.', false);
+            });
+        });
+        if (codeInput) {
+            codeInput.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); applyBtn.click(); } });
+        }
+    }
+
+    if (removeBtn) {
+        removeBtn.addEventListener('click', function(){
+            removeBtn.disabled = true;
+            fetch('/api/coupon/remove', {
+                method: 'POST',
+                headers: {'Content-Type':'application/x-www-form-urlencoded','X-Requested-With':'XMLHttpRequest'},
+                body: ''
+            })
+            .then(function(r){ return r.json(); })
+            .then(function(){ window.location.reload(); })
+            .catch(function(){ removeBtn.disabled = false; });
+        });
+    }
+});
 
 // Endereço obrigatório dependendo do gateway
 document.addEventListener('DOMContentLoaded', function() {

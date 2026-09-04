@@ -10,6 +10,7 @@ class Booking extends Model
     protected string $table = 'bookings';
     protected array $fillable = [
         'user_id', 'booking_number', 'status', 'subtotal', 'discount_amount',
+        'coupon_id', 'coupon_code',
         'total', 'paid_amount', 'due_amount', 'payment_mode', 'currency',
         'billing_first_name', 'billing_last_name', 'billing_email',
         'billing_phone', 'billing_address', 'billing_city', 'billing_country',

@@ -15,6 +15,7 @@ use App\Controllers\Auth\RegisterController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\TripsController as AdminTripsController;
 use App\Controllers\Admin\CategoriesController as AdminCategoriesController;
+use App\Controllers\Admin\CouponsController as AdminCouponsController;
 use App\Controllers\Admin\TransfersController as AdminTransfersController;
 use App\Controllers\Admin\BookingsController as AdminBookingsController;
 use App\Controllers\Admin\VouchersController as AdminVouchersController;
@@ -144,6 +145,8 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->get('/cart/count', [ApiCartController::class, 'count'], [], 'api.cart.count');
     $router->post('/checkout/upload-flight-voucher', [ApiCartController::class, 'uploadFlightVoucher'], [], 'api.checkout.upload_flight');
     $router->get('/wishlist/count', [ApiCartController::class, 'wishlistCount'], [], 'api.wishlist.count');
+    $router->post('/coupon/validate', [ApiCartController::class, 'applyCoupon'], [], 'api.coupon.validate');
+    $router->post('/coupon/remove', [ApiCartController::class, 'removeCoupon'], [], 'api.coupon.remove');
     $router->post('/webhook/payment', [WebhookController::class, 'handlePayment'], [], 'api.webhook.payment');
     $router->post('/webhook/stripe', [WebhookController::class, 'handleStripe'], [], 'api.webhook.stripe');
     $router->post('/webhook/pix-status', [WebhookController::class, 'pixStatus'], [], 'api.webhook.pix_status');
@@ -194,6 +197,14 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/categorias/{id}/editar', [AdminCategoriesController::class, 'edit'], [], 'admin.categories.edit');
     $router->post('/categorias/{id}/editar', [AdminCategoriesController::class, 'update'], [CsrfMiddleware::class], 'admin.categories.update');
     $router->post('/categorias/{id}/excluir', [AdminCategoriesController::class, 'destroy'], [CsrfMiddleware::class], 'admin.categories.destroy');
+
+    // Cupons de Desconto
+    $router->get('/cupons', [AdminCouponsController::class, 'index'], [], 'admin.coupons.index');
+    $router->get('/cupons/criar', [AdminCouponsController::class, 'create'], [], 'admin.coupons.create');
+    $router->post('/cupons/criar', [AdminCouponsController::class, 'store'], [CsrfMiddleware::class], 'admin.coupons.store');
+    $router->get('/cupons/{id}/editar', [AdminCouponsController::class, 'edit'], [], 'admin.coupons.edit');
+    $router->post('/cupons/{id}/editar', [AdminCouponsController::class, 'update'], [CsrfMiddleware::class], 'admin.coupons.update');
+    $router->post('/cupons/{id}/excluir', [AdminCouponsController::class, 'destroy'], [CsrfMiddleware::class], 'admin.coupons.destroy');
 
     // Transfers
     $router->get('/transfers', [AdminTransfersController::class, 'index'], [], 'admin.transfers.index');

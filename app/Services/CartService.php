@@ -15,7 +15,32 @@ class CartService
     private Session $session;
     private const CART_KEY = 'cart_items';
     private const TRANSFER_CART_KEY = 'transfer_cart_items';
+    private const COUPON_KEY = 'applied_coupon';
     private const EXPIRATION = 604800; // 7 dias
+
+    // ==================== CUPOM ====================
+
+    /**
+     * Guarda o cupom aplicado na sessão.
+     */
+    public function setCoupon(array $coupon): void
+    {
+        $this->session->set(self::COUPON_KEY, $coupon);
+    }
+
+    /**
+     * Retorna o cupom aplicado (array do banco) ou null.
+     */
+    public function getCoupon(): ?array
+    {
+        $c = $this->session->get(self::COUPON_KEY, null);
+        return is_array($c) ? $c : null;
+    }
+
+    public function clearCoupon(): void
+    {
+        $this->session->remove(self::COUPON_KEY);
+    }
 
     public function __construct()
     {
@@ -139,6 +164,7 @@ class CartService
     {
         $this->clearTrips();
         $this->clearTransfers();
+        $this->clearCoupon();
     }
 
     /**
