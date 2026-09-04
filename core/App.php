@@ -112,7 +112,9 @@ class App
 
     private function handleException(\Throwable $e): void
     {
-        $code = $e->getCode() >= 400 && $e->getCode() < 600 ? $e->getCode() : 500;
+        // getCode() pode retornar string (ex.: SQLSTATE do PDO). Normaliza para int.
+        $rawCode = (int) $e->getCode();
+        $code = ($rawCode >= 400 && $rawCode < 600) ? $rawCode : 500;
 
         $this->response->setStatusCode($code);
 
