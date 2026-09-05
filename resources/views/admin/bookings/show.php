@@ -478,6 +478,50 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
             </div>
         </div>
 
+        <!-- Card: Agência Parceira -->
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-icon admin-card-icon-blue">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                </div>
+                <div>
+                    <h3>Agência Parceira</h3>
+                    <p class="admin-card-subtitle">Vincular esta venda a uma agência</p>
+                </div>
+            </div>
+            <div style="padding:0 4px;">
+                <?php if (!empty($agencyCommission)): ?>
+                    <?php
+                    $acStatusLabels = ['pending' => 'Pendente', 'paid' => 'Paga', 'cancelled' => 'Cancelada'];
+                    $acStatusColors = ['pending' => 'warning', 'paid' => 'success', 'cancelled' => 'danger'];
+                    $acs = $agencyCommission['status'] ?? 'pending';
+                    ?>
+                    <p style="font-size:13px;color:#374151;margin-bottom:10px;">
+                        Comissão de agência já registrada:
+                        <strong><?= money((float)$agencyCommission['amount']) ?></strong>
+                        <span class="badge badge-<?= $acStatusColors[$acs] ?? 'secondary' ?>"><?= $acStatusLabels[$acs] ?? $acs ?></span>
+                    </p>
+                <?php endif; ?>
+
+                <form method="POST" action="/admin/reservas/<?= (int)$booking['id'] ?>/agencia">
+                    <?= csrf_field() ?>
+                    <label class="booking-status-label">Agência</label>
+                    <select name="agency_id" class="form-control form-control-sm" style="margin-bottom:10px;">
+                        <option value="0">— Sem agência —</option>
+                        <?php foreach (($agencies ?? []) as $ag): ?>
+                        <option value="<?= (int)$ag['id'] ?>" <?= (int)($booking['agency_id'] ?? 0) === (int)$ag['id'] ? 'selected' : '' ?>>
+                            <?= e($ag['trade_name'] ?: $ag['company_name']) ?> (<?= rtrim(rtrim(number_format((float)$ag['commission_rate'], 2), '0'), '.') ?>%)
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                    <button type="submit" class="btn btn-sm btn-primary btn-block">Salvar agência</button>
+                    <small style="display:block;margin-top:8px;color:#6b7280;font-size:12px;">
+                        Ao vincular, a comissão da agência é gerada automaticamente (se ainda não existir para esta reserva). A comissão do afiliado, se houver, é independente.
+                    </small>
+                </form>
+            </div>
+        </div>
+
         <!-- Card: Detalhes da Reserva -->
         <div class="admin-card">
             <div class="admin-card-header">

@@ -14,7 +14,7 @@ class Booking extends Model
         'total', 'paid_amount', 'due_amount', 'payment_mode', 'currency',
         'billing_first_name', 'billing_last_name', 'billing_email',
         'billing_phone', 'billing_address', 'billing_city', 'billing_country',
-        'notes', 'admin_notes', 'affiliate_id', 'ip_address', 'flight_voucher_path',
+        'notes', 'admin_notes', 'affiliate_id', 'agency_id', 'agency_ref_code', 'ip_address', 'flight_voucher_path',
         'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'referrer',
     ];
 

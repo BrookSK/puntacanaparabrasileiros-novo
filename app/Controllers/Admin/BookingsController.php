@@ -82,6 +82,16 @@ class BookingsController extends Controller
         foreach ($items as &$item) {
             $item['travelers'] = $this->bookingModel->getTravelers((int) $item['id']);
         }
+        unset($item);
+
+        // Agências ativas (para atribuição manual) + comissão já gerada para esta reserva
+        $agencies = $this->db->fetchAll(
+            "SELECT id, company_name, trade_name, commission_rate FROM agencies WHERE status = 'active' ORDER BY company_name ASC"
+        );
+        $agencyCommission = $this->db->fetchOne(
+            "SELECT * FROM agency_commissions WHERE booking_id = ? ORDER BY id DESC LIMIT 1",
+            [$id]
+        );
 
         $this->view('admin/bookings/show', [
             'booking' => $booking,
@@ -89,8 +99,66 @@ class BookingsController extends Controller
             'transfers' => $transfers,
             'payments' => $payments,
             'vouchers' => $vouchers,
+            'agencies' => $agencies,
+            'agencyCommission' => $agencyCommission,
             'pageTitle' => 'Reserva: ' . $booking['booking_number'],
         ], 'admin');
+    }
+
+    /**
+     * Atribui (ou remove) manualmente uma agência a esta reserva e gera a comissão.
+     */
+    public function assignAgency(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $agencyId = (int) $request->input('agency_id', '0');
+
+        $booking = $this->bookingModel->find($id);
+        if (!$booking) {
+            $this->flash('error', 'Reserva não encontrada.');
+            $this->redirect('/admin/reservas');
+            return;
+        }
+
+        // Remover atribuição
+        if ($agencyId <= 0) {
+            $this->bookingModel->update($id, ['agency_id' => null, 'agency_ref_code' => null]);
+            $this->flash('success', 'Agência desvinculada desta reserva. (Comissões já geradas permanecem no histórico e podem ser canceladas na tela de comissões.)');
+            $this->redirect('/admin/reservas/' . $id);
+            return;
+        }
+
+        $agency = (new \App\Models\Agency())->find($agencyId);
+        if (!$agency) {
+            $this->flash('error', 'Agência inválida.');
+            $this->redirect('/admin/reservas/' . $id);
+            return;
+        }
+
+        // Vincular a agência à reserva
+        $this->bookingModel->update($id, [
+            'agency_id' => $agencyId,
+            'agency_ref_code' => $agency['ref_code'],
+        ]);
+
+        // A comissão só é gerada se a reserva já estiver finalizada (paga/confirmada).
+        // Se ainda estiver pendente, a comissão será criada quando o pagamento for confirmado.
+        $finalizedStatuses = ['booked', 'partially_paid', 'completed'];
+        if (in_array($booking['status'] ?? '', $finalizedStatuses, true)) {
+            $commissionId = (new \App\Services\AgencyService())->createCommission(
+                $agencyId,
+                $id,
+                (float) $booking['total']
+            );
+            if ($commissionId) {
+                $this->flash('success', 'Agência vinculada e comissão gerada com sucesso.');
+            } else {
+                $this->flash('success', 'Agência vinculada. (Já existia uma comissão para esta reserva.)');
+            }
+        } else {
+            $this->flash('success', 'Agência vinculada. A comissão será gerada automaticamente quando a compra for finalizada (pagamento confirmado).');
+        }
+        $this->redirect('/admin/reservas/' . $id);
     }
 
     public function updateStatus(Request $request, Response $response): void

@@ -150,5 +150,15 @@ if ($refParam && ctype_digit($refParam)) {
     }
 }
 
+// Rastreamento de link de AGÊNCIA PARCEIRA (?ag=CODIGO) — seta cookie de atribuição
+$agParam = $_GET['ag'] ?? null;
+if ($agParam) {
+    try {
+        (new \App\Services\AgencyService())->trackVisit((string) $agParam);
+    } catch (\Throwable $e) {
+        // Nunca derrubar a página por erro de rastreamento de agência
+    }
+}
+
 // Executar aplicação
 $app->run();

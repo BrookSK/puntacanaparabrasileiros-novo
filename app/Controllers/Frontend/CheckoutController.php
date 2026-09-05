@@ -14,6 +14,7 @@ use App\Services\VoucherService;
 use App\Services\EmailService;
 use App\Services\WhatsAppService;
 use App\Services\AffiliateService;
+use App\Services\AgencyService;
 use App\Services\CouponService;
 use App\Models\Booking;
 use App\Models\TransferBooking;
@@ -166,6 +167,11 @@ class CheckoutController extends Controller
             $affiliateService = new AffiliateService();
             $affiliateId = $affiliateService->getActiveAffiliateId();
 
+            // Verificar agência parceira (via cookie ?ag=)
+            $agency = (new AgencyService())->getActiveAgency();
+            $agencyId = $agency['id'] ?? null;
+            $agencyRefCode = $agency['ref_code'] ?? null;
+
             // ── CUPOM DE DESCONTO ──────────────────────────────────────────
             // Revalida o cupom guardado na sessão sobre o total bruto.
             $discountAmount = 0.0;
@@ -224,6 +230,8 @@ class CheckoutController extends Controller
                 'billing_city' => $billing['city'] ?? null,
                 'billing_country' => $billing['country'] ?? null,
                 'affiliate_id' => $affiliateId,
+                'agency_id' => $agencyId,
+                'agency_ref_code' => $agencyRefCode,
                 'ip_address' => $request->ip(),
                 'notes' => $request->input('notes', '') ?: null,
                 'flight_voucher_path' => $request->input('flight_voucher_path', '') ?: null,
@@ -559,12 +567,21 @@ class CheckoutController extends Controller
         // Notificar admin por WhatsApp sobre nova venda
         $this->notifyAdminNewBooking($booking, $items, $transfers);
 
-        // ── COMISSÃO DE AFILIADO ───────────────────────────────────────────
+        // ── COMISSÕES (AFILIADO e AGÊNCIA são INDEPENDENTES) ───────────────
+        // Cada um recebe a sua comissão, com a sua própria porcentagem, sobre a mesma venda.
 
-        if ($booking['affiliate_id']) {
+        if (!empty($booking['affiliate_id'])) {
             $affiliateService = new AffiliateService();
             $affiliateService->createCommission(
                 (int) $booking['affiliate_id'],
+                $bookingId,
+                (float) $booking['total']
+            );
+        }
+
+        if (!empty($booking['agency_id'])) {
+            (new AgencyService())->createCommission(
+                (int) $booking['agency_id'],
                 $bookingId,
                 (float) $booking['total']
             );

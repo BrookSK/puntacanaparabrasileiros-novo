@@ -20,6 +20,7 @@ use App\Controllers\Admin\TransfersController as AdminTransfersController;
 use App\Controllers\Admin\BookingsController as AdminBookingsController;
 use App\Controllers\Admin\VouchersController as AdminVouchersController;
 use App\Controllers\Admin\AffiliatesController as AdminAffiliatesController;
+use App\Controllers\Admin\AgenciesController as AdminAgenciesController;
 use App\Controllers\Admin\UsersController as AdminUsersController;
 use App\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Controllers\Admin\NewsletterController as AdminNewsletterController;
@@ -230,6 +231,7 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/reservas/criar', [AdminBookingsController::class, 'store'], [CsrfMiddleware::class], 'admin.bookings.store');
     $router->get('/reservas/{id}', [AdminBookingsController::class, 'show'], [], 'admin.bookings.show');
     $router->post('/reservas/{id}/status', [AdminBookingsController::class, 'updateStatus'], [CsrfMiddleware::class], 'admin.bookings.status');
+    $router->post('/reservas/{id}/agencia', [AdminBookingsController::class, 'assignAgency'], [CsrfMiddleware::class], 'admin.bookings.assign_agency');
 
     // Vouchers
     $router->get('/vouchers', [AdminVouchersController::class, 'index'], [], 'admin.vouchers.index');
@@ -252,6 +254,18 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/afiliados/criativos', [AdminAffiliatesController::class, 'creatives'], [], 'admin.affiliates.creatives');
     $router->post('/afiliados/criativos/criar', [AdminAffiliatesController::class, 'storeCreative'], [CsrfMiddleware::class], 'admin.affiliates.creatives.store');
     $router->post('/afiliados/criativos/{id}/excluir', [AdminAffiliatesController::class, 'deleteCreative'], [CsrfMiddleware::class], 'admin.affiliates.creatives.delete');
+
+    // Agências Parceiras
+    $router->get('/agencias', [AdminAgenciesController::class, 'index'], [], 'admin.agencies.index');
+    $router->get('/agencias/comissoes', [AdminAgenciesController::class, 'commissions'], [], 'admin.agencies.commissions');
+    $router->post('/agencias/comissoes/{id}/pagar', [AdminAgenciesController::class, 'payCommission'], [CsrfMiddleware::class], 'admin.agencies.pay');
+    $router->post('/agencias/comissoes/{id}/cancelar', [AdminAgenciesController::class, 'cancelCommission'], [CsrfMiddleware::class], 'admin.agencies.cancel');
+    $router->get('/agencias/criar', [AdminAgenciesController::class, 'create'], [], 'admin.agencies.create');
+    $router->post('/agencias/criar', [AdminAgenciesController::class, 'store'], [CsrfMiddleware::class], 'admin.agencies.store');
+    $router->get('/agencias/{id}', [AdminAgenciesController::class, 'show'], [], 'admin.agencies.show');
+    $router->get('/agencias/{id}/editar', [AdminAgenciesController::class, 'edit'], [], 'admin.agencies.edit');
+    $router->post('/agencias/{id}/editar', [AdminAgenciesController::class, 'update'], [CsrfMiddleware::class], 'admin.agencies.update');
+    $router->post('/agencias/{id}/excluir', [AdminAgenciesController::class, 'destroy'], [CsrfMiddleware::class], 'admin.agencies.destroy');
 
     // Usuários
     $router->get('/usuarios', [AdminUsersController::class, 'index'], [], 'admin.users.index');
