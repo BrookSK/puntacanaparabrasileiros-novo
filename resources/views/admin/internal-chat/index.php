@@ -115,6 +115,7 @@
 .ic-conv-badge{background:#1B6F00;color:#fff;border-radius:10px;font-size:11px;padding:1px 7px;min-width:18px;text-align:center}
 .ic-conv-last{font-size:12px;color:#64748b;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:230px}
 .ic-conv-tag{font-size:10px;color:#166534;background:#dcfce7;border-radius:4px;padding:1px 6px;display:inline-block;width:fit-content;margin-top:2px}
+.ic-conv-tag-sup{color:#92400e;background:#fef3c7;margin-left:4px}
 .ic-empty{padding:20px;text-align:center;color:#94a3b8;font-size:13px}
 .ic-chat{flex:1;display:flex;flex-direction:column;min-width:0}
 .ic-chat-empty{flex:1;display:flex;align-items:center;justify-content:center;color:#94a3b8;text-align:center}
@@ -169,6 +170,7 @@
         list.forEach(function(c){
             var last = c.last_message ? (c.last_message.message_type==='system' ? c.last_message.body : ((c.last_message.first_name?c.last_message.first_name+': ':'')+c.last_message.body)) : '';
             var tag = c.related_contact ? '<span class="ic-conv-tag">Cliente: '+esc(c.related_contact.contact_name||c.related_contact.push_name||c.related_contact.phone||'')+'</span>' : '';
+            if (c.is_participant === false) { tag += '<span class="ic-conv-tag ic-conv-tag-sup">Supervisão</span>'; }
             html += '<div class="ic-conv-item'+(c.id==STATE.convId?' active':'')+'" data-id="'+c.id+'" data-type="'+c.type+'">'
                  + '<div class="ic-conv-top"><span class="ic-conv-name">'+esc(c.display_title)+'</span>'
                  + (c.unread>0?'<span class="ic-conv-badge">'+c.unread+'</span>':'')+'</div>'

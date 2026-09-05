@@ -45,8 +45,16 @@ class InternalChatController extends Controller
     public function conversations(Request $request, Response $response): void
     {
         $user = $this->currentUser();
-        $conversations = $this->conversationModel->listForUser((int) $user['id']);
+        $conversations = $this->conversationModel->listForUser((int) $user['id'], $this->isManager());
         $this->json(['conversations' => $conversations]);
+    }
+
+    /**
+     * Gestor = admin/superadmin (pode supervisionar conversas de cliente).
+     */
+    private function isManager(): bool
+    {
+        return in_array($this->currentUser()['role'] ?? '', ['superadmin', 'admin', 'editor'], true);
     }
 
     // ── Mensagens de uma conversa (JSON) ────────────────────────
@@ -55,13 +63,16 @@ class InternalChatController extends Controller
         $user = $this->currentUser();
         $conversationId = (int) $request->param('id');
 
-        if (!$this->conversationModel->isParticipant($conversationId, (int) $user['id'])) {
+        if (!$this->conversationModel->canAccess($conversationId, (int) $user['id'], $this->isManager())) {
             $this->json(['error' => 'Acesso negado.'], 403);
             return;
         }
 
         $messages = $this->messageModel->getByConversation($conversationId, 200);
-        $this->conversationModel->markRead($conversationId, (int) $user['id']);
+        // markRead só faz sentido se for participante (tem linha em participants)
+        if ($this->conversationModel->isParticipant($conversationId, (int) $user['id'])) {
+            $this->conversationModel->markRead($conversationId, (int) $user['id']);
+        }
 
         $this->json([
             'messages' => $messages,
@@ -76,13 +87,13 @@ class InternalChatController extends Controller
         $conversationId = (int) $request->param('id');
         $afterId = (int) $request->input('after_id', '0');
 
-        if (!$this->conversationModel->isParticipant($conversationId, (int) $user['id'])) {
+        if (!$this->conversationModel->canAccess($conversationId, (int) $user['id'], $this->isManager())) {
             $this->json(['messages' => []], 403);
             return;
         }
 
         $messages = $this->messageModel->getNewAfter($conversationId, $afterId);
-        if (!empty($messages)) {
+        if (!empty($messages) && $this->conversationModel->isParticipant($conversationId, (int) $user['id'])) {
             $this->conversationModel->markRead($conversationId, (int) $user['id']);
         }
         $this->json(['messages' => $messages]);
@@ -99,9 +110,22 @@ class InternalChatController extends Controller
             $this->json(['success' => false, 'error' => 'Mensagem inválida.'], 400);
             return;
         }
-        if (!$this->conversationModel->isParticipant($conversationId, (int) $user['id'])) {
-            $this->json(['success' => false, 'error' => 'Acesso negado.'], 403);
-            return;
+
+        $isParticipant = $this->conversationModel->isParticipant($conversationId, (int) $user['id']);
+        if (!$isParticipant) {
+            // Gestor supervisionando conversa de cliente: entra na conversa ao escrever
+            if ($this->isManager() && $this->conversationModel->isClientConversation($conversationId)) {
+                $this->conversationModel->addParticipant($conversationId, (int) $user['id'], 'member');
+                $this->messageModel->post(
+                    $conversationId,
+                    null,
+                    trim(($user['first_name'] ?? 'Supervisão')) . ' (supervisão) entrou na conversa.',
+                    'system'
+                );
+            } else {
+                $this->json(['success' => false, 'error' => 'Acesso negado.'], 403);
+                return;
+            }
         }
 
         $id = $this->messageModel->post($conversationId, (int) $user['id'], $body, 'text');

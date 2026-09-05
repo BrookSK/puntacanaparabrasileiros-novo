@@ -16,18 +16,35 @@ class InternalChatConversation extends Model
      * Lista as conversas de um usuário (as que ele participa), com dados para exibição:
      * título calculado, outro participante (direct), contador de não lidas, última msg.
      */
-    public function listForUser(int $userId): array
+    public function listForUser(int $userId, bool $isManager = false): array
     {
-        $rows = $this->db->fetchAll(
-            "SELECT c.*, p.last_read_message_id
-             FROM internal_chat_conversations c
-             INNER JOIN internal_chat_participants p ON p.conversation_id = c.id
-             WHERE p.user_id = ?
-             ORDER BY (c.last_message_at IS NULL), c.last_message_at DESC, c.id DESC",
-            [$userId]
-        );
+        if ($isManager) {
+            // Gestor vê as próprias conversas E todas as conversas vinculadas a um
+            // cliente (supervisão), mesmo sem ser participante.
+            $rows = $this->db->fetchAll(
+                "SELECT c.*, p.last_read_message_id,
+                        (p.user_id IS NOT NULL) AS is_participant
+                 FROM internal_chat_conversations c
+                 LEFT JOIN internal_chat_participants p
+                        ON p.conversation_id = c.id AND p.user_id = ?
+                 WHERE p.user_id = ? OR c.related_contact_id IS NOT NULL
+                 ORDER BY (c.last_message_at IS NULL), c.last_message_at DESC, c.id DESC",
+                [$userId, $userId]
+            );
+        } else {
+            $rows = $this->db->fetchAll(
+                "SELECT c.*, p.last_read_message_id, 1 AS is_participant
+                 FROM internal_chat_conversations c
+                 INNER JOIN internal_chat_participants p ON p.conversation_id = c.id
+                 WHERE p.user_id = ?
+                 ORDER BY (c.last_message_at IS NULL), c.last_message_at DESC, c.id DESC",
+                [$userId]
+            );
+        }
 
         foreach ($rows as &$conv) {
+            $conv['is_participant'] = (int) ($conv['is_participant'] ?? 0) === 1;
+            $conv['last_read_message_id'] = (int) ($conv['last_read_message_id'] ?? 0);
             $conv['participants'] = $this->participants((int) $conv['id']);
 
             // Título de exibição
@@ -96,6 +113,29 @@ class InternalChatConversation extends Model
             "SELECT id FROM internal_chat_participants WHERE conversation_id = ? AND user_id = ? LIMIT 1",
             [$conversationId, $userId]
         );
+    }
+
+    /**
+     * Verifica se a conversa está vinculada a um cliente (supervisionável pelo gestor).
+     */
+    public function isClientConversation(int $conversationId): bool
+    {
+        return (bool) $this->db->fetchColumn(
+            "SELECT id FROM internal_chat_conversations WHERE id = ? AND related_contact_id IS NOT NULL LIMIT 1",
+            [$conversationId]
+        );
+    }
+
+    /**
+     * Um usuário pode acessar a conversa se for participante OU se for gestor
+     * e a conversa for sobre um cliente.
+     */
+    public function canAccess(int $conversationId, int $userId, bool $isManager = false): bool
+    {
+        if ($this->isParticipant($conversationId, $userId)) {
+            return true;
+        }
+        return $isManager && $this->isClientConversation($conversationId);
     }
 
     /**
