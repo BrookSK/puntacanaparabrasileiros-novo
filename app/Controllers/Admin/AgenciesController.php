@@ -18,6 +18,7 @@ class AgenciesController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->agencyModel = new Agency();
         $this->commissionModel = new AgencyCommission();
     }

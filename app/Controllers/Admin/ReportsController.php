@@ -14,6 +14,12 @@ use App\Models\Booking;
  */
 class ReportsController extends Controller
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->requireManager();
+    }
+
     public function index(Request $request, Response $response): void
     {
         $bookingModel = new Booking();

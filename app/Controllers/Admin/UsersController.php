@@ -15,6 +15,7 @@ class UsersController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->userModel = new User();
     }
 

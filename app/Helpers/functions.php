@@ -207,6 +207,24 @@ function is_superadmin(): bool
 }
 
 /**
+ * Gestor = pode gerenciar áreas sensíveis (superadmin/admin/editor).
+ * Alias semântico de is_admin() para uso no controle de acesso da equipe.
+ */
+function is_manager(): bool
+{
+    return is_admin();
+}
+
+/**
+ * Verifica se o usuário é da equipe de atendimento (sem poder de gestão).
+ */
+function is_team(): bool
+{
+    $user = \Core\App::getInstance()->getSession()->get('user');
+    return in_array($user['role'] ?? '', ['attendant', 'whatsapp_agent', 'comercial'], true);
+}
+
+/**
  * Retorna o usuário logado.
  */
 function current_user(): ?array

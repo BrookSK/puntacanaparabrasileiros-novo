@@ -108,4 +108,28 @@ abstract class Controller
     {
         throw new \RuntimeException($message ?: "HTTP Error {$code}", $code);
     }
+
+    /**
+     * Exige que o usuário atual seja gestor (superadmin/admin/editor).
+     * Bloqueia a equipe de atendimento (attendant/whatsapp_agent/comercial).
+     * Redireciona para /admin com mensagem, ou responde 403 em requisições JSON.
+     */
+    protected function requireManager(): void
+    {
+        $user = $this->currentUser();
+        $isManager = in_array($user['role'] ?? '', ['superadmin', 'admin', 'editor'], true);
+        if ($isManager) {
+            return;
+        }
+
+        $request = $this->app->getRequest();
+        if ($request && $request->expectsJson()) {
+            $this->json(['error' => 'Acesso negado.'], 403);
+            exit;
+        }
+
+        $this->flash('error', 'Você não tem permissão para acessar esta área.');
+        $this->redirect('/admin');
+        exit;
+    }
 }

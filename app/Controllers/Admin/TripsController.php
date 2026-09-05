@@ -19,6 +19,7 @@ class TripsController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->tripModel = new Trip();
         $this->categoryModel = new TripCategory();
         $this->packageModel = new TripPackage();

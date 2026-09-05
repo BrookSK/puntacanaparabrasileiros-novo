@@ -15,6 +15,7 @@ class CouponsController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->couponModel = new Coupon();
     }
 

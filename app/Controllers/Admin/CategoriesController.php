@@ -15,6 +15,7 @@ class CategoriesController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->categoryModel = new TripCategory();
     }
 

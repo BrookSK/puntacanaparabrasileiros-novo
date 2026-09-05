@@ -20,6 +20,7 @@ class AffiliatesController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->affiliateModel = new Affiliate();
         $this->requestModel = new AffiliateRequest();
         $this->commissionModel = new Commission();

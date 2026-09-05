@@ -16,6 +16,7 @@ class NewsletterController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->subscriberModel = new NewsletterSubscriber();
     }
 

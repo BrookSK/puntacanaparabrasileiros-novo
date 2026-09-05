@@ -19,6 +19,7 @@ class TransfersController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->vehicleModel = new TransferVehicle();
         $this->locationModel = new TransferLocation();
     }

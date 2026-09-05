@@ -17,6 +17,7 @@ class VouchersController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->voucherModel = new Voucher();
     }
 

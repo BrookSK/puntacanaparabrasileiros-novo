@@ -9,14 +9,13 @@ use Core\Response;
 use Core\App;
 
 /**
- * Middleware de acesso administrativo.
- * Libera admin/superadmin/editor (gestão completa) e a equipe de atendimento
- * (attendant/whatsapp_agent/comercial) — estes últimos veem apenas as áreas de
- * atendimento; as áreas sensíveis são protegidas pelo ManagerMiddleware.
+ * Middleware de gestão: restringe áreas sensíveis do painel a
+ * superadmin/admin/editor. A equipe de atendimento (attendant/whatsapp_agent/
+ * comercial) é bloqueada aqui, mesmo tendo acesso ao /admin em geral.
  */
-class AdminMiddleware extends Middleware
+class ManagerMiddleware extends Middleware
 {
-    private const ALLOWED_ROLES = ['superadmin', 'admin', 'editor', 'attendant', 'whatsapp_agent', 'comercial'];
+    private const ALLOWED_ROLES = ['superadmin', 'admin', 'editor'];
 
     public function handle(Request $request, Response $response): bool
     {
@@ -30,7 +29,7 @@ class AdminMiddleware extends Middleware
             }
 
             $session->flash('error', 'Você não tem permissão para acessar esta área.');
-            $response->redirect('/');
+            $response->redirect('/admin');
             return false;
         }
 

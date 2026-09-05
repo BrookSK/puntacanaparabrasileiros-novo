@@ -24,6 +24,7 @@ class SchedulesController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->tripModel = new Trip();
         $this->hotelModel = new TripHotel();
         $this->scheduleModel = new TripHotelSchedule();

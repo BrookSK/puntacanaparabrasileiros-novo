@@ -16,6 +16,7 @@ class SettingsController extends Controller
     public function __construct()
     {
         parent::__construct();
+        $this->requireManager();
         $this->settingModel = new Setting();
     }
 
