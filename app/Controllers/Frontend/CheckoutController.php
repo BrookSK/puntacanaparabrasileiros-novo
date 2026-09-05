@@ -422,12 +422,11 @@ class CheckoutController extends Controller
                     return;
                 }
 
-                // Executar ações pós-pagamento (vouchers, emails, WhatsApp, comissões)
-                try {
-                    $this->postPaymentActions($bookingId);
-                } catch (\Throwable $e) {
-                    // Não bloquear por erro em notificações
-                }
+                // NÃO executar postPaymentActions aqui: geração de vouchers + envio de
+                // e-mail (SMTP) + WhatsApp deixam a requisição lenta e causam "erro de
+                // conexão" no navegador (timeout), embora a compra seja concluída.
+                // Essas ações são executadas na página de sucesso (success()), que já
+                // chama postPaymentActions() e é protegida contra duplicação.
 
                 // Limpar carrinho
                 $this->cartService->clearAll();
