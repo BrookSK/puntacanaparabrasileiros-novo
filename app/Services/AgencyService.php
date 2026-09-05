@@ -90,6 +90,17 @@ class AgencyService
 
         $this->agencyModel->updateStats($agencyId, $saleAmount, $commissionAmount);
 
+        // Notificar a agência sobre a venda realizada (WhatsApp + e-mail)
+        try {
+            $bookingNumber = null;
+            if ($bookingId) {
+                $bookingNumber = $this->db->fetchColumn("SELECT booking_number FROM bookings WHERE id = ? LIMIT 1", [$bookingId]) ?: null;
+            }
+            (new AgencyNotifier())->notifySale($agency, $commissionAmount, $saleAmount, $bookingNumber);
+        } catch (\Throwable $e) {
+            error_log('[AgencyService] Falha ao notificar venda: ' . $e->getMessage());
+        }
+
         return $commissionId;
     }
 

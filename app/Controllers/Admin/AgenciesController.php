@@ -194,6 +194,20 @@ class AgenciesController extends Controller
             [(float) $commission['amount'], (int) $commission['agency_id']]
         );
 
+        // Notificar a agência que a comissão foi paga (WhatsApp + e-mail)
+        try {
+            $agency = $this->agencyModel->find((int) $commission['agency_id']);
+            if ($agency) {
+                (new \App\Services\AgencyNotifier())->notifyCommissionPaid(
+                    $agency,
+                    (float) $commission['amount'],
+                    $reference ?: null
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('[Admin\\AgenciesController] Falha ao notificar pagamento: ' . $e->getMessage());
+        }
+
         $this->flash('success', 'Comissão marcada como paga!');
         $this->redirect('/admin/agencias/comissoes');
     }
@@ -231,6 +245,21 @@ class AgenciesController extends Controller
         }
 
         $this->commissionModel->cancel($id, $reason);
+
+        // Notificar a agência sobre o cancelamento (WhatsApp + e-mail)
+        try {
+            $agency = $this->agencyModel->find((int) $commission['agency_id']);
+            if ($agency) {
+                (new \App\Services\AgencyNotifier())->notifyCommissionCancelled(
+                    $agency,
+                    (float) $commission['amount'],
+                    $reason
+                );
+            }
+        } catch (\Throwable $e) {
+            error_log('[Admin\\AgenciesController] Falha ao notificar cancelamento: ' . $e->getMessage());
+        }
+
         $this->flash('success', 'Comissão cancelada.');
         $this->redirect('/admin/agencias/comissoes?status=cancelled');
     }
