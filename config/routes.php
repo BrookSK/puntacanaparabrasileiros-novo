@@ -307,6 +307,7 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
 // ============================================================
 use App\Controllers\Admin\WhatsAppController;
 use App\Controllers\Admin\CrmController;
+use App\Controllers\Admin\InternalChatController;
 use App\Middleware\WhatsAppMiddleware;
 
 $router->group(['prefix' => '/whatsapp', 'middleware' => [AuthMiddleware::class, WhatsAppMiddleware::class]], function ($router) {
@@ -404,4 +405,22 @@ $router->group(['prefix' => '/crm', 'middleware' => [AuthMiddleware::class, What
     // Comissões
     $router->get('/commissions', [CrmController::class, 'commissions'], [], 'crm.commissions');
     $router->get('/commissionLeads/{id}', [CrmController::class, 'commissionLeads'], [], 'crm.commissions.leads');
+});
+
+// ============================================================
+// CHAT INTERNO (comunicação entre atendentes/equipe)
+// ============================================================
+$router->group(['prefix' => '/chat-interno', 'middleware' => [AuthMiddleware::class, WhatsAppMiddleware::class]], function ($router) {
+    $router->get('', [InternalChatController::class, 'index'], [], 'internal_chat.index');
+    $router->get('/c/{id}', [InternalChatController::class, 'index'], [], 'internal_chat.open');
+
+    // API (JSON) — CSRF validado via header, seguindo o padrão do /whatsapp
+    $router->get('/conversations', [InternalChatController::class, 'conversations'], [], 'internal_chat.conversations');
+    $router->get('/messages/{id}', [InternalChatController::class, 'messages'], [], 'internal_chat.messages');
+    $router->get('/poll/{id}', [InternalChatController::class, 'poll'], [], 'internal_chat.poll');
+    $router->get('/unread', [InternalChatController::class, 'unreadCount'], [], 'internal_chat.unread');
+    $router->post('/send', [InternalChatController::class, 'send'], [], 'internal_chat.send');
+    $router->post('/createConversation', [InternalChatController::class, 'createConversation'], [], 'internal_chat.create');
+    $router->post('/addParticipant', [InternalChatController::class, 'addParticipant'], [], 'internal_chat.add_participant');
+    $router->post('/openForContact', [InternalChatController::class, 'openForContact'], [], 'internal_chat.open_for_contact');
 });

@@ -7,6 +7,9 @@
             <option value="">Todos os Perfis</option>
             <option value="superadmin" <?= ($currentRole ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
             <option value="admin" <?= ($currentRole ?? '') === 'admin' ? 'selected' : '' ?>>Admin</option>
+            <option value="attendant" <?= ($currentRole ?? '') === 'attendant' ? 'selected' : '' ?>>Atendente</option>
+            <option value="whatsapp_agent" <?= ($currentRole ?? '') === 'whatsapp_agent' ? 'selected' : '' ?>>Agente WhatsApp</option>
+            <option value="comercial" <?= ($currentRole ?? '') === 'comercial' ? 'selected' : '' ?>>Comercial</option>
             <option value="affiliate" <?= ($currentRole ?? '') === 'affiliate' ? 'selected' : '' ?>>Afiliado</option>
             <option value="customer" <?= ($currentRole ?? '') === 'customer' ? 'selected' : '' ?>>Cliente</option>
         </select>
@@ -38,8 +41,8 @@
             <td><?= e($user['email'] ?? '-') ?></td>
             <td>
                 <?php
-                    $roleColors = ['superadmin' => 'danger', 'admin' => 'info', 'affiliate' => 'warning', 'customer' => 'secondary'];
-                    $roleLabels = ['superadmin' => 'Superadmin', 'admin' => 'Admin', 'affiliate' => 'Afiliado', 'customer' => 'Cliente'];
+                    $roleColors = ['superadmin' => 'danger', 'admin' => 'info', 'attendant' => 'success', 'whatsapp_agent' => 'success', 'comercial' => 'success', 'affiliate' => 'warning', 'customer' => 'secondary'];
+                    $roleLabels = ['superadmin' => 'Superadmin', 'admin' => 'Admin', 'attendant' => 'Atendente', 'whatsapp_agent' => 'Agente WhatsApp', 'comercial' => 'Comercial', 'affiliate' => 'Afiliado', 'customer' => 'Cliente'];
                     $r = $user['role'] ?? 'customer';
                 ?>
                 <span class="badge badge-<?= $roleColors[$r] ?? 'secondary' ?>"><?= $roleLabels[$r] ?? $r ?></span>

@@ -80,6 +80,9 @@
                 <a href="/crm" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/crm') ? 'active' : '' ?>">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></span> CRM
                 </a>
+                <a href="/chat-interno" class="nav-item <?= str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/chat-interno') ? 'active' : '' ?>">
+                    <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 8h2a2 2 0 012 2v10l-4-4H9a2 2 0 01-2-2v-1"/><path d="M15 2H3a2 2 0 00-2 2v9l4-4h10a2 2 0 002-2V4a2 2 0 00-2-2z"/></svg></span> Chat Interno
+                </a>
                 <hr class="nav-divider">
                 <a href="/" class="nav-item" target="_blank">
                     <span class="nav-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></span> Ver Site
@@ -137,7 +140,7 @@
     <script src="<?= asset('js/admin.js') ?>?v=2.3"></script>
     <script src="<?= asset('js/phone-country.js') ?>?v=1.1"></script>
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp/chat')): ?>
-    <script src="<?= asset('js/whatsapp.js') ?>?v=1.5"></script>
+    <script src="<?= asset('js/whatsapp.js') ?>?v=1.6"></script>
     <?php endif; ?>
 </body>
 </html>

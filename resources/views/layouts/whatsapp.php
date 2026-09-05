@@ -15,6 +15,6 @@
 </head>
 <body class="wpp-body">
     <?= $content ?>
-    <script src="<?= asset('js/whatsapp.js') ?>?v=1.0"></script>
+    <script src="<?= asset('js/whatsapp.js') ?>?v=1.6"></script>
 </body>
 </html>

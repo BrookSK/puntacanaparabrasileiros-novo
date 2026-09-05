@@ -429,9 +429,20 @@ class WhatsAppController extends Controller
             return;
         }
 
+        // Detecta intervenção de gestor: admin/superadmin respondendo numa conversa
+        // que está atribuída a OUTRO atendente.
+        $userRole = $user['role'] ?? '';
+        $isManager = in_array($userRole, ['admin', 'superadmin'], true);
+        $assignedTo = (int) ($contact['assigned_to'] ?? 0);
+        $isIntervention = $isManager && $assignedTo > 0 && $assignedTo !== (int) $user['id'];
+
         // Assinar mensagem com nome do usuário
         $senderName = null;
-        if ($sign) {
+        if ($isIntervention) {
+            // Intervenção sempre identificada (nome + cargo), independentemente do toggle
+            $senderName = ($user['first_name'] ?? 'Gestor') . ' (Supervisão)';
+            $text = "*{$senderName}:*\n{$text}";
+        } elseif ($sign) {
             $senderName = $user['first_name'] ?? 'Sistema';
             $text = "*{$senderName}:*\n{$text}";
         }
@@ -465,12 +476,19 @@ class WhatsAppController extends Controller
         // Atualizar last_message_at
         $this->contactModel->update($contactId, ['last_message_at' => date('Y-m-d H:i:s')]);
 
-        // Atribuição automática
-        if (empty($contact['assigned_to'])) {
+        if ($isIntervention) {
+            // Registrar a intervenção nas notas internas (sem roubar o atendente responsável)
+            $stamp = date('d/m/Y H:i');
+            $note = "[{$stamp}] Intervenção de " . ($user['first_name'] ?? 'gestor') . " ({$userRole}).";
+            $existingNotes = (string) ($contact['internal_notes'] ?? '');
+            $newNotes = trim($existingNotes . "\n" . $note);
+            $this->contactModel->update($contactId, ['internal_notes' => $newNotes]);
+        } elseif (empty($contact['assigned_to'])) {
+            // Atribuição automática apenas quando ninguém é responsável ainda
             $this->contactModel->update($contactId, ['assigned_to' => (int) $user['id']]);
         }
 
-        $this->json(['success' => true, 'message_id' => $msgId]);
+        $this->json(['success' => true, 'message_id' => $msgId, 'intervention' => $isIntervention]);
     }
 
     /**

@@ -75,11 +75,17 @@ $old = flash('old') ?? [];
                 <div class="summary-card-body">
                     <div class="form-group">
                         <label>Perfil / Role</label>
+                        <?php $roleVal = $user['role'] ?? $old['role'] ?? 'customer'; ?>
                         <select name="role" class="form-control">
-                            <option value="customer" <?= ($user['role'] ?? $old['role'] ?? 'customer') === 'customer' ? 'selected' : '' ?>>Cliente</option>
-                            <option value="affiliate" <?= ($user['role'] ?? $old['role'] ?? '') === 'affiliate' ? 'selected' : '' ?>>Afiliado</option>
-                            <option value="admin" <?= ($user['role'] ?? $old['role'] ?? '') === 'admin' ? 'selected' : '' ?>>Admin</option>
-                            <option value="superadmin" <?= ($user['role'] ?? $old['role'] ?? '') === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
+                            <option value="customer" <?= $roleVal === 'customer' ? 'selected' : '' ?>>Cliente</option>
+                            <option value="affiliate" <?= $roleVal === 'affiliate' ? 'selected' : '' ?>>Afiliado</option>
+                            <optgroup label="Equipe / Atendimento">
+                                <option value="attendant" <?= $roleVal === 'attendant' ? 'selected' : '' ?>>Atendente</option>
+                                <option value="whatsapp_agent" <?= $roleVal === 'whatsapp_agent' ? 'selected' : '' ?>>Agente WhatsApp</option>
+                                <option value="comercial" <?= $roleVal === 'comercial' ? 'selected' : '' ?>>Comercial</option>
+                            </optgroup>
+                            <option value="admin" <?= $roleVal === 'admin' ? 'selected' : '' ?>>Admin</option>
+                            <option value="superadmin" <?= $roleVal === 'superadmin' ? 'selected' : '' ?>>Superadmin</option>
                         </select>
                     </div>
 

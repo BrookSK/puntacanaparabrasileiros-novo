@@ -1063,3 +1063,25 @@ function truncateText(text, max) {
     if (!text) return '';
     return text.length > max ? text.substring(0, max) + '...' : text;
 }
+
+// ═══════════════════════════════════════════════
+// CHAT INTERNO — Discutir com a equipe sobre este cliente
+// ═══════════════════════════════════════════════
+async function discussWithTeam() {
+    if (!STATE.contactId) { alert('Abra uma conversa primeiro.'); return; }
+    try {
+        const res = await fetch('/chat-interno/openForContact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRF-TOKEN': csrfToken },
+            body: 'contact_id=' + encodeURIComponent(STATE.contactId),
+        });
+        const json = await res.json();
+        if (json.success && json.redirect) {
+            window.location = json.redirect;
+        } else {
+            alert(json.error || 'Não foi possível abrir a conversa da equipe.');
+        }
+    } catch (e) {
+        alert('Erro de conexão. Tente novamente.');
+    }
+}
