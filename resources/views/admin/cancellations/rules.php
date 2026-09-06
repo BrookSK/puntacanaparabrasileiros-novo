@@ -40,7 +40,15 @@
                 </td>
                 <td><?= (int)$r['active'] === 1 ? '<span class="badge badge-success">Ativa</span>' : '<span class="badge badge-secondary">Inativa</span>' ?></td>
                 <td class="actions-cell" style="white-space:nowrap;">
-                    <button type="button" class="btn btn-sm btn-outline" onclick='crEdit(<?= json_encode($r) ?>)'>Editar</button>
+                    <button type="button" class="btn btn-sm btn-outline cr-edit-btn"
+                            data-id="<?= (int)$r['id'] ?>"
+                            data-label="<?= e($r['label'] ?? '') ?>"
+                            data-time-value="<?= (int)$r['time_value'] ?>"
+                            data-time-unit="<?= e($r['time_unit']) ?>"
+                            data-refund-value="<?= e((string)$r['refund_value']) ?>"
+                            data-refund-type="<?= e($r['refund_type']) ?>"
+                            data-sort-order="<?= (int)$r['sort_order'] ?>"
+                            data-active="<?= (int)$r['active'] ?>">Editar</button>
                     <button type="button" class="btn btn-sm btn-danger" onclick="crDelete(<?= (int)$r['id'] ?>)">Excluir</button>
                 </td>
             </tr>
@@ -104,19 +112,25 @@
 <form method="POST" id="crDeleteForm" style="display:none;"><?= csrf_field() ?></form>
 
 <script>
-function crEdit(r){
+function crEditFrom(btn){
+    var d = btn.dataset;
     document.getElementById('crFormTitle').textContent = 'Editar faixa';
-    document.getElementById('crForm').action = '/admin/cancelamentos/regras/' + r.id + '/editar';
-    document.getElementById('cr_label').value = r.label || '';
-    document.getElementById('cr_time_value').value = r.time_value;
-    document.getElementById('cr_time_unit').value = r.time_unit;
-    document.getElementById('cr_refund_value').value = r.refund_value;
-    document.getElementById('cr_refund_type').value = r.refund_type;
-    document.getElementById('cr_sort_order').value = r.sort_order;
-    document.getElementById('cr_active').checked = parseInt(r.active) === 1;
+    document.getElementById('crForm').action = '/admin/cancelamentos/regras/' + d.id + '/editar';
+    document.getElementById('cr_label').value = d.label || '';
+    document.getElementById('cr_time_value').value = d.timeValue;
+    document.getElementById('cr_time_unit').value = d.timeUnit;
+    document.getElementById('cr_refund_value').value = d.refundValue;
+    document.getElementById('cr_refund_type').value = d.refundType;
+    document.getElementById('cr_sort_order').value = d.sortOrder;
+    document.getElementById('cr_active').checked = parseInt(d.active) === 1;
     document.getElementById('crReset').style.display = 'inline-flex';
-    window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});
+    document.getElementById('crForm').scrollIntoView({behavior: 'smooth', block: 'center'});
 }
+document.addEventListener('DOMContentLoaded', function(){
+    document.querySelectorAll('.cr-edit-btn').forEach(function(btn){
+        btn.addEventListener('click', function(){ crEditFrom(btn); });
+    });
+});
 function crResetForm(){
     document.getElementById('crFormTitle').textContent = 'Nova faixa';
     var f = document.getElementById('crForm');
