@@ -297,6 +297,14 @@ $bst = $booking['status'] ?? 'pending';
                 <?php endif; ?>
                 <div>
                     <strong style="font-size:14px;color:#1e293b;"><?= e($item['trip_title'] ?? '') ?></strong>
+                    <?php if (!empty($item['trip_date'])): ?>
+                    <div style="font-size:13px;color:#475569;margin-top:2px;">
+                        📅 <?= date('d/m/Y', strtotime($item['trip_date'])) ?>
+                        <?php if (!empty($item['trip_time']) && $item['trip_time'] !== '00:00:00'): ?>
+                        às <?= date('H:i', strtotime($item['trip_time'])) ?>
+                        <?php endif; ?>
+                    </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php endforeach; ?>
