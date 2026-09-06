@@ -151,13 +151,20 @@ $bst = $booking['status'] ?? 'pending';
             <?php if ($pol && !empty($pol['has_rules'])): ?>
             <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#166534;">
                 <strong>Regra aplicada:</strong> <?= e($pol['label']) ?><br>
+                <strong>Data/hora atual (servidor):</strong> <?= date('d/m/Y H:i') ?><br>
                 <?php if ($pol['travel_at']): ?>
                 <strong>Viagem em:</strong> <?= date('d/m/Y H:i', strtotime($pol['travel_at'])) ?>
                 &nbsp;•&nbsp; <strong>Antecedência do cancelamento:</strong>
                 <?php
                     $h = (float) ($pol['hours_until'] ?? 0);
-                    echo $h >= 48 ? round($h / 24, 1) . ' dias' : round($h, 1) . ' horas';
+                    if ($h < 0) {
+                        echo 'viagem já passou (' . round(abs($h), 1) . 'h atrás)';
+                    } else {
+                        echo $h >= 48 ? round($h / 24, 1) . ' dias' : round($h, 1) . ' horas';
+                    }
                 ?><br>
+                <?php else: ?>
+                <strong style="color:#b45309;">Reserva sem data de viagem detectada.</strong><br>
                 <?php endif; ?>
                 <strong>Reembolso sugerido:</strong>
                 <?= money((float)$pol['refund_amount']) ?>

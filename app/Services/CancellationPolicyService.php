@@ -29,12 +29,14 @@ class CancellationPolicyService
     public function getEarliestTravelDateTime(int $bookingId): ?string
     {
         // Passeios: booking_items.trip_date (+ trip_time se houver)
+        // Quando não há hora definida, usamos o FIM do dia (23:59:59) como referência,
+        // para não reduzir indevidamente a antecedência do cliente por falta de horário.
         $tripDate = $this->db->fetchColumn(
             "SELECT MIN(
                         CASE
                             WHEN trip_time IS NOT NULL AND trip_time <> '00:00:00'
                             THEN TIMESTAMP(trip_date, trip_time)
-                            ELSE TIMESTAMP(trip_date, '00:00:00')
+                            ELSE TIMESTAMP(trip_date, '23:59:59')
                         END
                     )
              FROM booking_items
@@ -48,7 +50,7 @@ class CancellationPolicyService
                         CASE
                             WHEN time IS NOT NULL AND time <> '00:00:00'
                             THEN TIMESTAMP(date, time)
-                            ELSE TIMESTAMP(date, '00:00:00')
+                            ELSE TIMESTAMP(date, '23:59:59')
                         END
                     )
              FROM transfer_bookings
