@@ -69,7 +69,17 @@ class InternalChatController extends Controller
         }
 
         $messages = $this->messageModel->getByConversation($conversationId, 200);
-        // markRead só faz sentido se for participante (tem linha em participants)
+
+        // Gestor supervisionando uma conversa de cliente: torna-se participante
+        // silenciosamente ao abrir (sem mensagem de sistema), para que a leitura
+        // zere o contador de não lidas.
+        if (!$this->conversationModel->isParticipant($conversationId, (int) $user['id'])
+            && $this->isManager()
+            && $this->conversationModel->isClientConversation($conversationId)) {
+            $this->conversationModel->addParticipant($conversationId, (int) $user['id'], 'member');
+        }
+
+        // Marcar como lida (agora o gestor tem linha em participants)
         if ($this->conversationModel->isParticipant($conversationId, (int) $user['id'])) {
             $this->conversationModel->markRead($conversationId, (int) $user['id']);
         }
@@ -116,12 +126,6 @@ class InternalChatController extends Controller
             // Gestor supervisionando conversa de cliente: entra na conversa ao escrever
             if ($this->isManager() && $this->conversationModel->isClientConversation($conversationId)) {
                 $this->conversationModel->addParticipant($conversationId, (int) $user['id'], 'member');
-                $this->messageModel->post(
-                    $conversationId,
-                    null,
-                    trim(($user['first_name'] ?? 'Supervisão')) . ' (supervisão) entrou na conversa.',
-                    'system'
-                );
             } else {
                 $this->json(['success' => false, 'error' => 'Acesso negado.'], 403);
                 return;
