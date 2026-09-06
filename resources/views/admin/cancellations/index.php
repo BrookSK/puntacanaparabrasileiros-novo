@@ -1,7 +1,10 @@
 <div class="card-header">
-    <div class="header-actions">
+    <div class="header-actions" style="display:flex;gap:8px;align-items:center;">
         <?php if ($pendingCount > 0): ?>
         <span class="badge badge-warning" style="font-size:13px;padding:6px 14px;"><?= $pendingCount ?> pendente<?= $pendingCount > 1 ? 's' : '' ?></span>
+        <?php endif; ?>
+        <?php if (function_exists('is_manager') && is_manager()): ?>
+        <a href="/admin/cancelamentos/regras" class="btn btn-outline">⚙️ Regras de Reembolso</a>
         <?php endif; ?>
     </div>
     <form method="GET" class="filter-form">

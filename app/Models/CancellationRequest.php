@@ -10,7 +10,7 @@ class CancellationRequest extends Model
     protected string $table = 'cancellation_requests';
     protected array $fillable = [
         'booking_id', 'user_id', 'reason', 'status',
-        'admin_response', 'refund_status', 'refund_amount',
+        'admin_response', 'refund_status', 'refund_amount', 'refund_percentage', 'applied_rule_label',
         'refund_notes', 'processed_by', 'processed_at', 'refunded_at',
     ];
 
@@ -62,6 +62,28 @@ class CancellationRequest extends Model
         return (bool) $this->db->update($this->table, [
             'refund_status' => 'refunded',
             'refund_amount' => $amount,
+            'refund_notes' => $notes,
+            'refunded_at' => date('Y-m-d H:i:s'),
+        ], 'id = ?', [$id]);
+    }
+
+    /**
+     * Marca o reembolso com status explícito (none / partial_refund / refunded)
+     * e registra o percentual e a regra aplicada.
+     */
+    public function markRefundedWithStatus(
+        int $id,
+        float $amount,
+        string $refundStatus,
+        string $notes = '',
+        ?float $percentage = null,
+        ?string $ruleLabel = null
+    ): bool {
+        return (bool) $this->db->update($this->table, [
+            'refund_status' => $refundStatus,
+            'refund_amount' => $amount,
+            'refund_percentage' => $percentage,
+            'applied_rule_label' => $ruleLabel,
             'refund_notes' => $notes,
             'refunded_at' => date('Y-m-d H:i:s'),
         ], 'id = ?', [$id]);

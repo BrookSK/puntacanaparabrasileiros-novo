@@ -140,16 +140,53 @@ $bst = $booking['status'] ?? 'pending';
                 </div>
                 <div>
                     <h3>Processar Reembolso</h3>
-                    <p class="admin-card-subtitle">Informe o valor e confirme o reembolso ao cliente</p>
+                    <p class="admin-card-subtitle">O valor abaixo já vem sugerido pela regra. Você pode ajustar se necessário.</p>
                 </div>
             </div>
 
+            <?php
+                $pol = $policy ?? null;
+                $suggested = $pol && !empty($pol['has_rules']) ? (float) $pol['refund_amount'] : (float) ($booking['paid_amount'] ?? 0);
+            ?>
+            <?php if ($pol && !empty($pol['has_rules'])): ?>
+            <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#166534;">
+                <strong>Regra aplicada:</strong> <?= e($pol['label']) ?><br>
+                <?php if ($pol['travel_at']): ?>
+                <strong>Viagem em:</strong> <?= date('d/m/Y H:i', strtotime($pol['travel_at'])) ?>
+                &nbsp;•&nbsp; <strong>Antecedência do cancelamento:</strong>
+                <?php
+                    $h = (float) ($pol['hours_until'] ?? 0);
+                    echo $h >= 48 ? round($h / 24, 1) . ' dias' : round($h, 1) . ' horas';
+                ?><br>
+                <?php endif; ?>
+                <strong>Reembolso sugerido:</strong>
+                <?= money((float)$pol['refund_amount']) ?>
+                <?php if ($pol['refund_percentage'] !== null): ?>(<?= rtrim(rtrim(number_format((float)$pol['refund_percentage'], 2), '0'), '.') ?>% do valor pago)<?php endif; ?>
+            </div>
+            <?php elseif ($pol && empty($pol['travel_at'])): ?>
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#92400e;">
+                Não foi possível calcular a antecedência (reserva sem data de viagem). Defina o valor manualmente.
+            </div>
+            <?php else: ?>
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px 16px;margin-bottom:16px;font-size:13px;color:#92400e;">
+                Nenhuma regra de reembolso cadastrada. <a href="/admin/cancelamentos/regras" style="color:#92400e;text-decoration:underline;">Cadastrar regras</a> ou defina o valor manualmente.
+            </div>
+            <?php endif; ?>
+
             <form method="POST" action="/admin/cancelamentos/<?= (int)$cancellation['id'] ?>/reembolsar">
                 <?= csrf_field() ?>
+                <?php if ($pol && $pol['refund_percentage'] !== null): ?>
+                <input type="hidden" name="refund_percentage" value="<?= e((string)$pol['refund_percentage']) ?>">
+                <?php endif; ?>
+                <?php if ($pol && !empty($pol['label'])): ?>
+                <input type="hidden" name="applied_rule_label" value="<?= e($pol['label']) ?>">
+                <?php endif; ?>
                 <div class="form-row" style="margin-bottom:16px;">
                     <div class="form-group">
                         <label for="refund_amount" style="font-weight:600;">Valor do Reembolso (USD)</label>
-                        <input type="number" step="0.01" min="0.01" name="refund_amount" id="refund_amount" class="form-control" value="<?= number_format((float)($booking['paid_amount'] ?? 0), 2, '.', '') ?>" required>
+                        <input type="number" step="0.01" min="0" name="refund_amount" id="refund_amount" class="form-control" value="<?= number_format($suggested, 2, '.', '') ?>" required>
+                        <small class="form-hint">Sugerido pela regra. Ajuste se necessário. Use 0 para não reembolsar.</small>
+                    </div>
                     </div>
                     <div class="form-group">
                         <label for="refund_notes" style="font-weight:600;">Observações (opcional)</label>

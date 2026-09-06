@@ -7,8 +7,10 @@ use Core\Controller;
 use Core\Request;
 use Core\Response;
 use App\Models\CancellationRequest;
+use App\Models\CancellationRule;
 use App\Models\Booking;
 use App\Services\EmailService;
+use App\Services\CancellationPolicyService;
 
 class CancellationsController extends Controller
 {
@@ -85,13 +87,107 @@ class CancellationsController extends Controller
         $items = $this->bookingModel->getItems((int) $cancellation['booking_id']);
         $user = $this->db->fetchOne("SELECT * FROM users WHERE id = ?", [(int) $cancellation['user_id']]);
 
+        // Reembolso sugerido pelas regras cadastradas (com base na antecedência)
+        $policy = (new CancellationPolicyService())->evaluate(
+            (int) $cancellation['booking_id'],
+            (float) ($booking['paid_amount'] ?? 0)
+        );
+
         $this->view('admin/cancellations/show', [
             'cancellation' => $cancellation,
             'booking' => $booking,
             'items' => $items,
             'client' => $user,
+            'policy' => $policy,
             'pageTitle' => 'Cancelamento #' . $id,
         ], 'admin');
+    }
+
+    // ══════════════════════════════════════════════════════════════
+    // REGRAS DE CANCELAMENTO (configuráveis pelo admin) — só gestor
+    // ══════════════════════════════════════════════════════════════
+
+    public function rules(Request $request, Response $response): void
+    {
+        $this->requireManager();
+        $ruleModel = new CancellationRule();
+        $this->view('admin/cancellations/rules', [
+            'rules' => $ruleModel->getAllOrdered(),
+            'pageTitle' => 'Regras de Cancelamento',
+        ], 'admin');
+    }
+
+    public function storeRule(Request $request, Response $response): void
+    {
+        $this->requireManager();
+        $data = $this->collectRule($request);
+        if ($err = $this->validateRule($data)) {
+            $this->flash('error', $err);
+            $this->redirect('/admin/cancelamentos/regras');
+            return;
+        }
+        (new CancellationRule())->create($data);
+        $this->flash('success', 'Regra criada com sucesso.');
+        $this->redirect('/admin/cancelamentos/regras');
+    }
+
+    public function updateRule(Request $request, Response $response): void
+    {
+        $this->requireManager();
+        $id = (int) $request->param('id');
+        $ruleModel = new CancellationRule();
+        if (!$ruleModel->find($id)) {
+            $this->flash('error', 'Regra não encontrada.');
+            $this->redirect('/admin/cancelamentos/regras');
+            return;
+        }
+        $data = $this->collectRule($request);
+        if ($err = $this->validateRule($data)) {
+            $this->flash('error', $err);
+            $this->redirect('/admin/cancelamentos/regras');
+            return;
+        }
+        $ruleModel->update($id, $data);
+        $this->flash('success', 'Regra atualizada.');
+        $this->redirect('/admin/cancelamentos/regras');
+    }
+
+    public function deleteRule(Request $request, Response $response): void
+    {
+        $this->requireManager();
+        $id = (int) $request->param('id');
+        (new CancellationRule())->delete($id);
+        $this->flash('success', 'Regra removida.');
+        $this->redirect('/admin/cancelamentos/regras');
+    }
+
+    private function collectRule(Request $request): array
+    {
+        $timeUnit = $request->input('time_unit', 'days') === 'hours' ? 'hours' : 'days';
+        $refundType = $request->input('refund_type', 'percentage') === 'fixed' ? 'fixed' : 'percentage';
+        return [
+            'label' => trim((string) $request->input('label', '')) ?: null,
+            'time_unit' => $timeUnit,
+            'time_value' => max(0, (int) $request->input('time_value', '0')),
+            'refund_type' => $refundType,
+            'refund_value' => max(0, (float) $request->input('refund_value', '0')),
+            'sort_order' => (int) $request->input('sort_order', '0'),
+            'active' => $request->input('active') ? 1 : 0,
+        ];
+    }
+
+    private function validateRule(array $data): ?string
+    {
+        if ($data['time_value'] <= 0) {
+            return 'Informe a antecedência (maior que zero).';
+        }
+        if ($data['refund_value'] < 0) {
+            return 'Valor de reembolso inválido.';
+        }
+        if ($data['refund_type'] === 'percentage' && $data['refund_value'] > 100) {
+            return 'Para reembolso percentual, o valor não pode passar de 100%.';
+        }
+        return null;
     }
 
     /**
@@ -239,6 +335,8 @@ class CancellationsController extends Controller
         $id = (int) $request->param('id');
         $refundAmount = (float) $request->input('refund_amount', '0');
         $refundNotes = trim($request->input('refund_notes', ''));
+        $refundPercentage = $request->input('refund_percentage', null);
+        $appliedRuleLabel = trim((string) $request->input('applied_rule_label', '')) ?: null;
         $cancellation = $this->cancellationModel->find($id);
 
         if (!$cancellation) {
@@ -253,19 +351,36 @@ class CancellationsController extends Controller
             return;
         }
 
-        if ($refundAmount <= 0) {
+        if ($refundAmount < 0) {
             $this->flash('error', 'Informe um valor de reembolso válido.');
             $this->redirect('/admin/cancelamentos/' . $id);
             return;
         }
 
-        $this->cancellationModel->markRefunded($id, $refundAmount, $refundNotes);
+        // Determina o status do reembolso conforme o valor vs. o valor pago.
+        $booking = $this->bookingModel->find((int) $cancellation['booking_id']);
+        $paid = (float) ($booking['paid_amount'] ?? 0);
+        if ($refundAmount <= 0) {
+            $refundStatus = 'none';       // sem reembolso
+        } elseif ($paid > 0 && $refundAmount < $paid) {
+            $refundStatus = 'partial_refund'; // reembolso parcial
+        } else {
+            $refundStatus = 'refunded';   // integral
+        }
+
+        $this->cancellationModel->markRefundedWithStatus(
+            $id,
+            $refundAmount,
+            $refundStatus,
+            $refundNotes,
+            $refundPercentage !== null && $refundPercentage !== '' ? (float) $refundPercentage : null,
+            $appliedRuleLabel
+        );
 
         // Atualizar status do booking para refunded
         $this->bookingModel->updateStatus((int) $cancellation['booking_id'], 'refunded');
 
-        // Enviar email ao cliente
-        $booking = $this->bookingModel->find((int) $cancellation['booking_id']);
+        // Enviar email ao cliente ($booking já carregado acima)
         $clientEmail = $booking['billing_email'] ?? '';
         $clientName = ($booking['billing_first_name'] ?? '') . ' ' . ($booking['billing_last_name'] ?? '');
         $bookingItems = $this->db->fetchAll(

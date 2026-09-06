@@ -290,6 +290,11 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
 
     // Cancelamentos
     $router->get('/cancelamentos', [AdminCancellationsController::class, 'index'], [], 'admin.cancellations.index');
+    // Regras de cancelamento (antes de /{id} para não colidir)
+    $router->get('/cancelamentos/regras', [AdminCancellationsController::class, 'rules'], [], 'admin.cancellations.rules');
+    $router->post('/cancelamentos/regras/criar', [AdminCancellationsController::class, 'storeRule'], [CsrfMiddleware::class], 'admin.cancellations.rules.store');
+    $router->post('/cancelamentos/regras/{id}/editar', [AdminCancellationsController::class, 'updateRule'], [CsrfMiddleware::class], 'admin.cancellations.rules.update');
+    $router->post('/cancelamentos/regras/{id}/excluir', [AdminCancellationsController::class, 'deleteRule'], [CsrfMiddleware::class], 'admin.cancellations.rules.delete');
     $router->get('/cancelamentos/{id}', [AdminCancellationsController::class, 'show'], [], 'admin.cancellations.show');
     $router->post('/cancelamentos/{id}/aprovar', [AdminCancellationsController::class, 'approve'], [CsrfMiddleware::class], 'admin.cancellations.approve');
     $router->post('/cancelamentos/{id}/rejeitar', [AdminCancellationsController::class, 'reject'], [CsrfMiddleware::class], 'admin.cancellations.reject');

@@ -142,6 +142,21 @@ class AccountController extends Controller
             [(int) $user['id']]
         );
 
+        // Estimativa de reembolso por reserva (com base nas regras cadastradas)
+        $policyService = new \App\Services\CancellationPolicyService();
+        foreach ($bookings as &$bk) {
+            // Só estima para reservas ainda ativas (não canceladas/reembolsadas)
+            if (in_array($bk['status'] ?? '', ['cancelled', 'refunded'], true)) {
+                $bk['refund_estimate'] = null;
+                continue;
+            }
+            $bk['refund_estimate'] = $policyService->evaluate(
+                (int) $bk['id'],
+                (float) ($bk['paid_amount'] ?? 0)
+            );
+        }
+        unset($bk);
+
         $this->view('frontend/account/cancellations', [
             'bookings' => $bookings,
             'currentPage' => $page,

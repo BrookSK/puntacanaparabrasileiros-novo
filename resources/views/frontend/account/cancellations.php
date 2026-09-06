@@ -28,7 +28,26 @@
                 </td>
                 <td>
                     <?php if (in_array($b['status'], ['booked', 'pending', 'partially_paid']) && empty($b['cancellation_request_id'])): ?>
-                    <button type="button" class="btn btn-sm btn-danger" onclick="openCancelModal(<?= (int)$b['id'] ?>, '<?= e($b['booking_number'] ?? '#' . (int)$b['id']) ?>')">Solicitar Cancelamento</button>
+                    <?php
+                        $est = $b['refund_estimate'] ?? null;
+                        $estText = '';
+                        $estColor = '#64748b';
+                        if ($est && !empty($est['has_rules']) && !empty($est['travel_at'])) {
+                            $estAmount = money((float)$est['refund_amount']);
+                            if ((float)$est['refund_amount'] <= 0) {
+                                $estText = 'Sem reembolso (fora do prazo)';
+                                $estColor = '#b91c1c';
+                            } else {
+                                $pct = $est['refund_percentage'] !== null ? ' (' . rtrim(rtrim(number_format((float)$est['refund_percentage'], 2), '0'), '.') . '%)' : '';
+                                $estText = 'Reembolso estimado: ' . $estAmount . $pct;
+                                $estColor = '#166534';
+                            }
+                        }
+                    ?>
+                    <?php if ($estText !== ''): ?>
+                    <div style="font-size:12px;color:<?= $estColor ?>;margin-bottom:6px;font-weight:600;"><?= e($estText) ?></div>
+                    <?php endif; ?>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="openCancelModal(<?= (int)$b['id'] ?>, '<?= e($b['booking_number'] ?? '#' . (int)$b['id']) ?>', '<?= e($estText) ?>')">Solicitar Cancelamento</button>
 
                     <?php elseif (!empty($b['cancellation_request_id'])): ?>
                         <?php if ($b['cancellation_status'] === 'pending'): ?>
@@ -76,6 +95,7 @@
             <input type="hidden" name="booking_id" id="cancelBookingId" value="">
             <div class="modal-body">
                 <p class="modal-subtitle">Reserva: <strong id="cancelBookingNumber"></strong></p>
+                <div id="cancelRefundEstimate" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:10px 14px;font-size:13px;color:#166534;margin-bottom:14px;font-weight:600;"></div>
                 <div class="form-group">
                     <label for="cancellation_reason">Motivo do cancelamento <span style="color:#e74c3c">*</span></label>
                     <textarea name="cancellation_reason" id="cancellation_reason" class="form-control" rows="4" required placeholder="Informe o motivo pelo qual deseja cancelar esta reserva..."></textarea>
@@ -108,10 +128,17 @@
 
 <script>
 // Modal de solicitar cancelamento
-function openCancelModal(bookingId, bookingNumber) {
+function openCancelModal(bookingId, bookingNumber, refundEstimate) {
     document.getElementById('cancelBookingId').value = bookingId;
     document.getElementById('cancelBookingNumber').textContent = bookingNumber;
     document.getElementById('cancellation_reason').value = '';
+    var estBox = document.getElementById('cancelRefundEstimate');
+    if (refundEstimate && refundEstimate.trim() !== '') {
+        estBox.textContent = refundEstimate;
+        estBox.style.display = 'block';
+    } else {
+        estBox.style.display = 'none';
+    }
     document.getElementById('cancelModal').classList.remove('modal-hidden');
     document.body.style.overflow = 'hidden';
 }
