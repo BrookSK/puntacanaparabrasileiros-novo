@@ -25,6 +25,30 @@ class VoucherService
     }
 
     /**
+     * Grava o HTML do voucher no disco de forma resiliente:
+     * cria a pasta se necessário e nunca deixa o warning do PHP vazar para a página.
+     * Retorna true em sucesso, false em falha (a falha é logada, não interrompe o fluxo).
+     */
+    private function saveVoucherHtml(string $filePath, string $html): bool
+    {
+        try {
+            $dir = dirname($filePath);
+            if (!is_dir($dir)) {
+                @mkdir($dir, 0775, true);
+            }
+            $bytes = @file_put_contents($filePath, $html);
+            if ($bytes === false) {
+                error_log('[VoucherService] Não foi possível gravar o voucher em ' . $filePath . ' (verifique permissões da pasta uploads/vouchers).');
+                return false;
+            }
+            return true;
+        } catch (\Throwable $e) {
+            error_log('[VoucherService] Erro ao gravar voucher: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
      * Gera voucher HTML para um item de booking (trip).
      */
     public function generateTripVoucher(int $bookingId, int $bookingItemId): array
@@ -59,7 +83,7 @@ class VoucherService
         $safeTitle = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($item['trip_title'] ?? 'passeio'));
         $filename = "Voucher-Viagem-{$safeTitle}-{$reference}.html";
         $filePath = $this->vouchersPath . '/' . $filename;
-        file_put_contents($filePath, $html);
+        $this->saveVoucherHtml($filePath, $html);
 
         // Registrar no banco
         $voucherId = $this->voucherModel->create([
@@ -125,7 +149,7 @@ class VoucherService
         $safeRoute = preg_replace('/[^a-z0-9]+/', '-', mb_strtolower(($transfer['origin_title'] ?? '') . '-' . ($transfer['destination_title'] ?? '')));
         $filename = "Voucher-Transfer-{$safeRoute}-{$reference}.html";
         $filePath = $this->vouchersPath . '/' . $filename;
-        file_put_contents($filePath, $html);
+        $this->saveVoucherHtml($filePath, $html);
 
         $voucherId = $this->voucherModel->create([
             'booking_id' => $transfer['booking_id'],
