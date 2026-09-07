@@ -232,6 +232,8 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/reservas/{id}', [AdminBookingsController::class, 'show'], [], 'admin.bookings.show');
     $router->post('/reservas/{id}/status', [AdminBookingsController::class, 'updateStatus'], [CsrfMiddleware::class], 'admin.bookings.status');
     $router->post('/reservas/{id}/agencia', [AdminBookingsController::class, 'assignAgency'], [CsrfMiddleware::class], 'admin.bookings.assign_agency');
+    $router->post('/reservas/{id}/pagar-restante', [AdminBookingsController::class, 'registerRemainingPayment'], [CsrfMiddleware::class], 'admin.bookings.pay_remaining');
+    $router->post('/reservas/{id}/devolver-sinal', [AdminBookingsController::class, 'refundDeposit'], [CsrfMiddleware::class], 'admin.bookings.refund_deposit');
 
     // Vouchers
     $router->get('/vouchers', [AdminVouchersController::class, 'index'], [], 'admin.vouchers.index');

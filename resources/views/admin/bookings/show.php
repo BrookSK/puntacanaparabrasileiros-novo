@@ -287,9 +287,24 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
                                 <?php endif; ?>
                             </span>
+                            <?php
+                                $payTypeLabels = [
+                                    'full' => 'Pagamento total', 'partial' => 'Sinal (parcial)', 'remaining' => 'Restante (presencial)',
+                                    'deposit_refund' => 'Devolução do sinal', 'manual_full' => 'Total presencial',
+                                ];
+                                $methodLabels = [
+                                    'dinheiro' => 'Dinheiro', 'pix' => 'PIX', 'cartao' => 'Cartão',
+                                    'transferencia' => 'Transferência', 'outro' => 'Outro',
+                                ];
+                                $ptype = $pay['type'] ?? '';
+                                $pmethod = $pay['method'] ?? '';
+                            ?>
                             <div>
-                                <strong><?= e(ucfirst($pay['gateway'] ?? '-')) ?></strong>
-                                <small><?= e($pay['type'] ?? '-') ?></small>
+                                <strong><?= e($payTypeLabels[$ptype] ?? ucfirst($ptype ?: ($pay['gateway'] ?? '-'))) ?></strong>
+                                <small>
+                                    <?= e(ucfirst($pay['gateway'] ?? '')) ?><?= !empty($pmethod) ? ' • ' . e($methodLabels[$pmethod] ?? $pmethod) : '' ?>
+                                    <?php if (!empty($pay['notes'])): ?><br><span style="color:#94a3b8;"><?= e(mb_strimwidth($pay['notes'], 0, 60, '...')) ?></span><?php endif; ?>
+                                </small>
                             </div>
                         </div>
                     </div>
@@ -478,6 +493,44 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
             </div>
         </div>
 
+        <!-- Card: Controle de Caução / Sinal -->
+        <?php
+            $bkPaid = (float) ($booking['paid_amount'] ?? 0);
+            $bkDue = (float) ($booking['due_amount'] ?? 0);
+            $bkTotal = (float) ($booking['total'] ?? 0);
+            $hasDeposit = $bkPaid > 0 && $bkPaid < $bkTotal; // pagou sinal e ainda falta
+        ?>
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-icon admin-card-icon-orange">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                </div>
+                <div>
+                    <h3>Caução / Sinal</h3>
+                    <p class="admin-card-subtitle">Controle do sinal pago pelo cliente</p>
+                </div>
+            </div>
+            <div style="padding:0 4px;">
+                <div class="summary-row"><span class="summary-row-label">Sinal pago</span><span class="summary-row-value" style="color:#16a34a;"><?= money($bkPaid) ?></span></div>
+                <div class="summary-row"><span class="summary-row-label">Restante a pagar</span><span class="summary-row-value" style="color:<?= $bkDue > 0 ? '#ea580c' : '#16a34a' ?>;"><?= money($bkDue) ?></span></div>
+
+                <?php if ($bkPaid <= 0): ?>
+                <p style="font-size:13px;color:#94a3b8;margin-top:12px;">Nenhum sinal registrado nesta reserva.</p>
+                <?php elseif ($bkDue <= 0): ?>
+                <p style="font-size:13px;color:#16a34a;margin-top:12px;">Reserva quitada.</p>
+                <?php else: ?>
+                <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+                    <button type="button" class="btn btn-sm btn-primary btn-block" onclick="document.getElementById('modalRemaining').classList.add('open')">
+                        Manter sinal e registrar pagamento do restante
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline btn-block" onclick="document.getElementById('modalRefundDeposit').classList.add('open')">
+                        Devolver a caução (cliente paga tudo presencial)
+                    </button>
+                </div>
+                <?php endif; ?>
+            </div>
+        </div>
+
         <!-- Card: Agência Parceira -->
         <div class="admin-card">
             <div class="admin-card-header">
@@ -628,3 +681,82 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
 
     </div><!-- .booking-detail-right -->
 </div><!-- .booking-detail-grid -->
+
+<!-- ══════════ Modais de Caução/Sinal ══════════ -->
+<?php $methodOptions = ['dinheiro' => 'Dinheiro', 'pix' => 'PIX', 'cartao' => 'Cartão', 'transferencia' => 'Transferência', 'outro' => 'Outro']; ?>
+
+<!-- Modal: Registrar pagamento do restante (mantém o sinal) -->
+<div class="dep-modal-overlay" id="modalRemaining">
+    <div class="dep-modal">
+        <h3>Registrar pagamento do restante</h3>
+        <p>O cliente <strong>mantém o sinal</strong> e paga o valor restante presencialmente.</p>
+        <form method="POST" action="/admin/reservas/<?= (int)$booking['id'] ?>/pagar-restante">
+            <?= csrf_field() ?>
+            <div class="form-group">
+                <label>Valor recebido (USD)</label>
+                <input type="number" step="0.01" min="0.01" name="amount" class="form-control" value="<?= number_format((float)($booking['due_amount'] ?? 0), 2, '.', '') ?>" required>
+                <small class="form-hint">Sugerido: valor restante da reserva.</small>
+            </div>
+            <div class="form-group">
+                <label>Forma de pagamento</label>
+                <select name="method" class="form-control">
+                    <?php foreach ($methodOptions as $mk => $mv): ?><option value="<?= $mk ?>"><?= $mv ?></option><?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Observações (opcional)</label>
+                <input type="text" name="notes" class="form-control" placeholder="Ex: pago no local no dia do passeio">
+            </div>
+            <div class="dep-modal-actions">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('modalRemaining').classList.remove('open')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Registrar pagamento</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Devolver a caução -->
+<div class="dep-modal-overlay" id="modalRefundDeposit">
+    <div class="dep-modal">
+        <h3>Devolver a caução / sinal</h3>
+        <p>Registra a <strong>devolução do sinal</strong> de <strong><?= money((float)($booking['paid_amount'] ?? 0)) ?></strong> ao cliente.</p>
+        <form method="POST" action="/admin/reservas/<?= (int)$booking['id'] ?>/devolver-sinal">
+            <?= csrf_field() ?>
+            <div class="form-group">
+                <label>Forma da devolução</label>
+                <select name="method" class="form-control">
+                    <?php foreach ($methodOptions as $mk => $mv): ?><option value="<?= $mk ?>"><?= $mv ?></option><?php endforeach; ?>
+                </select>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:8px;font-weight:400;">
+                    <input type="checkbox" name="register_full" value="1" checked>
+                    O cliente pagou o valor total (<?= money((float)($booking['total'] ?? 0)) ?>) presencialmente
+                </label>
+                <small class="form-hint">Marcado: devolve o sinal e registra o pagamento total, quitando a reserva. Desmarcado: só devolve o sinal e a reserva volta a dever o valor integral.</small>
+            </div>
+            <div class="form-group">
+                <label>Observações (opcional)</label>
+                <input type="text" name="notes" class="form-control" placeholder="Ex: sinal devolvido em dinheiro no local">
+            </div>
+            <div class="dep-modal-actions">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('modalRefundDeposit').classList.remove('open')">Cancelar</button>
+                <button type="submit" class="btn btn-danger">Confirmar devolução</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.dep-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:9999;padding:16px}
+.dep-modal-overlay.open{display:flex}
+.dep-modal{background:#fff;border-radius:12px;max-width:460px;width:100%;padding:24px}
+.dep-modal h3{margin:0 0 8px;font-size:18px;color:#0f172a}
+.dep-modal p{margin:0 0 16px;font-size:13.5px;color:#64748b}
+.dep-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+</style>
+<script>
+document.querySelectorAll('.dep-modal-overlay').forEach(function(o){
+    o.addEventListener('click', function(e){ if(e.target === o) o.classList.remove('open'); });
+});
+</script>

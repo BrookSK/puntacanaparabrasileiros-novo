@@ -161,6 +161,140 @@ class BookingsController extends Controller
         $this->redirect('/admin/reservas/' . $id);
     }
 
+    // ══════════════════════════════════════════════════════════════
+    // CONTROLE DE CAUÇÃO / SINAL
+    // ══════════════════════════════════════════════════════════════
+
+    private const PAYMENT_METHODS = ['dinheiro', 'pix', 'cartao', 'transferencia', 'outro'];
+
+    /**
+     * Registra o pagamento presencial do RESTANTE (cliente mantém o sinal).
+     * Soma ao paid_amount, reduz o due_amount e registra em payments.
+     */
+    public function registerRemainingPayment(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $amount = round((float) $request->input('amount', '0'), 2);
+        $method = $request->input('method', 'dinheiro');
+        $notes = trim((string) $request->input('notes', ''));
+
+        $booking = $this->bookingModel->find($id);
+        if (!$booking) {
+            $this->flash('error', 'Reserva não encontrada.');
+            $this->redirect('/admin/reservas');
+            return;
+        }
+        if (!in_array($method, self::PAYMENT_METHODS, true)) {
+            $method = 'outro';
+        }
+        if ($amount <= 0) {
+            $this->flash('error', 'Informe um valor válido.');
+            $this->redirect('/admin/reservas/' . $id);
+            return;
+        }
+
+        $newPaid = round((float) ($booking['paid_amount'] ?? 0) + $amount, 2);
+        $newDue = round(max(0, (float) ($booking['total'] ?? 0) - $newPaid), 2);
+
+        // Registra o pagamento manual do restante
+        $this->db->insert('payments', [
+            'booking_id' => $id,
+            'gateway' => 'manual',
+            'transaction_id' => 'MANUAL-' . strtoupper(bin2hex(random_bytes(4))),
+            'amount' => $amount,
+            'currency' => $booking['currency'] ?? 'USD',
+            'status' => 'completed',
+            'type' => 'remaining',
+            'method' => $method,
+            'notes' => $notes ?: 'Pagamento presencial do valor restante (sinal mantido).',
+        ]);
+
+        // Atualiza os valores da reserva; se quitou, marca como concluída
+        $update = ['paid_amount' => $newPaid, 'due_amount' => $newDue];
+        if ($newDue <= 0 && in_array($booking['status'] ?? '', ['pending', 'partially_paid', 'booked'], true)) {
+            $update['status'] = 'completed';
+        }
+        $this->bookingModel->update($id, $update);
+
+        $this->flash('success', 'Pagamento do restante registrado (' . money($amount) . '). Sinal mantido.');
+        $this->redirect('/admin/reservas/' . $id);
+    }
+
+    /**
+     * Devolve a caução/sinal e (opcionalmente) registra o pagamento TOTAL presencial.
+     * Registra a devolução do sinal em payments (deposit_refund) e o pagamento total.
+     */
+    public function refundDeposit(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $method = $request->input('method', 'dinheiro');
+        $notes = trim((string) $request->input('notes', ''));
+        $registerFullPayment = $request->input('register_full') ? true : false;
+
+        $booking = $this->bookingModel->find($id);
+        if (!$booking) {
+            $this->flash('error', 'Reserva não encontrada.');
+            $this->redirect('/admin/reservas');
+            return;
+        }
+        if (!in_array($method, self::PAYMENT_METHODS, true)) {
+            $method = 'outro';
+        }
+
+        $deposit = round((float) ($booking['paid_amount'] ?? 0), 2);
+        if ($deposit <= 0) {
+            $this->flash('error', 'Esta reserva não possui sinal pago para devolver.');
+            $this->redirect('/admin/reservas/' . $id);
+            return;
+        }
+
+        // 1) Registra a devolução do sinal (valor informativo do que foi estornado)
+        $this->db->insert('payments', [
+            'booking_id' => $id,
+            'gateway' => 'manual',
+            'transaction_id' => 'REFUND-' . strtoupper(bin2hex(random_bytes(4))),
+            'amount' => $deposit,
+            'currency' => $booking['currency'] ?? 'USD',
+            'status' => 'refunded',
+            'type' => 'deposit_refund',
+            'method' => $method,
+            'notes' => $notes ?: 'Devolução da caução/sinal ao cliente.',
+        ]);
+
+        $total = round((float) ($booking['total'] ?? 0), 2);
+
+        if ($registerFullPayment) {
+            // 2) Cliente pagou o total presencialmente após a devolução do sinal.
+            $this->db->insert('payments', [
+                'booking_id' => $id,
+                'gateway' => 'manual',
+                'transaction_id' => 'MANUAL-' . strtoupper(bin2hex(random_bytes(4))),
+                'amount' => $total,
+                'currency' => $booking['currency'] ?? 'USD',
+                'status' => 'completed',
+                'type' => 'manual_full',
+                'method' => $method,
+                'notes' => 'Pagamento total presencial (após devolução do sinal).',
+            ]);
+            // Reserva quitada: total pago, nada pendente
+            $this->bookingModel->update($id, [
+                'paid_amount' => $total,
+                'due_amount' => 0,
+                'status' => 'completed',
+            ]);
+            $this->flash('success', 'Sinal de ' . money($deposit) . ' devolvido e pagamento total de ' . money($total) . ' registrado.');
+        } else {
+            // Só devolveu o sinal: reserva volta a dever o valor integral.
+            $this->bookingModel->update($id, [
+                'paid_amount' => 0,
+                'due_amount' => $total,
+            ]);
+            $this->flash('success', 'Sinal de ' . money($deposit) . ' devolvido. A reserva volta a ter o valor integral a pagar.');
+        }
+
+        $this->redirect('/admin/reservas/' . $id);
+    }
+
     public function updateStatus(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
