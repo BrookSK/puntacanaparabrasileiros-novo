@@ -412,7 +412,7 @@ class PageController extends Controller
         $tripModel = new \App\Models\Trip();
         $packageModel = new \App\Models\TripPackage();
 
-        $trips = $tripModel->getPublished(1, 50, 'sort_order ASC');
+        $trips = $tripModel->getPublished(1, 50, 'relevancia');
         foreach ($trips['items'] as &$trip) {
             $packages = $packageModel->getByTrip((int) $trip['id']);
             $trip['min_price'] = 0;
@@ -450,7 +450,7 @@ class PageController extends Controller
         $tripModel = new \App\Models\Trip();
         $packageModel = new \App\Models\TripPackage();
 
-        $trips = $tripModel->getPublished(1, 50, 'sort_order ASC');
+        $trips = $tripModel->getPublished(1, 50, 'relevancia');
         foreach ($trips['items'] as &$trip) {
             // Usa o mesmo pacote base (sort_order ASC) que a página /catalogo
             $packages = $packageModel->getByTrip((int) $trip['id']);

@@ -31,12 +31,16 @@ class TripsController extends Controller
         $status = $request->query('status');
         $search = $request->query('busca');
 
+        // Ordenação automática: mais novo primeiro (created_at DESC).
+        // sort_order fica como desempate opcional (destaque manual futuro): quem tiver
+        // sort_order maior sobe. Como por padrão é 0 para todos, o critério efetivo é a data.
+        $order = 'sort_order DESC, created_at DESC';
         if ($search) {
-            $trips = $this->tripModel->paginate($page, 20, "title LIKE ?", ['%' . $search . '%'], 'created_at DESC');
+            $trips = $this->tripModel->paginate($page, 20, "title LIKE ?", ['%' . $search . '%'], $order);
         } elseif ($status) {
-            $trips = $this->tripModel->paginate($page, 20, "status = ?", [$status], 'created_at DESC');
+            $trips = $this->tripModel->paginate($page, 20, "status = ?", [$status], $order);
         } else {
-            $trips = $this->tripModel->paginate($page, 20, '1=1', [], 'sort_order ASC, created_at DESC');
+            $trips = $this->tripModel->paginate($page, 20, '1=1', [], $order);
         }
 
         $this->view('admin/trips/index', [

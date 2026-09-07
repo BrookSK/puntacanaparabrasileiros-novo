@@ -72,9 +72,9 @@ class Trip extends Model
             $orderMap = [
                 'recente' => 'created_at DESC',
                 'antigo' => 'created_at ASC',
-                'relevancia' => 'sort_order ASC, created_at DESC',
+                'relevancia' => 'sort_order DESC, created_at DESC',
             ];
-            $order = $orderMap[$orderBy] ?? 'sort_order ASC, created_at DESC';
+            $order = $orderMap[$orderBy] ?? 'sort_order DESC, created_at DESC';
             $items = $this->db->fetchAll(
                 "SELECT * FROM `{$this->table}` WHERE status = 'published' ORDER BY {$order} LIMIT ? OFFSET ?",
                 [$perPage, $offset]
@@ -99,7 +99,7 @@ class Trip extends Model
         return $this->where(
             "status = 'published' AND featured = 1",
             [],
-            'sort_order ASC',
+            'sort_order DESC, created_at DESC',
             $limit
         );
     }
@@ -126,9 +126,9 @@ class Trip extends Model
             $orderMap = [
                 'recente' => 't.created_at DESC',
                 'antigo' => 't.created_at ASC',
-                'relevancia' => 't.sort_order ASC, t.created_at DESC',
+                'relevancia' => 't.sort_order DESC, t.created_at DESC',
             ];
-            $order = $orderMap[$orderBy] ?? 't.sort_order ASC, t.created_at DESC';
+            $order = $orderMap[$orderBy] ?? 't.sort_order DESC, t.created_at DESC';
             $sql = "SELECT t.* FROM `{$this->table}` t
                     INNER JOIN trip_category_relations tcr ON t.id = tcr.trip_id
                     WHERE tcr.category_id = ? AND t.status = 'published'
@@ -385,9 +385,9 @@ class Trip extends Model
         } else {
             $orderMap = [
                 'recente' => 'ORDER BY t.created_at DESC',
-                'relevancia' => 'ORDER BY t.sort_order ASC, t.created_at DESC',
+                'relevancia' => 'ORDER BY t.sort_order DESC, t.created_at DESC',
             ];
-            $orderSql = $orderMap[$orderBy] ?? 'ORDER BY t.sort_order ASC, t.created_at DESC';
+            $orderSql = $orderMap[$orderBy] ?? 'ORDER BY t.sort_order DESC, t.created_at DESC';
         }
 
         // Query principal
