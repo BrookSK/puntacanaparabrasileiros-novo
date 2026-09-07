@@ -421,7 +421,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                              Para voltar a exibir, troque o hidden por um input number visível. */ ?>
                     <input type="hidden" name="sort_order" value="<?= e($trip['sort_order'] ?? '0') ?>">
                     <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="featured" <?= !empty($trip['featured']) ? 'checked' : '' ?>> Passeio em Destaque</label></div>
-                    <div class="form-group"><label>Imagem Destacada</label><div class="file-upload-area"><input type="file" name="featured_image" id="featImg" class="file-input-hidden" accept="image/*"><label for="featImg" class="file-upload-label"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Escolher imagem</span></label><?php if ($isEdit && !empty($trip['featured_image'])): ?><div class="file-upload-preview"><img src="<?= e($trip['featured_image']) ?>" alt=""></div><?php endif; ?></div></div>
+                    <div class="form-group"><label>Imagem Destacada</label><div class="file-upload-area"><input type="file" name="featured_image" id="featImg" class="file-input-hidden" accept="image/*"><label for="featImg" class="file-upload-label"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Escolher imagem</span></label><?php if ($isEdit && !empty($trip['featured_image'])): ?><div class="file-upload-preview"><img src="<?= e($trip['featured_image']) ?>" alt=""></div><?php endif; ?></div><small class="form-hint">JPG, PNG ou WebP. Recomendado: 1200x800px (proporção 3:2, paisagem).</small></div>
                     <div class="form-group">
                         <label>Galeria de Fotos</label>
                         <p style="font-size:11px;color:#94a3b8;margin-bottom:10px;">Adicione imagens ao carrossel do passeio (apenas upload)</p>
@@ -451,7 +451,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                             </label>
                             <input type="file" name="gallery_files[]" id="galleryFiles" multiple accept="image/*" style="display:none;" onchange="previewGalleryFiles(this)">
                             <span id="galleryCount" style="font-size:12px;color:#94a3b8;margin-left:10px;"></span>
-                            <p style="font-size:10px;color:#94a3b8;margin-top:6px;">JPG, PNG, WebP, GIF, SVG, AVIF — Máx. 10MB cada</p>
+                            <p style="font-size:10px;color:#94a3b8;margin-top:6px;">JPG, PNG, WebP, GIF, SVG, AVIF — Máx. 10MB cada. Recomendado: 1200x800px (proporção 3:2, paisagem).</p>
                             <div id="galleryPreviews" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
                         </div>
                     </div>

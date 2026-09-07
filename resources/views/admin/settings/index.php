@@ -74,6 +74,7 @@
                         <span>Escolher imagem</span>
                     </label>
                 </div>
+                <small class="form-hint">PNG com fundo transparente. Recomendado: 400x120px (formato horizontal).</small>
             </div>
         </div>
     </div>
@@ -244,6 +245,7 @@
                     <input type="file" name="voucher_logo" id="voucherLogo" class="file-input-hidden" accept="image/*">
                     <label for="voucherLogo" class="file-upload-label"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Escolher imagem</span></label>
                 </div>
+                <small class="form-hint">PNG com fundo transparente. Recomendado: 300x100px (formato horizontal).</small>
             </div>
             <div class="form-group"><label>Texto de Rodapé</label><textarea name="voucher_footer_text" class="form-control" rows="2"><?= e($settings['vouchers']['voucher_footer_text']['setting_value'] ?? '') ?></textarea></div>
             <div class="form-group"><label>Instruções Padrão</label><textarea name="voucher_instructions" class="form-control" rows="3"><?= e($settings['vouchers']['voucher_instructions']['setting_value'] ?? '') ?></textarea></div>
