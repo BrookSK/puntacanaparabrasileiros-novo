@@ -402,6 +402,7 @@ class CancellationsController extends Controller
                     'bookingNumber' => $booking['booking_number'] ?? '',
                     'serviceName' => $serviceName,
                     'bookingTotal' => $booking['total'] ?? 0,
+                    'paidAmount' => $booking['paid_amount'] ?? 0,
                     'refundAmount' => $refundAmount,
                     'statusLabel' => 'Reembolsado',
                     'statusColor' => '#1B6F00',
@@ -409,7 +410,7 @@ class CancellationsController extends Controller
                     'blockquoteText' => $refundNotes ?: null,
                     'blockquoteColor' => '#3772C0',
                     'blockquoteBg' => '#eff6ff',
-                    'additionalMessage' => 'O valor será creditado de acordo com o meio de pagamento utilizado na compra.',
+                    'additionalMessage' => 'O reembolso corresponde ao valor efetivamente pago de forma antecipada. O restante da reserva não havia sido cobrado. O valor será creditado de acordo com o meio de pagamento utilizado na compra.',
                     'ctaUrl' => url('/minha-conta/cancelamentos'),
                     'ctaText' => 'Ver Meus Cancelamentos',
                 ]

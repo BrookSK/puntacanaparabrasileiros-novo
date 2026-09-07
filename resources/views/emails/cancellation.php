@@ -38,6 +38,12 @@
                     <td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:600;border-top:1px solid #f0f0f0;">$<?= number_format((float)$bookingTotal, 2) ?></td>
                 </tr>
                 <?php endif; ?>
+                <?php if (isset($paidAmount) && $paidAmount !== null): ?>
+                <tr>
+                    <td style="padding:8px 0;font-size:13px;color:#64748b;border-top:1px solid #f0f0f0;">Valor pago antecipado</td>
+                    <td style="padding:8px 0;font-size:14px;color:#1e293b;font-weight:600;border-top:1px solid #f0f0f0;">$<?= number_format((float)$paidAmount, 2) ?></td>
+                </tr>
+                <?php endif; ?>
                 <?php if (!empty($refundAmount)): ?>
                 <tr>
                     <td style="padding:8px 0;font-size:13px;color:#64748b;border-top:1px solid #f0f0f0;">Valor Reembolsado</td>
