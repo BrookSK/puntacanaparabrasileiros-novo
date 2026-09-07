@@ -9,6 +9,7 @@ use Core\Response;
 use App\Models\VideoCallBooking;
 use App\Models\Trip;
 use App\Services\VideoCallNotifier;
+use App\Services\GoogleMeetService;
 
 /**
  * Agendamento de chamadas de vídeo pelo cliente (na página do passeio).
@@ -130,7 +131,9 @@ class VideoCallController extends Controller
         }
 
         $duration = (int) $this->setting('videocall_duration', '30');
-        $meetingLink = $this->generateMeetingLink($name, $scheduledAt);
+
+        // Cria a reunião: tenta Google Meet (Calendar API) e cai para Jitsi se indisponível.
+        $meeting = $this->createMeeting($name, $email, $scheduledAt, $duration > 0 ? $duration : 30, $trip['title'] ?? '', $notes);
 
         $id = $this->model->create([
             'trip_id' => $tripId,
@@ -139,10 +142,14 @@ class VideoCallController extends Controller
             'phone' => $phone,
             'scheduled_at' => $scheduledAt,
             'duration_minutes' => $duration > 0 ? $duration : 30,
-            'meeting_link' => $meetingLink,
+            'meeting_link' => $meeting['meeting_link'],
+            'google_event_id' => $meeting['google_event_id'],
+            'google_calendar_id' => $meeting['google_calendar_id'],
             'status' => 'pending',
             'notes' => $notes,
         ]);
+
+        $meetingLink = $meeting['meeting_link'];
 
         // Notificar cliente + empresa (não bloqueia a resposta em caso de falha)
         try {
@@ -205,7 +212,63 @@ class VideoCallController extends Controller
     }
 
     /**
+     * Cria a reunião. Tenta o Google Meet (Google Calendar API) e, se a integração
+     * não estiver configurada ou falhar, cai automaticamente para o Jitsi Meet.
+     *
+     * @return array{meeting_link:string, google_event_id:?string, google_calendar_id:?string}
+     */
+    private function createMeeting(
+        string $name,
+        string $email,
+        string $scheduledAt,
+        int $duration,
+        string $tripTitle,
+        string $notes
+    ): array {
+        try {
+            $google = new GoogleMeetService();
+            if ($google->isConfigured()) {
+                $site = $this->setting('site_name', 'Punta Cana para Brasileiros');
+                $summary = 'Chamada de vídeo - ' . $name . ($tripTitle !== '' ? ' (' . $tripTitle . ')' : '');
+                $description = "Chamada de vídeo agendada pelo site {$site}.\n"
+                    . "Cliente: {$name}\n"
+                    . ($tripTitle !== '' ? "Passeio: {$tripTitle}\n" : '')
+                    . ($notes !== '' ? "Observações: {$notes}\n" : '');
+                $timezone = (string) $this->setting('google_meet_timezone', 'America/Santo_Domingo') ?: 'America/Santo_Domingo';
+
+                $result = $google->createMeeting(
+                    $summary,
+                    $description,
+                    $scheduledAt,
+                    $duration,
+                    $timezone,
+                    [$email]
+                );
+
+                if ($result !== null) {
+                    return [
+                        'meeting_link' => $result['meeting_link'],
+                        'google_event_id' => $result['event_id'],
+                        'google_calendar_id' => $result['calendar_id'],
+                    ];
+                }
+                error_log('[VideoCallController] Google Meet falhou; usando fallback Jitsi.');
+            }
+        } catch (\Throwable $e) {
+            error_log('[VideoCallController] Erro na integração Google Meet: ' . $e->getMessage());
+        }
+
+        // Fallback: Jitsi Meet (sem necessidade de API/auth).
+        return [
+            'meeting_link' => $this->generateMeetingLink($name, $scheduledAt),
+            'google_event_id' => null,
+            'google_calendar_id' => null,
+        ];
+    }
+
+    /**
      * Gera o link da reunião no Jitsi Meet (sem necessidade de API/auth).
+     * Usado como fallback quando o Google Meet não está configurado ou falha.
      */
     private function generateMeetingLink(string $name, string $scheduledAt): string
     {

@@ -10,8 +10,8 @@ class VideoCallBooking extends Model
     protected string $table = 'videocall_bookings';
     protected array $fillable = [
         'trip_id', 'customer_name', 'email', 'phone', 'scheduled_at',
-        'duration_minutes', 'meeting_link', 'status', 'reminder_sent',
-        'notes', 'admin_notes',
+        'duration_minutes', 'meeting_link', 'google_event_id', 'google_calendar_id',
+        'status', 'reminder_sent', 'notes', 'admin_notes',
     ];
 
     /**

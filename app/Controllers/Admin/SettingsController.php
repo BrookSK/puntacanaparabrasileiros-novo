@@ -8,6 +8,7 @@ use Core\Request;
 use Core\Response;
 use App\Models\Setting;
 use App\Services\EmailService;
+use App\Services\GoogleMeetService;
 
 class SettingsController extends Controller
 {
@@ -69,7 +70,7 @@ class SettingsController extends Controller
             'paypal_enabled', 'stripe_enabled', 'pagbank_enabled', 'partial_payment_enabled',
             'whatsapp_enabled', 'affiliate_enabled', 'affiliate_auto_approve',
             'checkout_online_enabled', 'checkout_whatsapp_enabled',
-            'videocall_enabled',
+            'videocall_enabled', 'google_meet_enabled',
         ];
         foreach ($booleanFields as $field) {
             $data[$field] = isset($data[$field]) ? '1' : '0';
@@ -93,6 +94,9 @@ class SettingsController extends Controller
             'videocall_enabled' => 'videocall', 'videocall_days' => 'videocall',
             'videocall_hour_start' => 'videocall', 'videocall_hour_end' => 'videocall',
             'videocall_duration' => 'videocall', 'videocall_reminder_token' => 'videocall',
+            'google_meet_enabled' => 'videocall', 'google_meet_client_id' => 'videocall',
+            'google_meet_client_secret' => 'videocall', 'google_meet_refresh_token' => 'videocall',
+            'google_meet_calendar_id' => 'videocall', 'google_meet_timezone' => 'videocall',
         ];
 
         // Salvar no banco
@@ -152,5 +156,101 @@ class SettingsController extends Controller
         $destination = BASE_PATH . '/public/uploads/' . $filename;
         move_uploaded_file($file['tmp_name'], $destination);
         return '/uploads/' . $filename;
+    }
+
+    // ─────────────────────────────────────────────
+    // Google Meet — fluxo de autorização OAuth 2.0
+    // ─────────────────────────────────────────────
+
+    /**
+     * Inicia o fluxo: redireciona o admin para a tela de consentimento do Google.
+     * GET /admin/google-meet/oauth/start
+     */
+    public function googleMeetOAuthStart(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        if (($user['role'] ?? '') !== 'superadmin') {
+            $this->flash('error', 'Apenas o superadmin pode autorizar o Google Meet.');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        $google = new GoogleMeetService();
+        $clientId = trim((string) $this->setting('google_meet_client_id', ''));
+        $clientSecret = trim((string) $this->setting('google_meet_client_secret', ''));
+        if ($clientId === '' || $clientSecret === '') {
+            $this->flash('error', 'Preencha e salve o Client ID e o Client Secret antes de autorizar.');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        // Guarda um state anti-CSRF na sessão.
+        $state = bin2hex(random_bytes(16));
+        $this->session->set('google_meet_oauth_state', $state);
+
+        $authUrl = $google->buildAuthUrl($this->googleMeetRedirectUri(), $state);
+        $this->redirect($authUrl);
+    }
+
+    /**
+     * Callback do Google: troca o code por tokens e persiste o refresh_token.
+     * GET /admin/google-meet/oauth/callback
+     */
+    public function googleMeetOAuthCallback(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        if (($user['role'] ?? '') !== 'superadmin') {
+            $this->flash('error', 'Acesso negado.');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        $error = (string) $request->query('error', '');
+        if ($error !== '') {
+            $this->flash('error', 'Autorização negada pelo Google: ' . $error);
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        // Valida o state anti-CSRF.
+        $state = (string) $request->query('state', '');
+        $expected = (string) $this->session->get('google_meet_oauth_state', '');
+        $this->session->remove('google_meet_oauth_state');
+        if ($state === '' || !hash_equals($expected, $state)) {
+            $this->flash('error', 'Falha de validação (state). Tente autorizar novamente.');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        $code = (string) $request->query('code', '');
+        if ($code === '') {
+            $this->flash('error', 'Código de autorização ausente.');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        $google = new GoogleMeetService();
+        $tokens = $google->exchangeCodeForTokens($code, $this->googleMeetRedirectUri());
+
+        if ($tokens === null || empty($tokens['refresh_token'])) {
+            $this->flash('error', 'Não foi possível obter o refresh token. Revogue o acesso do app na conta Google e tente novamente (o Google só devolve o refresh_token no primeiro consentimento).');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        $this->settingModel->setWithGroup('google_meet_refresh_token', (string) $tokens['refresh_token'], 'videocall');
+        $this->app->reloadSettings();
+
+        $this->flash('success', 'Conta Google autorizada com sucesso! As reuniões agora serão criadas no Google Meet.');
+        $this->redirect('/admin/configuracoes');
+    }
+
+    /**
+     * URL de redirecionamento registrada no Google Cloud Console.
+     */
+    private function googleMeetRedirectUri(): string
+    {
+        $base = rtrim((string) $this->setting('site_url', ''), '/');
+        return $base . '/admin/google-meet/oauth/callback';
     }
 }

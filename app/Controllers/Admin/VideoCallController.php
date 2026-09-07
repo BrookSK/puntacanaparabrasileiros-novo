@@ -8,6 +8,7 @@ use Core\Request;
 use Core\Response;
 use App\Models\VideoCallBooking;
 use App\Services\VideoCallNotifier;
+use App\Services\GoogleMeetService;
 
 /**
  * Gestão dos agendamentos de chamadas de vídeo no painel admin.
@@ -79,6 +80,11 @@ class VideoCallController extends Controller
         }
         $this->db->update('videocall_bookings', $update, 'id = ?', [$id]);
 
+        // Se cancelado, remover o evento/sala no Google Meet (Calendar API).
+        if ($status === 'cancelled') {
+            $this->cancelGoogleEvent($booking);
+        }
+
         // Notificar o cliente (WhatsApp + e-mail) em toda mudança relevante de status
         if (in_array($status, ['confirmed', 'completed', 'cancelled'], true)) {
             try {
@@ -103,6 +109,8 @@ class VideoCallController extends Controller
 
         $booking = $this->findWithTrip($id);
         if ($booking) {
+            // Remover o evento/sala no Google Meet antes de excluir o registro.
+            $this->cancelGoogleEvent($booking);
             try {
                 $booking['admin_notes'] = $reason;
                 (new VideoCallNotifier())->notifyDeleted($booking);
@@ -114,6 +122,27 @@ class VideoCallController extends Controller
         $this->model->delete($id);
         $this->flash('success', 'Agendamento removido.');
         $this->redirect('/admin/agendamentos');
+    }
+
+    /**
+     * Remove o evento associado no Google Calendar/Meet (resiliente).
+     * Não faz nada se o agendamento não tiver um evento do Google.
+     */
+    private function cancelGoogleEvent(array $booking): void
+    {
+        $eventId = trim((string) ($booking['google_event_id'] ?? ''));
+        if ($eventId === '') {
+            return;
+        }
+        try {
+            $google = new GoogleMeetService();
+            if ($google->isConfigured()) {
+                $calendarId = (string) ($booking['google_calendar_id'] ?? '');
+                $google->deleteMeeting($eventId, $calendarId !== '' ? $calendarId : null);
+            }
+        } catch (\Throwable $e) {
+            error_log('[Admin\\VideoCallController] Falha ao cancelar evento no Google Meet: ' . $e->getMessage());
+        }
     }
 
     /**

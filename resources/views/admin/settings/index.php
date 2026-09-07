@@ -307,6 +307,39 @@
             </div>
             <div class="form-group"><label>Duração de cada chamada (minutos)</label><input type="number" name="videocall_duration" class="form-control" value="<?= e($settings['videocall']['videocall_duration']['setting_value'] ?? '30') ?>" min="10" max="180" step="5" style="max-width:140px;"><small style="color:#6b7280;">Também define o intervalo entre horários disponíveis.</small></div>
 
+            <h4 class="settings-section-title">Integração com o Google Meet</h4>
+            <p class="admin-card-subtitle" style="margin-bottom:12px;">Quando ativada, cada agendamento cria um evento no Google Calendar com uma sala real do Google Meet. Se estiver desativada (ou falhar), o sistema usa automaticamente o Jitsi Meet.</p>
+
+            <div class="form-group"><label><input type="checkbox" name="google_meet_enabled" value="1" <?= ($settings['videocall']['google_meet_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Usar Google Meet (via Google Calendar API)</label></div>
+
+            <div class="form-row">
+                <div class="form-group col-6"><label>Client ID (OAuth 2.0)</label><input type="text" name="google_meet_client_id" class="form-control" value="<?= e($settings['videocall']['google_meet_client_id']['setting_value'] ?? '') ?>" placeholder="xxxxx.apps.googleusercontent.com" autocomplete="off"></div>
+                <div class="form-group col-6"><label>Client Secret</label><input type="password" name="google_meet_client_secret" class="form-control" value="<?= e($settings['videocall']['google_meet_client_secret']['setting_value'] ?? '') ?>" placeholder="••••••••" autocomplete="new-password"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-6"><label>ID do calendário</label><input type="text" name="google_meet_calendar_id" class="form-control" value="<?= e($settings['videocall']['google_meet_calendar_id']['setting_value'] ?? 'primary') ?>" placeholder="primary"><small style="color:#6b7280;">Use "primary" para o calendário principal da conta autorizada.</small></div>
+                <div class="form-group col-6"><label>Fuso horário dos eventos</label><input type="text" name="google_meet_timezone" class="form-control" value="<?= e($settings['videocall']['google_meet_timezone']['setting_value'] ?? 'America/Santo_Domingo') ?>" placeholder="America/Santo_Domingo"><small style="color:#6b7280;">Timezone IANA (ex: America/Santo_Domingo, America/Sao_Paulo).</small></div>
+            </div>
+            <input type="hidden" name="google_meet_refresh_token" value="<?= e($settings['videocall']['google_meet_refresh_token']['setting_value'] ?? '') ?>">
+
+            <?php
+                $gmToken = trim((string) ($settings['videocall']['google_meet_refresh_token']['setting_value'] ?? ''));
+                $gmSiteUrl = rtrim($settings['general']['site_url']['setting_value'] ?? '', '/');
+                $gmRedirect = $gmSiteUrl . '/admin/google-meet/oauth/callback';
+            ?>
+            <div style="background:<?= $gmToken !== '' ? '#f0fdf4;border:1px solid #bbf7d0;color:#166534' : '#fff7ed;border:1px solid #fed7aa;color:#9a3412' ?>;border-radius:8px;padding:12px 14px;font-size:13px;">
+                <?php if ($gmToken !== ''): ?>
+                    <strong>✓ Conta Google autorizada.</strong> As reuniões serão criadas no Google Meet.
+                    <br><a href="/admin/google-meet/oauth/start" style="color:#166534;text-decoration:underline;">Reautorizar / trocar de conta</a>
+                <?php else: ?>
+                    <strong>Ação necessária:</strong> salve o Client ID/Secret acima e clique para autorizar o acesso à conta Google que hospedará as reuniões.
+                    <br><a href="/admin/google-meet/oauth/start" style="color:#9a3412;text-decoration:underline;font-weight:600;">Autorizar acesso ao Google</a>
+                <?php endif; ?>
+                <br><br>
+                <strong>URL de redirecionamento autorizada</strong> (cadastre no Google Cloud Console → Credenciais):<br>
+                <code style="word-break:break-all;"><?= e($gmRedirect) ?></code>
+            </div>
+
             <h4 class="settings-section-title">Lembretes Automáticos</h4>
             <p class="admin-card-subtitle" style="margin-bottom:12px;">Os lembretes são enviados por um agendador externo (cron) que chama o endpoint abaixo. Defina um token secreto para proteger o endpoint.</p>
             <div class="form-group"><label>Token do endpoint de lembretes</label><input type="text" name="videocall_reminder_token" class="form-control" value="<?= e($settings['videocall']['videocall_reminder_token']['setting_value'] ?? '') ?>" placeholder="ex: um-token-secreto-aleatorio"></div>
