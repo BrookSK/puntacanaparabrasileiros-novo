@@ -6,8 +6,8 @@
         <div class="ic-sidebar-head">
             <h3>Conversas</h3>
             <div class="ic-new-actions">
-                <button type="button" class="ic-btn-icon" id="icNewDirect" title="Nova conversa">＋</button>
-                <button type="button" class="ic-btn-icon" id="icNewGroup" title="Novo grupo">👥</button>
+                <button type="button" class="ic-btn-icon" id="icNewDirect" title="Nova conversa"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                <button type="button" class="ic-btn-icon" id="icNewGroup" title="Novo grupo"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg></button>
             </div>
         </div>
         <div class="ic-conv-list" id="icConvList">
@@ -19,7 +19,7 @@
     <section class="ic-chat" id="icChat">
         <div class="ic-chat-empty" id="icChatEmpty">
             <div>
-                <div style="font-size:42px;margin-bottom:10px;">💬</div>
+                <div style="margin-bottom:10px;color:#cbd5e1;"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div>
                 <p>Selecione uma conversa ou inicie uma nova.</p>
             </div>
         </div>
@@ -30,7 +30,7 @@
                     <strong id="icChatTitle"></strong>
                     <span class="ic-chat-sub" id="icChatSub"></span>
                 </div>
-                <button type="button" class="ic-btn-icon" id="icAddParticipant" title="Adicionar participante" style="display:none;">＋👤</button>
+                <button type="button" class="ic-btn-icon" id="icAddParticipant" title="Adicionar participante" style="display:none;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg></button>
             </header>
 
             <div class="ic-messages" id="icMessages"></div>

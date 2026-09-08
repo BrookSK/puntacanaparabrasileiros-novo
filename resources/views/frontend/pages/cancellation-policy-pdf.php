@@ -43,7 +43,7 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
 
 <!-- Action Buttons -->
 <div class="btn-actions">
-    <button onclick="window.print()" class="btn-action btn-print">🖨️ Imprimir / Salvar PDF</button>
+    <button onclick="window.print()" class="btn-action btn-print"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-3px;margin-right:6px;"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Imprimir / Salvar PDF</button>
     <a href="/politicas-de-cancelamento" class="btn-action btn-back">← Voltar</a>
 </div>
 

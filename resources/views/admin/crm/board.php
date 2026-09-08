@@ -41,9 +41,9 @@
                     <span class="badge-mini" style="background:<?= e($card['label_color']) ?>"><?= e($card['label_name']) ?></span>
                     <?php endif; ?>
                     <?php if ($card['lead_outcome'] === 'converted'): ?>
-                    <span class="badge-mini badge-success">✅ Convertido</span>
+                    <span class="badge-mini badge-success"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:-1px;margin-right:3px;"><polyline points="20 6 9 17 4 12"/></svg>Convertido</span>
                     <?php elseif ($card['lead_outcome'] === 'lost'): ?>
-                    <span class="badge-mini badge-danger">❌ Perdido</span>
+                    <span class="badge-mini badge-danger"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:-1px;margin-right:3px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Perdido</span>
                     <?php endif; ?>
                     <?php if ($card['in_recovery']): ?>
                     <span class="badge-mini badge-purple">Em recuperação</span>
@@ -56,7 +56,7 @@
                 <small class="kanban-card-value">R$ <?= number_format((float)$card['value'], 2, ',', '.') ?></small>
                 <?php endif; ?>
                 <?php if ($card['assigned_name'] ?? null): ?>
-                <small class="kanban-card-assigned">👤 <?= e($card['assigned_name']) ?></small>
+                <small class="kanban-card-assigned"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><?= e($card['assigned_name']) ?></small>
                 <?php endif; ?>
             </div>
             <?php endforeach; ?>

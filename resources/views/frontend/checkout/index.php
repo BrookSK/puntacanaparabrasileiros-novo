@@ -180,7 +180,7 @@
                                 .then(function(r) { return r.json(); })
                                 .then(function(data) {
                                     if (data.success) {
-                                        text.textContent = '✓ ' + file.name;
+                                        text.textContent = 'Enviado: ' + file.name;
                                         label.style.borderColor = '#1B6F00';
                                         label.style.background = '#f0fdf4';
                                         hiddenPath.value = data.path;
@@ -314,7 +314,7 @@
                         <div class="partial-payment-info" style="margin-top:16px;padding:14px 18px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;">
                             <input type="hidden" name="payment_mode" value="partial" id="partialCheck">
                             <p style="font-size:13px;color:#0369a1;margin:0;font-weight:600;">
-                                💳 Pague apenas <?= (int)$partialPercent ?>% agora: <strong><?= money($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100)) ?></strong>
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:5px;"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Pague apenas <?= (int)$partialPercent ?>% agora: <strong><?= money($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100)) ?></strong>
                             </p>
                             <p style="font-size:12px;color:#64748b;margin:4px 0 0;">O restante (<?= money($cart['grand_total'] - ($partialAmount ?? ($cart['grand_total'] * $partialPercent / 100))) ?>) deve ser pago antes da data do passeio/transfer.</p>
                         </div>

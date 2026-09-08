@@ -55,7 +55,7 @@
             <tbody>
                 <!-- Preço -->
                 <tr>
-                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;">💰 Preço a partir de</td>
+                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Preço a partir de</td>
                     <?php foreach ($compareTrips as $trip): ?>
                     <td style="padding:12px 14px;text-align:center;border-bottom:1px solid #f1f5f9;font-size:16px;font-weight:700;color:#059669;">
                         <?= $trip['min_price'] > 0 ? money((float)$trip['min_price']) : 'Consultar' ?>
@@ -64,7 +64,7 @@
                 </tr>
                 <!-- Duração -->
                 <tr>
-                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;">⏱️ Duração</td>
+                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Duração</td>
                     <?php foreach ($compareTrips as $trip): ?>
                     <td style="padding:12px 14px;text-align:center;border-bottom:1px solid #f1f5f9;font-size:14px;">
                         <?= !empty($trip['duration']) ? e($trip['duration']) . ' ' . (($trip['duration_unit'] ?? 'hours') === 'hours' ? 'horas' : 'dias') : '—' ?>
@@ -73,7 +73,7 @@
                 </tr>
                 <!-- Dificuldade -->
                 <tr>
-                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;">⚡ Dificuldade</td>
+                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Dificuldade</td>
                     <?php
                     $diffMap = ['easy' => 'Fácil', 'moderate' => 'Moderado', 'hard' => 'Difícil'];
                     foreach ($compareTrips as $trip):
@@ -85,7 +85,7 @@
                 </tr>
                 <!-- Avaliação -->
                 <tr>
-                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;">⭐ Avaliação</td>
+                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none" style="vertical-align:-2px;margin-right:6px;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Avaliação</td>
                     <?php foreach ($compareTrips as $trip): ?>
                     <td style="padding:12px 14px;text-align:center;border-bottom:1px solid #f1f5f9;font-size:14px;">
                         <?= $trip['rating'] > 0 ? number_format((float)$trip['rating'], 1) . ' / 5' : 'Novo' ?>
@@ -94,7 +94,7 @@
                 </tr>
                 <!-- Passageiros -->
                 <tr>
-                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;">👥 Passageiros</td>
+                    <td style="padding:12px 14px;font-weight:600;color:#475569;font-size:13px;border-bottom:1px solid #f1f5f9;background:#fff;position:sticky;left:0;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Passageiros</td>
                     <?php foreach ($compareTrips as $trip): ?>
                     <td style="padding:12px 14px;text-align:center;border-bottom:1px solid #f1f5f9;font-size:14px;">
                         <?php
@@ -110,7 +110,7 @@
 
                 <!-- Cabeçalho: O que inclui -->
                 <tr>
-                    <td colspan="<?= count($compareTrips) + 1 ?>" style="padding:14px;background:#f0fdf4;font-weight:700;color:#166534;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;">✔️ O que inclui</td>
+                    <td colspan="<?= count($compareTrips) + 1 ?>" style="padding:14px;background:#f0fdf4;font-weight:700;color:#166534;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:-2px;margin-right:6px;"><polyline points="20 6 9 17 4 12"/></svg>O que inclui</td>
                 </tr>
                 <?php if (empty($allIncludeItems)): ?>
                 <tr>
@@ -129,9 +129,9 @@
                     ?>
                     <td style="padding:10px 14px;text-align:center;border-bottom:1px solid #f1f5f9;">
                         <?php if ($has): ?>
-                        <span style="color:#059669;font-size:18px;font-weight:700;">✔</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="3" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>
                         <?php else: ?>
-                        <span style="color:#dc2626;font-size:18px;font-weight:700;">✖</span>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" style="vertical-align:middle;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         <?php endif; ?>
                     </td>
                     <?php endforeach; ?>

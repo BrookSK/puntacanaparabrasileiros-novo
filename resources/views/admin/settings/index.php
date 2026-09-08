@@ -399,7 +399,7 @@
             ?>
             <div style="background:<?= $gmToken !== '' ? '#f0fdf4;border:1px solid #bbf7d0;color:#166534' : '#fff7ed;border:1px solid #fed7aa;color:#9a3412' ?>;border-radius:8px;padding:12px 14px;font-size:13px;">
                 <?php if ($gmToken !== ''): ?>
-                    <strong>✓ Conta Google autorizada.</strong> As reuniões serão criadas no Google Meet.
+                    <strong><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="vertical-align:-1px;margin-right:4px;"><polyline points="20 6 9 17 4 12"/></svg>Conta Google autorizada.</strong> As reuniões serão criadas no Google Meet.
                     <br><a href="/admin/google-meet/oauth/start" style="color:#166534;text-decoration:underline;">Reautorizar / trocar de conta</a>
                 <?php else: ?>
                     <strong>Ação necessária:</strong> salve o Client ID/Secret acima e clique para autorizar o acesso à conta Google que hospedará as reuniões.

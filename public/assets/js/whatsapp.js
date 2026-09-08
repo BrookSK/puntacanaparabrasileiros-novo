@@ -84,11 +84,12 @@ function renderContacts(contacts) {
         else groups.novo.push(c);
     });
 
+    const dot = (color) => `<svg width="9" height="9" viewBox="0 0 24 24" fill="${color}" style="vertical-align:middle;margin-right:6px;"><circle cx="12" cy="12" r="10"/></svg>`;
     const statusLabels = {
-        em_atendimento: '🟠 Em Atendimento',
-        aguardando: '🔴 Aguardando',
-        novo: '🔵 Novos',
-        concluido: '🟢 Concluídos',
+        em_atendimento: dot('#f59e0b') + 'Em Atendimento',
+        aguardando: dot('#ef4444') + 'Aguardando',
+        novo: dot('#3b82f6') + 'Novos',
+        concluido: dot('#22c55e') + 'Concluídos',
     };
 
     let html = '';
@@ -110,12 +111,13 @@ function renderContactItem(c) {
     const avatarClass = c.is_group ? 'wpp-avatar group' : 'wpp-avatar';
     const isActive = STATE.contactId === c.id ? 'active' : '';
 
+    const previewIcon = (paths) => `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;">${paths}</svg>`;
     let preview = '';
-    if (c.last_message_type === 'image') preview = '📷 Imagem';
-    else if (c.last_message_type === 'audio') preview = '🎤 Áudio';
-    else if (c.last_message_type === 'video') preview = '🎥 Vídeo';
-    else if (c.last_message_type === 'document') preview = '📎 Documento';
-    else if (c.last_message_type === 'sticker') preview = '🏷️ Sticker';
+    if (c.last_message_type === 'image') preview = previewIcon('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>') + 'Imagem';
+    else if (c.last_message_type === 'audio') preview = previewIcon('<path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/>') + 'Áudio';
+    else if (c.last_message_type === 'video') preview = previewIcon('<polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>') + 'Vídeo';
+    else if (c.last_message_type === 'document') preview = previewIcon('<path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>') + 'Documento';
+    else if (c.last_message_type === 'sticker') preview = previewIcon('<path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/>') + 'Sticker';
     else preview = truncateText(c.last_message_text || '', 40);
 
     const time = c.last_message_at ? formatTime(c.last_message_at) : '';
@@ -253,7 +255,7 @@ async function pollMessages() {
         if (json.deleted_ids && json.deleted_ids.length) {
             json.deleted_ids.forEach(d => {
                 const el = document.querySelector(`[data-msg-id="${d.id}"]`);
-                if (el) el.innerHTML = '<em class="wpp-msg-deleted">🚫 Mensagem apagada</em>';
+                if (el) el.innerHTML = '<em class="wpp-msg-deleted"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Mensagem apagada</em>';
             });
         }
     } catch (e) {}
@@ -306,7 +308,7 @@ function renderMessage(m) {
             if (m.media_url) {
                 content = `<div class="wpp-msg-image"><img src="${m.media_url}" onclick="openLightbox('${m.media_url}')"></div>`;
             } else {
-                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;">🖼 Imagem não disponível</div>`;
+                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Imagem não disponível</div>`;
             }
             if (m.message_text) content += `<div class="wpp-msg-text">${formatWhatsApp(m.message_text)}</div>`;
             break;
@@ -317,7 +319,7 @@ function renderMessage(m) {
             if (m.media_url) {
                 content = `<div class="wpp-msg-video"><video src="${m.media_url}" controls></video></div>`;
             } else {
-                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;">🎥 Vídeo não disponível</div>`;
+                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>Vídeo não disponível</div>`;
             }
             if (m.message_text) content += `<div class="wpp-msg-text">${formatWhatsApp(m.message_text)}</div>`;
             break;
@@ -328,7 +330,7 @@ function renderMessage(m) {
             if (m.media_url) {
                 content = `<div class="wpp-msg-sticker"><img src="${m.media_url}"></div>`;
             } else {
-                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;">🏷 Figurinha</div>`;
+                content = `<div class="wpp-msg-text" style="color:#999;font-style:italic;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:4px;"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Figurinha</div>`;
             }
             break;
         case 'location':
@@ -407,12 +409,14 @@ function renderDocument(m) {
 }
 
 function ackIcon(status) {
+    const single = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg>';
+    const double = '<svg width="16" height="14" viewBox="0 0 28 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;"><polyline points="16 6 7 17 3 13"/><polyline points="24 6 15 17 14.5 16.5"/></svg>';
     switch (status) {
-        case 'pending': return '⏳';
-        case 'sent': return '✓';
-        case 'delivered': return '✓✓';
-        case 'read': return '✓✓';
-        case 'failed': return '❌';
+        case 'pending': return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+        case 'sent': return single;
+        case 'delivered': return double;
+        case 'read': return double;
+        case 'failed': return '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" style="vertical-align:middle;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
         default: return '';
     }
 }
@@ -484,7 +488,7 @@ function stageFile(input) {
         const url = URL.createObjectURL(file);
         preview.innerHTML = `<img src="${url}" style="width:32px;height:32px;object-fit:cover;border-radius:4px;">`;
     } else {
-        preview.innerHTML = '📎';
+        preview.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>';
     }
 
     stage.style.display = 'flex';
@@ -596,7 +600,7 @@ function renderQuickRepliesList() {
     container.innerHTML = STATE.quickReplies.map(r => `
         <div style="padding:8px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center;">
             <div><span class="badge badge-info">/${r.shortcut}</span> <span style="font-size:12px;margin-left:8px;">${escapeHtml(truncateText(r.message || '', 80))}</span>
-            ${r.attachment_name ? `<br><small>📎 ${r.attachment_name}</small>` : ''}</div>
+            ${r.attachment_name ? `<br><small><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-1px;margin-right:3px;"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>${r.attachment_name}</small>` : ''}</div>
             <button class="btn btn-sm btn-danger-outline" onclick="deleteQuickReply(${r.id})">×</button>
         </div>
     `).join('');
