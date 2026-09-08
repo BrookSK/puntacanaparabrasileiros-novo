@@ -36,9 +36,16 @@ class SettingsController extends Controller
         // Boards do CRM (para o seletor da Aurora).
         $crmBoards = (new \App\Models\CrmBoard())->listWithColumns();
 
+        // Relatório de diagnóstico da Aurora (exibido uma vez, após clicar em "Diagnosticar").
+        $auroraDiagnose = $this->session->get('aurora_diagnose_report', '');
+        if ($auroraDiagnose !== '') {
+            $this->session->remove('aurora_diagnose_report');
+        }
+
         $this->view('admin/settings/index', [
             'settings' => $settings,
             'crmBoards' => $crmBoards,
+            'auroraDiagnose' => $auroraDiagnose,
             'pageTitle' => 'Configurações do Sistema',
         ], 'admin');
     }
@@ -179,6 +186,36 @@ class SettingsController extends Controller
             $this->flash('error', 'Aurora — ' . $result['message']);
         }
 
+        $this->redirect('/admin/configuracoes');
+    }
+
+    /**
+     * Diagnóstico completo do fluxo da Aurora (mostra cada etapa na tela).
+     * POST /admin/aurora/diagnose
+     */
+    public function diagnoseAurora(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        if (($user['role'] ?? '') !== 'superadmin') {
+            $this->flash('error', 'Acesso negado.');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        $this->app->reloadSettings();
+
+        $aurora = new \App\Services\AuroraService();
+        $steps = $aurora->diagnose();
+
+        $lines = [];
+        foreach ($steps as $s) {
+            $mark = $s['ok'] ? '[OK]' : '[FALHOU]';
+            $lines[] = "{$mark} {$s['step']}: {$s['detail']}";
+        }
+        $report = implode("\n", $lines);
+
+        // Passa o relatório para a view exibir num bloco legível.
+        $this->session->set('aurora_diagnose_report', $report);
         $this->redirect('/admin/configuracoes');
     }
 

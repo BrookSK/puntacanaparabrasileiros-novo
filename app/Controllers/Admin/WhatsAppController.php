@@ -1320,6 +1320,9 @@ class WhatsAppController extends Controller
         $event = $payload['event'] ?? '';
         $instanceName = $payload['instance'] ?? '';
 
+        // Log de diagnóstico: confirma que o webhook está recebendo eventos da Evolution.
+        error_log("[Aurora][Webhook] Evento recebido: '{$event}' | instância: '{$instanceName}'");
+
         // Buscar instância
         $instance = $this->db->fetchOne(
             "SELECT * FROM whatsapp_instances WHERE instance_name = ? LIMIT 1",
@@ -1327,6 +1330,7 @@ class WhatsAppController extends Controller
         );
 
         if (!$instance) {
+            error_log("[Aurora][Webhook] Instância '{$instanceName}' não encontrada no banco.");
             $this->json(['status' => 'instance_not_found']);
             return;
         }
@@ -1632,6 +1636,15 @@ class WhatsAppController extends Controller
      */
     private function parseMessageContent(array $msg): array
     {
+        // Desembrulhar mensagens aninhadas (efêmeras/temporárias, ver-uma-vez, com legenda).
+        // O WhatsApp frequentemente envelopa o conteúdo real dentro destas chaves; sem isso,
+        // uma simples mensagem de texto chega como "unknown" e a Aurora não dispara.
+        foreach (['ephemeralMessage', 'viewOnceMessage', 'viewOnceMessageV2', 'viewOnceMessageV2Extension', 'documentWithCaptionMessage', 'editedMessage'] as $wrapper) {
+            if (isset($msg[$wrapper]['message']) && is_array($msg[$wrapper]['message'])) {
+                return $this->parseMessageContent($msg[$wrapper]['message']);
+            }
+        }
+
         if (isset($msg['conversation'])) {
             return ['text', $msg['conversation'], null];
         }
@@ -1679,6 +1692,8 @@ class WhatsAppController extends Controller
             return ['location', "📍 {$lat}, {$lng}", null];
         }
 
+        // Não reconhecido: logar as chaves para identificar o formato exato enviado pelo WhatsApp.
+        error_log('[Aurora][Webhook] Tipo de mensagem não reconhecido. Chaves do conteúdo: ' . implode(', ', array_keys($msg)));
         return ['unknown', null, null];
     }
 

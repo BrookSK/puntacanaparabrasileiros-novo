@@ -317,6 +317,111 @@ class AuroraService
     }
 
     /**
+     * Diagnóstico completo do fluxo da Aurora (usado pela tela de teste do admin).
+     * Executa a MESMA chamada real (prompt completo com passeios + histórico) e reporta
+     * cada etapa, incluindo o HTTP/erro exato da OpenAI.
+     *
+     * @return array<int, array{step:string, ok:bool, detail:string}>
+     */
+    public function diagnose(string $customerText = 'Olá, quero saber sobre os passeios'): array
+    {
+        $steps = [];
+
+        // 1) Configuração
+        $enabled = setting('aurora_enabled', '0') === '1';
+        $steps[] = [
+            'step' => 'Aurora ativada (aurora_enabled)',
+            'ok' => $enabled,
+            'detail' => $enabled ? 'Sim' : "Não (valor atual: '" . setting('aurora_enabled', '0') . "')",
+        ];
+
+        $hasKey = $this->apiKey !== '';
+        $steps[] = [
+            'step' => 'Chave da OpenAI carregada (via setting/autoload)',
+            'ok' => $hasKey,
+            'detail' => $hasKey ? ('Sim (' . substr($this->apiKey, 0, 7) . '...' . substr($this->apiKey, -4) . ')') : 'Não — a chave não está sendo lida no runtime. Verifique se a setting aurora_openai_api_key tem autoload=1.',
+        ];
+
+        $steps[] = [
+            'step' => 'Modelo configurado',
+            'ok' => $this->model !== '',
+            'detail' => $this->model ?: '(vazio)',
+        ];
+
+        if (!$hasKey) {
+            return $steps; // sem chave não adianta seguir
+        }
+
+        // 2) Chamada REAL à OpenAI (com detalhe do HTTP)
+        $messages = [
+            ['role' => 'system', 'content' => 'Você é a Aurora. Responda em uma frase curta.'],
+            ['role' => 'user', 'content' => $customerText],
+        ];
+        $diag = $this->requestVerbose([
+            'model' => $this->model,
+            'messages' => $messages,
+            'max_tokens' => 60,
+        ]);
+
+        $steps[] = [
+            'step' => 'Chamada à OpenAI (HTTP)',
+            'ok' => $diag['ok'],
+            'detail' => $diag['detail'],
+        ];
+
+        return $steps;
+    }
+
+    /**
+     * Igual ao request(), mas retorna detalhes do erro (para diagnóstico visível).
+     *
+     * @return array{ok:bool, detail:string}
+     */
+    private function requestVerbose(array $payload): array
+    {
+        if (!function_exists('curl_init')) {
+            return ['ok' => false, 'detail' => 'A extensão cURL do PHP não está disponível no servidor.'];
+        }
+
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => self::OPENAI_URL,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($payload),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $this->apiKey,
+            ],
+            CURLOPT_TIMEOUT => 45,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            return ['ok' => false, 'detail' => 'Erro de conexão cURL: ' . $error . ' (o servidor pode estar bloqueando conexões de saída para api.openai.com).'];
+        }
+
+        if ($httpCode < 200 || $httpCode >= 300) {
+            $short = substr((string) $response, 0, 400);
+            return ['ok' => false, 'detail' => "HTTP {$httpCode} da OpenAI: {$short}"];
+        }
+
+        $decoded = json_decode((string) $response, true);
+        $content = $decoded['choices'][0]['message']['content'] ?? null;
+        if (!is_string($content) || trim($content) === '') {
+            return ['ok' => false, 'detail' => 'HTTP 200 mas resposta sem conteúdo: ' . substr((string) $response, 0, 300)];
+        }
+
+        return ['ok' => true, 'detail' => 'OK — modelo respondeu: "' . trim($content) . '"'];
+    }
+
+    /**
      * Prompt de fallback caso a setting esteja vazia.
      */
     private function defaultSystemPrompt(): string

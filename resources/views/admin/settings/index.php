@@ -305,7 +305,11 @@
             </div>
             <div class="form-group">
                 <button type="submit" formaction="/admin/aurora/test" class="btn btn-outline">Testar conexão</button>
-                <small style="color:#6b7280;display:block;margin-top:6px;">Salve as configurações antes de testar. O teste faz uma chamada real à OpenAI.</small>
+                <button type="submit" formaction="/admin/aurora/diagnose" class="btn btn-outline" style="margin-left:8px;">Diagnosticar Aurora</button>
+                <small style="color:#6b7280;display:block;margin-top:6px;">Salve as configurações antes de testar. "Diagnosticar" roda o fluxo real e mostra onde está falhando.</small>
+                <?php if (!empty($auroraDiagnose)): ?>
+                <pre style="margin-top:12px;padding:14px;background:#0f172a;color:#e2e8f0;border-radius:8px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word;"><?= e($auroraDiagnose) ?></pre>
+                <?php endif; ?>
             </div>
 
             <h4 class="settings-section-title">Comportamento</h4>
