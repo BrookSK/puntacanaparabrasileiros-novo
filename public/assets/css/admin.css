@@ -38,6 +38,7 @@ a { color: var(--primary); text-decoration: none; }
 .admin-card-icon-blue { background: #eff6ff; color: #2563eb; }
 .admin-card-icon-green { background: #f0fdf4; color: #16a34a; }
 .admin-card-icon-orange { background: #fff7ed; color: #ea580c; }
+.admin-card-icon-purple { background: #faf5ff; color: #9333ea; }
 .admin-card-sticky { position: static; }
 .admin-grid-2 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px; align-items: start; }
 .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }

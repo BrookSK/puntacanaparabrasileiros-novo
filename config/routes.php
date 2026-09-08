@@ -282,6 +282,7 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/configuracoes', [AdminSettingsController::class, 'index'], [], 'admin.settings.index');
     $router->post('/configuracoes', [AdminSettingsController::class, 'update'], [CsrfMiddleware::class], 'admin.settings.update');
     $router->post('/configuracoes/email-teste', [AdminSettingsController::class, 'testEmail'], [CsrfMiddleware::class], 'admin.settings.test_email');
+    $router->post('/aurora/test', [AdminSettingsController::class, 'testAurora'], [CsrfMiddleware::class], 'admin.aurora.test');
 
     // Google Meet — autorização OAuth 2.0
     $router->get('/google-meet/oauth/start', [AdminSettingsController::class, 'googleMeetOAuthStart'], [], 'admin.google_meet.oauth_start');

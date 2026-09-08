@@ -1485,6 +1485,77 @@ class WhatsAppController extends Controller
         if (!$fromMe && $contact['service_status'] === 'concluido') {
             $this->contactModel->update($contactId, ['service_status' => 'novo']);
         }
+
+        // ── Aurora (IA): primeiro atendimento automático ──
+        // Só atua em mensagens recebidas de contatos individuais, do tipo texto,
+        // e apenas enquanto NÃO houver atendente humano atribuído.
+        if (!$fromMe && !$isGroup && $msgType === 'text') {
+            $this->maybeRunAurora($contactId, $msgText);
+        }
+    }
+
+    /**
+     * Dispara a Aurora para responder automaticamente uma mensagem recebida.
+     *
+     * Regras: Aurora atende só até um humano assumir o contato (assigned_to),
+     * respeita o toggle geral e o limite de respostas automáticas por contato.
+     * Nunca quebra o fluxo do webhook (todo erro é apenas logado).
+     */
+    private function maybeRunAurora(int $contactId, ?string $customerText): void
+    {
+        try {
+            $customerText = trim((string) $customerText);
+            if ($customerText === '') {
+                return;
+            }
+
+            $aurora = new \App\Services\AuroraService();
+            if (!$aurora->isEnabled()) {
+                return;
+            }
+
+            // Recarrega o contato para checar atendente humano.
+            $contact = $this->contactModel->find($contactId);
+            if (!$contact) {
+                return;
+            }
+
+            // Se um humano já assumiu, a Aurora se cala.
+            if (!empty($contact['assigned_to'])) {
+                return;
+            }
+
+            // Limite de respostas automáticas por contato (evita loop/custo excessivo).
+            $maxReplies = (int) (setting('aurora_max_replies', '8') ?: 8);
+            if ($maxReplies > 0) {
+                $auroraCount = (int) $this->db->fetchColumn(
+                    "SELECT COUNT(*) FROM whatsapp_messages
+                     WHERE contact_id = ? AND from_me = 1 AND is_deleted = 0",
+                    [$contactId]
+                );
+                if ($auroraCount >= $maxReplies) {
+                    return;
+                }
+            }
+
+            // Gera a resposta com base no catálogo de passeios + histórico.
+            $result = $aurora->generateReply($contactId, $customerText);
+            if ($result === null || empty($result['reply'])) {
+                return;
+            }
+
+            // Envia a resposta (isso já persiste a mensagem com from_me=1).
+            $notifier = new \App\Services\WhatsappNotifier();
+            $sent = $notifier->sendToPhone((string) $contact['phone'], $result['reply']);
+
+            if ($sent) {
+                // Atualiza o lead no CRM (cria/avança etapa).
+                $crm = new \App\Services\AuroraCrmService();
+                $crm->processLead($contact, (bool) $result['handoff']);
+            }
+        } catch (\Throwable $e) {
+            error_log('[Aurora] maybeRunAurora falhou: ' . $e->getMessage());
+        }
     }
 
     private function handleMessageUpdate(array $instance, array $data): void

@@ -31,6 +31,10 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
             Agendamento
         </button>
+        <button type="button" class="settings-tab" data-tab="aurora">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V11h3a3 3 0 013 3v1a3 3 0 01-3 3h-1v1a2 2 0 01-2 2h-2a2 2 0 01-2-2v-1H6a3 3 0 01-3-3v-1a3 3 0 013-3h3V9.5A4 4 0 018 6a4 4 0 014-4z"/></svg>
+            Aurora IA
+        </button>
         <button type="button" class="settings-tab" data-tab="seo">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
             SEO
@@ -268,6 +272,70 @@
                 <div class="form-group col-6"><label>Duração do Cookie (dias)</label><input type="number" name="affiliate_cookie_days" class="form-control" value="<?= e($settings['affiliates']['affiliate_cookie_days']['setting_value'] ?? '30') ?>"></div>
             </div>
             <div class="form-group"><label><input type="checkbox" name="affiliate_auto_approve" value="1" <?= ($settings['affiliates']['affiliate_auto_approve']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Auto-aprovar novos afiliados</label></div>
+        </div>
+    </div>
+
+    <!-- Tab: Aurora IA -->
+    <div class="settings-panel" id="tab-aurora">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-icon admin-card-icon-purple">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 014 4c0 1.5-.8 2.8-2 3.5V11h3a3 3 0 013 3v1a3 3 0 01-3 3h-1v1a2 2 0 01-2 2h-2a2 2 0 01-2-2v-1H6a3 3 0 01-3-3v-1a3 3 0 013-3h3V9.5A4 4 0 018 6a4 4 0 014-4z"/></svg>
+                </div>
+                <div><h3>Aurora — Atendimento por IA</h3><p class="admin-card-subtitle">Agente de IA que faz o primeiro atendimento no WhatsApp</p></div>
+            </div>
+
+            <div class="form-group">
+                <label><input type="checkbox" name="aurora_enabled" value="1" <?= ($settings['aurora']['aurora_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar a Aurora</label>
+            </div>
+            <p style="font-size:12px;color:#6b7280;margin:-4px 0 20px;">Quando ativa, a Aurora responde automaticamente às mensagens recebidas no WhatsApp <strong>até um atendente humano assumir o contato</strong>. Ao assumir (atribuir o contato a um atendente), a Aurora para de responder aquela conversa.</p>
+
+            <h4 class="settings-section-title">Conexão com a OpenAI</h4>
+            <div class="form-row">
+                <div class="form-group col-8">
+                    <label>Chave de API da OpenAI</label>
+                    <input type="password" name="aurora_openai_api_key" class="form-control" autocomplete="new-password" placeholder="sk-..." value="<?= e($settings['aurora']['aurora_openai_api_key']['setting_value'] ?? '') ?>">
+                    <small style="color:#6b7280;">Gere em platform.openai.com › API Keys. A chave fica salva apenas no seu servidor.</small>
+                </div>
+                <div class="form-group col-4">
+                    <label>Modelo</label>
+                    <input type="text" name="aurora_model" class="form-control" value="<?= e($settings['aurora']['aurora_model']['setting_value'] ?? 'gpt-4o-mini') ?>">
+                    <small style="color:#6b7280;">Padrão: gpt-4o-mini (rápido e econômico).</small>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" formaction="/admin/aurora/test" class="btn btn-outline">Testar conexão</button>
+                <small style="color:#6b7280;display:block;margin-top:6px;">Salve as configurações antes de testar. O teste faz uma chamada real à OpenAI.</small>
+            </div>
+
+            <h4 class="settings-section-title">Comportamento</h4>
+            <div class="form-group">
+                <label>Instruções da Aurora (prompt do sistema)</label>
+                <textarea name="aurora_system_prompt" class="form-control" rows="10"><?= e($settings['aurora']['aurora_system_prompt']['setting_value'] ?? '') ?></textarea>
+                <small style="color:#6b7280;">Define a personalidade e as regras. A Aurora já é instruída a não inventar preços e a acionar um humano na hora de fechar.</small>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-6">
+                    <label>Board do CRM para os leads</label>
+                    <select name="aurora_crm_board_id" class="form-control">
+                        <option value="">Primeiro board ativo (padrão)</option>
+                        <?php foreach (($crmBoards ?? []) as $board): ?>
+                        <option value="<?= (int) $board['id'] ?>" <?= (string) ($settings['aurora']['aurora_crm_board_id']['setting_value'] ?? '') === (string) $board['id'] ? 'selected' : '' ?>><?= e($board['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                    <small style="color:#6b7280;">Onde os leads da Aurora são criados e movidos (Novo Lead → Contato Feito → Em Negociação).</small>
+                </div>
+                <div class="form-group col-3">
+                    <label>Máx. respostas por contato</label>
+                    <input type="number" name="aurora_max_replies" class="form-control" min="0" value="<?= e($settings['aurora']['aurora_max_replies']['setting_value'] ?? '8') ?>">
+                    <small style="color:#6b7280;">Limite antes de deixar só para humanos (0 = sem limite).</small>
+                </div>
+                <div class="form-group col-3">
+                    <label>Mensagens de contexto</label>
+                    <input type="number" name="aurora_history_limit" class="form-control" min="2" max="30" value="<?= e($settings['aurora']['aurora_history_limit']['setting_value'] ?? '10') ?>">
+                    <small style="color:#6b7280;">Qtde de mensagens recentes enviadas à IA.</small>
+                </div>
+            </div>
         </div>
     </div>
 

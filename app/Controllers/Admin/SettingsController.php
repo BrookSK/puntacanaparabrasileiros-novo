@@ -33,8 +33,12 @@ class SettingsController extends Controller
 
         $settings = $this->settingModel->getGrouped();
 
+        // Boards do CRM (para o seletor da Aurora).
+        $crmBoards = (new \App\Models\CrmBoard())->listWithColumns();
+
         $this->view('admin/settings/index', [
             'settings' => $settings,
+            'crmBoards' => $crmBoards,
             'pageTitle' => 'Configurações do Sistema',
         ], 'admin');
     }
@@ -71,6 +75,7 @@ class SettingsController extends Controller
             'whatsapp_enabled', 'affiliate_enabled', 'affiliate_auto_approve',
             'checkout_online_enabled', 'checkout_whatsapp_enabled',
             'videocall_enabled', 'google_meet_enabled',
+            'aurora_enabled',
         ];
         foreach ($booleanFields as $field) {
             $data[$field] = isset($data[$field]) ? '1' : '0';
@@ -97,6 +102,10 @@ class SettingsController extends Controller
             'google_meet_enabled' => 'videocall', 'google_meet_client_id' => 'videocall',
             'google_meet_client_secret' => 'videocall', 'google_meet_refresh_token' => 'videocall',
             'google_meet_calendar_id' => 'videocall', 'google_meet_timezone' => 'videocall',
+            'aurora_enabled' => 'aurora', 'aurora_openai_api_key' => 'aurora',
+            'aurora_model' => 'aurora', 'aurora_system_prompt' => 'aurora',
+            'aurora_crm_board_id' => 'aurora', 'aurora_max_replies' => 'aurora',
+            'aurora_history_limit' => 'aurora',
         ];
 
         // Salvar no banco
@@ -140,6 +149,34 @@ class SettingsController extends Controller
             }
         } catch (\Throwable $e) {
             $this->flash('error', 'Erro SMTP: ' . $e->getMessage());
+        }
+
+        $this->redirect('/admin/configuracoes');
+    }
+
+    /**
+     * Testa a conexão da Aurora com a OpenAI usando as configurações salvas.
+     * POST /admin/aurora/test
+     */
+    public function testAurora(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        if (($user['role'] ?? '') !== 'superadmin') {
+            $this->flash('error', 'Acesso negado.');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        // Garante que a leitura via setting() use os valores mais recentes.
+        $this->app->reloadSettings();
+
+        $aurora = new \App\Services\AuroraService();
+        $result = $aurora->testConnection();
+
+        if ($result['ok']) {
+            $this->flash('success', 'Aurora — ' . $result['message']);
+        } else {
+            $this->flash('error', 'Aurora — ' . $result['message']);
         }
 
         $this->redirect('/admin/configuracoes');
