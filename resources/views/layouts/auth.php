@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="<?= asset('css/auth.css') ?>">
-    <link rel="stylesheet" href="<?= asset('css/phone-country.css') ?>?v=1.2">
+    <link rel="stylesheet" href="<?= asset('css/phone-country.css') ?>?v=1.3">
 </head>
 <body class="auth-body">
     <div class="auth-container">
@@ -37,6 +37,6 @@
             <a href="/">Voltar para o site</a>
         </div>
     </div>
-    <script src="<?= asset('js/phone-country.js') ?>?v=1.2"></script>
+    <script src="<?= asset('js/phone-country.js') ?>?v=1.3"></script>
 </body>
 </html>

@@ -118,6 +118,9 @@
 
         dropdown.appendChild(list);
 
+        // Referência ao wrapper (usada por closeAllDropdowns mesmo com o dropdown no body).
+        dropdown._wrapper = wrapper;
+
         // Busca no dropdown
         searchInput.addEventListener('input', function() {
             var query = this.value.toLowerCase();
@@ -198,6 +201,34 @@
         }
         wrapper._onViewportChange = onViewportChange;
 
+        // Abre o dropdown: move para o <body> (escapa de overflow/stacking de modais)
+        // e posiciona via viewport ancorado ao botão.
+        function openDropdown() {
+            // Move o dropdown para o body para não ser cortado por containers com overflow.
+            if (dropdown.parentNode !== document.body) {
+                document.body.appendChild(dropdown);
+            }
+            dropdown.style.display = 'flex';
+            searchInput.value = '';
+            var items = list.querySelectorAll('.phone-country-item');
+            for (var k = 0; k < items.length; k++) { items[k].style.display = ''; }
+            positionDropdown();
+            searchInput.focus();
+            window.addEventListener('scroll', onViewportChange, true);
+            window.addEventListener('resize', onViewportChange);
+        }
+
+        // Fecha o dropdown e devolve ao wrapper (para não acumular no body).
+        function hideDropdown() {
+            dropdown.style.display = 'none';
+            if (dropdown.parentNode === document.body) {
+                wrapper.appendChild(dropdown);
+            }
+            window.removeEventListener('scroll', onViewportChange, true);
+            window.removeEventListener('resize', onViewportChange);
+        }
+        wrapper._hideDropdown = hideDropdown;
+
         // Toggle dropdown
         selectorBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -205,25 +236,15 @@
             var isOpen = dropdown.style.display !== 'none';
             closeAllDropdowns();
             if (!isOpen) {
-                dropdown.style.display = 'flex';
-                searchInput.value = '';
-                var items = list.querySelectorAll('.phone-country-item');
-                for (var k = 0; k < items.length; k++) { items[k].style.display = ''; }
-                // Posicionar após tornar visível (para ter dimensões corretas).
-                positionDropdown();
-                searchInput.focus();
-                // Acompanhar rolagem/resize (inclusive scroll dentro do modal) enquanto aberto.
-                window.addEventListener('scroll', onViewportChange, true);
-                window.addEventListener('resize', onViewportChange);
+                openDropdown();
             }
         });
 
-        // Fechar dropdown ao clicar fora
+        // Fechar dropdown ao clicar fora (o dropdown pode estar no body).
         document.addEventListener('click', function(e) {
-            if (!wrapper.contains(e.target) && e.target !== dropdown && !dropdown.contains(e.target)) {
-                dropdown.style.display = 'none';
-                window.removeEventListener('scroll', onViewportChange, true);
-                window.removeEventListener('resize', onViewportChange);
+            if (dropdown.style.display === 'none') return;
+            if (!wrapper.contains(e.target) && !dropdown.contains(e.target) && e.target !== selectorBtn) {
+                hideDropdown();
             }
         });
     }
@@ -232,11 +253,11 @@
         selectorBtn.innerHTML = '<span class="phone-country-flag">' + flagImg(country.code) + '</span><span class="phone-country-ddi">' + country.ddi + '</span><span class="phone-country-arrow">▾</span>';
         wrapper._selectedCountry = country;
         wrapper._hiddenInput.value = country.ddi + ' ' + input.value.trim();
-        dropdown.style.display = 'none';
-        // Remover listeners de viewport ao fechar por seleção.
-        if (wrapper._onViewportChange) {
-            window.removeEventListener('scroll', wrapper._onViewportChange, true);
-            window.removeEventListener('resize', wrapper._onViewportChange);
+        // Fechar e devolver o dropdown ao wrapper.
+        if (wrapper._hideDropdown) {
+            wrapper._hideDropdown();
+        } else {
+            dropdown.style.display = 'none';
         }
 
         // Atualizar classe selected
@@ -253,12 +274,11 @@
     function closeAllDropdowns() {
         var dropdowns = document.querySelectorAll('.phone-country-dropdown');
         for (var i = 0; i < dropdowns.length; i++) {
-            dropdowns[i].style.display = 'none';
-            // Remover listeners de viewport do wrapper correspondente.
-            var w = dropdowns[i].parentNode;
-            if (w && w._onViewportChange) {
-                window.removeEventListener('scroll', w._onViewportChange, true);
-                window.removeEventListener('resize', w._onViewportChange);
+            var w = dropdowns[i]._wrapper;
+            if (w && w._hideDropdown) {
+                w._hideDropdown();
+            } else {
+                dropdowns[i].style.display = 'none';
             }
         }
     }
