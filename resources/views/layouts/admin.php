@@ -144,7 +144,7 @@
     <script src="<?= asset('js/admin.js') ?>?v=2.3"></script>
     <script src="<?= asset('js/phone-country.js') ?>?v=1.3"></script>
     <?php if (str_starts_with($_SERVER['REQUEST_URI'] ?? '', '/whatsapp/chat')): ?>
-    <script src="<?= asset('js/whatsapp.js') ?>?v=1.6"></script>
+    <script src="<?= asset('js/whatsapp.js') ?>?v=1.7"></script>
     <?php endif; ?>
 </body>
 </html>

@@ -695,10 +695,20 @@ class WhatsAppController extends Controller
         $id = (int) $request->param('id');
         $data = [];
 
-        if ($request->input('contact_name') !== null) $data['contact_name'] = $request->input('contact_name');
-        if ($request->input('internal_notes') !== null) $data['internal_notes'] = $request->input('internal_notes');
-        if ($request->input('assigned_to') !== null) {
-            $data['assigned_to'] = $request->input('assigned_to') ? (int) $request->input('assigned_to') : null;
+        // Usa a PRESENÇA da chave (array_key_exists), não o valor, para permitir
+        // enviar assigned_to = null e assim REMOVER a atribuição ("Ninguém").
+        $body = $request->post();
+
+        if (array_key_exists('contact_name', $body)) {
+            $data['contact_name'] = $body['contact_name'];
+        }
+        if (array_key_exists('internal_notes', $body)) {
+            $data['internal_notes'] = $body['internal_notes'];
+        }
+        if (array_key_exists('assigned_to', $body)) {
+            // Vazio/null/0 => desatribuir (NULL); caso contrário, o ID do atendente.
+            $assigned = $body['assigned_to'];
+            $data['assigned_to'] = (empty($assigned) || $assigned === '0') ? null : (int) $assigned;
         }
 
         if (!empty($data)) {

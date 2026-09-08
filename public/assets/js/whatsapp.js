@@ -773,16 +773,31 @@ function toggleDetails() {
 }
 
 async function saveContactDetails() {
+    // Envia a string do select como está ('' = Ninguém). O backend interpreta
+    // vazio como "remover atribuição" (grava NULL).
     const data = {
         contact_name: document.getElementById('detailName').value,
-        assigned_to: document.getElementById('detailAssigned').value || null,
+        assigned_to: document.getElementById('detailAssigned').value,
         internal_notes: document.getElementById('detailNotes').value,
     };
-    await fetch(`/whatsapp/updateContact/${STATE.contactId}`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-        body: JSON.stringify(data),
-    });
-    loadContacts();
+    const btn = document.getElementById('detailSaveBtn');
+    const originalText = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+    try {
+        const res = await fetch(`/whatsapp/updateContact/${STATE.contactId}`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+            body: JSON.stringify(data),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (btn) { btn.textContent = (res.ok && json.success) ? 'Salvo!' : 'Erro ao salvar'; }
+    } catch (e) {
+        if (btn) { btn.textContent = 'Erro de conexão'; }
+    } finally {
+        setTimeout(function() {
+            if (btn) { btn.disabled = false; btn.textContent = originalText || 'Salvar'; }
+        }, 1500);
+        loadContacts();
+    }
 }
 
 async function updateServiceStatus() {

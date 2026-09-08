@@ -153,7 +153,7 @@
                 <label>Observações internas</label>
                 <textarea id="detailNotes" class="form-control" rows="3"></textarea>
             </div>
-            <button class="btn btn-primary btn-block" onclick="saveContactDetails()">Salvar</button>
+            <button type="button" id="detailSaveBtn" class="btn btn-primary btn-block" onclick="saveContactDetails()">Salvar</button>
 
             <hr>
             <h5>Etiquetas</h5>
