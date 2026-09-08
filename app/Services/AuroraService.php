@@ -126,10 +126,18 @@ class AuroraService
         // Escopo ampliado — sempre reforçado, independente do prompt salvo no admin:
         $system .= "\n\nESCOPO: você conhece TODO o sistema e deve responder qualquer pergunta "
             . "do cliente sobre passeios, transfers, veículos de transfer, locais de transfer, "
-            . "hotéis e horários de pickup — sempre com base no CATÁLOGO fornecido a seguir. "
-            . "Se o cliente escrever com erro de digitação, entenda a intenção e associe ao item "
-            . "correto do catálogo (ex.: 'bugie'/'bugue' = passeio de Buggy). Só há uma coisa que "
-            . "você NÃO faz: fechar/finalizar a venda ou o pagamento — nesse caso, aciona um consultor.";
+            . "hotéis e horários de pickup — sempre com base no CATÁLOGO fornecido a seguir.\n"
+            . "REGRAS OBRIGATÓRIAS sobre o catálogo:\n"
+            . "1. NUNCA diga que um passeio/serviço 'não existe' ou 'não temos' sem ANTES procurar "
+            . "em TODA a lista do catálogo. O catálogo é a verdade absoluta.\n"
+            . "2. Entenda erros de digitação, gírias e abreviações e associe ao item correto. "
+            . "Exemplos: 'bugie', 'bugue', 'bug', 'buguy', 'baggy' => procure por 'Buggy'/'Buggies' "
+            . "no catálogo; 'catamara' => 'Catamarã'; 'golfino' => 'Golfinho'. Se existir um item "
+            . "parecido no catálogo, é esse que o cliente quer.\n"
+            . "3. Ao apresentar 'o que tem', você pode resumir por categorias, mas se o cliente "
+            . "perguntar por um item específico, confirme pelo nome EXATO do catálogo se ele existir.\n"
+            . "4. Só há uma coisa que você NÃO faz: fechar/finalizar a venda ou o pagamento — "
+            . "nesse caso, aciona um consultor humano.";
 
         $system .= "\n\nINSTRUÇÃO TÉCNICA: quando perceber intenção clara de compra, "
             . "pedido de preço/disponibilidade de data específica, ou desejo de fechar/pagar, "
@@ -206,6 +214,7 @@ class AuroraService
         $blocks[] = $this->buildHotelsBlock();
 
         self::$catalogCache = implode("\n\n", array_filter($blocks));
+        error_log('[Aurora] Catálogo montado: ' . strlen(self::$catalogCache) . ' chars.');
         return self::$catalogCache;
     }
 
@@ -214,13 +223,32 @@ class AuroraService
      */
     private function buildTripsBlock(): string
     {
+        // Query DIRETA: garante TODOS os passeios publicados, mesmo sem preço/pacote
+        // cadastrado. O preço mínimo vem de um LEFT JOIN (NULL quando não há preço),
+        // sem excluir nenhum passeio da lista.
         try {
-            // orderBy 'preco_asc' faz o JOIN que traz min_price em cada item.
-            $result = $this->tripModel->getPublished(1, 500, 'preco_asc');
-            $trips = $result['items'] ?? [];
+            $db = \Core\Database::getInstance();
+            $trips = $db->fetchAll(
+                "SELECT t.id, t.title, t.short_description, t.duration, t.duration_unit,
+                        (
+                            SELECT MIN(COALESCE(tpc.sale_price, tpc.price))
+                            FROM trip_packages tp
+                            INNER JOIN trip_package_categories tpc ON tpc.package_id = tp.id
+                            WHERE tp.trip_id = t.id AND COALESCE(tpc.sale_price, tpc.price) > 0
+                        ) AS min_price
+                 FROM trips t
+                 WHERE t.status = 'published'
+                 ORDER BY t.sort_order DESC, t.created_at DESC"
+            );
         } catch (\Throwable $e) {
-            error_log('[Aurora] Falha ao carregar passeios: ' . $e->getMessage());
-            return 'PASSEIOS: não foi possível carregar no momento — um consultor pode confirmar.';
+            error_log('[Aurora] Falha ao carregar passeios (query direta): ' . $e->getMessage());
+            // Fallback ainda mais simples: só título/descrição.
+            try {
+                $trips = (new Trip())->where("status = 'published'", [], 'sort_order DESC, created_at DESC');
+            } catch (\Throwable $e2) {
+                error_log('[Aurora] Falha no fallback de passeios: ' . $e2->getMessage());
+                return 'PASSEIOS: não foi possível carregar no momento — um consultor pode confirmar.';
+            }
         }
 
         if (empty($trips)) {
@@ -256,7 +284,7 @@ class AuroraService
             $lines[] = $line;
         }
 
-        return "PASSEIOS DISPONÍVEIS (" . count($lines) . "):\n" . implode("\n", $lines);
+        return "PASSEIOS DISPONÍVEIS (" . count($lines) . " no total — liste/expanda conforme a pergunta):\n" . implode("\n", $lines);
     }
 
     /**
