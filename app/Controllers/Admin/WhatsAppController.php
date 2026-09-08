@@ -1501,14 +1501,41 @@ class WhatsAppController extends Controller
         }
 
         // ── Aurora (IA): primeiro atendimento automático ──
-        // Só atua em mensagens recebidas de contatos individuais, do tipo texto,
-        // e apenas enquanto NÃO houver atendente humano atribuído.
+        // Atua em mensagens recebidas de contatos individuais, de texto OU áudio
+        // (o áudio é transcrito), e apenas enquanto NÃO houver atendente humano atribuído.
         if (!$fromMe && !$isGroup) {
             error_log("[Aurora] Mensagem recebida no webhook. contato={$contactId}, tipo={$msgType}, texto_len=" . strlen((string) $msgText));
+
+            $auroraText = null;
+
             if ($msgType === 'text') {
-                $this->maybeRunAurora($contactId, $msgText);
+                $auroraText = $msgText;
+            } elseif ($msgType === 'audio' && !empty($mediaUrl)) {
+                // Transcrever o áudio para a Aurora entender o que o cliente quer.
+                try {
+                    $aurora = new \App\Services\AuroraService();
+                    $absPath = BASE_PATH . '/public' . $mediaUrl;
+                    $transcription = $aurora->transcribeAudioFile($absPath);
+                    if (!empty($transcription)) {
+                        $auroraText = $transcription;
+                        // Guarda a transcrição na própria mensagem (aparece no chat também).
+                        $saved = $this->messageModel->findByMessageId($instanceId, $messageId);
+                        if ($saved) {
+                            $this->messageModel->saveTranscription((int) $saved['id'], $transcription);
+                        }
+                        error_log("[Aurora] Áudio transcrito (contato {$contactId}): " . mb_substr($transcription, 0, 80));
+                    } else {
+                        error_log("[Aurora] Não foi possível transcrever o áudio (contato {$contactId}).");
+                    }
+                } catch (\Throwable $e) {
+                    error_log('[Aurora] Erro na transcrição de áudio: ' . $e->getMessage());
+                }
             } else {
-                error_log("[Aurora] Ignorado: tipo de mensagem '{$msgType}' (só responde a texto). Contato {$contactId}.");
+                error_log("[Aurora] Ignorado: tipo '{$msgType}' não suportado para resposta automática. Contato {$contactId}.");
+            }
+
+            if (!empty($auroraText)) {
+                $this->maybeRunAurora($contactId, $auroraText);
             }
         }
     }

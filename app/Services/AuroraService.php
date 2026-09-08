@@ -5,6 +5,9 @@ namespace App\Services;
 
 use App\Models\Trip;
 use App\Models\TripCategory;
+use App\Models\TripHotel;
+use App\Models\TransferVehicle;
+use App\Models\TransferLocation;
 use App\Models\WhatsappMessage;
 
 /**
@@ -38,6 +41,9 @@ class AuroraService
     private string $model;
     private string $systemPrompt;
     private int $historyLimit;
+
+    /** Cache do catálogo completo do sistema (montado uma vez por processo). */
+    private static ?string $catalogCache = null;
 
     public function __construct()
     {
@@ -116,14 +122,24 @@ class AuroraService
 
         // 1) System prompt (personalidade + regras) + instrução do marcador de handoff.
         $system = $this->systemPrompt !== '' ? $this->systemPrompt : $this->defaultSystemPrompt();
+
+        // Escopo ampliado — sempre reforçado, independente do prompt salvo no admin:
+        $system .= "\n\nESCOPO: você conhece TODO o sistema e deve responder qualquer pergunta "
+            . "do cliente sobre passeios, transfers, veículos de transfer, locais de transfer, "
+            . "hotéis e horários de pickup — sempre com base no CATÁLOGO fornecido a seguir. "
+            . "Se o cliente escrever com erro de digitação, entenda a intenção e associe ao item "
+            . "correto do catálogo (ex.: 'bugie'/'bugue' = passeio de Buggy). Só há uma coisa que "
+            . "você NÃO faz: fechar/finalizar a venda ou o pagamento — nesse caso, aciona um consultor.";
+
         $system .= "\n\nINSTRUÇÃO TÉCNICA: quando perceber intenção clara de compra, "
             . "pedido de preço/disponibilidade de data específica, ou desejo de fechar/pagar, "
             . "adicione o marcador " . self::HANDOFF_TAG . " ao FINAL da sua mensagem "
             . "(ele será removido automaticamente antes de enviar ao cliente).";
         $messages[] = ['role' => 'system', 'content' => $system];
 
-        // 2) Catálogo de passeios como contexto (baseado no interesse + lista geral).
-        $catalog = $this->buildCatalogContext($customerText);
+        // 2) Catálogo COMPLETO do sistema (todos os passeios, transfers, veículos, locais,
+        //    hotéis e horários). Não filtra por palavra-chave — a Aurora precisa conhecer tudo.
+        $catalog = $this->buildFullSystemCatalog();
         if ($catalog !== '') {
             $messages[] = ['role' => 'system', 'content' => $catalog];
         }
@@ -153,70 +169,230 @@ class AuroraService
     }
 
     /**
-     * Monta um bloco de contexto com passeios relevantes ao que o cliente escreveu.
+     * Monta o catálogo COMPLETO do sistema (todos os passeios com preço, categorias,
+     * transfers/veículos/locais/rotas e hotéis com horários). Cacheado por processo.
      */
-    private function buildCatalogContext(string $customerText): string
+    private function buildFullSystemCatalog(): string
     {
-        $trips = [];
-
-        // Busca por palavras-chave do cliente (usa o texto inteiro).
-        $found = $this->tripModel->search($customerText, 1, 8);
-        if (!empty($found['items'])) {
-            $trips = $found['items'];
+        if (self::$catalogCache !== null) {
+            return self::$catalogCache;
         }
 
-        // Fallback / complemento: passeios em destaque/recentes.
-        if (count($trips) < 6) {
-            $general = $this->tripModel->getPublished(1, 8, 'relevancia');
-            foreach ($general['items'] ?? [] as $t) {
-                $trips[$t['id']] = $t; // dedup por id
+        $blocks = [];
+        $blocks[] = "VOCÊ TEM ACESSO A TODO O CATÁLOGO DO SISTEMA ABAIXO. "
+            . "Use APENAS estas informações reais para responder. Se o cliente citar algo com "
+            . "erro de digitação (ex.: 'bugie', 'bugue', 'buguy' = Buggy/Buggies), reconheça e "
+            . "associe ao item correto da lista. Nunca invente itens, preços ou horários que não "
+            . "estejam aqui. Se algo não estiver na lista, diga que vai confirmar com um consultor.";
+
+        $blocks[] = $this->buildTripsBlock();
+
+        $catNames = [];
+        try {
+            foreach ($this->categoryModel->getAll() as $c) {
+                $n = trim((string) ($c['name'] ?? ''));
+                if ($n !== '') {
+                    $catNames[] = $n;
+                }
             }
-            // Reindexar
-            $trips = array_values($trips);
-        } else {
-            // Normalizar chave
-            $indexed = [];
-            foreach ($trips as $t) {
-                $indexed[$t['id']] = $t;
-            }
-            $trips = array_values($indexed);
+        } catch (\Throwable $e) {
+            error_log('[Aurora] Falha ao carregar categorias: ' . $e->getMessage());
+        }
+        if (!empty($catNames)) {
+            $blocks[] = "CATEGORIAS DE PASSEIOS: " . implode(', ', $catNames) . '.';
+        }
+
+        $blocks[] = $this->buildTransfersBlock();
+        $blocks[] = $this->buildHotelsBlock();
+
+        self::$catalogCache = implode("\n\n", array_filter($blocks));
+        return self::$catalogCache;
+    }
+
+    /**
+     * Bloco de passeios: nome, preço a partir de, duração e descrição curta.
+     */
+    private function buildTripsBlock(): string
+    {
+        try {
+            // orderBy 'preco_asc' faz o JOIN que traz min_price em cada item.
+            $result = $this->tripModel->getPublished(1, 500, 'preco_asc');
+            $trips = $result['items'] ?? [];
+        } catch (\Throwable $e) {
+            error_log('[Aurora] Falha ao carregar passeios: ' . $e->getMessage());
+            return 'PASSEIOS: não foi possível carregar no momento — um consultor pode confirmar.';
         }
 
         if (empty($trips)) {
-            return 'CATÁLOGO: nenhum passeio publicado encontrado no momento. '
-                . 'Peça mais detalhes ao cliente e informe que um consultor trará as opções.';
+            return 'PASSEIOS: nenhum passeio publicado no momento.';
         }
 
         $lines = [];
-        foreach (array_slice($trips, 0, 10) as $t) {
+        foreach ($trips as $t) {
             $title = trim((string) ($t['title'] ?? ''));
             if ($title === '') {
                 continue;
             }
+            $parts = [$title];
+
+            $min = (float) ($t['min_price'] ?? 0);
+            if ($min > 0) {
+                $parts[] = 'a partir de US$ ' . number_format($min, 2);
+            }
+            $dur = trim((string) ($t['duration'] ?? ''));
+            if ($dur !== '') {
+                $unit = ($t['duration_unit'] ?? 'hours') === 'days' ? 'dia(s)' : 'hora(s)';
+                $parts[] = $dur . ' ' . $unit;
+            }
+
+            $line = '- ' . implode(' | ', $parts);
             $desc = trim(strip_tags((string) ($t['short_description'] ?? '')));
-            if (mb_strlen($desc) > 160) {
-                $desc = mb_substr($desc, 0, 157) . '...';
+            if ($desc !== '') {
+                if (mb_strlen($desc) > 140) {
+                    $desc = mb_substr($desc, 0, 137) . '...';
+                }
+                $line .= "\n  " . $desc;
             }
-            $lines[] = $desc !== '' ? "- {$title}: {$desc}" : "- {$title}";
+            $lines[] = $line;
         }
 
-        // Categorias disponíveis (ajuda a Aurora a orientar).
-        $catNames = [];
-        foreach ($this->categoryModel->getAll() as $c) {
-            $n = trim((string) ($c['name'] ?? ''));
-            if ($n !== '') {
-                $catNames[] = $n;
+        return "PASSEIOS DISPONÍVEIS (" . count($lines) . "):\n" . implode("\n", $lines);
+    }
+
+    /**
+     * Bloco de transfers: veículos (capacidade + rotas com preços) e locais.
+     */
+    private function buildTransfersBlock(): string
+    {
+        $out = [];
+
+        try {
+            $vehicleModel = new TransferVehicle();
+            $vehicles = $vehicleModel->getActive();
+            if (!empty($vehicles)) {
+                $vLines = [];
+                foreach ($vehicles as $v) {
+                    $title = trim((string) ($v['title'] ?? ''));
+                    if ($title === '') {
+                        continue;
+                    }
+                    $vLine = '- ' . $title;
+                    $cap = (int) ($v['max_passengers'] ?? 0);
+                    if ($cap > 0) {
+                        $vLine .= " (até {$cap} passageiros)";
+                    }
+                    $vDesc = trim(strip_tags((string) ($v['description'] ?? '')));
+                    if ($vDesc !== '') {
+                        if (mb_strlen($vDesc) > 100) {
+                            $vDesc = mb_substr($vDesc, 0, 97) . '...';
+                        }
+                        $vLine .= ' — ' . $vDesc;
+                    }
+                    try {
+                        $routes = $vehicleModel->getRoutes((int) $v['id']);
+                        foreach (array_slice($routes, 0, 12) as $r) {
+                            $origin = trim((string) ($r['origin_title'] ?? ''));
+                            $dest = trim((string) ($r['destination_title'] ?? ''));
+                            if ($origin === '' || $dest === '') {
+                                continue;
+                            }
+                            $routeLine = "    · {$origin} -> {$dest}";
+                            $price = (float) ($r['base_price'] ?? 0);
+                            if ($price > 0) {
+                                $routeLine .= ' — a partir de US$ ' . number_format($price, 2);
+                            }
+                            $vLine .= "\n" . $routeLine;
+                        }
+                    } catch (\Throwable $e) {
+                        // rotas indisponíveis — segue sem
+                    }
+                    $vLines[] = $vLine;
+                }
+                if (!empty($vLines)) {
+                    $out[] = "VEÍCULOS DE TRANSFER E ROTAS:\n" . implode("\n", $vLines);
+                }
             }
+        } catch (\Throwable $e) {
+            error_log('[Aurora] Falha ao carregar veículos de transfer: ' . $e->getMessage());
         }
 
-        $context = "CATÁLOGO DE PASSEIOS DISPONÍVEIS (use APENAS estes nomes reais; "
-            . "não invente preços nem disponibilidade):\n" . implode("\n", $lines);
-
-        if (!empty($catNames)) {
-            $context .= "\n\nCATEGORIAS: " . implode(', ', array_slice($catNames, 0, 20)) . '.';
+        try {
+            $locationModel = new TransferLocation();
+            $locations = method_exists($locationModel, 'getActive')
+                ? $locationModel->getActive()
+                : $locationModel->where('status = 1', [], 'sort_order ASC');
+            if (!empty($locations)) {
+                $typeLabel = [
+                    'airport' => 'Aeroporto', 'hotel' => 'Hotel',
+                    'resort' => 'Resort', 'city' => 'Cidade', 'other' => 'Outro',
+                ];
+                $lLines = [];
+                foreach ($locations as $l) {
+                    $title = trim((string) ($l['title'] ?? ''));
+                    if ($title === '') {
+                        continue;
+                    }
+                    $type = $typeLabel[$l['location_type'] ?? 'other'] ?? 'Local';
+                    $lLines[] = "- {$title} ({$type})";
+                }
+                if (!empty($lLines)) {
+                    $out[] = "LOCAIS DE TRANSFER (origens/destinos):\n" . implode("\n", $lLines);
+                }
+            }
+        } catch (\Throwable $e) {
+            error_log('[Aurora] Falha ao carregar locais de transfer: ' . $e->getMessage());
         }
 
-        return $context;
+        return implode("\n\n", $out);
+    }
+
+    /**
+     * Bloco de hotéis e horários de pickup (cadastrados por passeio).
+     */
+    private function buildHotelsBlock(): string
+    {
+        try {
+            $hotelModel = new TripHotel();
+            $tripsResult = $this->tripModel->getPublished(1, 500, 'relevancia');
+            $trips = $tripsResult['items'] ?? [];
+
+            $lines = [];
+            foreach ($trips as $t) {
+                $hotels = $hotelModel->getByTrip((int) $t['id'], true);
+                if (empty($hotels)) {
+                    continue;
+                }
+                $tripTitle = trim((string) ($t['title'] ?? ''));
+                $hotelParts = [];
+                foreach ($hotels as $h) {
+                    $hotelName = trim((string) ($h['hotel_name'] ?? ''));
+                    if ($hotelName === '') {
+                        continue;
+                    }
+                    $times = [];
+                    foreach (($h['schedules'] ?? []) as $s) {
+                        $tt = substr((string) ($s['pickup_time'] ?? ''), 0, 5);
+                        if ($tt !== '') {
+                            $times[] = $tt;
+                        }
+                    }
+                    $hotelParts[] = $times
+                        ? "{$hotelName} (pickup: " . implode(', ', $times) . ')'
+                        : $hotelName;
+                }
+                if (!empty($hotelParts)) {
+                    $lines[] = "- {$tripTitle}: " . implode('; ', $hotelParts);
+                }
+            }
+
+            if (!empty($lines)) {
+                return "HOTÉIS E HORÁRIOS DE PICKUP (por passeio):\n" . implode("\n", $lines);
+            }
+        } catch (\Throwable $e) {
+            error_log('[Aurora] Falha ao carregar hotéis/horários: ' . $e->getMessage());
+        }
+
+        return '';
     }
 
     // ─────────────────────────────────────────────
@@ -419,6 +595,58 @@ class AuroraService
         }
 
         return ['ok' => true, 'detail' => 'OK — modelo respondeu: "' . trim($content) . '"'];
+    }
+
+    /**
+     * Transcreve um arquivo de áudio (caminho absoluto) usando OpenAI Whisper.
+     * Retorna o texto ou null em falha. Usa a chave da Aurora (aurora_openai_api_key).
+     */
+    public function transcribeAudioFile(string $absolutePath): ?string
+    {
+        if ($this->apiKey === '' || !function_exists('curl_init')) {
+            return null;
+        }
+        if (!is_file($absolutePath)) {
+            error_log("[Aurora] Áudio não encontrado para transcrição: {$absolutePath}");
+            return null;
+        }
+
+        try {
+            $ch = curl_init('https://api.openai.com/v1/audio/transcriptions');
+            $cFile = new \CURLFile($absolutePath);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_HTTPHEADER => ['Authorization: Bearer ' . $this->apiKey],
+                CURLOPT_POSTFIELDS => [
+                    'file' => $cFile,
+                    'model' => 'whisper-1',
+                    'language' => 'pt',
+                ],
+                CURLOPT_TIMEOUT => 60,
+                CURLOPT_CONNECTTIMEOUT => 10,
+            ]);
+            $response = curl_exec($ch);
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $error = curl_error($ch);
+            curl_close($ch);
+
+            if ($error) {
+                error_log("[Aurora] Whisper cURL error: {$error}");
+                return null;
+            }
+            if ($httpCode < 200 || $httpCode >= 300) {
+                error_log("[Aurora] Whisper HTTP {$httpCode}: " . substr((string) $response, 0, 300));
+                return null;
+            }
+
+            $data = json_decode((string) $response, true);
+            $text = $data['text'] ?? null;
+            return is_string($text) ? trim($text) : null;
+        } catch (\Throwable $e) {
+            error_log('[Aurora] Falha ao transcrever áudio: ' . $e->getMessage());
+            return null;
+        }
     }
 
     /**
