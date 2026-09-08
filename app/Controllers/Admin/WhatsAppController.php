@@ -1579,9 +1579,10 @@ class WhatsAppController extends Controller
                 return;
             }
 
-            // Limite de respostas automáticas por contato (conta APENAS mensagens da própria
-            // Aurora — não as enviadas manualmente pelo atendente/celular).
-            $maxReplies = (int) (setting('aurora_max_replies', '8') ?: 8);
+            // Limite de respostas automáticas por contato — apenas salvaguarda anti-loop.
+            // Padrão 0 = ILIMITADO (a Aurora atende enquanto nenhum humano assumir).
+            // Só bloqueia se o admin definir explicitamente um valor > 0.
+            $maxReplies = (int) setting('aurora_max_replies', '0');
             if ($maxReplies > 0) {
                 $auroraCount = (int) $this->db->fetchColumn(
                     "SELECT COUNT(*) FROM whatsapp_messages
@@ -1590,7 +1591,7 @@ class WhatsAppController extends Controller
                     [$contactId]
                 );
                 if ($auroraCount >= $maxReplies) {
-                    error_log("[Aurora] Limite de respostas atingido (contato {$contactId}: {$auroraCount}/{$maxReplies}).");
+                    error_log("[Aurora] Limite de respostas atingido (contato {$contactId}: {$auroraCount}/{$maxReplies}). Ajuste 'Máx. respostas por contato' nas configurações (0 = ilimitado).");
                     return;
                 }
             }

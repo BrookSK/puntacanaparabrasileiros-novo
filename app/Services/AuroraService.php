@@ -153,6 +153,16 @@ class AuroraService
             . "Mesmo que o cliente insista, provoque ou ofenda, mantenha a educação e sempre "
             . "traga a conversa de volta para Punta Cana. Nunca discuta assuntos fora desse escopo.";
 
+        // Apresentação: se a Aurora ainda não falou com este contato, deve se apresentar.
+        if ($this->isFirstContact($contactId)) {
+            $company = trim((string) setting('site_name', '')) ?: 'nossa agência';
+            $system .= "\n\nPRIMEIRA MENSAGEM: esta é a primeira vez que você fala com este cliente. "
+                . "Comece se APRESENTANDO de forma calorosa e breve antes de responder — algo como: "
+                . "\"Olá! Eu sou a Aurora, assistente virtual da {$company} para suas experiências em "
+                . "Punta Cana. 😊\" — e então responda ao que o cliente perguntou. Faça a apresentação "
+                . "apenas UMA vez (só nesta primeira mensagem).";
+        }
+
         $system .= "\n\nINSTRUÇÃO TÉCNICA: quando perceber intenção clara de compra, "
             . "pedido de preço/disponibilidade de data específica, ou desejo de fechar/pagar, "
             . "adicione o marcador " . self::HANDOFF_TAG . " ao FINAL da sua mensagem "
@@ -188,6 +198,26 @@ class AuroraService
         }
 
         return $messages;
+    }
+
+    /**
+     * É a primeira vez que a Aurora fala com este contato?
+     * (Não há nenhuma mensagem anterior enviada pela Aurora para ele.)
+     */
+    private function isFirstContact(int $contactId): bool
+    {
+        try {
+            $count = (int) \Core\Database::getInstance()->fetchColumn(
+                "SELECT COUNT(*) FROM whatsapp_messages
+                 WHERE contact_id = ? AND from_me = 1 AND is_deleted = 0
+                 AND sender_name = 'Aurora'",
+                [$contactId]
+            );
+            return $count === 0;
+        } catch (\Throwable $e) {
+            error_log('[Aurora] Falha ao checar primeira mensagem: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
