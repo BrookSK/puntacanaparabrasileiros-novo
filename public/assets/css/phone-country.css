@@ -67,18 +67,17 @@
 }
 
 /* Dropdown */
+/* position: fixed + posição calculada via JS (getBoundingClientRect) para que o dropdown
+   escape de containers com overflow (ex.: modais) e não seja cortado nem empurre o layout. */
 .phone-country-dropdown {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 9999;
+    position: fixed;
+    z-index: 100000;
     background: #fff;
     border: 1px solid #ddd;
     border-radius: 8px;
     box-shadow: 0 8px 24px rgba(0,0,0,0.15);
     width: 280px;
     max-height: 320px;
-    margin-top: 4px;
     overflow: hidden;
     display: flex;
     flex-direction: column;

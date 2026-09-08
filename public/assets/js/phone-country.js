@@ -163,6 +163,41 @@
             hiddenInput.value = wrapper._selectedCountry.ddi + ' ' + this.value.trim();
         });
 
+        // Posiciona o dropdown (position:fixed) ancorado ao botão, via viewport.
+        // Isso faz o dropdown escapar de containers com overflow (modais) sem ser cortado.
+        function positionDropdown() {
+            var rect = selectorBtn.getBoundingClientRect();
+            var vw = window.innerWidth;
+            var vh = window.innerHeight;
+            var ddWidth = dropdown.offsetWidth || 280;
+            var ddHeight = dropdown.offsetHeight || 320;
+            var gap = 4;
+
+            // Horizontal: alinha à esquerda do botão, mas mantém dentro da tela.
+            var left = rect.left;
+            if (left + ddWidth > vw - 8) {
+                left = Math.max(8, vw - ddWidth - 8);
+            }
+
+            // Vertical: abaixo do botão por padrão; acima se não couber embaixo.
+            var top = rect.bottom + gap;
+            if (top + ddHeight > vh - 8 && rect.top - gap - ddHeight > 8) {
+                top = rect.top - gap - ddHeight;
+            }
+
+            dropdown.style.left = Math.round(left) + 'px';
+            dropdown.style.top = Math.round(top) + 'px';
+            // Largura fica a cargo do CSS (inclui o responsivo em telas pequenas).
+        }
+
+        // Handlers de scroll/resize para reposicionar (ou fechar) enquanto aberto.
+        function onViewportChange() {
+            if (dropdown.style.display !== 'none') {
+                positionDropdown();
+            }
+        }
+        wrapper._onViewportChange = onViewportChange;
+
         // Toggle dropdown
         selectorBtn.addEventListener('click', function(e) {
             e.preventDefault();
@@ -170,18 +205,25 @@
             var isOpen = dropdown.style.display !== 'none';
             closeAllDropdowns();
             if (!isOpen) {
-                dropdown.style.display = 'block';
+                dropdown.style.display = 'flex';
                 searchInput.value = '';
-                searchInput.focus();
                 var items = list.querySelectorAll('.phone-country-item');
                 for (var k = 0; k < items.length; k++) { items[k].style.display = ''; }
+                // Posicionar após tornar visível (para ter dimensões corretas).
+                positionDropdown();
+                searchInput.focus();
+                // Acompanhar rolagem/resize (inclusive scroll dentro do modal) enquanto aberto.
+                window.addEventListener('scroll', onViewportChange, true);
+                window.addEventListener('resize', onViewportChange);
             }
         });
 
         // Fechar dropdown ao clicar fora
         document.addEventListener('click', function(e) {
-            if (!wrapper.contains(e.target)) {
+            if (!wrapper.contains(e.target) && e.target !== dropdown && !dropdown.contains(e.target)) {
                 dropdown.style.display = 'none';
+                window.removeEventListener('scroll', onViewportChange, true);
+                window.removeEventListener('resize', onViewportChange);
             }
         });
     }
@@ -191,6 +233,11 @@
         wrapper._selectedCountry = country;
         wrapper._hiddenInput.value = country.ddi + ' ' + input.value.trim();
         dropdown.style.display = 'none';
+        // Remover listeners de viewport ao fechar por seleção.
+        if (wrapper._onViewportChange) {
+            window.removeEventListener('scroll', wrapper._onViewportChange, true);
+            window.removeEventListener('resize', wrapper._onViewportChange);
+        }
 
         // Atualizar classe selected
         var items = dropdown.querySelectorAll('.phone-country-item');
@@ -207,6 +254,12 @@
         var dropdowns = document.querySelectorAll('.phone-country-dropdown');
         for (var i = 0; i < dropdowns.length; i++) {
             dropdowns[i].style.display = 'none';
+            // Remover listeners de viewport do wrapper correspondente.
+            var w = dropdowns[i].parentNode;
+            if (w && w._onViewportChange) {
+                window.removeEventListener('scroll', w._onViewportChange, true);
+                window.removeEventListener('resize', w._onViewportChange);
+            }
         }
     }
 
