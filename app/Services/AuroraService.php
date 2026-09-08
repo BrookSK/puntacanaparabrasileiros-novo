@@ -82,6 +82,7 @@ class AuroraService
             $raw = $this->callOpenAi($messages);
 
             if ($raw === null || $raw === '') {
+                error_log("[Aurora] OpenAI não retornou texto (modelo='{$this->model}'). Verifique a chave/modelo/saldo da conta OpenAI nos logs [Aurora] HTTP acima.");
                 return null;
             }
 

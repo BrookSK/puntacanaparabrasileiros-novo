@@ -102,7 +102,7 @@ class WhatsappNotifier
      * @param string|null $contactName Nome do contato (opcional, para criar/atualizar)
      * @return bool True se enviado com sucesso
      */
-    public function sendToPhone(string $phone, string $message, ?string $contactName = null): bool
+    public function sendToPhone(string $phone, string $message, ?string $contactName = null, string $senderName = 'Sistema'): bool
     {
         if (empty($phone) || empty($message)) {
             return false;
@@ -135,7 +135,7 @@ class WhatsappNotifier
         $contactId = $this->upsertContact($instance, $jid, $phone, $contactName);
 
         // Registrar mensagem no histórico
-        $this->registerMessage($instance, $jid, $message, $result, $contactId);
+        $this->registerMessage($instance, $jid, $message, $result, $contactId, $senderName);
 
         return true;
     }
@@ -354,7 +354,7 @@ class WhatsappNotifier
      * @param array $apiResult Resposta da Evolution API
      * @param int|null $contactId ID do contato (se individual)
      */
-    private function registerMessage(array $instance, string $jid, string $message, array $apiResult, ?int $contactId = null): void
+    private function registerMessage(array $instance, string $jid, string $message, array $apiResult, ?int $contactId = null, string $senderName = 'Sistema'): void
     {
         $instanceId = (int) $instance['id'];
 
@@ -376,7 +376,7 @@ class WhatsappNotifier
             'from_me' => 1,
             'message_type' => 'text',
             'message_text' => $message,
-            'sender_name' => 'Sistema',
+            'sender_name' => $senderName,
             'timestamp' => date('Y-m-d H:i:s'),
             'is_read' => 1,
             'ack_status' => 'sent',
