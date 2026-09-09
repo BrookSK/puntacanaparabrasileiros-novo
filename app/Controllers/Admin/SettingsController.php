@@ -212,6 +212,11 @@ class SettingsController extends Controller
             $mark = $s['ok'] ? '[OK]' : '[FALHOU]';
             $lines[] = "{$mark} {$s['step']}: {$s['detail']}";
         }
+
+        // Teste de transcrição do último áudio recebido.
+        $audio = $aurora->diagnoseLastAudio();
+        $lines[] = ($audio['ok'] ? '[OK]' : '[FALHOU]') . ' Transcrição de áudio: ' . $audio['detail'];
+
         $report = implode("\n", $lines);
 
         // Passa o relatório para a view exibir num bloco legível.

@@ -260,8 +260,11 @@ class EvolutionApi
      */
     public function getBase64FromMedia(array $messageData): ?array
     {
+        // A Evolution API v2 espera o objeto da mensagem em 'message'. Enviamos também
+        // 'convertToMp4' => false (mantém o áudio original ogg/opus, ideal para transcrição).
         return $this->post("/chat/getBase64FromMediaMessage/{$this->instanceName}", [
             'message' => $messageData,
+            'convertToMp4' => false,
         ]);
     }
 

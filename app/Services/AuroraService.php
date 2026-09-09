@@ -689,6 +689,57 @@ class AuroraService
     }
 
     /**
+     * Diagnóstico: pega o último áudio recebido no banco e tenta transcrever,
+     * retornando um relatório detalhado (para o botão de teste no admin).
+     *
+     * @return array{ok:bool, detail:string}
+     */
+    public function diagnoseLastAudio(): array
+    {
+        try {
+            $db = \Core\Database::getInstance();
+            $row = $db->fetchOne(
+                "SELECT id, media_url, media_mime_type, transcription
+                 FROM whatsapp_messages
+                 WHERE message_type = 'audio' AND from_me = 0
+                 ORDER BY id DESC LIMIT 1"
+            );
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'detail' => 'Erro ao consultar áudios: ' . $e->getMessage()];
+        }
+
+        if (!$row) {
+            return ['ok' => false, 'detail' => 'Nenhum áudio recebido encontrado no banco para testar.'];
+        }
+
+        $mediaUrl = (string) ($row['media_url'] ?? '');
+        if ($mediaUrl === '') {
+            return ['ok' => false, 'detail' => "Último áudio (msg #{$row['id']}) está SEM media_url no banco — o arquivo não foi salvo. Causa provável: a Evolution não enviou o áudio (webhook com base64 desativado). Solução: reconectar/registrar o webhook da instância."];
+        }
+
+        $absPath = \defined('BASE_PATH') ? BASE_PATH . '/public' . $mediaUrl : $_SERVER['DOCUMENT_ROOT'] . $mediaUrl;
+        $exists = is_file($absPath);
+        $size = $exists ? filesize($absPath) : 0;
+
+        $info = "Áudio msg #{$row['id']} | mime='{$row['media_mime_type']}' | arquivo=" . ($exists ? 'existe' : 'NÃO existe')
+            . " | tamanho={$size} bytes | caminho={$absPath}";
+
+        if (!$exists) {
+            return ['ok' => false, 'detail' => $info . "\n=> O arquivo não está no servidor. Verifique permissões da pasta uploads/whatsapp_media ou se o base64 do webhook está ativo."];
+        }
+        if ($size < 512) {
+            return ['ok' => false, 'detail' => $info . "\n=> Arquivo muito pequeno/vazio (provavelmente inválido ou criptografado)."];
+        }
+
+        $text = $this->transcribeAudioFile($absPath);
+        if (empty($text)) {
+            return ['ok' => false, 'detail' => $info . "\n=> A transcrição (Whisper) FALHOU. Veja no log do servidor a linha '[Aurora] Whisper HTTP ...' para o erro exato (ex.: 401 chave inválida, 400 formato)."];
+        }
+
+        return ['ok' => true, 'detail' => $info . "\n=> Transcrição OK: \"" . mb_substr($text, 0, 200) . '"'];
+    }
+
+    /**
      * Transcreve um arquivo de áudio (caminho absoluto) usando OpenAI Whisper.
      * Retorna o texto ou null em falha. Usa a chave da Aurora (aurora_openai_api_key).
      */
