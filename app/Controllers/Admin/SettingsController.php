@@ -250,15 +250,64 @@ class SettingsController extends Controller
         $out[] = 'Aurora ativada: ' . ($enabled ? 'sim' : 'NÃO');
         $out[] = 'Chave OpenAI: ' . ($key !== '' ? ('preenchida (' . substr($key, 0, 7) . '...)') : 'VAZIA');
 
-        // 2) Último áudio + transcrição
+        // 2) Último áudio recebido — reproduz o fluxo real de download + transcrição.
+        $out[] = '';
+        $out[] = 'ÚLTIMO ÁUDIO RECEBIDO:';
         try {
-            $aurora = new \App\Services\AuroraService();
-            $audio = $aurora->diagnoseLastAudio();
-            $out[] = '';
-            $out[] = 'TESTE DE TRANSCRIÇÃO (último áudio recebido):';
-            $out[] = ($audio['ok'] ? '[OK] ' : '[FALHOU] ') . $audio['detail'];
+            $row = $this->db->fetchOne(
+                "SELECT wm.id, wm.media_url, wm.media_mime_type, wm.message_id, wm.instance_id, wc.remote_jid
+                 FROM whatsapp_messages wm
+                 LEFT JOIN whatsapp_contacts wc ON wc.id = wm.contact_id
+                 WHERE wm.message_type = 'audio' AND wm.from_me = 0
+                 ORDER BY wm.id DESC LIMIT 1"
+            );
+
+            if (!$row) {
+                $out[] = 'Nenhum áudio recebido encontrado no banco.';
+            } else {
+                $out[] = "msg #{$row['id']} | mime='{$row['media_mime_type']}' | media_url='{$row['media_url']}'";
+                $absPath = BASE_PATH . '/public' . (string) $row['media_url'];
+                $exists = $row['media_url'] && is_file($absPath);
+                $size = $exists ? filesize($absPath) : 0;
+                $out[] = 'Arquivo no servidor: ' . ($exists ? "existe ({$size} bytes)" : 'NÃO existe');
+
+                // Se o arquivo não existe/está vazio, tentar baixar AGORA via Evolution e mostrar o resultado cru.
+                if (!$exists || $size < 512) {
+                    $out[] = '';
+                    $out[] = 'Tentando baixar o áudio AGORA via Evolution API...';
+                    $inst = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE id = ? LIMIT 1", [(int) $row['instance_id']]);
+                    if ($inst) {
+                        $api = \App\Services\EvolutionApi::fromInstance($inst);
+                        $res = $api->getBase64FromMedia([
+                            'key' => ['remoteJid' => $row['remote_jid'], 'id' => $row['message_id'], 'fromMe' => false],
+                        ]);
+                        if (is_array($res)) {
+                            $keys = implode(', ', array_keys($res));
+                            $b64len = isset($res['base64']) ? strlen((string) $res['base64']) : 0;
+                            $out[] = "Resposta da Evolution — chaves: [{$keys}] | tamanho do base64: {$b64len}";
+                            if ($b64len === 0) {
+                                $out[] = 'Trecho da resposta: ' . substr(json_encode($res, JSON_UNESCAPED_SLASHES), 0, 300);
+                                $out[] = '=> A Evolution NÃO devolveu o áudio em base64. É aqui que está o problema.';
+                            } else {
+                                $out[] = '=> A Evolution DEVOLVEU o áudio. O problema é na gravação/permissão da pasta.';
+                            }
+                        } else {
+                            $out[] = '=> getBase64FromMedia retornou nulo (erro de conexão com a Evolution). Veja [EvolutionApi] no log.';
+                        }
+                    } else {
+                        $out[] = 'Instância do áudio não encontrada no banco.';
+                    }
+                } else {
+                    // Arquivo existe: testar a transcrição de verdade.
+                    $aurora = new \App\Services\AuroraService();
+                    $text = $aurora->transcribeAudioFile($absPath);
+                    $out[] = empty($text)
+                        ? '=> Arquivo OK, mas a transcrição (Whisper) FALHOU. Veja [Aurora] Whisper HTTP no log.'
+                        : ('=> TUDO OK. Transcrição: "' . mb_substr($text, 0, 200) . '"');
+                }
+            }
         } catch (\Throwable $e) {
-            $out[] = 'Erro no teste de transcrição: ' . $e->getMessage();
+            $out[] = 'Erro no teste de áudio: ' . $e->getMessage();
         }
 
         // 3) Estado do webhook da instância na Evolution (base64?)
@@ -272,22 +321,8 @@ class SettingsController extends Controller
                 $api = \App\Services\EvolutionApi::fromInstance($instance);
                 if (method_exists($api, 'findWebhook')) {
                     $wh = $api->findWebhook();
-                    $out[] = 'Webhook atual: ' . json_encode($wh, JSON_UNESCAPED_SLASHES);
-
-                    // Se o base64 estiver desativado, re-registra o webhook com base64=true.
-                    $base64On = false;
-                    if (is_array($wh)) {
-                        $flat = json_encode($wh);
-                        $base64On = str_contains((string) $flat, '"base64":true');
-                    }
-                    if (!$base64On) {
-                        $webhookUrl = rtrim((string) setting('site_url', ''), '/') . '/whatsapp/webhook';
-                        $set = $api->setWebhook($webhookUrl);
-                        $out[] = 'Base64 estava DESATIVADO. Reaplicado webhook com base64=true (url: ' . $webhookUrl . '). Resultado: ' . json_encode($set, JSON_UNESCAPED_SLASHES);
-                        $out[] = '>>> Agora peça um NOVO áudio e teste de novo.';
-                    } else {
-                        $out[] = 'Base64 do webhook: ATIVO (ok).';
-                    }
+                    $base64On = is_array($wh) && str_contains((string) json_encode($wh), '"webhookBase64":true');
+                    $out[] = 'Base64 do webhook: ' . ($base64On ? 'ATIVO (ok)' : 'DESATIVADO');
                 }
             } else {
                 $out[] = 'Nenhuma instância conectada encontrada.';
