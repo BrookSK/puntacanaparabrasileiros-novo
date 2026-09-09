@@ -278,21 +278,19 @@ class SettingsController extends Controller
                     $inst = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE id = ? LIMIT 1", [(int) $row['instance_id']]);
                     if ($inst) {
                         $api = \App\Services\EvolutionApi::fromInstance($inst);
-                        $res = $api->getBase64FromMedia([
-                            'key' => ['remoteJid' => $row['remote_jid'], 'id' => $row['message_id'], 'fromMe' => false],
-                        ]);
-                        if (is_array($res)) {
-                            $keys = implode(', ', array_keys($res));
-                            $b64len = isset($res['base64']) ? strlen((string) $res['base64']) : 0;
-                            $out[] = "Resposta da Evolution — chaves: [{$keys}] | tamanho do base64: {$b64len}";
-                            if ($b64len === 0) {
-                                $out[] = 'Trecho da resposta: ' . substr(json_encode($res, JSON_UNESCAPED_SLASHES), 0, 300);
-                                $out[] = '=> A Evolution NÃO devolveu o áudio em base64. É aqui que está o problema.';
-                            } else {
-                                $out[] = '=> A Evolution DEVOLVEU o áudio. O problema é na gravação/permissão da pasta.';
-                            }
-                        } else {
-                            $out[] = '=> getBase64FromMedia retornou nulo (erro de conexão com a Evolution). Veja [EvolutionApi] no log.';
+                        $key = ['remoteJid' => $row['remote_jid'], 'id' => $row['message_id'], 'fromMe' => false];
+                        $v = $api->getBase64FromMediaVerbose(['key' => $key]);
+                        $out[] = 'URL chamada: ' . $v['url'];
+                        $out[] = 'HTTP: ' . $v['http'] . ($v['error'] !== '' ? ' | cURL error: ' . $v['error'] : '');
+                        $out[] = 'Resposta (crua, até 800 chars): ' . $v['body'];
+                        if ($v['http'] === 0) {
+                            $out[] = '=> Falha de CONEXÃO com a Evolution (não respondeu). Verifique a URL/porta da API da instância no admin.';
+                        } elseif ($v['http'] === 404) {
+                            $out[] = '=> Endpoint 404: a versão da sua Evolution usa outro caminho para baixar mídia. Me avise este resultado.';
+                        } elseif ($v['http'] === 400) {
+                            $out[] = '=> HTTP 400: o formato do pedido não foi aceito por esta versão da Evolution. Me avise este resultado.';
+                        } elseif ($v['http'] >= 200 && $v['http'] < 300) {
+                            $out[] = '=> A Evolution respondeu 2xx. Veja acima se veio "base64" na resposta.';
                         }
                     } else {
                         $out[] = 'Instância do áudio não encontrada no banco.';

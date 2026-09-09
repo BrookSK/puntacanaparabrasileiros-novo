@@ -260,12 +260,46 @@ class EvolutionApi
      */
     public function getBase64FromMedia(array $messageData): ?array
     {
-        // A Evolution API v2 espera o objeto da mensagem em 'message'. Enviamos também
-        // 'convertToMp4' => false (mantém o áudio original ogg/opus, ideal para transcrição).
+        // A Evolution API v2 espera o objeto da mensagem em 'message'.
         return $this->post("/chat/getBase64FromMediaMessage/{$this->instanceName}", [
             'message' => $messageData,
-            'convertToMp4' => false,
         ]);
+    }
+
+    /**
+     * Versão de DIAGNÓSTICO: retorna HTTP code + corpo cru da resposta do
+     * getBase64FromMediaMessage, para descobrir por que o download falha.
+     *
+     * @return array{url:string, http:int, error:string, body:string}
+     */
+    public function getBase64FromMediaVerbose(array $messageData): array
+    {
+        $url = $this->apiUrl . "/chat/getBase64FromMediaMessage/{$this->instanceName}";
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $url,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode(['message' => $messageData]),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'apikey: ' . $this->apiKey,
+            ],
+            CURLOPT_TIMEOUT => 30,
+            CURLOPT_CONNECTTIMEOUT => 10,
+            CURLOPT_SSL_VERIFYPEER => true,
+        ]);
+        $body = curl_exec($ch);
+        $http = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        return [
+            'url' => $url,
+            'http' => $http,
+            'error' => (string) $error,
+            'body' => substr((string) $body, 0, 800),
+        ];
     }
 
     // ─────────────────────────────────────────────
