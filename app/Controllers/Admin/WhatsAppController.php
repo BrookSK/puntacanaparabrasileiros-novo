@@ -1462,6 +1462,37 @@ class WhatsAppController extends Controller
                     error_log('[Aurora][Webhook] Falha ao baixar mídia via API: ' . $e->getMessage());
                 }
             }
+
+            // Para ÁUDIO: se o base64 do webhook não gerou um arquivo válido (ex.: veio
+            // criptografado), refazer o download via API da Evolution, que devolve o
+            // áudio já pronto/descriptografado. Garante transcrição confiável.
+            if ($msgType === 'audio') {
+                $needsRedownload = empty($mediaUrl)
+                    || !is_file(BASE_PATH . '/public' . $mediaUrl)
+                    || filesize(BASE_PATH . '/public' . $mediaUrl) < 1024; // < 1KB = provavelmente inválido
+                if ($needsRedownload) {
+                    try {
+                        $api = EvolutionApi::fromInstance($instance);
+                        $mediaResult = $api->getBase64FromMedia([
+                            'key' => $key,
+                            'message' => $msgContent,
+                        ]);
+                        if ($mediaResult && !empty($mediaResult['base64'])) {
+                            $mediaData['base64'] = $mediaResult['base64'];
+                            if (!empty($mediaResult['mimetype'])) {
+                                $mediaData['mimetype'] = $mediaResult['mimetype'];
+                            }
+                            $redownloaded = $this->saveMediaFromBase64($mediaData);
+                            if (!empty($redownloaded)) {
+                                $mediaUrl = $redownloaded;
+                                error_log("[Aurora][Webhook] Áudio re-baixado via API para transcrição confiável.");
+                            }
+                        }
+                    } catch (\Throwable $e) {
+                        error_log('[Aurora][Webhook] Falha ao re-baixar áudio: ' . $e->getMessage());
+                    }
+                }
+            }
         }
 
         // Salvar mensagem
@@ -1615,6 +1646,22 @@ class WhatsAppController extends Controller
 
             if ($sent) {
                 error_log("[Aurora] Respondeu ao contato {$contactId} ({$contact['phone']}).");
+
+                // Se o cliente pediu a lista de passeios, envia o link do catálogo completo.
+                if (!empty($result['catalog'])) {
+                    $siteUrl = rtrim((string) setting('site_url', ''), '/');
+                    if ($siteUrl !== '') {
+                        $catalogUrl = $siteUrl . '/catalogo';
+                        $notifier->sendToPhone(
+                            (string) $contact['phone'],
+                            "Aqui está nosso catálogo completo com todos os passeios: {$catalogUrl} 🌴",
+                            null,
+                            'Aurora'
+                        );
+                        error_log("[Aurora] Catálogo enviado ao contato {$contactId}: {$catalogUrl}");
+                    }
+                }
+
                 // Atualiza o lead no CRM (cria/avança etapa).
                 $crm = new \App\Services\AuroraCrmService();
                 $crm->processLead($contact, (bool) $result['handoff']);

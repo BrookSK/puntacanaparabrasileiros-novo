@@ -33,6 +33,9 @@ class AuroraService
     /** Marcador que a IA emite quando o lead deve ir para um humano. Removido antes do envio. */
     private const HANDOFF_TAG = '[HANDOFF]';
 
+    /** Marcador que a IA emite quando deve enviar o catálogo de passeios. Removido antes do envio. */
+    private const CATALOG_TAG = '[CATALOGO]';
+
     private Trip $tripModel;
     private TripCategory $categoryModel;
     private WhatsappMessage $messageModel;
@@ -92,9 +95,11 @@ class AuroraService
                 return null;
             }
 
-            // Detectar e remover o marcador de handoff.
+            // Detectar e remover os marcadores (handoff e catálogo).
             $handoff = stripos($raw, self::HANDOFF_TAG) !== false;
-            $reply = trim(str_ireplace(self::HANDOFF_TAG, '', $raw));
+            $catalog = stripos($raw, self::CATALOG_TAG) !== false;
+            $reply = str_ireplace([self::HANDOFF_TAG, self::CATALOG_TAG], '', $raw);
+            $reply = trim($reply);
 
             // Segurança: nunca devolver resposta vazia.
             if ($reply === '') {
@@ -102,7 +107,7 @@ class AuroraService
                 $handoff = true;
             }
 
-            return ['reply' => $reply, 'handoff' => $handoff];
+            return ['reply' => $reply, 'handoff' => $handoff, 'catalog' => $catalog];
         } catch (\Throwable $e) {
             error_log('[Aurora] Falha ao gerar resposta: ' . $e->getMessage());
             return null;
@@ -120,8 +125,15 @@ class AuroraService
     {
         $messages = [];
 
+        // Regra de topo (prioridade máxima): foco exclusivo em Punta Cana.
+        $system = "REGRA PRINCIPAL: você é a Aurora e conversa EXCLUSIVAMENTE sobre turismo em Punta "
+            . "Cana (passeios, transfers, hotéis, horários, reservas e a viagem do cliente). Você "
+            . "JAMAIS responde, explica ou dá conteúdo sobre qualquer outro assunto (tecnologia, "
+            . "programação, banco de dados, trabalho, receitas, etc.), mesmo que saiba — nesses casos "
+            . "diga educadamente que só ajuda com Punta Cana e reconduza a conversa.\n\n";
+
         // 1) System prompt (personalidade + regras) + instrução do marcador de handoff.
-        $system = $this->systemPrompt !== '' ? $this->systemPrompt : $this->defaultSystemPrompt();
+        $system .= $this->systemPrompt !== '' ? $this->systemPrompt : $this->defaultSystemPrompt();
 
         // Escopo ampliado — sempre reforçado, independente do prompt salvo no admin:
         $system .= "\n\nESCOPO: você conhece TODO o sistema e deve responder qualquer pergunta "
@@ -139,19 +151,22 @@ class AuroraService
             . "4. Só há uma coisa que você NÃO faz: fechar/finalizar a venda ou o pagamento — "
             . "nesse caso, aciona um consultor humano.";
 
-        // Guard-rail de ASSUNTO: foco em Punta Cana, mas sem ser seca com o cliente.
-        $system .= "\n\nASSUNTO / FORA DE CONTEXTO: seu foco é a empresa e os serviços em Punta Cana "
-            . "(passeios, transfers, veículos, locais, hotéis, horários, reservas e dúvidas de "
-            . "viagem/turismo em Punta Cana). Quando o cliente perguntar algo FORA desse assunto "
-            . "(ex.: receitas, compras, política, conversa pessoal), NÃO ignore nem recuse de forma "
-            . "seca: responda de maneira BREVE, simpática e educada à pergunta dele em 1 frase e, "
-            . "logo em seguida, na MESMA mensagem, pergunte gentilmente se ele gostaria de saber algo "
-            . "sobre Punta Cana (passeios, transfers, sua viagem). Exemplo de tom: se perguntarem "
-            . "'vende gás?', responda algo como 'Ah, gás a gente não vende, viu? 😅 Mas se você "
-            . "estiver planejando uma viagem para Punta Cana, posso te ajudar com passeios e "
-            . "transfers — quer dar uma olhada?'. Nunca seja grosseira; se o cliente ofender, "
-            . "mantenha a educação e traga a conversa de volta para Punta Cana. Não se aprofunde em "
-            . "temas fora do turismo: responda curtinho e redirecione.";
+        // Guard-rail de ASSUNTO: foco EXCLUSIVO em Punta Cana. Nunca explicar temas fora.
+        $system .= "\n\nASSUNTO / FORA DE CONTEXTO (regra crítica e inviolável): seu ÚNICO assunto é "
+            . "a empresa e os serviços em Punta Cana — passeios, transfers, veículos, locais, hotéis, "
+            . "horários, reservas e dúvidas de viagem/turismo em Punta Cana.\n"
+            . "Se o cliente falar de QUALQUER outro tema (ex.: programação, banco de dados, SQL, "
+            . "tecnologia, receitas, compras, política, esportes, trabalho, conversa pessoal, etc.), "
+            . "você está PROIBIDA de explicar, opinar, dar instruções, dicas ou qualquer conteúdo "
+            . "sobre esse tema — mesmo que saiba a resposta e mesmo que o cliente insista. NÃO entre "
+            . "no mérito do assunto de forma alguma.\n"
+            . "Nesses casos, responda SEMPRE de forma curta, educada e simpática deixando claro que "
+            . "você só ajuda com Punta Cana, e traga o foco de volta. Exemplo de tom (adapte as "
+            . "palavras, mantendo a ideia): 'Olha, sobre isso eu não consigo te ajudar — sou a Aurora "
+            . "e cuido só das experiências em Punta Cana. 😊 Mas me diz: você está pensando em viajar "
+            . "para lá? Posso te mostrar nossos passeios e transfers!'. "
+            . "NUNCA forneça explicações técnicas ou de outros assuntos. Máximo 2 frases: uma dizendo "
+            . "gentilmente que é fora do seu escopo, outra convidando a falar de Punta Cana.";
 
         // Apresentação: se a Aurora ainda não falou com este contato, deve se apresentar.
         if ($this->isFirstContact($contactId)) {
@@ -163,10 +178,14 @@ class AuroraService
                 . "apenas UMA vez (só nesta primeira mensagem).";
         }
 
-        $system .= "\n\nINSTRUÇÃO TÉCNICA: quando perceber intenção clara de compra, "
-            . "pedido de preço/disponibilidade de data específica, ou desejo de fechar/pagar, "
-            . "adicione o marcador " . self::HANDOFF_TAG . " ao FINAL da sua mensagem "
-            . "(ele será removido automaticamente antes de enviar ao cliente).";
+        $system .= "\n\nINSTRUÇÃO TÉCNICA (marcadores — são removidos antes de enviar ao cliente):\n"
+            . "- Quando perceber intenção clara de compra, pedido de preço/disponibilidade de data "
+            . "específica, ou desejo de fechar/pagar, adicione " . self::HANDOFF_TAG . " ao FINAL da mensagem.\n"
+            . "- Quando o cliente pedir a LISTA/relação de passeios, quiser ver 'todos os passeios', "
+            . "'o que vocês têm', 'o catálogo' ou algo assim, adicione " . self::CATALOG_TAG . " ao FINAL "
+            . "da mensagem. Nesse caso, faça uma resposta curta e simpática dizendo que está enviando "
+            . "o catálogo completo com todos os passeios (não precisa listar todos no texto — o catálogo "
+            . "será enviado automaticamente logo após sua mensagem).";
         $messages[] = ['role' => 'system', 'content' => $system];
 
         // 2) Catálogo COMPLETO do sistema (todos os passeios, transfers, veículos, locais,
@@ -479,7 +498,7 @@ class AuroraService
         $payload = [
             'model' => $this->model,
             'messages' => $messages,
-            'temperature' => 0.6,
+            'temperature' => 0.3,
             'max_tokens' => 400,
         ];
 
