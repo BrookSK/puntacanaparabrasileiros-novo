@@ -1457,10 +1457,10 @@ class WhatsAppController extends Controller
             if (!$fileOk) {
                 try {
                     $api = EvolutionApi::fromInstance($instance);
-                    $mediaResult = $api->getBase64FromMedia([
-                        'key' => $key,
-                        'message' => $msgContent,
-                    ]);
+                    // Passa o objeto $data EXATAMENTE como a Evolution enviou no webhook.
+                    // Reconstruir/enviar só o conteúdo interno gera o erro
+                    // "Cannot use 'in' operator to search for 'messageContextInfo'".
+                    $mediaResult = $api->getBase64FromMedia($data);
                     if ($mediaResult && !empty($mediaResult['base64'])) {
                         $mediaData['base64'] = $mediaResult['base64'];
                         if (!empty($mediaResult['mimetype'])) {

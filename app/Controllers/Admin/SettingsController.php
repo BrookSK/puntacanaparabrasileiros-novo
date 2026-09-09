@@ -276,25 +276,9 @@ class SettingsController extends Controller
                     $out[] = '';
                     $out[] = 'Tentando baixar o áudio AGORA via Evolution API...';
                     $inst = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE id = ? LIMIT 1", [(int) $row['instance_id']]);
-                    if ($inst) {
-                        $api = \App\Services\EvolutionApi::fromInstance($inst);
-                        $key = ['remoteJid' => $row['remote_jid'], 'id' => $row['message_id'], 'fromMe' => false];
-                        $v = $api->getBase64FromMediaVerbose(['key' => $key]);
-                        $out[] = 'URL chamada: ' . $v['url'];
-                        $out[] = 'HTTP: ' . $v['http'] . ($v['error'] !== '' ? ' | cURL error: ' . $v['error'] : '');
-                        $out[] = 'Resposta (crua, até 800 chars): ' . $v['body'];
-                        if ($v['http'] === 0) {
-                            $out[] = '=> Falha de CONEXÃO com a Evolution (não respondeu). Verifique a URL/porta da API da instância no admin.';
-                        } elseif ($v['http'] === 404) {
-                            $out[] = '=> Endpoint 404: a versão da sua Evolution usa outro caminho para baixar mídia. Me avise este resultado.';
-                        } elseif ($v['http'] === 400) {
-                            $out[] = '=> HTTP 400: o formato do pedido não foi aceito por esta versão da Evolution. Me avise este resultado.';
-                        } elseif ($v['http'] >= 200 && $v['http'] < 300) {
-                            $out[] = '=> A Evolution respondeu 2xx. Veja acima se veio "base64" na resposta.';
-                        }
-                    } else {
-                        $out[] = 'Instância do áudio não encontrada no banco.';
-                    }
+                    $out[] = 'OBS: este teste manual é limitado (não temos o payload bruto do áudio antigo).';
+                    $out[] = 'O download real foi corrigido para enviar o objeto completo da mensagem à Evolution.';
+                    $out[] = '>>> Peça um ÁUDIO NOVO agora e recarregue esta página: o áudio novo deve ser salvo e transcrito.';
                 } else {
                     // Arquivo existe: testar a transcrição de verdade.
                     $aurora = new \App\Services\AuroraService();

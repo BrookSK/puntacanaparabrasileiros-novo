@@ -260,10 +260,24 @@ class EvolutionApi
      */
     public function getBase64FromMedia(array $messageData): ?array
     {
-        // A Evolution API v2 espera o objeto da mensagem em 'message'.
-        return $this->post("/chat/getBase64FromMediaMessage/{$this->instanceName}", [
-            'message' => $messageData,
-        ]);
+        $endpoint = "/chat/getBase64FromMediaMessage/{$this->instanceName}";
+
+        // Formato 1: mensagem completa dentro de 'message' (padrão Evolution v2).
+        $res = $this->post($endpoint, ['message' => $messageData]);
+        if ($res && !empty($res['base64'])) {
+            return $res;
+        }
+
+        // Formato 2 (fallback): algumas versões aceitam apenas a chave da mensagem.
+        if (!empty($messageData['key'])) {
+            $res2 = $this->post($endpoint, ['message' => ['key' => $messageData['key']]]);
+            if ($res2 && !empty($res2['base64'])) {
+                return $res2;
+            }
+        }
+
+        // Retorna o que veio (mesmo sem base64) para o chamador logar/diagnosticar.
+        return $res;
     }
 
     /**
