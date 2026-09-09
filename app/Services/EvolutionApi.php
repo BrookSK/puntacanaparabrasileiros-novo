@@ -287,6 +287,14 @@ class EvolutionApi
     /**
      * Registra/atualiza o webhook da instância.
      */
+    /**
+     * Consulta a configuração atual do webhook (para diagnóstico do base64).
+     */
+    public function findWebhook(): ?array
+    {
+        return $this->get("/webhook/find/{$this->instanceName}");
+    }
+
     public function setWebhook(string $webhookUrl): ?array
     {
         return $this->post("/webhook/set/{$this->instanceName}", [

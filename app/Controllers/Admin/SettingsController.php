@@ -224,6 +224,82 @@ class SettingsController extends Controller
         $this->redirect('/admin/configuracoes');
     }
 
+    /**
+     * Diagnóstico de ÁUDIO acessível pelo navegador (texto puro).
+     * GET /admin/aurora/diagnostico-audio  — só superadmin.
+     */
+    public function diagnoseAudioWeb(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        if (($user['role'] ?? '') !== 'superadmin') {
+            http_response_code(403);
+            header('Content-Type: text/plain; charset=utf-8');
+            echo 'Acesso negado.';
+            exit;
+        }
+
+        $this->app->reloadSettings();
+
+        header('Content-Type: text/plain; charset=utf-8');
+        $out = [];
+        $out[] = '=== DIAGNÓSTICO DE ÁUDIO DA AURORA ===';
+
+        // 1) Config básica
+        $enabled = setting('aurora_enabled', '0') === '1';
+        $key = trim((string) setting('aurora_openai_api_key', ''));
+        $out[] = 'Aurora ativada: ' . ($enabled ? 'sim' : 'NÃO');
+        $out[] = 'Chave OpenAI: ' . ($key !== '' ? ('preenchida (' . substr($key, 0, 7) . '...)') : 'VAZIA');
+
+        // 2) Último áudio + transcrição
+        try {
+            $aurora = new \App\Services\AuroraService();
+            $audio = $aurora->diagnoseLastAudio();
+            $out[] = '';
+            $out[] = 'TESTE DE TRANSCRIÇÃO (último áudio recebido):';
+            $out[] = ($audio['ok'] ? '[OK] ' : '[FALHOU] ') . $audio['detail'];
+        } catch (\Throwable $e) {
+            $out[] = 'Erro no teste de transcrição: ' . $e->getMessage();
+        }
+
+        // 3) Estado do webhook da instância na Evolution (base64?)
+        try {
+            $instance = $this->db->fetchOne(
+                "SELECT * FROM whatsapp_instances WHERE connection_status = 'open' ORDER BY is_default DESC, id ASC LIMIT 1"
+            );
+            if ($instance) {
+                $out[] = '';
+                $out[] = 'INSTÂNCIA: ' . ($instance['instance_name'] ?? '?') . ' (status: ' . ($instance['connection_status'] ?? '?') . ')';
+                $api = \App\Services\EvolutionApi::fromInstance($instance);
+                if (method_exists($api, 'findWebhook')) {
+                    $wh = $api->findWebhook();
+                    $out[] = 'Webhook atual: ' . json_encode($wh, JSON_UNESCAPED_SLASHES);
+
+                    // Se o base64 estiver desativado, re-registra o webhook com base64=true.
+                    $base64On = false;
+                    if (is_array($wh)) {
+                        $flat = json_encode($wh);
+                        $base64On = str_contains((string) $flat, '"base64":true');
+                    }
+                    if (!$base64On) {
+                        $webhookUrl = rtrim((string) setting('site_url', ''), '/') . '/whatsapp/webhook';
+                        $set = $api->setWebhook($webhookUrl);
+                        $out[] = 'Base64 estava DESATIVADO. Reaplicado webhook com base64=true (url: ' . $webhookUrl . '). Resultado: ' . json_encode($set, JSON_UNESCAPED_SLASHES);
+                        $out[] = '>>> Agora peça um NOVO áudio e teste de novo.';
+                    } else {
+                        $out[] = 'Base64 do webhook: ATIVO (ok).';
+                    }
+                }
+            } else {
+                $out[] = 'Nenhuma instância conectada encontrada.';
+            }
+        } catch (\Throwable $e) {
+            $out[] = 'Erro ao checar webhook: ' . $e->getMessage();
+        }
+
+        echo implode("\n", $out);
+        exit;
+    }
+
     private function uploadSettingsFile(array $file, string $fieldName): ?string
     {
         $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml', 'image/x-icon'];
