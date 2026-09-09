@@ -1442,10 +1442,19 @@ class WhatsAppController extends Controller
         // Download mídia se necessário
         $mediaUrl = null;
         if ($mediaData) {
+            // 1) Tentar salvar direto do base64 do webhook (quando presente e válido).
             if (!empty($mediaData['base64'])) {
                 $mediaUrl = $this->saveMediaFromBase64($mediaData);
-            } else {
-                // Fallback: buscar a mídia (base64) via API da Evolution.
+            }
+
+            // 2) Se ainda não temos arquivo válido, buscar via API da Evolution.
+            //    Para ÁUDIO/vídeo/documento, o base64 do webhook costuma NÃO vir (ou vir
+            //    incompleto), então o download via getBase64FromMedia é o caminho confiável.
+            $fileOk = !empty($mediaUrl)
+                && is_file(BASE_PATH . '/public' . $mediaUrl)
+                && filesize(BASE_PATH . '/public' . $mediaUrl) >= 512;
+
+            if (!$fileOk) {
                 try {
                     $api = EvolutionApi::fromInstance($instance);
                     $mediaResult = $api->getBase64FromMedia([
@@ -1454,43 +1463,21 @@ class WhatsAppController extends Controller
                     ]);
                     if ($mediaResult && !empty($mediaResult['base64'])) {
                         $mediaData['base64'] = $mediaResult['base64'];
-                        $mediaUrl = $this->saveMediaFromBase64($mediaData);
+                        if (!empty($mediaResult['mimetype'])) {
+                            $mediaData['mimetype'] = $mediaResult['mimetype'];
+                        }
+                        $downloaded = $this->saveMediaFromBase64($mediaData);
+                        if (!empty($downloaded)) {
+                            $mediaUrl = $downloaded;
+                            error_log("[Aurora][Webhook] Mídia baixada via API (tipo {$msgType}).");
+                        } else {
+                            error_log("[Aurora][Webhook] getBase64FromMedia retornou base64, mas a gravação falhou (tipo {$msgType}). Veja logs [Aurora][Media].");
+                        }
                     } else {
-                        error_log("[Aurora][Webhook] getBase64FromMedia não retornou base64 (tipo {$msgType}). A Evolution pode estar com base64 desativado no webhook.");
+                        error_log("[Aurora][Webhook] getBase64FromMedia NÃO retornou base64 (tipo {$msgType}). Resposta: " . json_encode($mediaResult));
                     }
                 } catch (\Throwable $e) {
                     error_log('[Aurora][Webhook] Falha ao baixar mídia via API: ' . $e->getMessage());
-                }
-            }
-
-            // Para ÁUDIO: se o base64 do webhook não gerou um arquivo válido (ex.: veio
-            // criptografado), refazer o download via API da Evolution, que devolve o
-            // áudio já pronto/descriptografado. Garante transcrição confiável.
-            if ($msgType === 'audio') {
-                $needsRedownload = empty($mediaUrl)
-                    || !is_file(BASE_PATH . '/public' . $mediaUrl)
-                    || filesize(BASE_PATH . '/public' . $mediaUrl) < 1024; // < 1KB = provavelmente inválido
-                if ($needsRedownload) {
-                    try {
-                        $api = EvolutionApi::fromInstance($instance);
-                        $mediaResult = $api->getBase64FromMedia([
-                            'key' => $key,
-                            'message' => $msgContent,
-                        ]);
-                        if ($mediaResult && !empty($mediaResult['base64'])) {
-                            $mediaData['base64'] = $mediaResult['base64'];
-                            if (!empty($mediaResult['mimetype'])) {
-                                $mediaData['mimetype'] = $mediaResult['mimetype'];
-                            }
-                            $redownloaded = $this->saveMediaFromBase64($mediaData);
-                            if (!empty($redownloaded)) {
-                                $mediaUrl = $redownloaded;
-                                error_log("[Aurora][Webhook] Áudio re-baixado via API para transcrição confiável.");
-                            }
-                        }
-                    } catch (\Throwable $e) {
-                        error_log('[Aurora][Webhook] Falha ao re-baixar áudio: ' . $e->getMessage());
-                    }
                 }
             }
         }
@@ -1794,11 +1781,26 @@ class WhatsAppController extends Controller
     private function saveMediaFromBase64(array $mediaData): ?string
     {
         $base64 = $mediaData['base64'] ?? '';
-        if (empty($base64)) return null;
+        if (empty($base64)) {
+            error_log('[Aurora][Media] base64 vazio — nada a salvar.');
+            return null;
+        }
+
+        // Remover prefixo data-uri se presente (ex.: "data:audio/ogg;base64,....").
+        if (str_starts_with(trim($base64), 'data:') && str_contains($base64, ',')) {
+            $base64 = substr($base64, strpos($base64, ',') + 1);
+        }
+        // Remover espaços/quebras que às vezes vêm no base64.
+        $base64 = str_replace(["\r", "\n", ' '], '', $base64);
+
+        $binary = base64_decode($base64, true);
+        if ($binary === false || $binary === '') {
+            error_log('[Aurora][Media] base64_decode falhou (conteúdo inválido).');
+            return null;
+        }
 
         $mime = $mediaData['mimetype'] ?? 'application/octet-stream';
         // Normalizar: o WhatsApp envia mimes com parâmetros (ex.: "audio/ogg; codecs=opus").
-        // Sem remover o sufixo, o mapeamento falha e o arquivo é salvo como .bin.
         $mimeBase = strtolower(trim(explode(';', $mime)[0]));
         $extMap = [
             'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp',
@@ -1813,11 +1815,25 @@ class WhatsAppController extends Controller
 
         $month = date('Y-m');
         $uploadDir = BASE_PATH . "/public/uploads/whatsapp_media/{$month}";
-        if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+        if (!is_dir($uploadDir)) {
+            if (!@mkdir($uploadDir, 0775, true) && !is_dir($uploadDir)) {
+                error_log("[Aurora][Media] Falha ao criar diretório: {$uploadDir} (verifique permissões).");
+                return null;
+            }
+        }
+        if (!is_writable($uploadDir)) {
+            error_log("[Aurora][Media] Diretório SEM permissão de escrita: {$uploadDir}. Ajuste as permissões (ex.: chmod 775).");
+            return null;
+        }
 
         $fileName = uniqid() . '_' . time() . '.' . $ext;
         $filePath = "{$uploadDir}/{$fileName}";
-        file_put_contents($filePath, base64_decode($base64));
+
+        $bytes = @file_put_contents($filePath, $binary);
+        if ($bytes === false || $bytes === 0) {
+            error_log("[Aurora][Media] file_put_contents falhou ou gravou 0 bytes: {$filePath}");
+            return null;
+        }
 
         return "/uploads/whatsapp_media/{$month}/{$fileName}";
     }
