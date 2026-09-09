@@ -254,13 +254,16 @@ class SettingsController extends Controller
         $out[] = '';
         $out[] = 'ÚLTIMO ÁUDIO RECEBIDO:';
         try {
-            $row = $this->db->fetchOne(
-                "SELECT wm.id, wm.media_url, wm.media_mime_type, wm.message_id, wm.instance_id, wc.remote_jid
-                 FROM whatsapp_messages wm
-                 LEFT JOIN whatsapp_contacts wc ON wc.id = wm.contact_id
-                 WHERE wm.message_type = 'audio' AND wm.from_me = 0
-                 ORDER BY wm.id DESC LIMIT 1"
-            );
+            $hasRaw = $this->columnExistsPublic('whatsapp_messages', 'raw_payload');
+            $out[] = 'Coluna raw_payload: ' . ($hasRaw ? 'existe' : 'NÃO existe (rode a migration add_raw_payload_to_whatsapp_messages.sql)');
+
+            $select = "SELECT wm.id, wm.media_url, wm.media_mime_type, wm.message_id, wm.instance_id, wc.remote_jid"
+                . ($hasRaw ? ', wm.raw_payload' : '')
+                . " FROM whatsapp_messages wm
+                    LEFT JOIN whatsapp_contacts wc ON wc.id = wm.contact_id
+                    WHERE wm.message_type = 'audio' AND wm.from_me = 0
+                    ORDER BY wm.id DESC LIMIT 1";
+            $row = $this->db->fetchOne($select);
 
             if (!$row) {
                 $out[] = 'Nenhum áudio recebido encontrado no banco.';
@@ -271,21 +274,45 @@ class SettingsController extends Controller
                 $size = $exists ? filesize($absPath) : 0;
                 $out[] = 'Arquivo no servidor: ' . ($exists ? "existe ({$size} bytes)" : 'NÃO existe');
 
-                // Se o arquivo não existe/está vazio, tentar baixar AGORA via Evolution e mostrar o resultado cru.
-                if (!$exists || $size < 512) {
-                    $out[] = '';
-                    $out[] = 'Tentando baixar o áudio AGORA via Evolution API...';
-                    $inst = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE id = ? LIMIT 1", [(int) $row['instance_id']]);
-                    $out[] = 'OBS: este teste manual é limitado (não temos o payload bruto do áudio antigo).';
-                    $out[] = 'O download real foi corrigido para enviar o objeto completo da mensagem à Evolution.';
-                    $out[] = '>>> Peça um ÁUDIO NOVO agora e recarregue esta página: o áudio novo deve ser salvo e transcrito.';
-                } else {
-                    // Arquivo existe: testar a transcrição de verdade.
+                if ($exists && $size >= 512) {
                     $aurora = new \App\Services\AuroraService();
                     $text = $aurora->transcribeAudioFile($absPath);
                     $out[] = empty($text)
-                        ? '=> Arquivo OK, mas a transcrição (Whisper) FALHOU. Veja [Aurora] Whisper HTTP no log.'
+                        ? '=> Arquivo OK, mas a transcrição (Whisper) FALHOU. Veja abaixo o teste direto.'
                         : ('=> TUDO OK. Transcrição: "' . mb_substr($text, 0, 200) . '"');
+                } else {
+                    // Reprocessar com o payload REAL (se disponível) testando os formatos.
+                    $inst = $this->db->fetchOne("SELECT * FROM whatsapp_instances WHERE id = ? LIMIT 1", [(int) $row['instance_id']]);
+                    if (!$inst) {
+                        $out[] = 'Instância não encontrada.';
+                    } elseif (empty($row['raw_payload'])) {
+                        $out[] = '>>> Este áudio é ANTIGO (sem raw_payload). Peça um ÁUDIO NOVO e recarregue esta página.';
+                    } else {
+                        $data = json_decode((string) $row['raw_payload'], true);
+                        $api = \App\Services\EvolutionApi::fromInstance($inst);
+
+                        // Formato A: payload $data completo (como veio do webhook).
+                        $vA = $api->getBase64FromMediaVerbose($data);
+                        $out[] = '';
+                        $out[] = 'FORMATO A (mensagem completa) -> HTTP ' . $vA['http']
+                            . ' | base64? ' . (str_contains($vA['body'], 'base64') ? 'SIM' : 'não');
+                        if (!str_contains($vA['body'], 'base64')) {
+                            $out[] = '  resposta: ' . substr($vA['body'], 0, 250);
+                        }
+
+                        // Formato B: só a key.
+                        $vB = $api->getBase64FromMediaVerbose(['key' => $data['key'] ?? []]);
+                        $out[] = 'FORMATO B (só key) -> HTTP ' . $vB['http']
+                            . ' | base64? ' . (str_contains($vB['body'], 'base64') ? 'SIM' : 'não');
+                        if (!str_contains($vB['body'], 'base64')) {
+                            $out[] = '  resposta: ' . substr($vB['body'], 0, 250);
+                        }
+
+                        $winner = str_contains($vA['body'], 'base64') ? 'A' : (str_contains($vB['body'], 'base64') ? 'B' : null);
+                        $out[] = $winner
+                            ? "=> FUNCIONOU no formato {$winner}! O download real usa esse formato — o próximo áudio será transcrito."
+                            : '=> Nenhum formato retornou base64. Me mande estas respostas cruas.';
+                    }
                 }
             }
         } catch (\Throwable $e) {
@@ -315,6 +342,19 @@ class SettingsController extends Controller
 
         echo implode("\n", $out);
         exit;
+    }
+
+    private function columnExistsPublic(string $table, string $column): bool
+    {
+        try {
+            return (bool) $this->db->fetchOne(
+                "SELECT 1 FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1",
+                [$table, $column]
+            );
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     private function uploadSettingsFile(array $file, string $fieldName): ?string

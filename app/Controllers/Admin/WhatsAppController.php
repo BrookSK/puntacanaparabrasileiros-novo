@@ -1485,7 +1485,12 @@ class WhatsAppController extends Controller
         // Salvar mensagem
         $quotedMsgId = $reactionTargetId ?? ($msgContent['extendedTextMessage']['contextInfo']['quotedMessage']['stanzaId'] ?? null);
         
-        $this->db->insert('whatsapp_messages', [
+        // Guardar o payload bruto apenas para mídia (usado para (re)baixar da Evolution).
+        $rawPayload = in_array($msgType, ['audio', 'image', 'video', 'document'], true)
+            ? json_encode($data, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+            : null;
+
+        $insertData = [
             'instance_id' => $instanceId,
             'contact_id' => $contactId,
             'remote_jid' => $remoteJid,
@@ -1503,7 +1508,13 @@ class WhatsAppController extends Controller
             'is_read' => $fromMe ? 1 : 0,
             'ack_status' => $fromMe ? 'sent' : null,
             'created_at' => date('Y-m-d H:i:s'),
-        ]);
+        ];
+        // Só inclui raw_payload se a coluna existir (após a migration).
+        if ($rawPayload !== null && $this->columnExists('whatsapp_messages', 'raw_payload')) {
+            $insertData['raw_payload'] = $rawPayload;
+        }
+
+        $this->db->insert('whatsapp_messages', $insertData);
 
         // Incrementar não lidas (só se não é mensagem própria)
         if (!$fromMe) {
@@ -1773,6 +1784,28 @@ class WhatsAppController extends Controller
         // Não reconhecido: logar as chaves para identificar o formato exato enviado pelo WhatsApp.
         error_log('[Aurora][Webhook] Tipo de mensagem não reconhecido. Chaves do conteúdo: ' . implode(', ', array_keys($msg)));
         return ['unknown', null, null];
+    }
+
+    /**
+     * Verifica se uma coluna existe numa tabela (cacheado por request).
+     */
+    private function columnExists(string $table, string $column): bool
+    {
+        static $cache = [];
+        $ckey = $table . '.' . $column;
+        if (isset($cache[$ckey])) {
+            return $cache[$ckey];
+        }
+        try {
+            $found = $this->db->fetchOne(
+                "SELECT 1 FROM information_schema.COLUMNS
+                 WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1",
+                [$table, $column]
+            );
+            return $cache[$ckey] = (bool) $found;
+        } catch (\Throwable $e) {
+            return $cache[$ckey] = false;
+        }
     }
 
     /**
