@@ -1526,6 +1526,16 @@ class WhatsAppController extends Controller
                         error_log("[Aurora] Áudio transcrito (contato {$contactId}): " . mb_substr($transcription, 0, 80));
                     } else {
                         error_log("[Aurora] Não foi possível transcrever o áudio (contato {$contactId}).");
+                        // Fallback: pedir que o cliente escreva, em vez de responder sem entender.
+                        if (empty($contact['assigned_to'] ?? null)) {
+                            $notifier = new \App\Services\WhatsappNotifier();
+                            $notifier->sendToPhone(
+                                (string) ($this->contactModel->find($contactId)['phone'] ?? ''),
+                                'Recebi seu áudio, mas não consegui ouvi-lo bem por aqui. 🎧 Pode me mandar por escrito o que você procura em Punta Cana? Assim te ajudo rapidinho! 😊',
+                                null,
+                                'Aurora'
+                            );
+                        }
                     }
                 } catch (\Throwable $e) {
                     error_log('[Aurora] Erro na transcrição de áudio: ' . $e->getMessage());
@@ -1744,12 +1754,19 @@ class WhatsAppController extends Controller
         if (empty($base64)) return null;
 
         $mime = $mediaData['mimetype'] ?? 'application/octet-stream';
+        // Normalizar: o WhatsApp envia mimes com parâmetros (ex.: "audio/ogg; codecs=opus").
+        // Sem remover o sufixo, o mapeamento falha e o arquivo é salvo como .bin.
+        $mimeBase = strtolower(trim(explode(';', $mime)[0]));
         $extMap = [
             'image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp',
-            'image/gif' => 'gif', 'audio/ogg' => 'ogg', 'audio/mpeg' => 'mp3',
-            'audio/mp4' => 'm4a', 'video/mp4' => 'mp4', 'application/pdf' => 'pdf',
+            'image/gif' => 'gif',
+            'audio/ogg' => 'ogg', 'audio/opus' => 'ogg', 'audio/mpeg' => 'mp3',
+            'audio/mp3' => 'mp3', 'audio/mp4' => 'm4a', 'audio/m4a' => 'm4a',
+            'audio/x-m4a' => 'm4a', 'audio/aac' => 'm4a', 'audio/amr' => 'amr',
+            'audio/wav' => 'wav', 'audio/webm' => 'webm',
+            'video/mp4' => 'mp4', 'application/pdf' => 'pdf',
         ];
-        $ext = $extMap[$mime] ?? 'bin';
+        $ext = $extMap[$mimeBase] ?? 'bin';
 
         $month = date('Y-m');
         $uploadDir = BASE_PATH . "/public/uploads/whatsapp_media/{$month}";

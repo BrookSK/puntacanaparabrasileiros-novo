@@ -676,6 +676,7 @@ class AuroraService
     public function transcribeAudioFile(string $absolutePath): ?string
     {
         if ($this->apiKey === '' || !function_exists('curl_init')) {
+            error_log('[Aurora] Transcrição abortada: sem chave OpenAI ou cURL indisponível.');
             return null;
         }
         if (!is_file($absolutePath)) {
@@ -683,9 +684,34 @@ class AuroraService
             return null;
         }
 
+        // O Whisper exige uma extensão de arquivo reconhecida. O WhatsApp salva áudio como
+        // .ogg (opus), mas versões antigas podem ter salvo como .bin — nesse caso, criamos
+        // uma cópia temporária com extensão válida para o envio.
+        $allowedExt = ['flac', 'm4a', 'mp3', 'mp4', 'mpeg', 'mpga', 'oga', 'ogg', 'wav', 'webm'];
+        $ext = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
+        $sendPath = $absolutePath;
+        $tempPath = null;
+        $mimeForUpload = 'audio/ogg';
+
+        if (!in_array($ext, $allowedExt, true)) {
+            // Copiar para .ogg (formato padrão do WhatsApp) para o Whisper aceitar.
+            $tempPath = sys_get_temp_dir() . '/aurora_audio_' . uniqid() . '.ogg';
+            if (@copy($absolutePath, $tempPath)) {
+                $sendPath = $tempPath;
+                error_log("[Aurora] Áudio com extensão '{$ext}' — enviando como .ogg (cópia temporária).");
+            } else {
+                error_log("[Aurora] Não foi possível criar cópia .ogg do áudio: {$absolutePath}");
+            }
+        } else {
+            $extMime = ['ogg' => 'audio/ogg', 'oga' => 'audio/ogg', 'mp3' => 'audio/mpeg',
+                'mpga' => 'audio/mpeg', 'm4a' => 'audio/mp4', 'mp4' => 'audio/mp4',
+                'wav' => 'audio/wav', 'webm' => 'audio/webm', 'flac' => 'audio/flac'];
+            $mimeForUpload = $extMime[$ext] ?? 'audio/ogg';
+        }
+
         try {
             $ch = curl_init('https://api.openai.com/v1/audio/transcriptions');
-            $cFile = new \CURLFile($absolutePath);
+            $cFile = new \CURLFile($sendPath, $mimeForUpload, 'audio.ogg');
             curl_setopt_array($ch, [
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST => true,
@@ -703,6 +729,10 @@ class AuroraService
             $error = curl_error($ch);
             curl_close($ch);
 
+            if ($tempPath && is_file($tempPath)) {
+                @unlink($tempPath);
+            }
+
             if ($error) {
                 error_log("[Aurora] Whisper cURL error: {$error}");
                 return null;
@@ -716,6 +746,9 @@ class AuroraService
             $text = $data['text'] ?? null;
             return is_string($text) ? trim($text) : null;
         } catch (\Throwable $e) {
+            if ($tempPath && is_file($tempPath)) {
+                @unlink($tempPath);
+            }
             error_log('[Aurora] Falha ao transcrever áudio: ' . $e->getMessage());
             return null;
         }
