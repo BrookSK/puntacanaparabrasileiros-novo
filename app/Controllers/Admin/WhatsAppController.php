@@ -1445,7 +1445,7 @@ class WhatsAppController extends Controller
             if (!empty($mediaData['base64'])) {
                 $mediaUrl = $this->saveMediaFromBase64($mediaData);
             } else {
-                // Fallback: tentar buscar mídia via API getBase64FromMediaMessage
+                // Fallback: buscar a mídia (base64) via API da Evolution.
                 try {
                     $api = EvolutionApi::fromInstance($instance);
                     $mediaResult = $api->getBase64FromMedia([
@@ -1455,9 +1455,11 @@ class WhatsAppController extends Controller
                     if ($mediaResult && !empty($mediaResult['base64'])) {
                         $mediaData['base64'] = $mediaResult['base64'];
                         $mediaUrl = $this->saveMediaFromBase64($mediaData);
+                    } else {
+                        error_log("[Aurora][Webhook] getBase64FromMedia não retornou base64 (tipo {$msgType}). A Evolution pode estar com base64 desativado no webhook.");
                     }
                 } catch (\Throwable $e) {
-                    // Mídia não disponível — mensagem será salva sem ela
+                    error_log('[Aurora][Webhook] Falha ao baixar mídia via API: ' . $e->getMessage());
                 }
             }
         }
@@ -1510,12 +1512,16 @@ class WhatsAppController extends Controller
 
             if ($msgType === 'text') {
                 $auroraText = $msgText;
-            } elseif ($msgType === 'audio' && !empty($mediaUrl)) {
+            } elseif ($msgType === 'audio') {
                 // Transcrever o áudio para a Aurora entender o que o cliente quer.
                 try {
+                    if (empty($mediaUrl)) {
+                        error_log("[Aurora] Áudio SEM media_url (contato {$contactId}). Base64 não veio no webhook e o download falhou.");
+                    }
                     $aurora = new \App\Services\AuroraService();
                     $absPath = BASE_PATH . '/public' . $mediaUrl;
-                    $transcription = $aurora->transcribeAudioFile($absPath);
+                    error_log("[Aurora] Transcrevendo áudio. media_url='{$mediaUrl}', existe=" . (is_file($absPath) ? 'sim' : 'nao') . ", tamanho=" . (is_file($absPath) ? filesize($absPath) : 0) . " bytes.");
+                    $transcription = !empty($mediaUrl) ? $aurora->transcribeAudioFile($absPath) : null;
                     if (!empty($transcription)) {
                         $auroraText = $transcription;
                         // Guarda a transcrição na própria mensagem (aparece no chat também).
@@ -1525,17 +1531,7 @@ class WhatsAppController extends Controller
                         }
                         error_log("[Aurora] Áudio transcrito (contato {$contactId}): " . mb_substr($transcription, 0, 80));
                     } else {
-                        error_log("[Aurora] Não foi possível transcrever o áudio (contato {$contactId}).");
-                        // Fallback: pedir que o cliente escreva, em vez de responder sem entender.
-                        if (empty($contact['assigned_to'] ?? null)) {
-                            $notifier = new \App\Services\WhatsappNotifier();
-                            $notifier->sendToPhone(
-                                (string) ($this->contactModel->find($contactId)['phone'] ?? ''),
-                                'Recebi seu áudio, mas não consegui ouvi-lo bem por aqui. 🎧 Pode me mandar por escrito o que você procura em Punta Cana? Assim te ajudo rapidinho! 😊',
-                                null,
-                                'Aurora'
-                            );
-                        }
+                        error_log("[Aurora] Não foi possível transcrever o áudio (contato {$contactId}). Verifique logs [Aurora] Whisper.");
                     }
                 } catch (\Throwable $e) {
                     error_log('[Aurora] Erro na transcrição de áudio: ' . $e->getMessage());
