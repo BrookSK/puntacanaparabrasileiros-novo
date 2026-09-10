@@ -25,7 +25,12 @@ class CsrfMiddleware extends Middleware
         // (ou o total de imagens) passou do limite permitido pelo servidor.
         $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
         $isPost = strtoupper($_SERVER['REQUEST_METHOD'] ?? '') === 'POST';
-        if ($isPost && $contentLength > 0 && empty($_POST) && empty($_FILES)) {
+        $contentType = strtolower($_SERVER['CONTENT_TYPE'] ?? '');
+        // Só é um POST de formulário se o Content-Type for de form. Corpos JSON
+        // (APIs) não populam $_POST e NÃO devem ser confundidos com estouro.
+        $isFormPost = str_contains($contentType, 'multipart/form-data')
+            || str_contains($contentType, 'application/x-www-form-urlencoded');
+        if ($isPost && $isFormPost && $contentLength > 0 && empty($_POST) && empty($_FILES)) {
             $limit = $this->bytesFromIni((string) ini_get('post_max_size'));
             $limitLabel = $limit > 0 ? round($limit / 1048576, 1) . ' MB' : ini_get('post_max_size');
 

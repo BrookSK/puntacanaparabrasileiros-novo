@@ -195,6 +195,15 @@ class TripsController extends Controller
         $trip = $this->tripModel->find($id);
         if (!$trip) $this->abort(404);
 
+        // Diagnóstico: registra o que chegou no request (chaves de $_FILES/$_POST)
+        $this->uploadLog(sprintf(
+            'update(id=%d): FILES=[%s] POST_keys=[%s] featured_hasFile=%s',
+            $id,
+            implode(',', array_keys($_FILES)),
+            implode(',', array_keys($_POST)),
+            $request->hasFile('featured_image') ? 'sim' : 'nao'
+        ));
+
         $data = $request->only([
             'title', 'description', 'short_description', 'duration', 'duration_unit',
             'difficulty', 'min_pax', 'max_pax', 'meeting_point', 'important_notes',
@@ -241,12 +250,19 @@ class TripsController extends Controller
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));
         }
 
-        $gallery = $this->processGalleryUploads($request);
-        $data['gallery'] = !empty($gallery) ? json_encode($gallery) : null;
+        // Galeria: só atualiza se o form enviou campos de galeria. Assim
+        // evitamos apagar a galeria inteira caso o request venha truncado ou
+        // sem esses campos (grava null apagaria tudo silenciosamente).
+        if (array_key_exists('gallery_existing', $_POST) || isset($_FILES['gallery_files'])) {
+            $gallery = $this->processGalleryUploads($request);
+            $data['gallery'] = !empty($gallery) ? json_encode($gallery) : null;
+        }
 
-        // Documentos extras
-        $documents = $this->processDocumentUploads($request);
-        $data['documents'] = !empty($documents) ? json_encode($documents) : null;
+        // Documentos extras: mesma proteção da galeria.
+        if (array_key_exists('docs_existing', $_POST) || isset($_FILES['doc_files'])) {
+            $documents = $this->processDocumentUploads($request);
+            $data['documents'] = !empty($documents) ? json_encode($documents) : null;
+        }
 
         $this->tripModel->update($id, $data);
 
@@ -503,6 +519,11 @@ class TripsController extends Controller
 
     private function saveItinerary(int $tripId, Request $request): void
     {
+        // Só mexe no itinerário se o formulário realmente enviou o campo.
+        // Sem isto, um save do form (que não inclui itinerário) apagaria
+        // silenciosamente todos os itens já cadastrados.
+        if (!array_key_exists('itinerary', $_POST)) return;
+
         $items = $request->input('itinerary', []);
         $this->db->delete('trip_itinerary', 'trip_id = ?', [$tripId]);
         foreach ($items as $i => $item) {
@@ -519,6 +540,10 @@ class TripsController extends Controller
 
     private function saveExtraServices(int $tripId, Request $request): void
     {
+        // Só mexe nos serviços extras se o form enviou o campo (evita apagar
+        // dados existentes quando o formulário não contém esses campos).
+        if (!array_key_exists('extra_services', $_POST)) return;
+
         $services = $request->input('extra_services', []);
         $this->db->delete('trip_extra_services', 'trip_id = ?', [$tripId]);
         foreach ($services as $i => $svc) {
@@ -537,6 +562,10 @@ class TripsController extends Controller
 
     private function saveFixedDates(int $tripId, Request $request): void
     {
+        // Só mexe nas datas fixas se o form enviou o campo (evita apagar
+        // dados existentes quando o formulário não contém esses campos).
+        if (!array_key_exists('fixed_dates', $_POST)) return;
+
         $dates = $request->input('fixed_dates', []);
         $this->db->delete('trip_fixed_dates', 'trip_id = ?', [$tripId]);
         foreach ($dates as $fd) {
@@ -558,27 +587,60 @@ class TripsController extends Controller
         $compositionModel->syncForTrip($tripId, $packages);
     }
 
+    /**
+     * Grava uma linha no log de diagnóstico de upload (storage/upload-debug.log).
+     * Serve para descobrir POR QUE um upload falha no servidor de produção,
+     * onde não dá pra depurar ao vivo. Pode ser removido depois que resolver.
+     */
+    private function uploadLog(string $msg): void
+    {
+        $dir = BASE_PATH . '/storage';
+        if (!is_dir($dir)) @mkdir($dir, 0775, true);
+        @file_put_contents(
+            $dir . '/upload-debug.log',
+            '[' . date('Y-m-d H:i:s') . '] ' . $msg . PHP_EOL,
+            FILE_APPEND
+        );
+    }
+
     private function uploadImage(array $file): ?string
     {
+        $this->uploadLog(sprintf(
+            'uploadImage: name=%s type=%s size=%s error=%s tmp=%s',
+            $file['name'] ?? '(vazio)',
+            $file['type'] ?? '(vazio)',
+            $file['size'] ?? '(vazio)',
+            $file['error'] ?? '(vazio)',
+            $file['tmp_name'] ?? '(vazio)'
+        ));
+
         // Sem arquivo válido enviado
         if (empty($file['tmp_name']) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            $this->uploadLog('  -> ABORTADO: arquivo ausente ou com erro de upload (error=' . ($file['error'] ?? 'null') . ')');
             return null;
         }
-        if (($file['size'] ?? 0) > 10 * 1024 * 1024) return null;
+        if (($file['size'] ?? 0) > 10 * 1024 * 1024) {
+            $this->uploadLog('  -> ABORTADO: arquivo maior que 10MB');
+            return null;
+        }
 
         // Validação por EXTENSÃO (mais confiável que o MIME informado pelo
         // navegador, que às vezes chega vazio ou como application/octet-stream).
         $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
         $allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'bmp', 'avif'];
-        if (!in_array($ext, $allowedExt, true)) return null;
+        if (!in_array($ext, $allowedExt, true)) {
+            $this->uploadLog('  -> ABORTADO: extensão não permitida (ext=' . $ext . ')');
+            return null;
+        }
 
         // Garante que a pasta de uploads exista e seja gravável
         $uploadDir = BASE_PATH . '/public/uploads';
         if (!is_dir($uploadDir)) {
             @mkdir($uploadDir, 0775, true);
+            $this->uploadLog('  -> pasta de uploads não existia, tentei criar: ' . $uploadDir);
         }
         if (!is_writable($uploadDir)) {
-            error_log('[uploadImage] Diretório de uploads não gravável: ' . $uploadDir);
+            $this->uploadLog('  -> ABORTADO: pasta de uploads NÃO GRAVÁVEL: ' . $uploadDir);
             return null;
         }
 
@@ -586,10 +648,11 @@ class TripsController extends Controller
         $destination = $uploadDir . '/' . $filename;
 
         if (!move_uploaded_file($file['tmp_name'], $destination)) {
-            error_log('[uploadImage] Falha ao mover upload para: ' . $destination);
+            $this->uploadLog('  -> ABORTADO: move_uploaded_file FALHOU para: ' . $destination);
             return null;
         }
 
+        $this->uploadLog('  -> OK: gravado em ' . $destination);
         return '/uploads/' . $filename;
     }
 

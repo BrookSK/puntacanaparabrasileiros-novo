@@ -1,5 +1,22 @@
 RewriteEngine On
 
+# Limites de formulário/upload (reforço quando o PHP roda como módulo Apache).
+# Necessário porque o form de edição de passeios pode gerar muitos campos e
+# estourar o max_input_vars padrão (1000), o que faz o upload de imagens
+# falhar silenciosamente em passeios com muita configuração/galeria.
+<IfModule mod_php7.c>
+    php_value max_input_vars 5000
+    php_value post_max_size 64M
+    php_value upload_max_filesize 32M
+    php_value max_file_uploads 50
+</IfModule>
+<IfModule mod_php.c>
+    php_value max_input_vars 5000
+    php_value post_max_size 64M
+    php_value upload_max_filesize 32M
+    php_value max_file_uploads 50
+</IfModule>
+
 # Compressão Gzip
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css application/javascript application/json

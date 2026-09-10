@@ -1,0 +1,10 @@
+# Logs de diagnóstico e sessões
+storage/upload-debug.log
+storage/sessions/*
+!storage/sessions/.gitkeep
+
+# Dependências
+/vendor/
+
+# Config local
+.env
