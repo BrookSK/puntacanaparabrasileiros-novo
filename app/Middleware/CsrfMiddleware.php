@@ -18,6 +18,29 @@ class CsrfMiddleware extends Middleware
     {
         $session = App::getInstance()->getSession();
 
+        // Detecta POST "estourado": quando o corpo enviado ultrapassa o
+        // post_max_size do PHP, o PHP DESCARTA $_POST e $_FILES por completo.
+        // Nesse caso o _token some e cairíamos em "Sessão expirada" sem motivo
+        // real. Damos uma mensagem clara para o admin entender que a imagem
+        // (ou o total de imagens) passou do limite permitido pelo servidor.
+        $contentLength = (int) ($_SERVER['CONTENT_LENGTH'] ?? 0);
+        $isPost = strtoupper($_SERVER['REQUEST_METHOD'] ?? '') === 'POST';
+        if ($isPost && $contentLength > 0 && empty($_POST) && empty($_FILES)) {
+            $limit = $this->bytesFromIni((string) ini_get('post_max_size'));
+            $limitLabel = $limit > 0 ? round($limit / 1048576, 1) . ' MB' : ini_get('post_max_size');
+
+            if ($request->expectsJson()) {
+                $response->json([
+                    'error' => 'O envio ultrapassou o limite do servidor (' . $limitLabel . '). Envie imagens menores.',
+                ], 413);
+                return false;
+            }
+
+            $session->flash('error', 'As imagens enviadas ultrapassaram o limite do servidor (máx. ' . $limitLabel . ' no total). Reduza o tamanho/quantidade das imagens e tente novamente.');
+            $response->redirect($request->header('referer') ?? '/');
+            return false;
+        }
+
         // Obter token do formulário ou header
         $token = $request->input('_token')
             ?? $request->header('X-CSRF-TOKEN')
@@ -35,5 +58,22 @@ class CsrfMiddleware extends Middleware
         }
 
         return true;
+    }
+
+    /**
+     * Converte um valor de php.ini (ex.: "8M", "2G", "512K") em bytes.
+     */
+    private function bytesFromIni(string $value): int
+    {
+        $value = trim($value);
+        if ($value === '') return 0;
+        $unit = strtolower($value[strlen($value) - 1]);
+        $num = (int) $value;
+        return match ($unit) {
+            'g' => $num * 1024 * 1024 * 1024,
+            'm' => $num * 1024 * 1024,
+            'k' => $num * 1024,
+            default => (int) $value,
+        };
     }
 }

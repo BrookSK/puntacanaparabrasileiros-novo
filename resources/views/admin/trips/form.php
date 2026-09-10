@@ -421,7 +421,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                              Para voltar a exibir, troque o hidden por um input number visível. */ ?>
                     <input type="hidden" name="sort_order" value="<?= e($trip['sort_order'] ?? '0') ?>">
                     <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="featured" <?= !empty($trip['featured']) ? 'checked' : '' ?>> Passeio em Destaque</label></div>
-                    <div class="form-group"><label>Imagem Destacada</label><div class="file-upload-area"><input type="file" name="featured_image" id="featImg" class="file-input-hidden" accept="image/*"><label for="featImg" class="file-upload-label"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Escolher imagem</span></label><?php if ($isEdit && !empty($trip['featured_image'])): ?><div class="file-upload-preview"><img src="<?= e($trip['featured_image']) ?>" alt=""></div><?php endif; ?></div><small class="form-hint">JPG, PNG ou WebP. Recomendado: 1200x800px (proporção 3:2, paisagem).</small></div>
+                    <div class="form-group"><label>Imagem Destacada</label><div class="file-upload-area"><input type="file" name="featured_image" id="featImg" class="file-input-hidden" accept="image/*" onchange="previewFeaturedImage(this)"><label for="featImg" class="file-upload-label" onclick="document.getElementById('featImg').click(); return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Escolher imagem</span></label><div class="file-upload-preview" id="featImgPreview" style="<?= ($isEdit && !empty($trip['featured_image'])) ? '' : 'display:none;' ?>"><img id="featImgPreviewImg" src="<?= ($isEdit && !empty($trip['featured_image'])) ? e($trip['featured_image']) : '' ?>" alt=""></div></div><small class="form-hint">JPG, PNG ou WebP. Recomendado: 1200x800px (proporção 3:2, paisagem).</small></div>
                     <div class="form-group">
                         <label>Galeria de Fotos</label>
                         <p style="font-size:11px;color:#94a3b8;margin-bottom:10px;">Adicione imagens ao carrossel do passeio (apenas upload)</p>
@@ -470,6 +470,19 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
 
 <script>
 function addRepeater(listId, fieldName, placeholder) { const list = document.getElementById(listId); const div = document.createElement('div'); div.className = 'repeater-item'; div.innerHTML = `<input type="text" name="${fieldName}" value="" class="form-control" placeholder="${placeholder}"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button>`; list.appendChild(div); }
+
+function previewFeaturedImage(input) {
+    var preview = document.getElementById('featImgPreview');
+    var img = document.getElementById('featImgPreviewImg');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            preview.style.display = '';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
 
 function previewGalleryFiles(input) {
     const container = document.getElementById('galleryPreviews');

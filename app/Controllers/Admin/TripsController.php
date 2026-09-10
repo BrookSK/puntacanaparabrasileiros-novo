@@ -560,14 +560,36 @@ class TripsController extends Controller
 
     private function uploadImage(array $file): ?string
     {
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/svg+xml', 'image/bmp', 'image/avif'];
-        if (!in_array($file['type'], $allowedTypes)) return null;
-        if ($file['size'] > 10 * 1024 * 1024) return null;
+        // Sem arquivo válido enviado
+        if (empty($file['tmp_name']) || ($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+            return null;
+        }
+        if (($file['size'] ?? 0) > 10 * 1024 * 1024) return null;
 
-        $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        // Validação por EXTENSÃO (mais confiável que o MIME informado pelo
+        // navegador, que às vezes chega vazio ou como application/octet-stream).
+        $ext = strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION));
+        $allowedExt = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg', 'bmp', 'avif'];
+        if (!in_array($ext, $allowedExt, true)) return null;
+
+        // Garante que a pasta de uploads exista e seja gravável
+        $uploadDir = BASE_PATH . '/public/uploads';
+        if (!is_dir($uploadDir)) {
+            @mkdir($uploadDir, 0775, true);
+        }
+        if (!is_writable($uploadDir)) {
+            error_log('[uploadImage] Diretório de uploads não gravável: ' . $uploadDir);
+            return null;
+        }
+
         $filename = 'trip-' . uniqid() . '.' . $ext;
-        $destination = BASE_PATH . '/public/uploads/' . $filename;
-        move_uploaded_file($file['tmp_name'], $destination);
+        $destination = $uploadDir . '/' . $filename;
+
+        if (!move_uploaded_file($file['tmp_name'], $destination)) {
+            error_log('[uploadImage] Falha ao mover upload para: ' . $destination);
+            return null;
+        }
+
         return '/uploads/' . $filename;
     }
 
