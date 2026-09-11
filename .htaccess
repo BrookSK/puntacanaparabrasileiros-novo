@@ -34,9 +34,18 @@ RewriteEngine On
     ExpiresByType font/woff2 "access plus 1 year"
 </IfModule>
 
-# Servir assets diretamente do /public
-RewriteRule ^assets/(.*)$ public/assets/$1 [L]
-RewriteRule ^uploads/(.*)$ public/uploads/$1 [L]
+# Servir assets/uploads diretamente do /public.
+# IMPORTANTE: só reescreve se o arquivo REALMENTE existir dentro de /public,
+# e serve o arquivo direto (sem cair no front controller). Sem esta checagem,
+# um /uploads/foto.jpg que não resolvesse escorregava até o index.php e o
+# servidor devolvia uma página de erro em vez do arquivo — o que fazia as
+# imagens aparecerem quebradas (X) e os documentos não baixarem.
+RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+RewriteRule ^(assets/.*)$ public/$1 [L]
+
+RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
+RewriteRule ^(uploads/.*)$ public/$1 [L]
+
 RewriteRule ^import\.png$ public/import.png [L]
 RewriteRule ^favicon\.ico$ public/favicon.ico [L]
 
