@@ -9,18 +9,16 @@
 -- =============================================================
 
 -- -------------------------------------------------------------
--- [A] CONFERÊNCIA: veja se o passeio existe com esse título.
+-- [A] CONFERÊNCIA: confirma que o id 71 é o passeio certo.
 --     Rode este SELECT primeiro. Ele NÃO altera nada.
---     Anote o "id" que aparecer (você pode usar ele no lugar do
---     título, se preferir — é mais seguro).
+--     Deve aparecer: "Saona Premium Rivest - Lancha".
 -- -------------------------------------------------------------
-SELECT id, title FROM trips WHERE title LIKE '%Saona%';
+SELECT id, title FROM trips WHERE id = 71;
 
 -- -------------------------------------------------------------
 -- [B] ATUALIZAÇÃO DO CONTEÚDO
---     Se o título no banco for exatamente "Saona Premium Brasil",
---     pode rodar como está. Se for outro, troque o valor do
---     WHERE (ou use: WHERE id = <numero_do_id_do_passo_A>).
+--     Mira pelo id = 71 (Saona Premium Rivest - Lancha),
+--     que corresponde ao "Saona Premium Brasil" do catálogo.
 -- -------------------------------------------------------------
 UPDATE trips SET
     duration = 10,
@@ -40,10 +38,10 @@ UPDATE trips SET
 
     excludes = '["Fotos profissionais","Itens pessoais","Gorjetas (opcional)"]'
 
-WHERE title = 'Saona Premium Brasil';
+WHERE id = 71;
 
 -- -------------------------------------------------------------
 -- [C] CONFERÊNCIA FINAL (opcional): rode para ver o resultado.
 -- -------------------------------------------------------------
 SELECT id, title, short_description, meeting_point, includes, excludes
-FROM trips WHERE title = 'Saona Premium Brasil';
+FROM trips WHERE id = 71;
