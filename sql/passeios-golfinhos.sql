@@ -41,7 +41,7 @@ UPDATE trips SET
 
     excludes = '["Fotos profissionais","Alimentos e bebidas","Gorjetas (opcional)","Nado com golfinho (não incluso neste programa)","Itens não especificados no mar ou na piscina"]'
 
-WHERE id = 65;  -- ??  TROQUE pelo id do "Interação com 1 Golfinho"
+WHERE id = 65;  -- Interação com Golfinho (só interação, sem nado)
 
 
 -- =============================================================
@@ -65,7 +65,7 @@ UPDATE trips SET
 
     excludes = '["Fotos profissionais","Alimentos e bebidas","Gorjetas (opcional)","Itens não especificados no mar ou na piscina"]'
 
-WHERE id = 0;  -- ??  TROQUE pelo id do "Interação e Nado com 1 Golfinho"
+WHERE id = 58;  -- Nado e interação com 1 Golfinho
 
 
 -- =============================================================
@@ -89,8 +89,8 @@ UPDATE trips SET
 
     excludes = '["Fotos profissionais","Alimentos e bebidas","Gorjetas (opcional)","Itens não especificados no mar ou na piscina"]'
 
-WHERE id = 0;  -- ??  TROQUE pelo id do "Interação e Nado com 2 Golfinhos"
+WHERE id = 57;  -- Nado e interação com 2 Golfinhos
 
 
--- [E] CONFERÊNCIA FINAL (opcional): troque os ids pelos corretos.
--- SELECT id, title, short_description, includes FROM trips WHERE id IN (65, 0, 0);
+-- [E] CONFERÊNCIA FINAL (opcional)
+-- SELECT id, title, short_description, includes FROM trips WHERE id IN (65, 58, 57);
