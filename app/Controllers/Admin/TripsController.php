@@ -90,6 +90,11 @@ class TripsController extends Controller
         $data['companion_max_total'] = !empty($data['companion_max_total']) ? (int) $data['companion_max_total'] : null;
         $data['featured'] = isset($data['featured']) ? 1 : 0;
 
+        // min_pax / max_pax: campos numéricos que podem vir vazios do form.
+        // Vazio vira NULL (sem limite) para não quebrar a coluna do banco.
+        $data['min_pax'] = ($data['min_pax'] ?? '') !== '' ? (int) $data['min_pax'] : null;
+        $data['max_pax'] = ($data['max_pax'] ?? '') !== '' ? (int) $data['max_pax'] : null;
+
         // Group pricing (tabela de preço fixo por número de passageiros)
         $groupPricing = $request->input('group_pricing', []);
         $groupPricing = array_filter($groupPricing, fn($gp) => !empty($gp['pax']) && !empty($gp['price']));
@@ -230,6 +235,11 @@ class TripsController extends Controller
         $data['companion_max_per_participant'] = !empty($data['companion_max_per_participant']) ? (int) $data['companion_max_per_participant'] : null;
         $data['companion_max_total'] = !empty($data['companion_max_total']) ? (int) $data['companion_max_total'] : null;
         $data['featured'] = isset($data['featured']) ? 1 : 0;
+
+        // min_pax / max_pax: campos numéricos que podem vir vazios do form.
+        // Vazio vira NULL (sem limite) para não quebrar a coluna do banco.
+        $data['min_pax'] = ($data['min_pax'] ?? '') !== '' ? (int) $data['min_pax'] : null;
+        $data['max_pax'] = ($data['max_pax'] ?? '') !== '' ? (int) $data['max_pax'] : null;
 
         // Group pricing (tabela de preço fixo por número de passageiros)
         $groupPricing = $request->input('group_pricing', []);
