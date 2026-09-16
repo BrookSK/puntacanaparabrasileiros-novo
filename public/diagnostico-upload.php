@@ -69,7 +69,23 @@ try {
             }
         }
     });
+    if (!defined('BASE_PATH')) define('BASE_PATH', $root);
     $db = \Core\Database::getInstance();
+
+    echo "  --- TRANSFERS (transfer_vehicles) ---\n";
+    $vs = $db->fetchAll("SELECT id, title, image FROM transfer_vehicles ORDER BY id");
+    foreach ($vs as $v) {
+        $img = $v['image'] ?? '';
+        if ($img) {
+            $path = __DIR__ . $img;
+            echo "  Veículo #{$v['id']} - {$v['title']}\n";
+            echo "    image: {$img} -> " . (is_file($path) ? 'EXISTE' : 'ARQUIVO NÃO EXISTE') . "\n";
+        } else {
+            echo "  Veículo #{$v['id']} - {$v['title']}: (sem imagem no banco)\n";
+        }
+    }
+
+    echo "\n  --- PASSEIOS (trips) ---\n";
     $rows = $db->fetchAll("SELECT id, title, featured_image, gallery FROM trips ORDER BY id DESC LIMIT 20");
     foreach ($rows as $r) {
         echo "  Passeio #{$r['id']} - {$r['title']}\n";
