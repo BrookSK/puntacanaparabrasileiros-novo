@@ -165,6 +165,20 @@ function openAgencyReject(id, name){
 <?php endif; ?>
 <?php endif; ?>
 
+<style>
+.affiliate-tabs { display: flex; gap: 0; border-bottom: 2px solid #e2e8f0; margin-bottom: 24px; flex-wrap: wrap; }
+.affiliate-tab { display: inline-flex; align-items: center; gap: 8px; padding: 14px 24px; font-size: 14px; font-weight: 600; color: #64748b; text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; }
+.affiliate-tab:hover { color: #334155; }
+.affiliate-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+.affiliate-tab-badge { background: #ef4444; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; min-width: 20px; text-align: center; }
+.affiliate-tab-count { font-size: 12px; color: #94a3b8; font-weight: 400; }
+
+/* Alinhamento dos botões de ação na tabela */
+.actions-cell { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.actions-cell form { margin: 0; }
+.actions-cell .btn { white-space: nowrap; }
+</style>
+
 <script>
 function agencyDelete(id){
     if (!confirm('Excluir esta agência? As comissões já geradas permanecem no histórico.')) return;
