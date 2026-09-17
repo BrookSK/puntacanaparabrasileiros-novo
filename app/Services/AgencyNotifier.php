@@ -79,7 +79,74 @@ class AgencyNotifier
     }
 
     // ─────────────────────────────────────────────
-    // EVENTOS
+    // EVENTOS — CADASTRO / APROVAÇÃO
+    // ─────────────────────────────────────────────
+
+    /**
+     * Solicitação de parceria recebida (confirmação para a agência).
+     */
+    public function notifyRegistration(?string $phone, string $companyName, string $contactName): void
+    {
+        $firstName = explode(' ', trim($contactName))[0] ?: $companyName;
+        $msg = "✅ *Solicitação de parceria recebida!*\n\n";
+        $msg .= "Olá, {$firstName}!\n\n";
+        $msg .= "Recebemos a solicitação da agência *{$companyName}* para se tornar parceira da {$this->siteName()}.\n\n";
+        $msg .= "Nossa equipe vai analisar os dados e você receberá uma resposta em breve. ";
+        $msg .= "Avisaremos por aqui assim que houver uma atualização.\n\n";
+        $msg .= "Obrigado pelo interesse! 🌴";
+        $this->sendWhatsApp($phone, $msg);
+    }
+
+    /**
+     * Notifica o ADMIN por WhatsApp sobre uma nova solicitação de agência.
+     */
+    public function notifyAdminNewRequest(string $companyName, string $contactName, string $email, string $phone): void
+    {
+        $adminPhone = (string) $this->app()->setting('admin_whatsapp', $this->app()->setting('admin_phone', ''));
+        if ($adminPhone === '') return;
+        $msg = "🏢 *Nova solicitação de agência parceira*\n\n";
+        $msg .= "• Agência: *{$companyName}*\n";
+        $msg .= "• Contato: {$contactName}\n";
+        $msg .= "• E-mail: {$email}\n";
+        $msg .= "• Telefone: {$phone}\n\n";
+        $msg .= "Acesse o painel para aprovar ou recusar.";
+        $this->sendWhatsApp($adminPhone, $msg);
+    }
+
+    /**
+     * Parceria aprovada.
+     */
+    public function notifyApproved(?string $phone, string $companyName, string $contactName): void
+    {
+        $firstName = explode(' ', trim($contactName))[0] ?: $companyName;
+        $site = $this->siteName();
+        $msg = "🎉 *Parabéns! Sua agência foi aprovada!*\n\n";
+        $msg .= "Olá, {$firstName}!\n\n";
+        $msg .= "A agência *{$companyName}* agora é parceira da {$site}. Você já pode acessar o painel ";
+        $msg .= "com o e-mail e a senha cadastrados.\n\n";
+        $msg .= "👉 Acesse: {$this->siteUrl()}/login-agencia\n\n";
+        $msg .= "Bem-vindo(a) ao time! 🚀";
+        $this->sendWhatsApp($phone, $msg);
+    }
+
+    /**
+     * Parceria recusada (com motivo).
+     */
+    public function notifyRejected(?string $phone, string $companyName, string $contactName, string $reason): void
+    {
+        $firstName = explode(' ', trim($contactName))[0] ?: $companyName;
+        $msg = "📋 *Atualização sobre sua solicitação de parceria*\n\n";
+        $msg .= "Olá, {$firstName}!\n\n";
+        $msg .= "Analisamos a solicitação da agência *{$companyName}* e, neste momento, ela *não foi aprovada*.\n\n";
+        if ($reason !== '') {
+            $msg .= "*Motivo:* {$reason}\n\n";
+        }
+        $msg .= "Você pode tentar novamente futuramente. Qualquer dúvida, estamos à disposição.";
+        $this->sendWhatsApp($phone, $msg);
+    }
+
+    // ─────────────────────────────────────────────
+    // EVENTOS — COMISSÕES
     // ─────────────────────────────────────────────
 
     /**

@@ -293,6 +293,151 @@ class PageController extends Controller
         $this->redirect('/cadastro-afiliado');
     }
 
+    // ============================================================
+    // AGÊNCIAS — cadastro público (espelha o fluxo de afiliado)
+    // ============================================================
+
+    public function agencyRegister(Request $request, Response $response): void
+    {
+        $this->view('frontend/pages/agency-register', [
+            'pageTitle' => 'Cadastre sua Agência - Punta Cana para Brasileiros',
+            'metaDescription' => 'Cadastre sua agência parceira e ofereça as experiências da Punta Cana para Brasileiros aos seus clientes.',
+        ], 'app');
+    }
+
+    public function agencyLogin(Request $request, Response $response): void
+    {
+        // Se já está logado como agência, vai direto pro painel
+        if ($this->isAuthenticated()) {
+            $user = $this->currentUser();
+            if (($user['role'] ?? '') === 'agency') {
+                $this->redirect('/painel-agencia');
+                return;
+            }
+        }
+
+        $this->view('frontend/pages/agency-login', [
+            'pageTitle' => 'Login Agência - Punta Cana para Brasileiros',
+            'metaDescription' => 'Acesse o painel da sua agência parceira.',
+        ], 'app');
+    }
+
+    public function agencyRegisterStore(Request $request, Response $response): void
+    {
+        $data = $request->only([
+            'company_name', 'trade_name', 'cnpj', 'contact_name',
+            'email', 'phone', 'city', 'country',
+            'password', 'password_confirmation', 'message',
+        ]);
+
+        // Validação básica
+        $errors = [];
+        if (empty($data['company_name'])) $errors['company_name'] = 'A razão social é obrigatória.';
+        if (empty($data['contact_name'])) $errors['contact_name'] = 'O nome do contato é obrigatório.';
+        if (empty($data['phone'])) $errors['phone'] = 'WhatsApp/Telefone é obrigatório.';
+        if (!filter_var($data['email'] ?? '', FILTER_VALIDATE_EMAIL)) $errors['email'] = 'E-mail inválido.';
+        if (strlen($data['password'] ?? '') < 6) $errors['password'] = 'A senha deve ter pelo menos 6 caracteres.';
+        if (($data['password'] ?? '') !== ($data['password_confirmation'] ?? '')) $errors['password_confirmation'] = 'As senhas não coincidem.';
+
+        $requestModel = new \App\Models\AgencyRequest();
+        $userModel = new \App\Models\User();
+
+        // Deduplicação por email (solicitação pendente/aprovada ou user existente)
+        if (empty($errors['email'])) {
+            $existing = $requestModel->findByEmail(strtolower(trim($data['email'])));
+            if ($existing && in_array($existing['status'], ['pending', 'approved'])) {
+                $errors['email'] = $existing['status'] === 'pending'
+                    ? 'Já existe uma solicitação pendente com este e-mail.'
+                    : 'Este e-mail já possui uma agência aprovada.';
+            } elseif ($existing) {
+                // Solicitação rejeitada antiga — limpa para permitir novo cadastro
+                $this->db->delete('agency_requests', 'id = ?', [(int) $existing['id']]);
+            }
+
+            if (empty($errors['email']) && $userModel->findByEmail(strtolower(trim($data['email'])))) {
+                $errors['email'] = 'Este e-mail já está cadastrado no sistema.';
+            }
+        }
+
+        if (!empty($errors)) {
+            $this->flash('errors', $errors);
+            $this->flash('old', $data);
+            $this->redirect('/cadastro-agencia');
+            return;
+        }
+
+        // Salva a solicitação (NÃO cria o usuário ainda — só na aprovação)
+        try {
+            $requestModel->create([
+                'company_name' => $data['company_name'],
+                'trade_name' => $data['trade_name'] ?: null,
+                'cnpj' => $data['cnpj'] ?: null,
+                'contact_name' => $data['contact_name'],
+                'email' => strtolower(trim($data['email'])),
+                'phone' => $data['phone'],
+                'city' => $data['city'] ?: null,
+                'country' => $data['country'] ?: null,
+                'password_hash' => password_hash($data['password'], PASSWORD_BCRYPT),
+                'message' => $data['message'] ?: null,
+                'status' => 'pending',
+            ]);
+        } catch (\Throwable $e) {
+            $this->flash('error', 'Erro ao enviar solicitação: ' . $e->getMessage());
+            $this->flash('old', $data);
+            $this->redirect('/cadastro-agencia');
+            return;
+        }
+
+        // Notifica o admin por e-mail
+        try {
+            $emailService = new \App\Services\EmailService();
+            $adminEmail = $this->setting('admin_email', '');
+            if ($adminEmail) {
+                $emailService->send(
+                    $adminEmail,
+                    'Admin',
+                    'Nova Solicitação de Agência: ' . $data['company_name'],
+                    '<p>Uma nova solicitação de agência foi recebida.</p>'
+                    . '<p>Razão social: ' . e($data['company_name']) . '</p>'
+                    . '<p>Contato: ' . e($data['contact_name']) . '</p>'
+                    . '<p>E-mail: ' . e($data['email']) . '</p>'
+                    . '<p>Telefone: ' . e($data['phone']) . '</p>'
+                    . '<p>Acesse o painel para aprovar ou recusar.</p>'
+                );
+            }
+        } catch (\Throwable $e) {
+            // Silenciar erro de e-mail
+        }
+
+        // Notifica o admin por WhatsApp + confirma para a agência (WhatsApp)
+        try {
+            $notifier = new \App\Services\AgencyNotifier();
+            $notifier->notifyAdminNewRequest($data['company_name'], $data['contact_name'], $data['email'], $data['phone']);
+            $notifier->notifyRegistration($data['phone'], $data['company_name'], $data['contact_name']);
+        } catch (\Throwable $e) {
+            // Silenciar erro de WhatsApp
+        }
+
+        // E-mail de confirmação para a agência
+        try {
+            $emailService = $emailService ?? new \App\Services\EmailService();
+            $emailService->send(
+                $data['email'],
+                $data['contact_name'],
+                'Recebemos sua solicitação de parceria - Punta Cana para Brasileiros',
+                '<p>Olá, ' . e($data['contact_name']) . '!</p>'
+                . '<p>Recebemos a solicitação da agência <strong>' . e($data['company_name']) . '</strong> para se tornar parceira da Punta Cana para Brasileiros.</p>'
+                . '<p>Nossa equipe vai analisar os dados e você receberá uma resposta em breve.</p>'
+                . '<p>Obrigado pelo interesse!</p>'
+            );
+        } catch (\Throwable $e) {
+            // Silenciar erro de e-mail
+        }
+
+        $this->flash('success', 'Solicitação enviada com sucesso! Nossa equipe analisará os dados e entrará em contato em breve.');
+        $this->redirect('/cadastro-agencia');
+    }
+
     public function terms(Request $request, Response $response): void
     {
         $this->view('frontend/pages/terms', [

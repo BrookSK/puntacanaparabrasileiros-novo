@@ -34,6 +34,7 @@
                         <li><a href="/">Home</a></li>
                         <li><a href="/passeios">Experiências</a></li>
                         <li><a href="/programa-de-afiliados">Afiliados</a></li>
+                        <li><a href="/cadastro-agencia">Agência Parceira</a></li>
                         <li><a href="/blog">Blog</a></li>
                         <li><a href="/sobre-nos">Sobre Nós</a></li>
                         <li><a href="/contato">Contato</a></li>
@@ -48,6 +49,7 @@
                         <li><a href="/pesquisa">Busca</a></li>
                         <li><a href="/minha-conta">Minha Conta</a></li>
                         <li><a href="/login-afiliado">Conta de Afiliado</a></li>
+                        <li><a href="/login-agencia">Conta de Agência</a></li>
                         <li><a href="/minha-conta/wishlist">Lista de Desejos</a></li>
                         <li><a href="/catalogo" target="_blank">Baixe Nosso Catálogo</a></li>
                     </ul>
