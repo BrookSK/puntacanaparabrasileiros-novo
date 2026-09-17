@@ -9,6 +9,7 @@ class Agency extends Model
 {
     protected string $table = 'agencies';
     protected array $fillable = [
+        'user_id',
         'company_name', 'trade_name', 'cnpj', 'contact_name', 'email', 'phone',
         'address', 'city', 'country', 'bank_info', 'ref_code', 'commission_rate',
         'status', 'total_sales', 'total_commission', 'total_paid', 'notes',

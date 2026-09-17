@@ -388,21 +388,25 @@ class PageController extends Controller
             return;
         }
 
-        // Notifica o admin por e-mail
+        $siteUrl = $this->setting('site_url', 'https://puntacananovo.lrvweb.com.br');
+
+        // Notifica o admin por e-mail (template com identidade Punta Cana)
         try {
             $emailService = new \App\Services\EmailService();
             $adminEmail = $this->setting('admin_email', '');
             if ($adminEmail) {
-                $emailService->send(
+                $emailService->sendTemplate(
                     $adminEmail,
                     'Admin',
                     'Nova Solicitação de Agência: ' . $data['company_name'],
-                    '<p>Uma nova solicitação de agência foi recebida.</p>'
-                    . '<p>Razão social: ' . e($data['company_name']) . '</p>'
-                    . '<p>Contato: ' . e($data['contact_name']) . '</p>'
-                    . '<p>E-mail: ' . e($data['email']) . '</p>'
-                    . '<p>Telefone: ' . e($data['phone']) . '</p>'
-                    . '<p>Acesse o painel para aprovar ou recusar.</p>'
+                    'agency-request-admin',
+                    [
+                        'companyName' => $data['company_name'],
+                        'contactName' => $data['contact_name'],
+                        'email' => $data['email'],
+                        'phone' => $data['phone'],
+                        'siteUrl' => $siteUrl,
+                    ]
                 );
             }
         } catch (\Throwable $e) {
@@ -418,17 +422,19 @@ class PageController extends Controller
             // Silenciar erro de WhatsApp
         }
 
-        // E-mail de confirmação para a agência
+        // E-mail de confirmação para a agência (template com identidade Punta Cana)
         try {
             $emailService = $emailService ?? new \App\Services\EmailService();
-            $emailService->send(
+            $emailService->sendTemplate(
                 $data['email'],
                 $data['contact_name'],
                 'Recebemos sua solicitação de parceria - Punta Cana para Brasileiros',
-                '<p>Olá, ' . e($data['contact_name']) . '!</p>'
-                . '<p>Recebemos a solicitação da agência <strong>' . e($data['company_name']) . '</strong> para se tornar parceira da Punta Cana para Brasileiros.</p>'
-                . '<p>Nossa equipe vai analisar os dados e você receberá uma resposta em breve.</p>'
-                . '<p>Obrigado pelo interesse!</p>'
+                'agency-request-confirmation',
+                [
+                    'contactName' => $data['contact_name'],
+                    'companyName' => $data['company_name'],
+                    'siteUrl' => $siteUrl,
+                ]
             );
         } catch (\Throwable $e) {
             // Silenciar erro de e-mail

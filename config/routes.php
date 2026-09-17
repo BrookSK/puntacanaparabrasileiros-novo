@@ -265,6 +265,10 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
 
     // Agências Parceiras
     $router->get('/agencias', [AdminAgenciesController::class, 'index'], [], 'admin.agencies.index');
+    $router->get('/agencias/solicitacao/{id}', [AdminAgenciesController::class, 'showRequest'], [], 'admin.agencies.request.show');
+    $router->post('/agencias/solicitacao/{id}/aprovar', [AdminAgenciesController::class, 'approveRequest'], [CsrfMiddleware::class], 'admin.agencies.request.approve');
+    $router->post('/agencias/solicitacao/{id}/recusar', [AdminAgenciesController::class, 'rejectRequest'], [CsrfMiddleware::class], 'admin.agencies.request.reject');
+    $router->post('/agencias/solicitacao/{id}/excluir', [AdminAgenciesController::class, 'deleteRequest'], [CsrfMiddleware::class], 'admin.agencies.request.delete');
     $router->get('/agencias/comissoes', [AdminAgenciesController::class, 'commissions'], [], 'admin.agencies.commissions');
     $router->post('/agencias/comissoes/{id}/pagar', [AdminAgenciesController::class, 'payCommission'], [CsrfMiddleware::class], 'admin.agencies.pay');
     $router->post('/agencias/comissoes/{id}/cancelar', [AdminAgenciesController::class, 'cancelCommission'], [CsrfMiddleware::class], 'admin.agencies.cancel');

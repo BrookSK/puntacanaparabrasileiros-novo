@@ -26,25 +26,210 @@ class AgenciesController extends Controller
     // ── Listagem ────────────────────────────────────────────────
     public function index(Request $request, Response $response): void
     {
+        $tab = $request->query('tab', 'solicitacoes');
         $page = max(1, (int) $request->query('page', '1'));
-        $search = trim((string) $request->query('busca', ''));
-        $status = $request->query('status', '');
 
-        $agencies = $this->agencyModel->getAllPaginated($page, 20, $search, $status ?: null);
+        $requestModel = new \App\Models\AgencyRequest();
 
-        $totals = [
-            'total' => (int) $this->db->fetchColumn("SELECT COUNT(*) FROM agencies"),
-            'active' => (int) $this->db->fetchColumn("SELECT COUNT(*) FROM agencies WHERE status = 'active'"),
-            'pending_commission' => (float) $this->db->fetchColumn("SELECT COALESCE(SUM(amount),0) FROM agency_commissions WHERE status = 'pending'"),
+        // Contadores
+        $pendingCount = $this->tableExists('agency_requests') ? $requestModel->countByStatus('pending') : 0;
+        $activeCount = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM agencies WHERE status = 'active'");
+        // Bloqueadas = agências inativas (mesmo filtro usado na listagem da aba)
+        $blockedCount = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM agencies WHERE status = 'inactive'");
+
+        $data = [
+            'tab' => $tab,
+            'pendingCount' => $pendingCount,
+            'activeCount' => $activeCount,
+            'blockedCount' => $blockedCount,
+            'pageTitle' => 'Agências Parceiras',
         ];
 
-        $this->view('admin/agencies/index', [
-            'agencies' => $agencies,
-            'totals' => $totals,
-            'currentSearch' => $search,
-            'currentStatus' => $status,
-            'pageTitle' => 'Agências Parceiras',
+        if ($tab === 'solicitacoes') {
+            $data['requests'] = $this->tableExists('agency_requests')
+                ? $requestModel->getPending($page)
+                : ['items' => [], 'total' => 0, 'per_page' => 20, 'current_page' => 1, 'total_pages' => 0];
+        } elseif ($tab === 'ativas') {
+            $data['agencies'] = $this->agencyModel->getAllPaginated($page, 20, '', 'active');
+        } elseif ($tab === 'bloqueadas') {
+            $data['blocked'] = $this->agencyModel->getAllPaginated($page, 20, '', 'inactive');
+        }
+
+        $this->view('admin/agencies/index', $data, 'admin');
+    }
+
+    /**
+     * Verifica se uma tabela existe (para ambientes sem a migração ainda aplicada).
+     */
+    private function tableExists(string $table): bool
+    {
+        try {
+            $this->db->fetchColumn("SELECT 1 FROM `{$table}` LIMIT 1");
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
+    }
+
+    // ── Solicitação: detalhe ────────────────────────────────────
+    public function showRequest(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $req = (new \App\Models\AgencyRequest())->find($id);
+        if (!$req) $this->abort(404);
+
+        $this->view('admin/agencies/request-detail', [
+            'request' => $req,
+            'pageTitle' => 'Solicitação: ' . $req['company_name'],
         ], 'admin');
+    }
+
+    // ── Solicitação: aprovar (cria login + agência) ─────────────
+    public function approveRequest(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $requestModel = new \App\Models\AgencyRequest();
+        $req = $requestModel->find($id);
+
+        if (!$req || $req['status'] !== 'pending') {
+            $this->flash('error', 'Solicitação não encontrada ou já processada.');
+            $this->redirect('/admin/agencias');
+            return;
+        }
+
+        $this->db->beginTransaction();
+        try {
+            $userModel = new \App\Models\User();
+
+            // 1) Criar/atualizar usuário com role 'agency'
+            $existingUser = $userModel->findByEmail($req['email']);
+            if ($existingUser) {
+                $userId = (int) $existingUser['id'];
+                $this->db->update('users', ['role' => 'agency', 'status' => 'active'], 'id = ?', [$userId]);
+            } else {
+                // Divide o nome do contato em first/last
+                $parts = explode(' ', trim((string) $req['contact_name']), 2);
+                $userId = $this->db->insert('users', [
+                    'first_name' => $parts[0] ?: $req['company_name'],
+                    'last_name' => $parts[1] ?? '',
+                    'email' => $req['email'],
+                    'password' => $req['password_hash'],
+                    'phone' => $req['phone'],
+                    'role' => 'agency',
+                    'status' => 'active',
+                    'email_verified_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            // 2) Criar registro da agência
+            $refCode = $this->agencyModel->generateRefCode();
+            $agencyId = $this->agencyModel->create([
+                'user_id' => $userId,
+                'company_name' => $req['company_name'],
+                'trade_name' => $req['trade_name'],
+                'cnpj' => $req['cnpj'],
+                'contact_name' => $req['contact_name'],
+                'email' => $req['email'],
+                'phone' => $req['phone'],
+                'city' => $req['city'],
+                'country' => $req['country'],
+                'ref_code' => $refCode,
+                'commission_rate' => 10.00,
+                'status' => 'active',
+            ]);
+
+            // 3) Marcar solicitação como aprovada
+            $requestModel->approve($id, $request->input('admin_notes', ''));
+
+            $this->db->commit();
+
+            // 4) Notificar a agência (e-mail + WhatsApp)
+            $siteUrl = $this->setting('site_url', 'https://puntacananovo.lrvweb.com.br');
+            try {
+                (new \App\Services\EmailService())->sendTemplate(
+                    $req['email'],
+                    $req['contact_name'],
+                    'Sua agência foi aprovada! - Punta Cana para Brasileiros',
+                    'agency-approved',
+                    [
+                        'contactName' => $req['contact_name'],
+                        'companyName' => $req['company_name'],
+                        'email' => $req['email'],
+                        'siteUrl' => $siteUrl,
+                    ]
+                );
+            } catch (\Throwable $e) {}
+            try {
+                (new \App\Services\AgencyNotifier())->notifyApproved($req['phone'], $req['company_name'], $req['contact_name']);
+            } catch (\Throwable $e) {}
+
+            $this->flash('success', 'Agência "' . $req['company_name'] . '" aprovada! O acesso ao painel foi liberado.');
+        } catch (\Throwable $e) {
+            $this->db->rollback();
+            $this->flash('error', 'Erro ao aprovar: ' . $e->getMessage());
+        }
+
+        $this->redirect('/admin/agencias');
+    }
+
+    // ── Solicitação: recusar (com motivo) ───────────────────────
+    public function rejectRequest(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $requestModel = new \App\Models\AgencyRequest();
+        $req = $requestModel->find($id);
+
+        if (!$req) {
+            $this->flash('error', 'Solicitação não encontrada.');
+            $this->redirect('/admin/agencias');
+            return;
+        }
+        if ($req['status'] === 'approved') {
+            $this->flash('error', 'Esta solicitação já foi aprovada e não pode ser recusada.');
+            $this->redirect('/admin/agencias');
+            return;
+        }
+
+        $reason = trim((string) $request->input('block_reason', ''));
+        if ($reason === '') {
+            $this->flash('error', 'O motivo da recusa é obrigatório.');
+            $this->redirect('/admin/agencias?tab=solicitacoes');
+            return;
+        }
+
+        $requestModel->reject($id, $reason);
+
+        // Notificar a agência (e-mail + WhatsApp)
+        $siteUrl = $this->setting('site_url', 'https://puntacananovo.lrvweb.com.br');
+        try {
+            (new \App\Services\EmailService())->sendTemplate(
+                $req['email'],
+                $req['contact_name'],
+                'Atualização sobre sua solicitação de parceria - Punta Cana para Brasileiros',
+                'agency-rejected',
+                [
+                    'contactName' => $req['contact_name'],
+                    'companyName' => $req['company_name'],
+                    'reason' => $reason,
+                    'siteUrl' => $siteUrl,
+                ]
+            );
+        } catch (\Throwable $e) {}
+        try {
+            (new \App\Services\AgencyNotifier())->notifyRejected($req['phone'], $req['company_name'], $req['contact_name'], $reason);
+        } catch (\Throwable $e) {}
+
+        $this->flash('success', 'Solicitação recusada.');
+        $this->redirect('/admin/agencias');
+    }
+
+    // ── Solicitação: excluir ────────────────────────────────────
+    public function deleteRequest(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $this->db->delete('agency_requests', 'id = ?', [$id]);
+        $this->flash('success', 'Solicitação excluída.');
+        $this->redirect('/admin/agencias');
     }
 
     // ── Criar ───────────────────────────────────────────────────

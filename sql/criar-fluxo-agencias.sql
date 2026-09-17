@@ -32,3 +32,9 @@ CREATE TABLE IF NOT EXISTS `agency_requests` (
 -- 2) Liga a agência a um usuário (login). Só adiciona se ainda não existir.
 --    (Se a coluna já existir, o phpMyAdmin vai acusar erro — pode ignorar nesse caso.)
 ALTER TABLE `agencies` ADD COLUMN `user_id` INT UNSIGNED DEFAULT NULL AFTER `id`;
+
+-- 3) Adiciona a role 'agency' ao ENUM da coluna users.role.
+--    (Preserva todas as roles existentes + adiciona 'agency'.)
+ALTER TABLE `users`
+MODIFY COLUMN `role` ENUM('superadmin','admin','editor','affiliate','customer','attendant','whatsapp_agent','comercial','agency')
+NOT NULL DEFAULT 'customer';
