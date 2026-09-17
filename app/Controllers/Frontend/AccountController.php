@@ -636,6 +636,41 @@ class AccountController extends Controller
         ], 'app');
     }
 
+    // ==================== PAINEL DA AGÊNCIA ====================
+
+    public function agencyDashboard(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        $agencyModel = new \App\Models\Agency();
+        $agency = $agencyModel->findByUser((int) $user['id']);
+
+        // Se o usuário não tem agência vinculada, não pode acessar o painel
+        if (!$agency) {
+            $this->flash('error', 'Sua conta não está vinculada a uma agência.');
+            $this->redirect('/');
+            return;
+        }
+
+        $agencyId = (int) $agency['id'];
+        $commissionModel = new \App\Models\AgencyCommission();
+
+        // Comissões e totais
+        $commissions = $commissionModel->getByAgency($agencyId, 1, 50);
+        $pendingTotal = $commissionModel->getTotalPending($agencyId);
+
+        // Link de indicação
+        $refLink = (new \App\Services\AgencyService())->generateLink($agency['ref_code']);
+
+        $this->view('frontend/agency/dashboard', [
+            'agency' => $agency,
+            'user' => $user,
+            'commissions' => $commissions,
+            'pendingTotal' => $pendingTotal,
+            'refLink' => $refLink,
+            'pageTitle' => 'Painel da Agência',
+        ], 'app');
+    }
+
     public function affiliateLinks(Request $request, Response $response): void
     {
         $user = $this->currentUser();

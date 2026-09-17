@@ -89,6 +89,11 @@ $router->group(['prefix' => '/painel-afiliado', 'middleware' => [AuthMiddleware:
     $router->get('/landing-page', [AccountController::class, 'affiliateLanding'], [], 'affiliate.landing');
     $router->get('/testar-notificacao', [AccountController::class, 'affiliateTestNotification'], [], 'affiliate.test_notification');
 });
+
+// Painel da Agência (autenticado)
+$router->group(['prefix' => '/painel-agencia', 'middleware' => [AuthMiddleware::class]], function ($router) {
+    $router->get('', [AccountController::class, 'agencyDashboard'], [], 'agency.dashboard');
+});
 $router->get('/blog', [BlogController::class, 'index'], [], 'blog.index');
 $router->get('/blog/categoria/{slug}', [BlogController::class, 'category'], [], 'blog.category');
 $router->get('/blog/{slug}', [BlogController::class, 'show'], [], 'blog.show');

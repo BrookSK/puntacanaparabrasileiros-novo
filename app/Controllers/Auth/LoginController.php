@@ -193,6 +193,9 @@ class LoginController extends Controller
         if (($user['role'] ?? '') === 'affiliate') {
             return '/painel-afiliado';
         }
+        if (($user['role'] ?? '') === 'agency') {
+            return '/painel-agencia';
+        }
         return '/minha-conta';
     }
 

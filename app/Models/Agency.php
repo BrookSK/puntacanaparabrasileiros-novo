@@ -24,6 +24,17 @@ class Agency extends Model
     }
 
     /**
+     * Busca a agência vinculada a um usuário (login).
+     */
+    public function findByUser(int $userId): ?array
+    {
+        return $this->db->fetchOne(
+            "SELECT * FROM agencies WHERE user_id = ? LIMIT 1",
+            [$userId]
+        );
+    }
+
+    /**
      * Lista paginada, com busca opcional por nome/CNPJ/código.
      */
     public function getAllPaginated(int $page = 1, int $perPage = 20, string $search = '', ?string $status = null): array
