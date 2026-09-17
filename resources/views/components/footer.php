@@ -79,6 +79,51 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
                             Pagamento seguro
                         </span>
+                        <div class="footer-cards" aria-label="Formas de pagamento aceitas">
+                            <!-- Visa -->
+                            <span class="footer-card" title="Visa">
+                                <svg viewBox="0 0 48 32" width="38" height="25" role="img" aria-label="Visa">
+                                    <rect width="48" height="32" rx="4" fill="#fff" stroke="#e5e7eb"/>
+                                    <text x="24" y="21" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-style="italic" font-weight="bold" fill="#1a1f71">VISA</text>
+                                </svg>
+                            </span>
+                            <!-- Mastercard -->
+                            <span class="footer-card" title="Mastercard">
+                                <svg viewBox="0 0 48 32" width="38" height="25" role="img" aria-label="Mastercard">
+                                    <rect width="48" height="32" rx="4" fill="#fff" stroke="#e5e7eb"/>
+                                    <circle cx="20" cy="16" r="8" fill="#eb001b"/>
+                                    <circle cx="28" cy="16" r="8" fill="#f79e1b" fill-opacity="0.9"/>
+                                </svg>
+                            </span>
+                            <!-- American Express -->
+                            <span class="footer-card" title="American Express">
+                                <svg viewBox="0 0 48 32" width="38" height="25" role="img" aria-label="American Express">
+                                    <rect width="48" height="32" rx="4" fill="#1f72cd"/>
+                                    <text x="24" y="19" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="#fff">AMEX</text>
+                                </svg>
+                            </span>
+                            <!-- Elo -->
+                            <span class="footer-card" title="Elo">
+                                <svg viewBox="0 0 48 32" width="38" height="25" role="img" aria-label="Elo">
+                                    <rect width="48" height="32" rx="4" fill="#000"/>
+                                    <text x="24" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#fff">elo</text>
+                                </svg>
+                            </span>
+                            <!-- Hipercard -->
+                            <span class="footer-card" title="Hipercard">
+                                <svg viewBox="0 0 48 32" width="38" height="25" role="img" aria-label="Hipercard">
+                                    <rect width="48" height="32" rx="4" fill="#822124"/>
+                                    <text x="24" y="19" text-anchor="middle" font-family="Arial, sans-serif" font-size="6.5" font-weight="bold" fill="#fff">Hipercard</text>
+                                </svg>
+                            </span>
+                            <!-- Pix -->
+                            <span class="footer-card" title="Pix">
+                                <svg viewBox="0 0 48 32" width="38" height="25" role="img" aria-label="Pix">
+                                    <rect width="48" height="32" rx="4" fill="#fff" stroke="#e5e7eb"/>
+                                    <text x="24" y="20" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#32bcad">Pix</text>
+                                </svg>
+                            </span>
+                        </div>
                     </div>
                 </div>
             </div>

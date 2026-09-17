@@ -2970,6 +2970,29 @@ img { max-width: 100%; height: auto; }
 .secure-badge svg {
     color: #00897b;
 }
+.footer-secure {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+.footer-cards {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.footer-card {
+    display: inline-flex;
+    line-height: 0;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.footer-card svg { display: block; }
+@media (max-width: 768px) {
+    .footer-secure { align-items: center; }
+    .footer-cards { justify-content: center; }
+}
 
 /* WhatsApp Float */
 .whatsapp-float { position: fixed; bottom: 25px; right: 25px; background: #25D366; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 999; transition: transform .2s, bottom .2s; }
