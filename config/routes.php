@@ -177,6 +177,7 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/passeios/{id}/editar', [AdminTripsController::class, 'edit'], [], 'admin.trips.edit');
     $router->post('/passeios/{id}/editar', [AdminTripsController::class, 'update'], [CsrfMiddleware::class], 'admin.trips.update');
     $router->post('/passeios/{id}/excluir', [AdminTripsController::class, 'destroy'], [CsrfMiddleware::class], 'admin.trips.destroy');
+    $router->post('/passeios/{id}/duplicar', [AdminTripsController::class, 'duplicate'], [CsrfMiddleware::class], 'admin.trips.duplicate');
     $router->get('/passeios/{id}/precos', [AdminTripsController::class, 'pricing'], [], 'admin.trips.pricing');
     $router->post('/passeios/{id}/precos', [AdminTripsController::class, 'savePricing'], [CsrfMiddleware::class], 'admin.trips.pricing.save');
 

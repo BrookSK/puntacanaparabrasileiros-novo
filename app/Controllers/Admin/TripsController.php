@@ -307,6 +307,179 @@ class TripsController extends Controller
         $this->redirect('/admin/passeios');
     }
 
+    /**
+     * Duplica um passeio (cria uma cópia independente).
+     * Copia o passeio e todas as suas relações: pacotes, preços por categoria,
+     * preços por dia, itinerário, serviços extras, datas fixas, categorias,
+     * pacotes de composição e hotéis/horários. A cópia nasce como rascunho.
+     */
+    public function duplicate(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $orig = $this->tripModel->find($id);
+        if (!$orig) {
+            $this->flash('error', 'Passeio não encontrado.');
+            $this->redirect('/admin/passeios');
+            return;
+        }
+
+        $this->db->beginTransaction();
+        try {
+            // 1) Cria o novo passeio a partir do original
+            $data = $orig;
+            unset($data['id'], $data['created_at'], $data['updated_at']);
+            $data['title'] = $orig['title'] . ' (Cópia)';
+            $data['slug'] = $this->tripModel->generateSlug($data['title']);
+            $data['status'] = 'draft';          // nasce como rascunho para revisão
+            $data['featured'] = 0;              // não herda destaque
+            $data['views_count'] = 0;
+            $data['bookings_count'] = 0;
+            $newTripId = $this->tripModel->create($data);
+
+            // 2) Categorias (trip_category_relations)
+            $catIds = array_column($this->tripModel->getCategories($id), 'id');
+            if (!empty($catIds)) {
+                $this->tripModel->syncCategories($newTripId, $catIds);
+            }
+
+            // 3) Tags (trip_tag_relations) — mantém filtros do frontend
+            if ($this->tableExists('trip_tag_relations')) {
+                $tagRels = $this->db->fetchAll("SELECT tag_id FROM trip_tag_relations WHERE trip_id = ?", [$id]);
+                foreach ($tagRels as $tr) {
+                    $this->db->insert('trip_tag_relations', [
+                        'trip_id' => $newTripId,
+                        'tag_id' => (int) $tr['tag_id'],
+                    ]);
+                }
+            }
+
+            // 4) Pacotes + preços por categoria + preços por dia (re-mapeando package_id)
+            $packages = $this->db->fetchAll("SELECT * FROM trip_packages WHERE trip_id = ? ORDER BY sort_order ASC", [$id]);
+            foreach ($packages as $pkg) {
+                $newPackageId = $this->db->insert('trip_packages', [
+                    'trip_id' => $newTripId,
+                    'title' => $pkg['title'],
+                    'description' => $pkg['description'] ?? null,
+                    'sort_order' => (int) $pkg['sort_order'],
+                    'status' => (int) $pkg['status'],
+                ]);
+
+                // Preços por categoria
+                $cats = $this->db->fetchAll("SELECT * FROM trip_package_categories WHERE package_id = ?", [(int) $pkg['id']]);
+                foreach ($cats as $c) {
+                    $this->db->insert('trip_package_categories', [
+                        'package_id' => $newPackageId,
+                        'traveler_category_id' => (int) $c['traveler_category_id'],
+                        'price' => $c['price'],
+                        'sale_price' => $c['sale_price'],
+                        'min_pax' => (int) $c['min_pax'],
+                        'max_pax' => $c['max_pax'],
+                    ]);
+                }
+
+                // Preços por dia
+                $dayPricing = $this->db->fetchAll("SELECT * FROM trip_day_pricing WHERE package_id = ?", [(int) $pkg['id']]);
+                foreach ($dayPricing as $dp) {
+                    $this->db->insert('trip_day_pricing', [
+                        'package_id' => $newPackageId,
+                        'traveler_category_id' => (int) $dp['traveler_category_id'],
+                        'rule_type' => $dp['rule_type'],
+                        'day_key' => $dp['day_key'],
+                        'price' => $dp['price'],
+                        'sale_price' => $dp['sale_price'],
+                        'label' => $dp['label'],
+                        'active' => (int) $dp['active'],
+                    ]);
+                }
+            }
+
+            // 5) Itinerário
+            foreach ($this->db->fetchAll("SELECT * FROM trip_itinerary WHERE trip_id = ? ORDER BY sort_order ASC", [$id]) as $it) {
+                $this->db->insert('trip_itinerary', [
+                    'trip_id' => $newTripId,
+                    'day_number' => (int) $it['day_number'],
+                    'title' => $it['title'],
+                    'description' => $it['description'] ?? null,
+                    'image' => $it['image'] ?? null,
+                    'sort_order' => (int) $it['sort_order'],
+                ]);
+            }
+
+            // 6) Serviços extras
+            foreach ($this->db->fetchAll("SELECT * FROM trip_extra_services WHERE trip_id = ? ORDER BY sort_order ASC", [$id]) as $svc) {
+                $this->db->insert('trip_extra_services', [
+                    'trip_id' => $newTripId,
+                    'name' => $svc['name'],
+                    'description' => $svc['description'] ?? null,
+                    'price' => $svc['price'],
+                    'price_type' => $svc['price_type'],
+                    'required' => (int) $svc['required'],
+                    'sort_order' => (int) $svc['sort_order'],
+                ]);
+            }
+
+            // 7) Datas fixas futuras (zera booked_pax; ignora datas vencidas)
+            foreach ($this->db->fetchAll("SELECT * FROM trip_fixed_dates WHERE trip_id = ? AND date >= CURDATE()", [$id]) as $fd) {
+                $this->db->insert('trip_fixed_dates', [
+                    'trip_id' => $newTripId,
+                    'date' => $fd['date'],
+                    'time' => $fd['time'] ?? null,
+                    'max_pax' => $fd['max_pax'],
+                    'booked_pax' => 0,
+                    'status' => $fd['status'],
+                ]);
+            }
+
+            // 8) Pacotes de composição
+            if ($this->tableExists('trip_composition_packages')) {
+                $comps = $this->db->fetchAll("SELECT * FROM trip_composition_packages WHERE trip_id = ? ORDER BY sort_order ASC", [$id]);
+                foreach ($comps as $cp) {
+                    $this->db->insert('trip_composition_packages', [
+                        'trip_id' => $newTripId,
+                        'label' => $cp['label'],
+                        'pax' => (int) $cp['pax'],
+                        'units' => (int) $cp['units'],
+                        'unit_label' => $cp['unit_label'] ?? null,
+                        'pax_per_unit' => $cp['pax_per_unit'],
+                        'price' => $cp['price'],
+                        'sort_order' => (int) $cp['sort_order'],
+                        'status' => $cp['status'],
+                    ]);
+                }
+            }
+
+            // 9) Hotéis + horários (re-mapeando trip_hotel_id)
+            if ($this->tableExists('trip_hotels')) {
+                $hotels = $this->db->fetchAll("SELECT * FROM trip_hotels WHERE trip_id = ? ORDER BY sort_order ASC", [$id]);
+                foreach ($hotels as $h) {
+                    $newHotelId = $this->db->insert('trip_hotels', [
+                        'trip_id' => $newTripId,
+                        'hotel_name' => $h['hotel_name'],
+                        'sort_order' => (int) $h['sort_order'],
+                        'is_active' => (int) $h['is_active'],
+                    ]);
+                    $schedules = $this->db->fetchAll("SELECT * FROM trip_hotel_schedules WHERE trip_hotel_id = ?", [(int) $h['id']]);
+                    foreach ($schedules as $s) {
+                        $this->db->insert('trip_hotel_schedules', [
+                            'trip_hotel_id' => $newHotelId,
+                            'pickup_time' => $s['pickup_time'],
+                            'notes' => $s['notes'] ?? null,
+                            'is_active' => (int) $s['is_active'],
+                        ]);
+                    }
+                }
+            }
+
+            $this->db->commit();
+            $this->flash('success', 'Passeio duplicado com sucesso! A cópia foi criada como rascunho. Ajuste os dados e publique quando quiser.');
+            $this->redirect('/admin/passeios/' . $newTripId . '/editar');
+        } catch (\Throwable $e) {
+            $this->db->rollback();
+            $this->flash('error', 'Erro ao duplicar o passeio: ' . $e->getMessage());
+            $this->redirect('/admin/passeios');
+        }
+    }
+
     public function pricing(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
@@ -595,6 +768,19 @@ class TripsController extends Controller
         $packages = $request->input('composition_packages', []);
         $compositionModel = new \App\Models\TripCompositionPackage();
         $compositionModel->syncForTrip($tripId, $packages);
+    }
+
+    /**
+     * Verifica se uma tabela existe no banco (para relações opcionais na duplicação).
+     */
+    private function tableExists(string $table): bool
+    {
+        try {
+            $this->db->fetchColumn("SELECT 1 FROM `{$table}` LIMIT 1");
+            return true;
+        } catch (\Throwable $e) {
+            return false;
+        }
     }
 
     /**
