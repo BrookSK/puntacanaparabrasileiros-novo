@@ -74,12 +74,12 @@
                         <p>Punta Cana para Brasileiros Oliveira & Ramos SRL</p>
                         <p>RNC: 133287765</p>
                     </div>
-                    <div class="footer-secure">
+                    <div class="footer-secure" style="display:flex;flex-direction:column;align-items:flex-end;gap:14px;">
                         <span class="secure-badge">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
                             Pagamento seguro
                         </span>
-                        <div class="footer-cards" aria-label="Formas de pagamento aceitas">
+                        <div class="footer-cards" aria-label="Formas de pagamento aceitas" style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-top:6px;">
                             <!-- Visa -->
                             <span class="footer-card" title="Visa">
                                 <svg viewBox="0 0 48 32" width="38" height="25" role="img" aria-label="Visa">
