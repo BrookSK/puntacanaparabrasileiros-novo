@@ -50,7 +50,12 @@ class TransferVehicle extends Model
      */
     public function searchAvailable(int $originId, int $destinationId, int $totalPax, string $serviceType, bool $needsWheelchair = false): array
     {
-        $wheelchairCondition = $needsWheelchair ? ' AND tv.wheelchair_accessible = 1' : '';
+        // Acessibilidade:
+        // - Se o cliente marcou cadeirante/acessibilidade -> mostra SÓ os acessíveis.
+        // - Se NÃO marcou -> esconde os acessíveis (só transfers comuns).
+        $wheelchairCondition = $needsWheelchair
+            ? ' AND tv.wheelchair_accessible = 1'
+            : ' AND tv.wheelchair_accessible = 0';
 
         $sql = "SELECT tv.*, tr.id as route_id, tr.base_price, tr.duration, tr.distance_km
                 FROM transfer_vehicles tv
