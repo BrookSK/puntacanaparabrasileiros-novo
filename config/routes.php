@@ -95,7 +95,10 @@ $router->group(['prefix' => '/painel-agencia', 'middleware' => [AuthMiddleware::
     $router->get('', [AccountController::class, 'agencyDashboard'], [], 'agency.dashboard');
     $router->get('/link', [AccountController::class, 'agencyLinks'], [], 'agency.links');
     $router->get('/comissoes', [AccountController::class, 'agencyCommissions'], [], 'agency.commissions');
+    $router->get('/visitas', [AccountController::class, 'agencyVisits'], [], 'agency.visits');
+    $router->get('/criativos', [AccountController::class, 'agencyCreatives'], [], 'agency.creatives');
     $router->get('/pagamentos', [AccountController::class, 'agencyPayments'], [], 'agency.payments');
+    $router->get('/landing-page', [AccountController::class, 'agencyLanding'], [], 'agency.landing');
     $router->get('/configuracoes', [AccountController::class, 'agencySettings'], [], 'agency.settings');
     $router->post('/configuracoes', [AccountController::class, 'agencySettingsUpdate'], [CsrfMiddleware::class], 'agency.settings.update');
 });

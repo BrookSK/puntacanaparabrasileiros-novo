@@ -819,6 +819,50 @@ class AccountController extends Controller
         $this->redirect('/painel-agencia/configuracoes');
     }
 
+    public function agencyVisits(Request $request, Response $response): void
+    {
+        $agency = $this->requireAgency();
+        if (!$agency) return;
+
+        // Agência não possui rastreamento de visitas por link (diferente do afiliado).
+        // A tela existe para paridade com o painel do afiliado.
+        $this->view('frontend/agency/visits', [
+            'agency' => $agency,
+            'pageTitle' => 'Visitas',
+        ], 'app');
+    }
+
+    public function agencyCreatives(Request $request, Response $response): void
+    {
+        $agency = $this->requireAgency();
+        if (!$agency) return;
+
+        // Reaproveita os criativos globais (mesmos do afiliado)
+        $creatives = (new \App\Models\AffiliateCreative())->getActive();
+        $refLink = (new \App\Services\AgencyService())->generateLink($agency['ref_code']);
+
+        $this->view('frontend/agency/creatives', [
+            'agency' => $agency,
+            'creatives' => $creatives,
+            'refLink' => $refLink,
+            'pageTitle' => 'Criativos',
+        ], 'app');
+    }
+
+    public function agencyLanding(Request $request, Response $response): void
+    {
+        $agency = $this->requireAgency();
+        if (!$agency) return;
+
+        $refLink = (new \App\Services\AgencyService())->generateLink($agency['ref_code']);
+
+        $this->view('frontend/agency/landing', [
+            'agency' => $agency,
+            'refLink' => $refLink,
+            'pageTitle' => 'Landing Page',
+        ], 'app');
+    }
+
     public function affiliateLinks(Request $request, Response $response): void
     {
         $user = $this->currentUser();
