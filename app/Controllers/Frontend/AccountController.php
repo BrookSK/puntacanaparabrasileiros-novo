@@ -671,6 +671,118 @@ class AccountController extends Controller
         ], 'app');
     }
 
+    /** Helper: retorna a agência do usuário logado ou redireciona. */
+    private function requireAgency(): ?array
+    {
+        $user = $this->currentUser();
+        $agency = (new \App\Models\Agency())->findByUser((int) $user['id']);
+        if (!$agency) {
+            $this->flash('error', 'Sua conta não está vinculada a uma agência.');
+            $this->redirect('/');
+            return null;
+        }
+        return $agency;
+    }
+
+    public function agencyLinks(Request $request, Response $response): void
+    {
+        $agency = $this->requireAgency();
+        if (!$agency) return;
+
+        $refLink = (new \App\Services\AgencyService())->generateLink($agency['ref_code']);
+
+        $this->view('frontend/agency/links', [
+            'agency' => $agency,
+            'refLink' => $refLink,
+            'pageTitle' => 'Link de Indicação',
+        ], 'app');
+    }
+
+    public function agencyCommissions(Request $request, Response $response): void
+    {
+        $agency = $this->requireAgency();
+        if (!$agency) return;
+
+        $commissionModel = new \App\Models\AgencyCommission();
+        $commissions = $commissionModel->getByAgency((int) $agency['id'], 1, 100);
+
+        $totalCancelled = (float) $this->db->fetchColumn(
+            "SELECT COALESCE(SUM(amount), 0) FROM agency_commissions WHERE agency_id = ? AND status = 'cancelled'",
+            [(int) $agency['id']]
+        );
+
+        $this->view('frontend/agency/commissions', [
+            'agency' => $agency,
+            'commissions' => $commissions,
+            'totalCancelled' => $totalCancelled,
+            'pageTitle' => 'Comissões',
+        ], 'app');
+    }
+
+    public function agencyPayments(Request $request, Response $response): void
+    {
+        $agency = $this->requireAgency();
+        if (!$agency) return;
+
+        $payments = $this->db->fetchAll(
+            "SELECT ac.*, b.booking_number
+             FROM agency_commissions ac
+             LEFT JOIN bookings b ON ac.booking_id = b.id
+             WHERE ac.agency_id = ? AND ac.status = 'paid'
+             ORDER BY ac.paid_at DESC",
+            [(int) $agency['id']]
+        );
+
+        $this->view('frontend/agency/payments', [
+            'agency' => $agency,
+            'payments' => $payments,
+            'pageTitle' => 'Pagamentos',
+        ], 'app');
+    }
+
+    public function agencySettings(Request $request, Response $response): void
+    {
+        $agency = $this->requireAgency();
+        if (!$agency) return;
+
+        $this->view('frontend/agency/settings', [
+            'agency' => $agency,
+            'pageTitle' => 'Configurações',
+        ], 'app');
+    }
+
+    public function agencySettingsUpdate(Request $request, Response $response): void
+    {
+        $agency = $this->requireAgency();
+        if (!$agency) return;
+
+        $data = $request->only([
+            'trade_name', 'contact_name', 'phone', 'email',
+            'city', 'country', 'bank_info',
+        ]);
+
+        // Valida e-mail (server-side; o type="email" do form é só client-side)
+        $email = trim((string)($data['email'] ?? ''));
+        if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $this->flash('error', 'Informe um e-mail válido.');
+            $this->redirect('/painel-agencia/configuracoes');
+            return;
+        }
+
+        $this->db->update('agencies', [
+            'trade_name' => trim((string)($data['trade_name'] ?? '')) ?: null,
+            'contact_name' => trim((string)($data['contact_name'] ?? '')) ?: null,
+            'phone' => trim((string)($data['phone'] ?? '')) ?: null,
+            'email' => trim((string)($data['email'] ?? '')) ?: null,
+            'city' => trim((string)($data['city'] ?? '')) ?: null,
+            'country' => trim((string)($data['country'] ?? '')) ?: null,
+            'bank_info' => trim((string)($data['bank_info'] ?? '')) ?: null,
+        ], 'id = ?', [(int) $agency['id']]);
+
+        $this->flash('success', 'Dados atualizados com sucesso!');
+        $this->redirect('/painel-agencia/configuracoes');
+    }
+
     public function affiliateLinks(Request $request, Response $response): void
     {
         $user = $this->currentUser();

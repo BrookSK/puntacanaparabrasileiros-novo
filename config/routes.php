@@ -93,6 +93,11 @@ $router->group(['prefix' => '/painel-afiliado', 'middleware' => [AuthMiddleware:
 // Painel da Agência (autenticado)
 $router->group(['prefix' => '/painel-agencia', 'middleware' => [AuthMiddleware::class]], function ($router) {
     $router->get('', [AccountController::class, 'agencyDashboard'], [], 'agency.dashboard');
+    $router->get('/link', [AccountController::class, 'agencyLinks'], [], 'agency.links');
+    $router->get('/comissoes', [AccountController::class, 'agencyCommissions'], [], 'agency.commissions');
+    $router->get('/pagamentos', [AccountController::class, 'agencyPayments'], [], 'agency.payments');
+    $router->get('/configuracoes', [AccountController::class, 'agencySettings'], [], 'agency.settings');
+    $router->post('/configuracoes', [AccountController::class, 'agencySettingsUpdate'], [CsrfMiddleware::class], 'agency.settings.update');
 });
 $router->get('/blog', [BlogController::class, 'index'], [], 'blog.index');
 $router->get('/blog/categoria/{slug}', [BlogController::class, 'category'], [], 'blog.category');

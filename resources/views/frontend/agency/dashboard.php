@@ -56,7 +56,7 @@
                 </div>
 
                 <!-- Link de indicação -->
-                <div class="aff-card" id="link">
+                <div class="aff-card">
                     <h3 class="aff-card-title">Seu link de indicação</h3>
                     <p class="aff-card-desc">Compartilhe este link com seus clientes. As vendas feitas por ele geram comissão para a sua agência.</p>
                     <div class="aff-link-copy-box">
@@ -69,9 +69,9 @@
                     <p style="font-size:12px;color:#94a3b8;margin:10px 0 0;">Código da agência: <strong><?= e($agency['ref_code']) ?></strong></p>
                 </div>
 
-                <!-- Comissões -->
-                <div class="aff-card" id="comissoes">
-                    <h3 class="aff-card-title">Histórico de Comissões</h3>
+                <!-- Últimas comissões -->
+                <div class="aff-card">
+                    <h3 class="aff-card-title">Últimas Comissões</h3>
                     <div class="aff-table-wrap" style="margin-top:14px;">
                         <table class="aff-table">
                             <thead>
