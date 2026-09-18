@@ -824,10 +824,30 @@ class AccountController extends Controller
         $agency = $this->requireAgency();
         if (!$agency) return;
 
-        // Agência não possui rastreamento de visitas por link (diferente do afiliado).
-        // A tela existe para paridade com o painel do afiliado.
+        $agencyId = (int) $agency['id'];
+        $page = max(1, (int) $request->query('page', '1'));
+        $perPage = 10;
+        $offset = ($page - 1) * $perPage;
+
+        $total = 0;
+        $visits = [];
+        try {
+            $total = (int) $this->db->fetchColumn("SELECT COUNT(*) FROM agency_visits WHERE agency_id = ?", [$agencyId]);
+            $visits = $this->db->fetchAll(
+                "SELECT * FROM agency_visits WHERE agency_id = ? ORDER BY created_at DESC LIMIT {$perPage} OFFSET {$offset}",
+                [$agencyId]
+            );
+        } catch (\Throwable $e) {
+            // Tabela agency_visits pode não existir ainda — trata como zero visitas
+        }
+        $totalPages = (int) ceil($total / $perPage);
+
         $this->view('frontend/agency/visits', [
             'agency' => $agency,
+            'visits' => $visits,
+            'total' => $total,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
             'pageTitle' => 'Visitas',
         ], 'app');
     }

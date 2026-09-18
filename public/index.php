@@ -152,11 +152,38 @@ if ($refParam && ctype_digit($refParam)) {
 
 // Rastreamento de link de AGÊNCIA PARCEIRA (?ag=CODIGO) — seta cookie de atribuição
 $agParam = $_GET['ag'] ?? null;
+$agCookie = $_COOKIE['pcb_ag'] ?? null;
 if ($agParam) {
+    // Primeira visita com ?ag= — seta o cookie de atribuição
     try {
         (new \App\Services\AgencyService())->trackVisit((string) $agParam);
     } catch (\Throwable $e) {
         // Nunca derrubar a página por erro de rastreamento de agência
+    }
+}
+
+// Registrar visita de página enquanto o cookie de agência estiver ativo
+// (mesma lógica do afiliado). Ignora assets, API, admin e o próprio painel.
+$agCode = $agParam ?: $agCookie;
+if ($agCode) {
+    $agUri = $_SERVER['REQUEST_URI'] ?? '/';
+    if (!str_starts_with($agUri, '/assets/') && !str_starts_with($agUri, '/api/')
+        && !str_starts_with($agUri, '/admin') && !str_starts_with($agUri, '/painel-agencia')) {
+        try {
+            $agencyService = new \App\Services\AgencyService();
+            $agency = $agencyService->getActiveAgency();
+            if ($agency) {
+                $agencyService->logVisit(
+                    (int) $agency['id'],
+                    $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0',
+                    $_SERVER['HTTP_REFERER'] ?? null,
+                    $agUri,
+                    $_SERVER['HTTP_USER_AGENT'] ?? null
+                );
+            }
+        } catch (\Throwable $e) {
+            // Nunca derrubar a página por erro de rastreamento de agência
+        }
     }
 }
 

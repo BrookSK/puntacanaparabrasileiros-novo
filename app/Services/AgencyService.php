@@ -59,6 +59,46 @@ class AgencyService
     }
 
     /**
+     * Registra uma visita de página atribuída a uma agência (tabela agency_visits).
+     * Evita duplicar a mesma página + IP no último minuto.
+     */
+    public function logVisit(int $agencyId, string $ip, ?string $referrer, string $pageUrl, ?string $userAgent): void
+    {
+        try {
+            $recent = $this->db->fetchColumn(
+                "SELECT id FROM agency_visits
+                 WHERE agency_id = ? AND page_url = ? AND ip_address = ?
+                 AND created_at > DATE_SUB(NOW(), INTERVAL 1 MINUTE) LIMIT 1",
+                [$agencyId, $pageUrl, $ip]
+            );
+            if ($recent) return;
+
+            $this->db->insert('agency_visits', [
+                'agency_id' => $agencyId,
+                'ip_address' => $ip,
+                'referrer' => $referrer,
+                'page_url' => $pageUrl,
+                'user_agent' => $userAgent,
+            ]);
+        } catch (\Throwable $e) {
+            // Tabela pode não existir ainda em algum ambiente — nunca derrubar a página
+            error_log('[AgencyService] logVisit: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Total de visitas registradas para uma agência.
+     */
+    public function countVisits(int $agencyId): int
+    {
+        try {
+            return (int) $this->db->fetchColumn("SELECT COUNT(*) FROM agency_visits WHERE agency_id = ?", [$agencyId]);
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    /**
      * Cria a comissão da agência após a venda confirmada.
      */
     public function createCommission(int $agencyId, int $bookingId, float $saleAmount): ?int
