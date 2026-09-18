@@ -113,6 +113,10 @@
     </div>
 </section>
 
+<style>
+/* Compensa o cabeçalho fixo ao rolar até uma seção via link do menu */
+#link, #comissoes { scroll-margin-top: 100px; }
+</style>
 <script>
 function copyRefLink() {
     var input = document.getElementById('refLink');
@@ -125,4 +129,22 @@ function copyRefLink() {
     btn.textContent = 'Copiado!';
     setTimeout(function(){ btn.classList.remove('btn-copied'); btn.innerHTML = original; }, 1800);
 }
+
+// Links do menu lateral: rola suave até a seção e destaca o item clicado
+document.addEventListener('DOMContentLoaded', function () {
+    var navLinks = document.querySelectorAll('.aff-nav-link[href*="#"]');
+    navLinks.forEach(function (link) {
+        link.addEventListener('click', function (e) {
+            var hash = link.getAttribute('href').split('#')[1];
+            if (!hash) return;
+            var target = document.getElementById(hash);
+            if (!target) return;
+            e.preventDefault();
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            // Destaca o item ativo
+            document.querySelectorAll('.aff-nav-link').forEach(function (l) { l.classList.remove('active'); });
+            link.classList.add('active');
+        });
+    });
+});
 </script>
