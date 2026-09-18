@@ -128,6 +128,59 @@ class SettingsController extends Controller
         $this->redirect('/admin/configuracoes');
     }
 
+    /**
+     * Limpa o cache para todos os usuários:
+     *  - Incrementa a versão global dos assets (força o navegador de todos os
+     *    visitantes a baixar CSS/JS novos).
+     *  - Esvazia o OPcache do PHP (código compilado no servidor).
+     *  - Remove os arquivos de cache em storage/cache.
+     *  - Recarrega as configurações em memória.
+     * POST /admin/configuracoes/limpar-cache — só superadmin.
+     */
+    public function clearCache(Request $request, Response $response): void
+    {
+        $user = $this->currentUser();
+        if (($user['role'] ?? '') !== 'superadmin') {
+            $this->flash('error', 'Acesso negado.');
+            $this->redirect('/admin/configuracoes');
+            return;
+        }
+
+        $done = [];
+
+        // 1) Versão dos assets: incrementa para invalidar CSS/JS no cache dos navegadores.
+        $current = (int) $this->settingModel->get('asset_version', '1');
+        $next = $current + 1;
+        $this->settingModel->setWithGroup('asset_version', (string) $next, 'general');
+        $done[] = 'assets do site (visitantes)';
+
+        // 2) OPcache do PHP (código compilado). Requer a extensão habilitada.
+        if (function_exists('opcache_reset')) {
+            @opcache_reset();
+            $done[] = 'código PHP (OPcache)';
+        }
+
+        // 3) Arquivos de cache em storage/cache (ex.: feed do Instagram).
+        $cacheDir = BASE_PATH . '/storage/cache';
+        $removed = 0;
+        if (is_dir($cacheDir)) {
+            foreach (glob($cacheDir . '/*') ?: [] as $file) {
+                if (is_file($file) && @unlink($file)) {
+                    $removed++;
+                }
+            }
+        }
+        if ($removed > 0) {
+            $done[] = $removed . ' arquivo(s) temporário(s)';
+        }
+
+        // 4) Recarrega as settings em memória (inclui a nova asset_version).
+        $this->app->reloadSettings();
+
+        $this->flash('success', 'Cache limpo com sucesso: ' . implode(', ', $done) . '. Os visitantes vão receber a versão mais recente do site.');
+        $this->redirect('/admin/configuracoes');
+    }
+
     public function testEmail(Request $request, Response $response): void
     {
         $user = $this->currentUser();

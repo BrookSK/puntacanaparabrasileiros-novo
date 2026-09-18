@@ -30,8 +30,8 @@
     <link href="https://fonts.googleapis.com/css2?family=<?= e(setting('font_primary', 'Poppins')) ?>:wght@300;400;500;600;700;800&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- CSS -->
-    <link rel="stylesheet" href="<?= asset('css/app.css') ?>?v=8.0">
-    <link rel="stylesheet" href="<?= asset('css/phone-country.css') ?>?v=1.3">
+    <link rel="stylesheet" href="<?= asset('css/app.css') ?>">
+    <link rel="stylesheet" href="<?= asset('css/phone-country.css') ?>">
 
     <!-- Custom CSS from settings -->
     <?php if (setting('custom_css')): ?>
@@ -108,8 +108,8 @@
     </a>
 
     <!-- JavaScript -->
-    <script src="<?= asset('js/app.js') ?>?v=8.1"></script>
-    <script src="<?= asset('js/phone-country.js') ?>?v=1.3"></script>
+    <script src="<?= asset('js/app.js') ?>"></script>
+    <script src="<?= asset('js/phone-country.js') ?>"></script>
 
     <!-- Google Translate -->
     <div id="google_translate_element" style="display:none;"></div>

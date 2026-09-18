@@ -1,3 +1,17 @@
+<!-- Barra de ações no topo direito: Limpar Cache -->
+<div class="settings-actions-bar">
+    <form method="POST" action="/admin/configuracoes/limpar-cache" id="clearCacheForm" class="settings-clear-cache">
+        <?= csrf_field() ?>
+        <button type="submit" class="btn btn-outline btn-clear-cache" onclick="return confirm('Isso vai limpar o cache do site para todos os visitantes (CSS/JS, código PHP e arquivos temporários). Os clientes vão receber a versão mais recente. Deseja continuar?');">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/>
+                <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+            </svg>
+            Limpar Cache
+        </button>
+    </form>
+</div>
+
 <form method="POST" action="/admin/configuracoes" enctype="multipart/form-data">
     <?= csrf_field() ?>
 

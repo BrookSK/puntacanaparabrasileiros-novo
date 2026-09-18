@@ -310,6 +310,7 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/configuracoes', [AdminSettingsController::class, 'index'], [], 'admin.settings.index');
     $router->post('/configuracoes', [AdminSettingsController::class, 'update'], [CsrfMiddleware::class], 'admin.settings.update');
     $router->post('/configuracoes/email-teste', [AdminSettingsController::class, 'testEmail'], [CsrfMiddleware::class], 'admin.settings.test_email');
+    $router->post('/configuracoes/limpar-cache', [AdminSettingsController::class, 'clearCache'], [CsrfMiddleware::class], 'admin.settings.clear_cache');
     $router->post('/aurora/test', [AdminSettingsController::class, 'testAurora'], [CsrfMiddleware::class], 'admin.aurora.test');
     $router->post('/aurora/diagnose', [AdminSettingsController::class, 'diagnoseAurora'], [CsrfMiddleware::class], 'admin.aurora.diagnose');
     $router->get('/aurora/diagnostico-audio', [AdminSettingsController::class, 'diagnoseAudioWeb'], [], 'admin.aurora.audio_diag');
