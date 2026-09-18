@@ -31,6 +31,120 @@ function asset(string $path): string
 }
 
 /**
+ * Retorna a URL absoluta atual (sem query string) — usada para canonical/OG.
+ */
+function current_url(bool $withQuery = false): string
+{
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || ($_SERVER['SERVER_PORT'] ?? '') == 443 ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $uri = $_SERVER['REQUEST_URI'] ?? '/';
+    if (!$withQuery) {
+        $uri = strtok($uri, '?');
+    }
+    return $scheme . '://' . $host . $uri;
+}
+
+/**
+ * Retorna a URL base do site (a partir da setting site_url, com fallback no host atual).
+ */
+function site_base_url(): string
+{
+    $url = (string) setting('site_url', '');
+    if ($url !== '') return rtrim($url, '/');
+    $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    return $scheme . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+}
+
+/**
+ * Gera todas as meta tags de SEO do <head>: description, canonical, robots,
+ * Open Graph e Twitter Cards. Consome as variáveis já passadas pelas views
+ * (pageTitle, metaDescription) e aceita overrides opcionais.
+ *
+ * @param array $opts title, description, image, type (website|article|product), noindex (bool)
+ */
+function seo_meta_tags(array $opts = []): string
+{
+    $siteName = (string) setting('site_name', 'Punta Cana para Brasileiros');
+    $title = trim((string) ($opts['title'] ?? $siteName));
+    $description = trim((string) ($opts['description'] ?? setting('meta_description', '')));
+    $type = $opts['type'] ?? 'website';
+    $canonical = $opts['canonical'] ?? current_url();
+    $noindex = !empty($opts['noindex']);
+
+    // Imagem: usa a informada, senão a logo/imagem padrão do site
+    $image = trim((string) ($opts['image'] ?? ''));
+    if ($image !== '' && !preg_match('#^https?://#', $image)) {
+        $image = site_base_url() . '/' . ltrim($image, '/');
+    }
+    if ($image === '') {
+        $image = site_base_url() . '/assets/images/layout/PUNTA-CANA-1.png';
+    }
+
+    // Se o chamador (ex.: layout) já montou o título completo, usa verbatim
+    // para não duplicar a marca no og:title/twitter:title.
+    if (!empty($opts['fullTitle'])) {
+        $fullTitle = trim((string) $opts['fullTitle']);
+    } else {
+        $fullTitle = $title !== $siteName ? ($title . ' | ' . $siteName) : $siteName;
+    }
+
+    $out = [];
+    $out[] = '<meta name="description" content="' . e($description) . '">';
+    $out[] = '<link rel="canonical" href="' . e($canonical) . '">';
+    $out[] = $noindex
+        ? '<meta name="robots" content="noindex, nofollow">'
+        : '<meta name="robots" content="index, follow, max-image-preview:large">';
+
+    // Open Graph
+    $out[] = '<meta property="og:site_name" content="' . e($siteName) . '">';
+    $out[] = '<meta property="og:type" content="' . e($type) . '">';
+    $out[] = '<meta property="og:title" content="' . e($fullTitle) . '">';
+    $out[] = '<meta property="og:description" content="' . e($description) . '">';
+    $out[] = '<meta property="og:url" content="' . e($canonical) . '">';
+    $out[] = '<meta property="og:image" content="' . e($image) . '">';
+    $out[] = '<meta property="og:locale" content="pt_BR">';
+
+    // Twitter Cards
+    $out[] = '<meta name="twitter:card" content="summary_large_image">';
+    $out[] = '<meta name="twitter:title" content="' . e($fullTitle) . '">';
+    $out[] = '<meta name="twitter:description" content="' . e($description) . '">';
+    $out[] = '<meta name="twitter:image" content="' . e($image) . '">';
+
+    return implode("\n    ", $out);
+}
+
+/**
+ * Renderiza um bloco JSON-LD (Schema.org) a partir de um array.
+ */
+function json_ld(array $data): string
+{
+    return '<script type="application/ld+json">'
+        . json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+        . '</script>';
+}
+
+/**
+ * JSON-LD da organização (dados da empresa) — usado no site inteiro.
+ */
+function json_ld_organization(): string
+{
+    $base = site_base_url();
+    return json_ld([
+        '@context' => 'https://schema.org',
+        '@type' => 'TravelAgency',
+        'name' => setting('site_name', 'Punta Cana para Brasileiros'),
+        'url' => $base,
+        'logo' => $base . '/assets/images/layout/PUNTA-CANA-1.png',
+        'image' => $base . '/assets/images/layout/PUNTA-CANA-1.png',
+        'telephone' => '+1 829 458 2170',
+        'areaServed' => 'Punta Cana, República Dominicana',
+        'sameAs' => [
+            'https://www.instagram.com/puntacanaparabrasileiros',
+        ],
+    ]);
+}
+
+/**
  * Escapa HTML (previne XSS).
  */
 function e(?string $value): string

@@ -46,6 +46,11 @@ use App\Middleware\CsrfMiddleware;
 // FRONTEND - Páginas Públicas
 // ============================================================
 $router->get('/', [HomeController::class, 'index'], [], 'home');
+
+// SEO: sitemap e robots
+$router->get('/sitemap.xml', [\App\Controllers\Frontend\SeoController::class, 'sitemap'], [], 'seo.sitemap');
+$router->get('/robots.txt', [\App\Controllers\Frontend\SeoController::class, 'robots'], [], 'seo.robots');
+
 $router->get('/passeios', [TripsController::class, 'index'], [], 'trips.index');
 $router->get('/comparar-passeios', [TripsController::class, 'compare'], [], 'trips.compare');
 $router->get('/passeios/categoria/{slug}', [TripsController::class, 'category'], [], 'trips.category');

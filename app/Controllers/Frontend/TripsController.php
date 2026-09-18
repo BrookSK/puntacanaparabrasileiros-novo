@@ -361,6 +361,58 @@ class TripsController extends Controller
             $compositionPackages = $compositionModel->getByTrip($tripId);
         }
 
+        // ── Dados estruturados (JSON-LD) para o Google ──
+        $base = site_base_url();
+        $minPrice = 0.0;
+        foreach ($packages as $pkg) {
+            $bp = (float) ($pkg['base_price'] ?? 0);
+            if ($bp > 0 && ($minPrice === 0.0 || $bp < $minPrice)) $minPrice = $bp;
+        }
+        $tripImage = !empty($trip['featured_image'])
+            ? (preg_match('#^https?://#', $trip['featured_image']) ? $trip['featured_image'] : $base . $trip['featured_image'])
+            : $base . '/assets/images/layout/PUNTA-CANA-1.png';
+
+        $productLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => $trip['title'],
+            'description' => $trip['meta_description'] ?: ($trip['short_description'] ?: ''),
+            'image' => $tripImage,
+            'brand' => ['@type' => 'Brand', 'name' => setting('site_name', 'Punta Cana para Brasileiros')],
+            'url' => $base . '/passeios/' . $trip['slug'],
+        ];
+        if ($minPrice > 0) {
+            $productLd['offers'] = [
+                '@type' => 'Offer',
+                'price' => number_format($minPrice, 2, '.', ''),
+                'priceCurrency' => 'USD',
+                'availability' => 'https://schema.org/InStock',
+                'url' => $base . '/passeios/' . $trip['slug'],
+            ];
+        }
+        $reviewCount = is_array($reviews) ? count($reviews) : 0;
+        if ($rating > 0 && $reviewCount > 0) {
+            $productLd['aggregateRating'] = [
+                '@type' => 'AggregateRating',
+                'ratingValue' => (string) $rating,
+                'reviewCount' => (string) $reviewCount,
+                'bestRating' => '5',
+                'worstRating' => '1',
+            ];
+        }
+
+        $breadcrumbLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'BreadcrumbList',
+            'itemListElement' => [
+                ['@type' => 'ListItem', 'position' => 1, 'name' => 'Início', 'item' => $base . '/'],
+                ['@type' => 'ListItem', 'position' => 2, 'name' => 'Passeios', 'item' => $base . '/passeios'],
+                ['@type' => 'ListItem', 'position' => 3, 'name' => $trip['title'], 'item' => $base . '/passeios/' . $trip['slug']],
+            ],
+        ];
+
+        $jsonLd = json_ld($productLd) . "\n    " . json_ld($breadcrumbLd);
+
         $this->view('frontend/trips/show', [
             'trip' => $trip,
             'packages' => $packages,
@@ -379,6 +431,9 @@ class TripsController extends Controller
             'compositionPackages' => $compositionPackages,
             'pageTitle' => $trip['meta_title'] ?: $trip['title'],
             'metaDescription' => $trip['meta_description'] ?: $trip['short_description'],
+            'ogImage' => $tripImage,
+            'ogType' => 'product',
+            'jsonLd' => $jsonLd,
         ], 'app');
     }
 }

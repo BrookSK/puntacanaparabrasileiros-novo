@@ -3,8 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="<?= e($metaDescription ?? setting('meta_description', '')) ?>">
-    <title><?= e($pageTitle ?? setting('site_name', 'Punta Cana para Brasileiros')) ?> - <?= e(setting('site_name', '')) ?></title>
+    <?php
+        $seoSiteName = setting('site_name', 'Punta Cana para Brasileiros');
+        $seoTitle = $pageTitle ?? $seoSiteName;
+        // Título final: "Página | Nome do Site" (sem duplicar a marca se já vier no título)
+        $seoFullTitle = (mb_stripos($seoTitle, (string)$seoSiteName) !== false)
+            ? $seoTitle
+            : $seoTitle . ' | ' . $seoSiteName;
+    ?>
+    <title><?= e($seoFullTitle) ?></title>
+
+    <!-- SEO: description, canonical, Open Graph, Twitter Cards, robots -->
+    <?= seo_meta_tags([
+        'fullTitle' => $seoFullTitle,
+        'description' => $metaDescription ?? null,
+        'image' => $ogImage ?? null,
+        'type' => $ogType ?? 'website',
+        'noindex' => $noindex ?? false,
+    ]) ?>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/favicon.ico">
@@ -22,8 +38,28 @@
     <style><?= setting('custom_css') ?></style>
     <?php endif; ?>
 
+    <!-- Google Analytics (injetado automaticamente a partir da configuração) -->
+    <?php $gaId = trim((string) setting('google_analytics_id', '')); ?>
+    <?php if ($gaId !== ''): ?>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=<?= e($gaId) ?>"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', '<?= e($gaId) ?>');
+    </script>
+    <?php endif; ?>
+
     <!-- Head Scripts from settings -->
     <?= setting('head_scripts', '') ?>
+
+    <!-- Dados estruturados: Organização (global) -->
+    <?= json_ld_organization() ?>
+
+    <!-- Dados estruturados específicos da página (JSON-LD) -->
+    <?php if (!empty($jsonLd)): ?>
+    <?= $jsonLd ?>
+    <?php endif; ?>
 
     <!-- CSRF Token for AJAX -->
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
