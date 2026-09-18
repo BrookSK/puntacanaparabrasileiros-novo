@@ -65,9 +65,20 @@
                         <?php endif; ?>
                     </div>
 
+                    <!-- Ponto de Encontro -->
+                    <?php if (!empty($trip['meeting_point'])): ?>
+                    <div class="trip-section">
+                        <h3>Ponto de Encontro</h3>
+                        <div class="trip-body-content">
+                            <?= nl2br(e($trip['meeting_point'])) ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Notas Importantes / Avisos -->
                     <?php if (!empty($trip['important_notes'])): ?>
                     <div class="trip-section">
+                        <h3>Notas Importantes</h3>
                         <div class="trip-body-content">
                             <?= nl2br(e($trip['important_notes'])) ?>
                         </div>
