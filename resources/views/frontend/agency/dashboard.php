@@ -116,68 +116,11 @@
                     </div>
                 </div>
 
-                <!-- Link de indicação -->
-                <div class="aff-card">
-                    <h3 class="aff-card-title">Seu link de indicação</h3>
-                    <p class="aff-card-desc">Compartilhe este link com seus clientes. As vendas feitas por ele geram comissão para a sua agência.</p>
-                    <div class="aff-link-copy-box">
-                        <input type="text" id="refLink" class="aff-link-input" value="<?= e($refLink) ?>" readonly>
-                        <button type="button" class="btn btn-primary aff-copy-btn" id="copyBtn" onclick="copyRefLink()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                            Copiar link
-                        </button>
-                    </div>
-                    <p style="font-size:12px;color:#94a3b8;margin:10px 0 0;">Código da agência: <strong><?= e($agency['ref_code']) ?></strong></p>
-                </div>
-
-                <!-- Últimas comissões -->
-                <div class="aff-card">
-                    <h3 class="aff-card-title">Últimas Comissões</h3>
-                    <div class="aff-table-wrap" style="margin-top:14px;">
-                        <table class="aff-table">
-                            <thead>
-                                <tr>
-                                    <th>Reserva</th>
-                                    <th>Valor da venda</th>
-                                    <th>Comissão</th>
-                                    <th>Status</th>
-                                    <th>Data</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (empty($commissions)): ?>
-                                <tr><td colspan="5" class="aff-table-empty">Nenhuma comissão ainda. Compartilhe seu link para começar!</td></tr>
-                                <?php else: ?>
-                                <?php foreach ($commissions as $c): ?>
-                                <tr>
-                                    <td><?= e($c['booking_number'] ?? '—') ?></td>
-                                    <td><?= money((float)$c['base_amount']) ?></td>
-                                    <td class="aff-td-amount" style="color:#16a34a;"><?= money((float)$c['amount']) ?></td>
-                                    <td>
-                                        <?php
-                                            $st = $c['status'] ?? 'pending';
-                                            $map = ['pending' => ['Pendente', 'badge-warning'], 'paid' => ['Pago', 'badge-success'], 'cancelled' => ['Cancelado', 'badge-secondary']];
-                                            [$lbl, $cls] = $map[$st] ?? [$st, 'badge-info'];
-                                        ?>
-                                        <span class="badge <?= $cls ?>"><?= e($lbl) ?></span>
-                                    </td>
-                                    <td style="color:#636e72;"><?= date('d/m/Y', strtotime($c['created_at'])) ?></td>
-                                </tr>
-                                <?php endforeach; ?>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
             </main>
         </div>
     </div>
 </section>
 
-<style>
-/* Compensa o cabeçalho fixo ao rolar até uma seção via link do menu */
-#link, #comissoes { scroll-margin-top: 100px; }
-</style>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -202,36 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             interaction: { intersect: false, mode: 'index' }
         }
-    });
-});
-
-function copyRefLink() {
-    var input = document.getElementById('refLink');
-    var btn = document.getElementById('copyBtn');
-    input.select();
-    input.setSelectionRange(0, 99999);
-    try { navigator.clipboard.writeText(input.value); } catch (e) { document.execCommand('copy'); }
-    var original = btn.innerHTML;
-    btn.classList.add('btn-copied');
-    btn.textContent = 'Copiado!';
-    setTimeout(function(){ btn.classList.remove('btn-copied'); btn.innerHTML = original; }, 1800);
-}
-
-// Links do menu lateral: rola suave até a seção e destaca o item clicado
-document.addEventListener('DOMContentLoaded', function () {
-    var navLinks = document.querySelectorAll('.aff-nav-link[href*="#"]');
-    navLinks.forEach(function (link) {
-        link.addEventListener('click', function (e) {
-            var hash = link.getAttribute('href').split('#')[1];
-            if (!hash) return;
-            var target = document.getElementById(hash);
-            if (!target) return;
-            e.preventDefault();
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            // Destaca o item ativo
-            document.querySelectorAll('.aff-nav-link').forEach(function (l) { l.classList.remove('active'); });
-            link.classList.add('active');
-        });
     });
 });
 </script>
