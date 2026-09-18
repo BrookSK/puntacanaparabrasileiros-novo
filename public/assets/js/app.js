@@ -1527,6 +1527,10 @@
                 </div>`;
             }).join('');
 
+            // Acompanhante DENTRO do bloco de Viajantes (junto de Adulto/Criança/Infantil),
+            // para o cliente não perder essa opção por estar escondida em outro accordion.
+            travelersHtml += getCompanionHtml();
+
             travelersHtml += `</div></div>`;
 
             // Accordion: Composição (fechado por padrão, abre quando seleciona viajantes)
@@ -1539,20 +1543,6 @@
                     <div id="compositionOptionsContainer"></div>
                 </div>
             </div>`;
-
-            // Accordion: Acompanhante
-            const companionAccHtml = getCompanionHtml();
-            if (companionAccHtml) {
-                travelersHtml += `<div class="bm-accordion">
-                    <div class="bm-accordion-header" onclick="toggleAccordion(this)">
-                        <span>${(typeof COMPANION_CONFIG !== 'undefined' && COMPANION_CONFIG.label) || 'Acompanhante'}</span>
-                        <svg class="bm-accordion-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
-                    </div>
-                    <div class="bm-accordion-body" style="display:none;">
-                        ${companionAccHtml}
-                    </div>
-                </div>`;
-            }
 
             container.innerHTML = travelersHtml;
             updateCompositionOptions();
