@@ -661,12 +661,48 @@ class AccountController extends Controller
         // Link de indicação
         $refLink = (new \App\Services\AgencyService())->generateLink($agency['ref_code']);
 
+        // Gráfico dos últimos 30 dias: nº de comissões e ganhos por dia
+        // (agência não tem rastreamento de visitas, então o gráfico é
+        //  comissões x ganhos, sem a série de visitas do afiliado)
+        $byDay = $this->db->fetchAll(
+            "SELECT DATE(created_at) as day, COUNT(*) as total, SUM(amount) as earnings
+             FROM agency_commissions
+             WHERE agency_id = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+             GROUP BY DATE(created_at)",
+            [$agencyId]
+        );
+        $commissionsMap = [];
+        $earningsMap = [];
+        foreach ($byDay as $row) {
+            $commissionsMap[$row['day']] = (int) $row['total'];
+            $earningsMap[$row['day']] = (float) $row['earnings'];
+        }
+        $chartLabels = [];
+        $chartCommissions = [];
+        $chartEarnings = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $date = date('Y-m-d', strtotime("-{$i} days"));
+            $chartLabels[] = date('d/m', strtotime($date));
+            $chartCommissions[] = $commissionsMap[$date] ?? 0;
+            $chartEarnings[] = $earningsMap[$date] ?? 0;
+        }
+
+        // Totais "todos os tempos"
+        $totalCommissionsCount = (int) $this->db->fetchColumn(
+            "SELECT COUNT(*) FROM agency_commissions WHERE agency_id = ?",
+            [$agencyId]
+        );
+
         $this->view('frontend/agency/dashboard', [
             'agency' => $agency,
             'user' => $user,
             'commissions' => $commissions,
             'pendingTotal' => $pendingTotal,
             'refLink' => $refLink,
+            'chartLabels' => $chartLabels,
+            'chartCommissions' => $chartCommissions,
+            'chartEarnings' => $chartEarnings,
+            'totalCommissionsCount' => $totalCommissionsCount,
             'pageTitle' => 'Painel da Agência',
         ], 'app');
     }

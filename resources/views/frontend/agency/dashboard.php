@@ -55,6 +55,67 @@
                     </div>
                 </div>
 
+                <!-- Gráfico de Desempenho -->
+                <div class="aff-chart-card">
+                    <div class="aff-chart-header">
+                        <h3 class="aff-card-title">Desempenho</h3>
+                        <div class="aff-chart-legend">
+                            <span class="aff-legend-item"><span class="aff-legend-dot" style="background:#f59e0b"></span>Comissões</span>
+                            <span class="aff-legend-item"><span class="aff-legend-dot" style="background:#10b981"></span>Ganhos</span>
+                        </div>
+                    </div>
+                    <div class="aff-chart-body">
+                        <canvas id="agencyChart" height="220"></canvas>
+                    </div>
+                </div>
+
+                <!-- Todos os tempos + Detalhes do Programa -->
+                <div class="aff-bottom-grid">
+                    <div class="aff-card">
+                        <h3 class="aff-card-title">Todos os tempos</h3>
+                        <div class="aff-mini-stats">
+                            <div class="aff-mini-stat">
+                                <span class="aff-mini-stat-value"><?= (int)($totalCommissionsCount ?? 0) ?></span>
+                                <span class="aff-mini-stat-label">Comissões</span>
+                            </div>
+                            <div class="aff-mini-stat">
+                                <span class="aff-mini-stat-value"><?= money((float)($agency['total_sales'] ?? 0)) ?></span>
+                                <span class="aff-mini-stat-label">Total em Vendas</span>
+                            </div>
+                            <div class="aff-mini-stat">
+                                <span class="aff-mini-stat-value"><?= money((float)($agency['total_paid'] ?? 0)) ?></span>
+                                <span class="aff-mini-stat-label">Ganhos Pagos</span>
+                            </div>
+                            <div class="aff-mini-stat">
+                                <span class="aff-mini-stat-value"><?= money((float)($agency['total_commission'] ?? 0) - (float)($agency['total_paid'] ?? 0)) ?></span>
+                                <span class="aff-mini-stat-label">Não-Pagos</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="aff-card">
+                        <h3 class="aff-card-title">Detalhes da Parceria</h3>
+                        <div class="aff-program-details">
+                            <div class="aff-program-item">
+                                <span class="aff-program-label">Taxa de Comissão</span>
+                                <span class="aff-program-value"><?= rtrim(rtrim(number_format((float)($agency['commission_rate'] ?? 0), 2), '0'), '.') ?>%</span>
+                            </div>
+                            <div class="aff-program-item">
+                                <span class="aff-program-label">Código da Agência</span>
+                                <span class="aff-program-value"><?= e($agency['ref_code']) ?></span>
+                            </div>
+                            <div class="aff-program-item">
+                                <span class="aff-program-label">Método de Pagamento</span>
+                                <span class="aff-program-value">PIX / Transferência</span>
+                            </div>
+                            <div class="aff-program-item">
+                                <span class="aff-program-label">Status</span>
+                                <span class="badge badge-success"><?= ($agency['status'] ?? '') === 'active' ? 'Ativa' : 'Inativa' ?></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Link de indicação -->
                 <div class="aff-card">
                     <h3 class="aff-card-title">Seu link de indicação</h3>
@@ -117,7 +178,33 @@
 /* Compensa o cabeçalho fixo ao rolar até uma seção via link do menu */
 #link, #comissoes { scroll-margin-top: 100px; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('agencyChart');
+    if (!ctx || typeof Chart === 'undefined') return;
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: <?= json_encode($chartLabels ?? []) ?>,
+            datasets: [
+                { label: 'Comissões', data: <?= json_encode($chartCommissions ?? array_fill(0, 30, 0)) ?>, borderColor: '#f59e0b', backgroundColor: 'rgba(245,158,11,0.05)', tension: 0.4, fill: true },
+                { label: 'Ganhos', data: <?= json_encode($chartEarnings ?? array_fill(0, 30, 0)) ?>, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.05)', tension: 0.4, fill: true }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { size: 10 }, maxTicksLimit: 8 } },
+                y: { beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { font: { size: 11 } } }
+            },
+            interaction: { intersect: false, mode: 'index' }
+        }
+    });
+});
+
 function copyRefLink() {
     var input = document.getElementById('refLink');
     var btn = document.getElementById('copyBtn');
