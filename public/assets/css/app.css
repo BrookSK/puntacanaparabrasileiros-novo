@@ -5812,6 +5812,37 @@ img { max-width: 100%; height: auto; }
     font-size: 13px;
     color: var(--gray);
 }
+/* Grid de preços por categoria (Adulto/Criança/Infantil) — igual ao site antigo */
+.trip-price-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px 12px;
+    margin-bottom: 18px;
+    text-align: left;
+}
+.trip-price-cat {
+    padding: 2px 4px;
+}
+.trip-price-cat .price-from {
+    text-align: left;
+}
+.trip-price-cat .trip-price-value {
+    display: block;
+    font-size: 26px;
+    line-height: 1.15;
+}
+.trip-price-cat .price-per {
+    display: block;
+    margin-top: 2px;
+}
+.trip-price-old {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray);
+    text-decoration: line-through;
+    margin-right: 4px;
+}
 .btn-verificar {
     display: block;
     width: 100%;
@@ -6534,6 +6565,33 @@ img { max-width: 100%; height: auto; }
 /* Hotel Selection Step */
 .bm-hotel-section { margin-bottom: 20px; }
 .bm-section-title { font-size: 18px; font-weight: 700; color: var(--dark); margin: 0 0 6px; font-family: var(--font); }
+.bm-section-optional,
+.bm-tab-optional { font-size: 11px; font-weight: 500; color: var(--gray); }
+/* Hotel selecionado (colapsado) */
+.bm-hotel-selected {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1.5px solid var(--text-green, #1B6F00);
+    border-radius: 12px;
+    background: #f4fbf1;
+}
+.bm-hotel-selected-info { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.bm-hotel-selected-icon { flex-shrink: 0; color: var(--text-green, #1B6F00); display: flex; }
+.bm-hotel-selected-name { font-size: 15px; font-weight: 600; color: var(--dark); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-hotel-change {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    color: var(--text-green, #1B6F00);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.bm-hotel-change:hover { color: #155c00; }
 .bm-section-subtitle { font-size: 13px; color: var(--gray); margin: 0 0 18px; line-height: 1.4; }
 .bm-hotel-search {
     display: flex;

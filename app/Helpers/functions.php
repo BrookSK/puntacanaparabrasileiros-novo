@@ -153,6 +153,32 @@ function e(?string $value): string
 }
 
 /**
+ * Gera um slug amigável para URL, transliterando acentos em vez de removê-los.
+ * Ex.: "Saona Clássica Catamarã (cópia)" => "saona-classica-catamara-copia".
+ */
+function slugify(string $text): string
+{
+    $text = mb_strtolower(trim($text), 'UTF-8');
+
+    // Transliteração de caracteres acentuados comuns (pt/es) para ASCII.
+    $map = [
+        'à'=>'a','á'=>'a','â'=>'a','ã'=>'a','ä'=>'a','å'=>'a',
+        'è'=>'e','é'=>'e','ê'=>'e','ë'=>'e',
+        'ì'=>'i','í'=>'i','î'=>'i','ï'=>'i',
+        'ò'=>'o','ó'=>'o','ô'=>'o','õ'=>'o','ö'=>'o',
+        'ù'=>'u','ú'=>'u','û'=>'u','ü'=>'u',
+        'ç'=>'c','ñ'=>'n','ý'=>'y','ÿ'=>'y',
+    ];
+    $text = strtr($text, $map);
+
+    // Remove o que não for letra/número/espaço/hífen, colapsa separadores.
+    $text = preg_replace('/[^a-z0-9\s-]/', '', $text);
+    $text = preg_replace('/[\s-]+/', '-', $text);
+
+    return trim($text, '-');
+}
+
+/**
  * Gera campo hidden com CSRF token.
  */
 function csrf_field(): string

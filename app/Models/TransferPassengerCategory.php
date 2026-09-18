@@ -31,16 +31,7 @@ class TransferPassengerCategory extends Model
 
     public function generateSlug(string $name, ?int $excludeId = null): string
     {
-        $slug = mb_strtolower($name);
-        $slug = preg_replace('/[àáâãäå]/', 'a', $slug);
-        $slug = preg_replace('/[èéêë]/', 'e', $slug);
-        $slug = preg_replace('/[ìíîï]/', 'i', $slug);
-        $slug = preg_replace('/[òóôõö]/', 'o', $slug);
-        $slug = preg_replace('/[ùúûü]/', 'u', $slug);
-        $slug = preg_replace('/[ç]/', 'c', $slug);
-        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
-        $slug = preg_replace('/[\s-]+/', '-', $slug);
-        $slug = trim($slug, '-');
+        $slug = slugify($name);
 
         $baseSlug = $slug;
         $counter = 1;

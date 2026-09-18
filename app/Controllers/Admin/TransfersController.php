@@ -146,7 +146,7 @@ class TransfersController extends Controller
     public function storeLocation(Request $request, Response $response): void
     {
         $data = $request->only(['title', 'address', 'latitude', 'longitude', 'location_type', 'sort_order']);
-        $data['slug'] = mb_strtolower(preg_replace('/[^a-z0-9]+/', '-', mb_strtolower($data['title'])));
+        $data['slug'] = slugify($data['title']);
         $data['status'] = 1;
         $this->locationModel->create($data);
         $this->flash('success', 'Local criado!');

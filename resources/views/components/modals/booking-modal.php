@@ -7,58 +7,43 @@
         <div class="booking-modal-layout">
             <!-- Conteúdo Principal (esquerda) -->
             <div class="booking-modal-main">
-                <!-- Tabs -->
+                <!-- Tabs (ordem: Tipo de Pacote → Data e Hora → Hotel) -->
                 <div class="booking-modal-tabs">
-                    <button class="bm-tab active" data-step="1" id="bmTab1">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
-                        Hotel
+                    <button class="bm-tab active" data-step="3" id="bmTab3">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4"/></svg>
+                        Tipo De Pacote
                     </button>
                     <button class="bm-tab" data-step="2" id="bmTab2">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         Data E Hora
                     </button>
-                    <button class="bm-tab" data-step="3" id="bmTab3">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4"/></svg>
-                        Tipo De Pacote
+                    <button class="bm-tab" data-step="1" id="bmTab1">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                        Hotel <span class="bm-tab-optional">(opcional)</span>
                     </button>
                 </div>
 
-                <!-- Step 1: Seleção de Hotel e Horário de Busca -->
-                <div class="bm-step active" id="bmStep1">
-                    <div class="bm-hotel-section">
-                        <h4 class="bm-section-title">Selecione seu Hotel</h4>
-                        <p class="bm-section-subtitle">Digite o nome do hotel onde você está hospedado</p>
+                <!-- Step 3: Tipo de Pacote (PRIMEIRO passo) -->
+                <div class="bm-step active" id="bmStep3">
+                    <!-- Pacotes -->
+                    <div class="bm-packages" id="bmPackages"></div>
 
-                        <div class="bm-hotel-search">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                            <input type="text" id="bmHotelSearch" placeholder="Ex: Barceló, Hard Rock, Dreams..." autocomplete="off">
+                    <!-- Viajantes -->
+                    <div class="bm-travelers">
+                        <div class="bm-travelers-header">
+                            <span>VIAJANTES</span>
+                            <span>QUANTIDADE</span>
                         </div>
-
-                        <div class="bm-hotel-list" id="bmHotelList">
-                            <div class="bm-hotel-loading" id="bmHotelLoading" style="display:none">
-                                <span>Carregando hotéis...</span>
-                            </div>
-                            <div class="bm-hotel-empty" id="bmHotelHint">
-                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;color:#bbb;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                                Digite o nome do seu hotel para buscar
-                            </div>
-                        </div>
+                        <div class="bm-travelers-list" id="bmTravelersList"></div>
                     </div>
 
-                    <!-- Horários de Busca (aparece após selecionar hotel) -->
-                    <div class="bm-pickup-section" id="bmPickupSection" style="display:none">
-                        <h4 class="bm-section-title">Horário de Busca</h4>
-                        <p class="bm-section-subtitle">Selecione o horário de busca</p>
-                        <div class="bm-pickup-times" id="bmPickupTimes"></div>
-                    </div>
-
-                    <!-- Botão Continuar -->
+                    <!-- Ações -->
                     <div class="bm-actions">
-                        <button type="button" class="bm-btn-continue" id="bmContinueStep1" disabled>CONTINUAR</button>
+                        <button type="button" class="bm-btn-continue" id="bmContinueStep3">CONTINUAR</button>
                     </div>
                 </div>
 
-                <!-- Step 2: Data e Hora -->
+                <!-- Step 2: Data e Hora (SEGUNDO passo) -->
                 <div class="bm-step" id="bmStep2">
                     <!-- Navegação do calendário -->
                     <div class="bm-calendar-nav">
@@ -92,23 +77,52 @@
                     </div>
                 </div>
 
-                <!-- Step 3: Tipo de Pacote -->
-                <div class="bm-step" id="bmStep3">
-                    <!-- Pacotes -->
-                    <div class="bm-packages" id="bmPackages"></div>
+                <!-- Step 1: Seleção de Hotel e Horário de Busca (TERCEIRO passo, opcional) -->
+                <div class="bm-step" id="bmStep1">
+                    <div class="bm-hotel-section">
+                        <h4 class="bm-section-title">Selecione seu Hotel <span class="bm-section-optional">(opcional)</span></h4>
+                        <p class="bm-section-subtitle">Digite o nome do hotel onde você está hospedado. Se preferir, pode continuar sem selecionar.</p>
 
-                    <!-- Viajantes -->
-                    <div class="bm-travelers">
-                        <div class="bm-travelers-header">
-                            <span>VIAJANTES</span>
-                            <span>QUANTIDADE</span>
+                        <!-- Busca + lista (ficam visíveis enquanto nenhum hotel está selecionado) -->
+                        <div class="bm-hotel-picker" id="bmHotelPicker">
+                            <div class="bm-hotel-search">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                <input type="text" id="bmHotelSearch" placeholder="Ex: Barceló, Hard Rock, Dreams..." autocomplete="off">
+                            </div>
+
+                            <div class="bm-hotel-list" id="bmHotelList">
+                                <div class="bm-hotel-loading" id="bmHotelLoading" style="display:none">
+                                    <span>Carregando hotéis...</span>
+                                </div>
+                                <div class="bm-hotel-empty" id="bmHotelHint">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;color:#bbb;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                    Digite o nome do seu hotel para buscar
+                                </div>
+                            </div>
                         </div>
-                        <div class="bm-travelers-list" id="bmTravelersList"></div>
+
+                        <!-- Hotel selecionado (aparece no lugar da lista após escolher) -->
+                        <div class="bm-hotel-selected" id="bmHotelSelected" style="display:none">
+                            <div class="bm-hotel-selected-info">
+                                <div class="bm-hotel-selected-icon">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+                                </div>
+                                <span class="bm-hotel-selected-name notranslate" translate="no" id="bmHotelSelectedName"></span>
+                            </div>
+                            <button type="button" class="bm-hotel-change" id="bmHotelChange">Trocar</button>
+                        </div>
+                    </div>
+
+                    <!-- Horários de Busca (aparece logo abaixo após selecionar hotel) -->
+                    <div class="bm-pickup-section" id="bmPickupSection" style="display:none">
+                        <h4 class="bm-section-title">Horário de Busca</h4>
+                        <p class="bm-section-subtitle">Selecione o horário de busca</p>
+                        <div class="bm-pickup-times" id="bmPickupTimes"></div>
                     </div>
 
                     <!-- Ações -->
-                    <div class="bm-actions bm-actions-step2" style="display:flex;gap:10px;align-items:center;margin-top:24px;flex-wrap:nowrap;">
-                        <button type="button" class="bm-btn-back" id="bmBack">&lsaquo; Voltar</button>
+                    <div class="bm-actions bm-actions-final" style="display:flex;gap:10px;align-items:center;margin-top:24px;flex-wrap:nowrap;">
+                        <button type="button" class="bm-btn-back" id="bmBackStep1">&lsaquo; Voltar</button>
                         <button type="button" id="bmAddCart" style="padding:14px 20px;background:#1B6F00;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">ADICIONAR AO CARRINHO</button>
                         <button type="button" id="bmDirectCheckout" style="padding:14px 20px;background:#0077b6;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;">IR PARA CHECKOUT</button>
                     </div>
@@ -122,13 +136,13 @@
                 <p class="bm-sidebar-date" id="bmSidebarDate">Data De Início: --</p>
                 <div class="bm-sidebar-code" id="bmSidebarCode"></div>
 
+                <div class="bm-sidebar-package" id="bmSidebarPackage" style="display:none">
+                    <span id="bmSidebarPackageName"></span>
+                </div>
+
                 <div class="bm-sidebar-hotel" id="bmSidebarHotel" style="display:none">
                     <span id="bmSidebarHotelName" class="notranslate" translate="no"></span>
                     <span id="bmSidebarPickupTime"></span>
-                </div>
-
-                <div class="bm-sidebar-package" id="bmSidebarPackage" style="display:none">
-                    <span id="bmSidebarPackageName"></span>
                 </div>
 
                 <div class="bm-sidebar-travelers" id="bmSidebarTravelers" style="display:none">

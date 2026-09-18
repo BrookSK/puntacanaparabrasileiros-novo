@@ -269,10 +269,7 @@ class Trip extends Model
 
     public function generateSlug(string $title, ?int $excludeId = null): string
     {
-        $slug = mb_strtolower($title);
-        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
-        $slug = preg_replace('/[\s-]+/', '-', $slug);
-        $slug = trim($slug, '-');
+        $slug = slugify($title);
 
         $baseSlug = $slug;
         $counter = 1;

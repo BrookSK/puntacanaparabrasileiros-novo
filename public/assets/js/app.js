@@ -1307,9 +1307,55 @@
             if (codeEl && typeof TRIP_ID !== 'undefined') {
                 codeEl.innerHTML = '<span class="bm-code-badge">C\u00F3digo Da Viagem: WTE-' + (8000 + TRIP_ID) + '</span>';
             }
+            // Reseta o estado para não herdar seleções de uma abertura anterior.
+            resetBookingModal();
+            // Novo fluxo: começa no Tipo de Pacote (step 3). Hotel é o último passo (opcional).
+            goToStep(3);
+            renderPackages();
+            // Pré-carrega os hotéis em segundo plano para o passo final.
             loadHotels();
         });
     });
+
+    // Restaura o modal ao estado inicial (usado a cada abertura).
+    function resetBookingModal() {
+        selectedHotel = null;
+        selectedPickupTime = null;
+        selectedDate = null;
+        selectedTime = null;
+        travelerCounts = {};
+        window._companionCount = 0;
+        window._selectedCompositionPkg = null;
+
+        // Passo Hotel: volta a mostrar a busca/lista e esconde hotel selecionado + horários.
+        const picker = document.getElementById('bmHotelPicker');
+        const selectedBox = document.getElementById('bmHotelSelected');
+        const pickup = document.getElementById('bmPickupSection');
+        if (picker) picker.style.display = 'block';
+        if (selectedBox) selectedBox.style.display = 'none';
+        if (pickup) pickup.style.display = 'none';
+        const searchEl = document.getElementById('bmHotelSearch');
+        if (searchEl) searchEl.value = '';
+        const hint = document.getElementById('bmHotelHint');
+        if (hint) hint.style.display = 'block';
+        document.querySelectorAll('.bm-hotel-item').forEach(el => el.remove());
+
+        // Passo Data: esconde horários e desabilita o Continuar até escolher a data.
+        const times = document.getElementById('bmTimes');
+        if (times) times.style.display = 'none';
+        const continueBtn = document.getElementById('bmContinue');
+        if (continueBtn) continueBtn.disabled = true;
+
+        // Sidebar: limpa hotel/data/pacote/viajantes.
+        const sidebarHotel = document.getElementById('bmSidebarHotel');
+        if (sidebarHotel) sidebarHotel.style.display = 'none';
+        const sidebarPackage = document.getElementById('bmSidebarPackage');
+        if (sidebarPackage) sidebarPackage.style.display = 'none';
+        const sidebarTravelers = document.getElementById('bmSidebarTravelers');
+        if (sidebarTravelers) sidebarTravelers.style.display = 'none';
+        const sidebarDate = document.getElementById('bmSidebarDate');
+        if (sidebarDate) sidebarDate.textContent = 'Data De In\u00EDcio: --';
+    }
 
     // Fechar modal
     document.getElementById('bookingModalClose')?.addEventListener('click', () => { modal.style.display = 'none'; });
@@ -1366,24 +1412,50 @@
     window.selectHotel = function(hotelId) {
         selectedHotel = hotelsData.find(h => h.id === hotelId); selectedPickupTime = null;
         if (!selectedHotel) return;
-        document.querySelectorAll('.bm-hotel-item').forEach(el => el.classList.remove('selected'));
-        document.querySelector(`.bm-hotel-item[data-hotel-id="${hotelId}"]`)?.classList.add('selected');
+
+        // Colapsa a busca/lista e mostra apenas o hotel escolhido (some com as outras opções).
+        const picker = document.getElementById('bmHotelPicker');
+        const selectedBox = document.getElementById('bmHotelSelected');
+        const selectedName = document.getElementById('bmHotelSelectedName');
+        if (picker) picker.style.display = 'none';
+        if (selectedName) selectedName.textContent = selectedHotel.hotel_name;
+        if (selectedBox) selectedBox.style.display = 'flex';
+
+        // Exibe o horário de busca logo abaixo, sem precisar rolar.
         const section = document.getElementById('bmPickupSection');
         document.getElementById('bmPickupTimes').innerHTML = selectedHotel.schedules.map(s => `<button type="button" class="bm-pickup-time-btn" data-time="${s.time}" onclick="selectPickupTime('${s.time}')">${s.time}</button>`).join('');
         section.style.display = 'block';
-        document.getElementById('bmContinueStep1').disabled = true;
+        // Traz o horário de busca para a área visível do modal.
+        section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         updateSidebar();
     };
+
+    // Botão "Trocar": volta a mostrar a busca/lista de hotéis.
+    document.getElementById('bmHotelChange')?.addEventListener('click', () => {
+        selectedHotel = null; selectedPickupTime = null;
+        const picker = document.getElementById('bmHotelPicker');
+        const selectedBox = document.getElementById('bmHotelSelected');
+        const section = document.getElementById('bmPickupSection');
+        if (picker) picker.style.display = 'block';
+        if (selectedBox) selectedBox.style.display = 'none';
+        if (section) section.style.display = 'none';
+        const searchEl = document.getElementById('bmHotelSearch');
+        if (searchEl) { searchEl.value = ''; searchEl.focus(); }
+        const hint = document.getElementById('bmHotelHint');
+        if (hint) { hint.style.display = 'block'; }
+        document.querySelectorAll('.bm-hotel-item').forEach(el => el.remove());
+        updateSidebar();
+    });
 
     window.selectPickupTime = function(time) {
         selectedPickupTime = time;
         document.querySelectorAll('.bm-pickup-time-btn').forEach(el => el.classList.remove('selected'));
         document.querySelector(`.bm-pickup-time-btn[data-time="${time}"]`)?.classList.add('selected');
-        document.getElementById('bmContinueStep1').disabled = false;
         updateSidebar();
     };
 
-    document.getElementById('bmContinueStep1')?.addEventListener('click', () => { goToStep(2); renderCalendar(); });
+    // Voltar do Hotel (step 1, último) para Data e Hora (step 2).
+    document.getElementById('bmBackStep1')?.addEventListener('click', () => { goToStep(2); });
 
     // ===== STEP 2: Data =====
     document.getElementById('bmPrevMonth')?.addEventListener('click', () => { currentMonth--; if (currentMonth < 0) { currentMonth = 11; currentYear--; } renderCalendar(); });
@@ -1443,20 +1515,14 @@
         updateSidebar();
     };
 
-    // Voltar Step 2 → Step 1
-    document.getElementById('bmBackStep2')?.addEventListener('click', () => { goToStep(1); });
+    // Voltar Data (step 2) → Tipo de Pacote (step 3, primeiro passo)
+    document.getElementById('bmBackStep2')?.addEventListener('click', () => { goToStep(3); });
 
-    // Continuar para Step 3
-    document.getElementById('bmContinue')?.addEventListener('click', () => {
-        document.getElementById('bmStep2').classList.remove('active');
-        document.getElementById('bmStep3').classList.add('active');
-        document.getElementById('bmTab2').classList.remove('active');
-        document.getElementById('bmTab3').classList.add('active');
-        renderPackages();
-    });
+    // Continuar da Data (step 2) → Hotel (step 1, último passo, opcional)
+    document.getElementById('bmContinue')?.addEventListener('click', () => { goToStep(1); });
 
-    // Voltar para Step 2
-    document.getElementById('bmBack')?.addEventListener('click', () => { goToStep(2); });
+    // Continuar do Tipo de Pacote (step 3) → Data e Hora (step 2)
+    document.getElementById('bmContinueStep3')?.addEventListener('click', () => { goToStep(2); renderCalendar(); });
 
     function renderPackages() {
         const container = document.getElementById('bmPackages');
@@ -1768,6 +1834,10 @@
             hotelEl.style.display = 'block';
             hotelNameEl.textContent = 'Hotel: ' + selectedHotel.hotel_name;
             pickupEl.textContent = selectedPickupTime ? 'Busca: ' + selectedPickupTime : '';
+        } else if (hotelEl) {
+            hotelEl.style.display = 'none';
+            hotelNameEl.textContent = '';
+            pickupEl.textContent = '';
         }
         // Date
         const dateEl = document.getElementById('bmSidebarDate');

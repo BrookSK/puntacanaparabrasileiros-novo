@@ -417,29 +417,65 @@
             <aside class="trip-sidebar">
                 <!-- Card de Preço + CTA -->
                 <div class="trip-price-card">
+                    <?php
+                    // ── Cálculo dos preços exibidos no card ──
+                    // Mantém $basePrice/$priceLabel para a barra fixa mobile e demais usos,
+                    // mas o card lateral mostra TODAS as categorias cadastradas (Adulto/Criança/Infantil).
+                    $basePrice = 0;
+                    $priceLabel = '/ Adulto';
+                    $isGroupPricing = (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing']) && empty($trip['composition_pricing_enabled']));
+                    $priceCategories = [];
+
+                    if ($isGroupPricing) {
+                        // Group pricing ativo (sem composition): usar preço da primeira faixa
+                        $gpRules = json_decode($trip['group_pricing'], true);
+                        if (is_array($gpRules) && !empty($gpRules)) {
+                            usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                            $basePrice = (float) $gpRules[0]['price'];
+                            $paxLabel = (int) $gpRules[0]['pax'];
+                            $priceLabel = $paxLabel === 1 ? '/ Pessoa' : '/ ' . $paxLabel . ' pessoas';
+                        }
+                    } elseif (!empty($packages)) {
+                        $basePrice = $packages[0]['base_price'] ?? 0;
+                        // Categorias de preço do 1º pacote (Adulto/Criança/Infantil...)
+                        $priceCategories = $packages[0]['categories'] ?? [];
+                    }
+                    ?>
+
+                    <?php if (!$isGroupPricing && !empty($priceCategories)): ?>
+                    <!-- Preços por categoria (igual ao site antigo) -->
+                    <div class="trip-price-grid">
+                        <?php foreach ($priceCategories as $cat): ?>
+                        <?php
+                            $catRegular = (float) ($cat['price'] ?? 0);
+                            $catSale = isset($cat['sale_price']) && $cat['sale_price'] !== null && $cat['sale_price'] !== '' ? (float) $cat['sale_price'] : null;
+                            $catFinal = ($catSale !== null && $catSale > 0) ? $catSale : $catRegular;
+                            $catName = $cat['category_name'] ?? 'Categoria';
+                            $catAge = !empty($cat['age_group']) ? ': ' . $cat['age_group'] : '';
+                        ?>
+                        <div class="trip-price-cat">
+                            <span class="price-from">De</span>
+                            <?php if ($catSale !== null && $catSale > 0 && $catSale < $catRegular): ?>
+                            <span class="trip-price-value">
+                                <span class="trip-price-old"><?= money($catRegular) ?></span>
+                                <?= money($catFinal) ?>
+                            </span>
+                            <?php else: ?>
+                            <span class="trip-price-value"><?= money($catFinal) ?></span>
+                            <?php endif; ?>
+                            <span class="price-per">/ <?= e($catName . $catAge) ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php else: ?>
+                    <!-- Preço único (group pricing ou sem categorias cadastradas) -->
                     <div class="trip-price-header">
                         <span class="price-from">De</span>
-                        <span class="trip-price-value">
-                            <?php
-                            $basePrice = 0;
-                            $priceLabel = '/ Adulto';
-                            if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing']) && empty($trip['composition_pricing_enabled'])) {
-                                // Group pricing ativo (sem composition): usar preço da primeira faixa
-                                $gpRules = json_decode($trip['group_pricing'], true);
-                                if (is_array($gpRules) && !empty($gpRules)) {
-                                    usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
-                                    $basePrice = (float) $gpRules[0]['price'];
-                                    $paxLabel = (int) $gpRules[0]['pax'];
-                                    $priceLabel = $paxLabel === 1 ? '/ Pessoa' : '/ ' . $paxLabel . ' pessoas';
-                                }
-                            } elseif (!empty($packages)) {
-                                $basePrice = $packages[0]['base_price'] ?? 0;
-                            }
-                            echo money($basePrice);
-                            ?>
-                        </span>
+                        <span class="trip-price-value"><?= money($basePrice) ?></span>
                         <span class="price-per"><?= $priceLabel ?></span>
                     </div>
+                    <?php endif; ?>
+
                     <a href="#booking-section" class="btn-verificar">Verificar Disponibilidade</a>
                     <?php if (setting('videocall_enabled', '0') === '1'): ?>
                     <button type="button" class="btn-videocall" id="btnOpenVideoCall">

@@ -179,10 +179,7 @@ class CategoriesController extends Controller
 
     private function generateSlug(string $name, ?int $excludeId = null): string
     {
-        $slug = mb_strtolower($name);
-        $slug = preg_replace('/[^a-z0-9\s-]/', '', $slug);
-        $slug = preg_replace('/[\s-]+/', '-', $slug);
-        $slug = trim($slug, '-');
+        $slug = slugify($name);
 
         $baseSlug = $slug;
         $counter = 1;
