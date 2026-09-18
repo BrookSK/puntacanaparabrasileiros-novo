@@ -88,12 +88,12 @@ class AgencyNotifier
     public function notifyRegistration(?string $phone, string $companyName, string $contactName): void
     {
         $firstName = explode(' ', trim($contactName))[0] ?: $companyName;
-        $msg = "✅ *Solicitação de parceria recebida!*\n\n";
+        $msg = "*Solicitação de parceria recebida!*\n\n";
         $msg .= "Olá, {$firstName}!\n\n";
         $msg .= "Recebemos a solicitação da agência *{$companyName}* para se tornar parceira da {$this->siteName()}.\n\n";
         $msg .= "Nossa equipe vai analisar os dados e você receberá uma resposta em breve. ";
         $msg .= "Avisaremos por aqui assim que houver uma atualização.\n\n";
-        $msg .= "Obrigado pelo interesse! 🌴";
+        $msg .= "Obrigado pelo interesse!";
         $this->sendWhatsApp($phone, $msg);
     }
 
@@ -104,7 +104,7 @@ class AgencyNotifier
     {
         $adminPhone = (string) $this->app()->setting('admin_whatsapp', $this->app()->setting('admin_phone', ''));
         if ($adminPhone === '') return;
-        $msg = "🏢 *Nova solicitação de agência parceira*\n\n";
+        $msg = "*Nova solicitação de agência parceira*\n\n";
         $msg .= "• Agência: *{$companyName}*\n";
         $msg .= "• Contato: {$contactName}\n";
         $msg .= "• E-mail: {$email}\n";
@@ -120,12 +120,12 @@ class AgencyNotifier
     {
         $firstName = explode(' ', trim($contactName))[0] ?: $companyName;
         $site = $this->siteName();
-        $msg = "🎉 *Parabéns! Sua agência foi aprovada!*\n\n";
+        $msg = "*Parabéns! Sua agência foi aprovada!*\n\n";
         $msg .= "Olá, {$firstName}!\n\n";
         $msg .= "A agência *{$companyName}* agora é parceira da {$site}. Você já pode acessar o painel ";
         $msg .= "com o e-mail e a senha cadastrados.\n\n";
-        $msg .= "👉 Acesse: {$this->siteUrl()}/login-agencia\n\n";
-        $msg .= "Bem-vindo(a) ao time! 🚀";
+        $msg .= "Acesse: {$this->siteUrl()}/login-agencia\n\n";
+        $msg .= "Bem-vindo(a) ao time!";
         $this->sendWhatsApp($phone, $msg);
     }
 
@@ -135,7 +135,7 @@ class AgencyNotifier
     public function notifyRejected(?string $phone, string $companyName, string $contactName, string $reason): void
     {
         $firstName = explode(' ', trim($contactName))[0] ?: $companyName;
-        $msg = "📋 *Atualização sobre sua solicitação de parceria*\n\n";
+        $msg = "*Atualização sobre sua solicitação de parceria*\n\n";
         $msg .= "Olá, {$firstName}!\n\n";
         $msg .= "Analisamos a solicitação da agência *{$companyName}* e, neste momento, ela *não foi aprovada*.\n\n";
         if ($reason !== '') {
@@ -160,9 +160,9 @@ class AgencyNotifier
         $site = $this->siteName();
 
         // WhatsApp
-        $msg = "💰 *Você realizou uma venda!*\n\n";
+        $msg = "*Você realizou uma venda!*\n\n";
         $msg .= "Olá, {$firstName}!\n\n";
-        $msg .= "Uma venda foi realizada através da sua parceria com a {$site}! 🎉\n\n";
+        $msg .= "Uma venda foi realizada através da sua parceria com a {$site}!\n\n";
         if ($bookingNumber) {
             $msg .= "• Reserva: *{$bookingNumber}*\n";
         }
@@ -197,13 +197,13 @@ class AgencyNotifier
         $site = $this->siteName();
 
         // WhatsApp
-        $msg = "✅ *Sua comissão foi paga!*\n\n";
+        $msg = "*Sua comissão foi paga!*\n\n";
         $msg .= "Olá, {$firstName}!\n\n";
-        $msg .= "Boa notícia: sua comissão de *" . money($amount) . "* foi paga! 🎉\n\n";
+        $msg .= "Boa notícia: sua comissão de *" . money($amount) . "* foi paga!\n\n";
         if (!empty($reference)) {
             $msg .= "• Referência do pagamento: {$reference}\n\n";
         }
-        $msg .= "Obrigado por fazer parte das agências parceiras da {$site}! 🌴";
+        $msg .= "Obrigado por fazer parte das agências parceiras da {$site}!";
         $this->sendWhatsApp($agency['phone'] ?? null, $msg);
 
         // E-mail
@@ -230,7 +230,7 @@ class AgencyNotifier
         $site = $this->siteName();
 
         // WhatsApp
-        $msg = "⚠️ *Atualização sobre uma comissão*\n\n";
+        $msg = "*Atualização sobre uma comissão*\n\n";
         $msg .= "Olá, {$firstName}!\n\n";
         $msg .= "Uma comissão de " . money($amount) . " foi *cancelada*.\n\n";
         if ($reason !== '') {

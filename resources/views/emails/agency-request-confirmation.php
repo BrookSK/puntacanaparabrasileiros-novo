@@ -16,9 +16,9 @@
         <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:20px;margin-bottom:24px;">
             <h3 style="font-size:14px;margin:0 0 12px;color:#1B6F00;text-transform:uppercase;letter-spacing:0.5px;">Próximos passos</h3>
             <table style="width:100%;font-size:14px;">
-                <tr><td style="padding:6px 0;color:#333;">📋 Nossa equipe vai analisar os dados enviados</td></tr>
-                <tr><td style="padding:6px 0;color:#333;">⏱️ Você receberá uma resposta em breve</td></tr>
-                <tr><td style="padding:6px 0;color:#333;">✅ Após a aprovação, você acessa o painel da agência</td></tr>
+                <tr><td style="padding:6px 0;color:#333;">Nossa equipe vai analisar os dados enviados</td></tr>
+                <tr><td style="padding:6px 0;color:#333;">Você receberá uma resposta em breve</td></tr>
+                <tr><td style="padding:6px 0;color:#333;">Após a aprovação, você acessa o painel da agência</td></tr>
             </table>
         </div>
 
