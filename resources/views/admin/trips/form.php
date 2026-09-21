@@ -484,15 +484,18 @@ function previewFeaturedImage(input) {
     }
 }
 
-function previewGalleryFiles(input) {
+function previewGalleryFiles(input, skipAccumulate) {
     const container = document.getElementById('galleryPreviews');
     const countEl = document.getElementById('galleryCount');
     // Acumular arquivos em um DataTransfer para permitir adicionar mais
+    // skipAccumulate=true quando chamado de removeGalleryFile (já atualizamos o DT)
     if (!window._galleryDT) window._galleryDT = new DataTransfer();
-    for (let i = 0; i < input.files.length; i++) {
-        window._galleryDT.items.add(input.files[i]);
+    if (!skipAccumulate) {
+        for (let i = 0; i < input.files.length; i++) {
+            window._galleryDT.items.add(input.files[i]);
+        }
+        input.files = window._galleryDT.files;
     }
-    input.files = window._galleryDT.files;
     countEl.textContent = window._galleryDT.files.length + ' arquivo(s) selecionado(s)';
     // Renderizar previews
     container.innerHTML = '';
@@ -518,7 +521,7 @@ function removeGalleryFile(idx) {
     }
     window._galleryDT = dt;
     input.files = dt.files;
-    previewGalleryFiles(input);
+    previewGalleryFiles(input, true); // true = não acumular novamente
 }
 document.addEventListener('click', function(e) { if (e.target.classList.contains('repeater-remove')) { e.target.closest('.repeater-item, .package-item').remove(); } });
 
