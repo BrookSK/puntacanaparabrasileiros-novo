@@ -237,6 +237,15 @@ class AffiliatesController extends Controller
             }
 
             $this->flash('success', 'Afiliado aprovado com sucesso! ' . $req['first_name'] . ' ' . $req['last_name'] . ' agora tem acesso ao painel.');
+            
+            // Log de auditoria
+            \App\Services\AuditService::getInstance()->logAction(
+                'approve',
+                'affiliate',
+                $affiliateId,
+                $req['first_name'] . ' ' . $req['last_name'],
+                'Aprovou solicitação de afiliado: ' . $req['first_name'] . ' ' . $req['last_name'] . ' (' . $req['email'] . ')'
+            );
         } catch (\Exception $e) {
             $this->flash('error', 'Erro ao aprovar: ' . $e->getMessage());
         }
@@ -308,6 +317,16 @@ class AffiliatesController extends Controller
         }
 
         $this->flash('success', 'Solicitação de ' . $req['first_name'] . ' ' . $req['last_name'] . ' foi bloqueada.');
+        
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logAction(
+            'reject',
+            'affiliate',
+            $id,
+            $req['first_name'] . ' ' . $req['last_name'],
+            'Rejeitou solicitação de afiliado: ' . $req['first_name'] . ' ' . $req['last_name'] . ' - Motivo: ' . $reason
+        );
+        
         $this->redirect('/admin/afiliados?tab=bloqueados');
     }
 

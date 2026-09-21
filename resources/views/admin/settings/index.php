@@ -1,5 +1,11 @@
-<!-- Barra de ações no topo direito: Limpar Cache -->
+<!-- Barra de ações no topo direito: Logs de Auditoria e Limpar Cache -->
 <div class="settings-actions-bar">
+    <a href="/admin/audit-logs" class="btn btn-outline">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/>
+        </svg>
+        Logs de Auditoria
+    </a>
     <form method="POST" action="/admin/configuracoes/limpar-cache" id="clearCacheForm" class="settings-clear-cache">
         <?= csrf_field() ?>
         <button type="submit" class="btn btn-outline btn-clear-cache" onclick="return confirm('Isso vai limpar o cache do site para todos os visitantes (CSS/JS, código PHP e arquivos temporários). Os clientes vão receber a versão mais recente. Deseja continuar?');">

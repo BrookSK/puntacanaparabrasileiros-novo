@@ -23,6 +23,7 @@ use App\Controllers\Admin\AffiliatesController as AdminAffiliatesController;
 use App\Controllers\Admin\AgenciesController as AdminAgenciesController;
 use App\Controllers\Admin\UsersController as AdminUsersController;
 use App\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Controllers\Admin\AuditLogsController as AdminAuditLogsController;
 use App\Controllers\Admin\NewsletterController as AdminNewsletterController;
 use App\Controllers\Admin\CancellationsController as AdminCancellationsController;
 use App\Controllers\Admin\SchedulesController as AdminSchedulesController;
@@ -318,6 +319,11 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     // Google Meet — autorização OAuth 2.0
     $router->get('/google-meet/oauth/start', [AdminSettingsController::class, 'googleMeetOAuthStart'], [], 'admin.google_meet.oauth_start');
     $router->get('/google-meet/oauth/callback', [AdminSettingsController::class, 'googleMeetOAuthCallback'], [], 'admin.google_meet.oauth_callback');
+
+    // Logs de Auditoria
+    $router->get('/audit-logs', [AdminAuditLogsController::class, 'index'], [], 'admin.audit_logs.index');
+    $router->get('/audit-logs/export', [AdminAuditLogsController::class, 'export'], [], 'admin.audit_logs.export');
+    $router->get('/audit-logs/{id}', [AdminAuditLogsController::class, 'show'], [], 'admin.audit_logs.show');
 
     // Newsletter
     $router->get('/newsletter', [AdminNewsletterController::class, 'index'], [], 'admin.newsletter.index');

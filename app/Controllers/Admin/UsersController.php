@@ -67,6 +67,16 @@ class UsersController extends Controller
         }
 
         $this->userModel->createUser($data);
+        
+        // Log de auditoria
+        $newUser = $this->userModel->findByEmail($data['email']);
+        \App\Services\AuditService::getInstance()->logCreate(
+            'user',
+            (int) $newUser['id'],
+            ($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''),
+            ['email' => $data['email'], 'role' => $data['role'] ?? 'customer']
+        );
+        
         $this->flash('success', 'Usuário criado!');
         $this->redirect('/admin/usuarios');
     }
@@ -88,6 +98,9 @@ class UsersController extends Controller
         $id = (int) $request->param('id');
         $data = $request->only(['first_name', 'last_name', 'email', 'phone', 'country', 'role', 'status']);
 
+        // Buscar dados antigos para auditoria
+        $oldUser = $this->userModel->find($id);
+
         // Verificar email duplicado
         $existing = $this->userModel->findByEmail($data['email'] ?? '');
         if ($existing && (int) $existing['id'] !== $id) {
@@ -103,6 +116,15 @@ class UsersController extends Controller
         if ($newPassword && strlen($newPassword) >= 6) {
             $this->userModel->updatePassword($id, $newPassword);
         }
+
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logUpdate(
+            'user',
+            $id,
+            ($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''),
+            $oldUser,
+            $data
+        );
 
         $this->flash('success', 'Usuário atualizado!');
         $this->redirect('/admin/usuarios/' . $id . '/editar');
@@ -120,7 +142,21 @@ class UsersController extends Controller
             return;
         }
 
+        // Buscar dados para auditoria antes de excluir
+        $userToDelete = $this->userModel->find($id);
+        
         $this->userModel->delete($id);
+        
+        // Log de auditoria
+        if ($userToDelete) {
+            \App\Services\AuditService::getInstance()->logDelete(
+                'user',
+                $id,
+                ($userToDelete['first_name'] ?? '') . ' ' . ($userToDelete['last_name'] ?? ''),
+                ['email' => $userToDelete['email'], 'role' => $userToDelete['role']]
+            );
+        }
+        
         $this->flash('success', 'Usuário excluído.');
         $this->redirect('/admin/usuarios');
     }
@@ -136,6 +172,15 @@ class UsersController extends Controller
 
         unset($user['password']);
         $this->session->set('user', $user);
+
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logAction(
+            'impersonate',
+            'user',
+            $id,
+            $user['first_name'] . ' ' . $user['last_name'],
+            'Personificou usuário: ' . $user['first_name'] . ' ' . $user['last_name'] . ' (' . $user['email'] . ')'
+        );
 
         $this->flash('info', 'Você está agora logado como ' . $user['first_name'] . ' ' . $user['last_name']);
         $this->redirect('/minha-conta');

@@ -142,6 +142,14 @@ class TripsController extends Controller
         // Pacotes de composição
         $this->saveCompositionPackages($tripId, $request);
 
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logCreate(
+            'trip',
+            $tripId,
+            $data['title'],
+            ['title' => $data['title'], 'slug' => $data['slug'], 'status' => $data['status'] ?? 'draft']
+        );
+
         $this->flash('success', 'Passeio criado com sucesso!');
         $this->redirect('/admin/passeios/' . $tripId . '/editar');
     }
@@ -299,6 +307,15 @@ class TripsController extends Controller
         // Datas fixas
         $this->saveFixedDates($id, $request);
 
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logUpdate(
+            'trip',
+            $id,
+            $data['title'] ?? $trip['title'],
+            $trip,
+            $data
+        );
+
         $this->flash('success', 'Passeio atualizado com sucesso!');
         $this->redirect('/admin/passeios/' . $id . '/editar');
     }
@@ -306,7 +323,21 @@ class TripsController extends Controller
     public function destroy(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
+        
+        // Buscar dados para auditoria antes de excluir
+        $trip = $this->tripModel->find($id);
+        
         $this->tripModel->delete($id);
+        
+        // Log de auditoria
+        if ($trip) {
+            \App\Services\AuditService::getInstance()->logDelete(
+                'trip',
+                $id,
+                $trip['title'],
+                ['title' => $trip['title'], 'slug' => $trip['slug']]
+            );
+        }
         $this->flash('success', 'Passeio excluído.');
         $this->redirect('/admin/passeios');
     }
