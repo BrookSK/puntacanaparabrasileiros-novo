@@ -484,17 +484,31 @@ function previewFeaturedImage(input) {
     }
 }
 
+// Chamado no onchange do input: adiciona os arquivos recém-escolhidos ao acumulado.
 function previewGalleryFiles(input) {
-    const container = document.getElementById('galleryPreviews');
-    const countEl = document.getElementById('galleryCount');
-    // Acumular arquivos em um DataTransfer para permitir adicionar mais
     if (!window._galleryDT) window._galleryDT = new DataTransfer();
+    // Adiciona SOMENTE os arquivos que o usuário acabou de selecionar.
     for (let i = 0; i < input.files.length; i++) {
         window._galleryDT.items.add(input.files[i]);
     }
+    syncGalleryInput();
+}
+
+// Reflete o DataTransfer acumulado no input e (re)desenha as miniaturas.
+// Separado de previewGalleryFiles para NÃO re-adicionar arquivos ao acumular.
+function syncGalleryInput() {
+    const input = document.getElementById('galleryFiles');
+    const container = document.getElementById('galleryPreviews');
+    const countEl = document.getElementById('galleryCount');
+    if (!window._galleryDT) window._galleryDT = new DataTransfer();
+
+    // Sincroniza os arquivos escolhidos com o input que será enviado no submit.
     input.files = window._galleryDT.files;
-    countEl.textContent = window._galleryDT.files.length + ' arquivo(s) selecionado(s)';
-    // Renderizar previews
+    countEl.textContent = window._galleryDT.files.length
+        ? window._galleryDT.files.length + ' arquivo(s) selecionado(s)'
+        : '';
+
+    // Redesenha as miniaturas de pré-visualização.
     container.innerHTML = '';
     for (let i = 0; i < window._galleryDT.files.length; i++) {
         const file = window._galleryDT.files[i];
@@ -511,26 +525,32 @@ function previewGalleryFiles(input) {
 }
 
 function removeGalleryFile(idx) {
-    const input = document.getElementById('galleryFiles');
     const dt = new DataTransfer();
     for (let i = 0; i < window._galleryDT.files.length; i++) {
         if (i !== idx) dt.items.add(window._galleryDT.files[i]);
     }
     window._galleryDT = dt;
-    input.files = dt.files;
-    previewGalleryFiles(input);
+    // Apenas sincroniza — NÃO chama previewGalleryFiles (evita re-adicionar/duplicar).
+    syncGalleryInput();
 }
 document.addEventListener('click', function(e) { if (e.target.classList.contains('repeater-remove')) { e.target.closest('.repeater-item, .package-item').remove(); } });
 
+// Chamado no onchange do input: adiciona os arquivos recém-escolhidos ao acumulado.
 function previewDocFiles(input) {
-    const container = document.getElementById('docPreviews');
-    // Acumular arquivos usando DataTransfer
     if (!window._docDT) window._docDT = new DataTransfer();
     for (let i = 0; i < input.files.length; i++) {
         window._docDT.items.add(input.files[i]);
     }
+    syncDocInput();
+}
+
+// Reflete o DataTransfer acumulado no input e (re)desenha a lista.
+function syncDocInput() {
+    const input = document.getElementById('docFiles');
+    const container = document.getElementById('docPreviews');
+    if (!window._docDT) window._docDT = new DataTransfer();
+
     input.files = window._docDT.files;
-    // Renderizar lista
     container.innerHTML = '';
     for (let i = 0; i < window._docDT.files.length; i++) {
         const file = window._docDT.files[i];
@@ -542,14 +562,12 @@ function previewDocFiles(input) {
 }
 
 function removeDocFile(idx) {
-    const input = document.getElementById('docFiles');
     const dt = new DataTransfer();
     for (let i = 0; i < window._docDT.files.length; i++) {
         if (i !== idx) dt.items.add(window._docDT.files[i]);
     }
     window._docDT = dt;
-    input.files = dt.files;
-    previewDocFiles(input);
+    syncDocInput();
 }
 document.getElementById('addPackageBtn')?.addEventListener('click', function() { const list = document.getElementById('packages-list'), i = list.children.length; const cats = <?= json_encode($travelerCategories ?? []) ?>; let ch = ''; cats.forEach(tc => { ch += `<label class="checkbox-label"><input type="checkbox" name="packages[${i}][categories][]" value="${tc.id}"> ${tc.name}</label>`; }); const d = document.createElement('div'); d.className = 'package-item card-inner'; d.innerHTML = `<div class="form-row"><div class="form-group col-6"><label>Nome</label><input type="text" name="packages[${i}][title]" class="form-control"></div><div class="form-group col-6"><label>Descrição</label><input type="text" name="packages[${i}][description]" class="form-control"></div></div><div class="form-group"><label>Categorias</label><div class="checkbox-grid">${ch}</div></div><button type="button" class="btn btn-sm btn-danger repeater-remove">&times; Remover</button>`; list.appendChild(d); });
 
