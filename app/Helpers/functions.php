@@ -24,10 +24,23 @@ function url(string $path = '/'): string
 
 /**
  * Gera URL para asset (CSS, JS, imagem).
+ *
+ * Anexa uma versão global (setting "asset_version") como query string, de modo que
+ * o botão "Limpar Cache" (no admin) consiga invalidar o CSS/JS em cache no navegador
+ * de todos os visitantes de uma só vez, apenas incrementando essa versão.
+ * Imagens e arquivos com query própria não recebem a versão.
  */
 function asset(string $path): string
 {
-    return '/assets/' . ltrim($path, '/');
+    $url = '/assets/' . ltrim($path, '/');
+
+    // Só versiona CSS/JS (o que fica em cache agressivo no navegador) e sem query pré-existente.
+    if (!str_contains($url, '?') && preg_match('/\.(css|js)$/i', $url)) {
+        $version = setting('asset_version', '1');
+        $url .= '?v=' . rawurlencode((string) $version);
+    }
+
+    return $url;
 }
 
 /**

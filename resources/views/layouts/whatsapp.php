@@ -8,13 +8,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= asset('css/whatsapp.css') ?>?v=1.0">
+    <link rel="stylesheet" href="<?= asset('css/whatsapp.css') ?>">
     <meta name="csrf-token" content="<?= e(csrf_token()) ?>">
     <meta name="current-user-id" content="<?= e(current_user()['id'] ?? '') ?>">
     <meta name="current-user-name" content="<?= e(current_user()['first_name'] ?? '') ?>">
 </head>
 <body class="wpp-body">
     <?= $content ?>
-    <script src="<?= asset('js/whatsapp.js') ?>?v=1.6"></script>
+    <script src="<?= asset('js/whatsapp.js') ?>"></script>
 </body>
 </html>
