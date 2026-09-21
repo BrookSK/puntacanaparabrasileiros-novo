@@ -263,9 +263,13 @@ class TripsController extends Controller
         // Galeria: só atualiza se o form enviou campos de galeria. Assim
         // evitamos apagar a galeria inteira caso o request venha truncado ou
         // sem esses campos (grava null apagaria tudo silenciosamente).
-        if (array_key_exists('gallery_existing', $_POST) || isset($_FILES['gallery_files'])) {
+        if (array_key_exists('gallery_marker', $_POST) || array_key_exists('gallery_existing', $_POST) || isset($_FILES['gallery_files'])) {
+            $this->uploadLog('update: processando galeria...');
             $gallery = $this->processGalleryUploads($request);
             $data['gallery'] = !empty($gallery) ? json_encode($gallery) : null;
+            $this->uploadLog('update: gallery final=' . ($data['gallery'] ?? 'null'));
+        } else {
+            $this->uploadLog('update: galeria NAO sera processada (nenhum campo de galeria no POST)');
         }
 
         // Documentos extras: mesma proteção da galeria.
@@ -861,6 +865,7 @@ class TripsController extends Controller
 
         // Imagens existentes que foram mantidas pelo admin
         $existingImages = $request->input('gallery_existing', []);
+        $this->uploadLog('processGalleryUploads: gallery_existing=' . json_encode($existingImages));
         foreach ($existingImages as $img) {
             $img = trim($img);
             if (!empty($img)) {
@@ -869,11 +874,24 @@ class TripsController extends Controller
         }
 
         // Arquivos enviados por upload
+        $this->uploadLog('processGalleryUploads: FILES[gallery_files] exists=' . (isset($_FILES['gallery_files']) ? 'sim' : 'nao'));
         if (isset($_FILES['gallery_files'])) {
             $files = $_FILES['gallery_files'];
+            $this->uploadLog('processGalleryUploads: gallery_files=' . json_encode($files));
             $count = is_array($files['name']) ? count($files['name']) : 0;
+            $this->uploadLog('processGalleryUploads: count=' . $count);
             for ($i = 0; $i < $count; $i++) {
-                if ($files['error'][$i] !== UPLOAD_ERR_OK) continue;
+                $this->uploadLog(sprintf(
+                    'processGalleryUploads: file[%d] name=%s error=%s size=%s',
+                    $i,
+                    $files['name'][$i] ?? '(vazio)',
+                    $files['error'][$i] ?? '(vazio)',
+                    $files['size'][$i] ?? '(vazio)'
+                ));
+                if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                    $this->uploadLog('  -> SKIP: error != UPLOAD_ERR_OK');
+                    continue;
+                }
                 $uploaded = $this->uploadImage([
                     'name' => $files['name'][$i],
                     'type' => $files['type'][$i],
@@ -883,10 +901,14 @@ class TripsController extends Controller
                 ]);
                 if ($uploaded) {
                     $urls[] = $uploaded;
+                    $this->uploadLog('  -> ADDED: ' . $uploaded);
+                } else {
+                    $this->uploadLog('  -> FAILED: uploadImage retornou null');
                 }
             }
         }
 
+        $this->uploadLog('processGalleryUploads: resultado final=' . json_encode($urls));
         return $urls;
     }
 
