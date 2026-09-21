@@ -145,6 +145,14 @@ class TripsController extends Controller
         // Pacotes de composição
         $this->saveCompositionPackages($tripId, $request);
 
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logCreate(
+            'trip',
+            $tripId,
+            $data['title'],
+            ['title' => $data['title'], 'slug' => $data['slug'], 'status' => $data['status'] ?? 'draft']
+        );
+
         $this->flash('success', 'Passeio criado com sucesso!');
         $this->redirect('/admin/passeios/' . $tripId . '/editar');
     }
@@ -267,7 +275,8 @@ class TripsController extends Controller
         // evitamos apagar a galeria inteira caso o request venha truncado ou
         // sem esses campos (grava null apagaria tudo silenciosamente).
         $galleryUploadFailed = false;
-        if (array_key_exists('gallery_existing', $_POST) || isset($_FILES['gallery_files'])) {
+        if (array_key_exists('gallery_marker', $_POST) || array_key_exists('gallery_existing', $_POST) || isset($_FILES['gallery_files'])) {
+            $this->uploadLog('update: processando galeria...');
             $gallery = $this->processGalleryUploads($request);
             $stats = $this->lastGalleryStats;
 
@@ -289,6 +298,9 @@ class TripsController extends Controller
                 // o admin realmente esvaziou a galeria.
                 $data['gallery'] = null;
             }
+            $this->uploadLog('update: gallery final=' . ($data['gallery'] ?? 'null'));
+        } else {
+            $this->uploadLog('update: galeria NAO sera processada (nenhum campo de galeria no POST)');
         }
 
         // Documentos extras: mesma proteção da galeria.
@@ -318,6 +330,15 @@ class TripsController extends Controller
         // Datas fixas
         $this->saveFixedDates($id, $request);
 
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logUpdate(
+            'trip',
+            $id,
+            $data['title'] ?? $trip['title'],
+            $trip,
+            $data
+        );
+
         if ($galleryUploadFailed) {
             $this->flash('error', 'Passeio salvo, mas NÃO foi possível gravar uma ou mais imagens da galeria. Isso costuma ser permissão de escrita na pasta de uploads do servidor (defina 775 em public/uploads). As imagens que já existiam foram preservadas.');
         } else {
@@ -329,7 +350,21 @@ class TripsController extends Controller
     public function destroy(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
+        
+        // Buscar dados para auditoria antes de excluir
+        $trip = $this->tripModel->find($id);
+        
         $this->tripModel->delete($id);
+        
+        // Log de auditoria
+        if ($trip) {
+            \App\Services\AuditService::getInstance()->logDelete(
+                'trip',
+                $id,
+                $trip['title'],
+                ['title' => $trip['title'], 'slug' => $trip['slug']]
+            );
+        }
         $this->flash('success', 'Passeio excluído.');
         $this->redirect('/admin/passeios');
     }
@@ -890,6 +925,7 @@ class TripsController extends Controller
 
         // Imagens existentes que foram mantidas pelo admin
         $existingImages = $request->input('gallery_existing', []);
+        $this->uploadLog('processGalleryUploads: gallery_existing=' . json_encode($existingImages));
         foreach ($existingImages as $img) {
             $img = trim($img);
             if (!empty($img)) {
@@ -898,16 +934,26 @@ class TripsController extends Controller
         }
 
         // Arquivos enviados por upload
+        $this->uploadLog('processGalleryUploads: FILES[gallery_files] exists=' . (isset($_FILES['gallery_files']) ? 'sim' : 'nao'));
         if (isset($_FILES['gallery_files'])) {
             $files = $_FILES['gallery_files'];
+            $this->uploadLog('processGalleryUploads: gallery_files=' . json_encode($files));
             $count = is_array($files['name']) ? count($files['name']) : 0;
+            $this->uploadLog('processGalleryUploads: count=' . $count);
             for ($i = 0; $i < $count; $i++) {
+                $this->uploadLog(sprintf(
+                    'processGalleryUploads: file[%d] name=%s error=%s size=%s',
+                    $i,
+                    $files['name'][$i] ?? '(vazio)',
+                    $files['error'][$i] ?? '(vazio)',
+                    $files['size'][$i] ?? '(vazio)'
+                ));
                 // Ignora slots vazios (nenhum arquivo escolhido naquele índice).
                 if (($files['error'][$i] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) continue;
                 $attempted++;
                 if ($files['error'][$i] !== UPLOAD_ERR_OK) {
                     $failed++;
-                    $this->uploadLog('processGalleryUploads: upload PHP com erro (error=' . $files['error'][$i] . ') no arquivo ' . ($files['name'][$i] ?? '?'));
+                    $this->uploadLog('  -> SKIP: error != UPLOAD_ERR_OK (error=' . $files['error'][$i] . ') no arquivo ' . ($files['name'][$i] ?? '?'));
                     continue;
                 }
                 $uploaded = $this->uploadImage([
@@ -919,8 +965,10 @@ class TripsController extends Controller
                 ]);
                 if ($uploaded) {
                     $urls[] = $uploaded;
+                    $this->uploadLog('  -> ADDED: ' . $uploaded);
                 } else {
                     $failed++;
+                    $this->uploadLog('  -> FAILED: uploadImage retornou null');
                 }
             }
         }
@@ -928,6 +976,7 @@ class TripsController extends Controller
         // Guarda o resumo da última execução para o controller consultar.
         $this->lastGalleryStats = ['attempted' => $attempted, 'failed' => $failed];
 
+        $this->uploadLog('processGalleryUploads: resultado final=' . json_encode($urls));
         return $urls;
     }
 

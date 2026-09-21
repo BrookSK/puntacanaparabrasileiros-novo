@@ -124,6 +124,9 @@ class SettingsController extends Controller
         // Recarregar settings na App
         $this->app->reloadSettings();
 
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logSettingsUpdate($data, 'Atualizou configurações do sistema');
+
         $this->flash('success', 'Configurações salvas com sucesso!');
         $this->redirect('/admin/configuracoes');
     }
@@ -176,6 +179,15 @@ class SettingsController extends Controller
 
         // 4) Recarrega as settings em memória (inclui a nova asset_version).
         $this->app->reloadSettings();
+
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logAction(
+            'cache_clear',
+            'system',
+            null,
+            'Cache do Sistema',
+            'Limpou o cache do sistema: ' . implode(', ', $done)
+        );
 
         $this->flash('success', 'Cache limpo com sucesso: ' . implode(', ', $done) . '. Os visitantes vão receber a versão mais recente do site.');
         $this->redirect('/admin/configuracoes');

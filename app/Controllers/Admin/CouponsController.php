@@ -48,7 +48,16 @@ class CouponsController extends Controller
             return;
         }
 
-        $this->couponModel->create($data);
+        $couponId = $this->couponModel->create($data);
+        
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logCreate(
+            'coupon',
+            $couponId,
+            $data['code'],
+            ['code' => $data['code'], 'type' => $data['type'], 'value' => $data['value']]
+        );
+        
         $this->flash('success', 'Cupom criado com sucesso!');
         $this->redirect('/admin/cupons');
     }
@@ -94,6 +103,16 @@ class CouponsController extends Controller
         unset($data['used_count']);
 
         $this->couponModel->update($id, $data);
+        
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logUpdate(
+            'coupon',
+            $id,
+            $data['code'],
+            $coupon,
+            $data
+        );
+        
         $this->flash('success', 'Cupom atualizado com sucesso!');
         $this->redirect('/admin/cupons');
     }
@@ -101,7 +120,22 @@ class CouponsController extends Controller
     public function destroy(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
+        
+        // Buscar dados para auditoria antes de excluir
+        $coupon = $this->couponModel->find($id);
+        
         $this->couponModel->delete($id);
+        
+        // Log de auditoria
+        if ($coupon) {
+            \App\Services\AuditService::getInstance()->logDelete(
+                'coupon',
+                $id,
+                $coupon['code'],
+                ['code' => $coupon['code'], 'type' => $coupon['type']]
+            );
+        }
+        
         $this->flash('success', 'Cupom excluído.');
         $this->redirect('/admin/cupons');
     }

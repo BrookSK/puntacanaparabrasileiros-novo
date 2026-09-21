@@ -88,6 +88,15 @@ class CategoriesController extends Controller
 
         $this->categoryModel->create($data);
 
+        // Log de auditoria
+        $newCategory = $this->categoryModel->findBySlug($slug);
+        \App\Services\AuditService::getInstance()->logCreate(
+            'category',
+            (int) ($newCategory['id'] ?? 0),
+            $name,
+            ['name' => $name, 'slug' => $slug]
+        );
+
         $this->flash('success', 'Categoria criada com sucesso!');
         $this->redirect('/admin/categorias');
     }
@@ -151,6 +160,15 @@ class CategoriesController extends Controller
 
         $this->categoryModel->update($id, $data);
 
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logUpdate(
+            'category',
+            $id,
+            $name,
+            $category,
+            $data
+        );
+
         $this->flash('success', 'Categoria atualizada com sucesso!');
         $this->redirect('/admin/categorias');
     }
@@ -158,7 +176,21 @@ class CategoriesController extends Controller
     public function destroy(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
+        
+        // Buscar dados para auditoria antes de excluir
+        $category = $this->categoryModel->find($id);
+        
         $this->categoryModel->delete($id);
+
+        // Log de auditoria
+        if ($category) {
+            \App\Services\AuditService::getInstance()->logDelete(
+                'category',
+                $id,
+                $category['name'],
+                ['name' => $category['name'], 'slug' => $category['slug']]
+            );
+        }
 
         $this->flash('success', 'Categoria excluída.');
         $this->redirect('/admin/categorias');

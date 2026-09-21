@@ -57,6 +57,10 @@ class LoginController extends Controller
         $user = $this->userModel->authenticate($email, $password);
         if (!$user) {
             $this->incrementRateLimit($request->ip());
+            
+            // Log de auditoria - falha de login
+            \App\Services\AuditService::getInstance()->logLoginFailed($email, 'Credenciais inválidas');
+            
             $this->flash('error', 'Email ou senha incorretos.');
             $this->flash('old', ['email' => $email]);
             $this->redirect('/login');
@@ -70,7 +74,10 @@ class LoginController extends Controller
         $this->session->regenerate();
         $this->session->set('user', $user);
 
-        // Log de atividade
+        // Log de auditoria - login bem-sucedido
+        \App\Services\AuditService::getInstance()->logLogin($user);
+
+        // Log de atividade (legado)
         $this->db->insert('activity_log', [
             'user_id' => $user['id'],
             'action' => 'login',

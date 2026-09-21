@@ -307,7 +307,20 @@ class BookingsController extends Controller
             return;
         }
 
+        // Buscar dados para auditoria
+        $booking = $this->bookingModel->find($id);
+        $oldStatus = $booking['status'] ?? 'unknown';
+
         $this->bookingModel->updateStatus($id, $status);
+
+        // Log de auditoria
+        \App\Services\AuditService::getInstance()->logStatusChange(
+            'booking',
+            $id,
+            $booking['booking_number'] ?? null,
+            $oldStatus,
+            $status
+        );
 
         // Se confirmado, gerar vouchers se não existem
         if ($status === 'booked') {
