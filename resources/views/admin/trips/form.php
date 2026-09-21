@@ -448,14 +448,11 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
 
                         <!-- Upload de novas imagens -->
                         <div style="margin-bottom:14px;">
-                            <label for="galleryFilesInput" class="btn btn-outline" style="cursor:pointer;">
+                            <label for="galleryFiles" class="btn btn-outline" style="cursor:pointer;">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                 Escolher Imagens
                             </label>
-                            <!-- Input visível para seleção (será copiado para container hidden) -->
-                            <input type="file" id="galleryFilesInput" multiple accept="image/*" style="display:none;" onchange="handleGalleryFileSelect(this)">
-                            <!-- Container com os inputs reais que serão enviados no form -->
-                            <div id="galleryFilesContainer" style="display:none;"></div>
+                            <input type="file" name="gallery_files[]" id="galleryFiles" multiple accept="image/*" style="display:none;" onchange="handleGalleryFileSelect(this)">
                             <span id="galleryCount" style="font-size:12px;color:#94a3b8;margin-left:10px;"></span>
                             <p style="font-size:10px;color:#94a3b8;margin-top:6px;">JPG, PNG, WebP, GIF, SVG, AVIF — Máx. 10MB cada. Recomendado: 1200x800px (proporção 3:2, paisagem).</p>
                             <div id="galleryPreviews" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;"></div>
@@ -496,71 +493,81 @@ function previewGalleryFiles(input, skipAccumulate) {
 
 // Array global para armazenar os arquivos da galeria
 window._galleryFiles = window._galleryFiles || [];
+window._galleryDT = window._galleryDT || null;
 
 function handleGalleryFileSelect(input) {
-    const container = document.getElementById('galleryFilesContainer');
     const previewsEl = document.getElementById('galleryPreviews');
     const countEl = document.getElementById('galleryCount');
     
-    // Adicionar novos arquivos ao array
+    // Inicializar DataTransfer se necessário
+    if (!window._galleryDT) {
+        window._galleryDT = new DataTransfer();
+    }
+    
+    // Adicionar novos arquivos ao DataTransfer
     for (let i = 0; i < input.files.length; i++) {
+        window._galleryDT.items.add(input.files[i]);
         window._galleryFiles.push(input.files[i]);
     }
     
-    // Limpar input original (para permitir selecionar o mesmo arquivo novamente)
-    input.value = '';
+    // Atribuir todos os arquivos acumulados ao input
+    input.files = window._galleryDT.files;
     
     // Atualizar contador
-    countEl.textContent = window._galleryFiles.length + ' arquivo(s) selecionado(s)';
+    countEl.textContent = window._galleryDT.files.length + ' arquivo(s) selecionado(s)';
     
-    // Recriar os inputs e previews
-    rebuildGalleryInputs();
+    // Recriar previews
+    rebuildGalleryPreviews();
 }
 
-function rebuildGalleryInputs() {
-    const container = document.getElementById('galleryFilesContainer');
+function rebuildGalleryPreviews() {
     const previewsEl = document.getElementById('galleryPreviews');
     const countEl = document.getElementById('galleryCount');
     
-    // Limpar containers
-    container.innerHTML = '';
+    // Limpar previews
     previewsEl.innerHTML = '';
     
     // Atualizar contador
-    countEl.textContent = window._galleryFiles.length > 0 
-        ? window._galleryFiles.length + ' arquivo(s) selecionado(s)' 
-        : '';
-    
-    // Criar um único input com DataTransfer contendo todos os arquivos
-    if (window._galleryFiles.length > 0) {
-        const dt = new DataTransfer();
-        window._galleryFiles.forEach(file => dt.items.add(file));
-        
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.name = 'gallery_files[]';
-        fileInput.multiple = true;
-        fileInput.files = dt.files;
-        container.appendChild(fileInput);
-    }
+    const total = window._galleryDT ? window._galleryDT.files.length : 0;
+    countEl.textContent = total > 0 ? total + ' arquivo(s) selecionado(s)' : '';
     
     // Criar previews
-    window._galleryFiles.forEach((file, idx) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const thumb = document.createElement('div');
-            thumb.style.cssText = 'position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:2px solid #e2e8f0;flex-shrink:0;';
-            thumb.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">' +
-                '<button type="button" onclick="removeGalleryFileByIndex(' + idx + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>';
-            previewsEl.appendChild(thumb);
-        };
-        reader.readAsDataURL(file);
-    });
+    if (window._galleryDT) {
+        for (let i = 0; i < window._galleryDT.files.length; i++) {
+            const file = window._galleryDT.files[i];
+            const idx = i;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const thumb = document.createElement('div');
+                thumb.id = 'galleryPreview' + idx;
+                thumb.style.cssText = 'position:relative;width:64px;height:64px;border-radius:8px;overflow:hidden;border:2px solid #e2e8f0;flex-shrink:0;';
+                thumb.innerHTML = '<img src="' + e.target.result + '" style="width:100%;height:100%;object-fit:cover;">' +
+                    '<button type="button" onclick="removeGalleryFileByIndex(' + idx + ')" style="position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:#ef4444;color:#fff;border:none;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;">&times;</button>';
+                previewsEl.appendChild(thumb);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 }
 
 function removeGalleryFileByIndex(idx) {
-    window._galleryFiles.splice(idx, 1);
-    rebuildGalleryInputs();
+    const input = document.getElementById('galleryFiles');
+    
+    // Criar novo DataTransfer sem o arquivo removido
+    const newDT = new DataTransfer();
+    for (let i = 0; i < window._galleryDT.files.length; i++) {
+        if (i !== idx) {
+            newDT.items.add(window._galleryDT.files[i]);
+        }
+    }
+    
+    // Atualizar referências
+    window._galleryDT = newDT;
+    window._galleryFiles = Array.from(newDT.files);
+    input.files = newDT.files;
+    
+    // Reconstruir previews
+    rebuildGalleryPreviews();
 }
 
 function removeGalleryFile(idx) {
