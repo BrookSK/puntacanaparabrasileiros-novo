@@ -34,7 +34,7 @@
                         <p class="cart-item-meta">
                             Data: <?= format_date($item['date']) ?>
                             <?php if ($item['time']): ?> | Horário: <?= e($item['time']) ?><?php endif; ?>
-                            | <?= (int)$item['total_pax'] ?> passageiro(s)
+                            | <?= e(pax_label($item['pax'] ?? [], (int)($item['total_pax'] ?? 1))) ?>
                         </p>
                         <?php if ($item['package_title']): ?>
                         <p class="cart-item-package">Pacote: <?= e($item['package_title']) ?></p>
@@ -67,7 +67,7 @@
                             <?= e($transfer['origin_title']) ?> &rarr; <?= e($transfer['destination_title']) ?><br>
                             <?= format_date($transfer['date']) ?> às <?= e($transfer['time']) ?>
                             | <?= e($transfer['type'] === 'arrival' ? 'Chegada' : 'Partida') ?>
-                            | <?= (int)$transfer['adults'] + (int)$transfer['children'] + (int)$transfer['infants'] ?> passageiro(s)
+                            | <?= e(transfer_pax_label($transfer['adults'] ?? 0, $transfer['children'] ?? 0, $transfer['infants'] ?? 0)) ?>
                         </p>
                     </div>
                     <div class="cart-item-price">

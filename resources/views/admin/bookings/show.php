@@ -185,21 +185,13 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                         <span class="booking-detail-value"><?= e($item['package_title']) ?></span>
                     </div>
                     <?php endif; ?>
-                    <?php if (!empty($item['travelers'])): ?>
                     <div class="booking-trip-detail-item">
                         <span class="booking-detail-label">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                             Passageiros
                         </span>
-                        <span class="booking-detail-value"><?php
-                            $travelerParts = [];
-                            foreach ($item['travelers'] as $t) {
-                                $travelerParts[] = (int)$t['quantity'] . ' ' . e($t['category_name'] ?? 'Viajante');
-                            }
-                            echo implode(', ', $travelerParts);
-                        ?></span>
+                        <span class="booking-detail-value"><?= e(pax_label($item['pax'] ?? [], (int)($item['total_pax'] ?? 1))) ?></span>
                     </div>
-                    <?php endif; ?>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -249,7 +241,7 @@ $customerName = trim(($booking['billing_first_name'] ?? '') . ' ' . ($booking['b
                     <?php endif; ?>
                     <div class="booking-transfer-meta-item">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
-                        <?= (int)($tr['adults'] ?? 0) ?> ad. + <?= (int)($tr['children'] ?? 0) ?> cr.
+                        <?= e(transfer_pax_label($tr['adults'] ?? 0, $tr['children'] ?? 0, $tr['infants'] ?? 0)) ?>
                     </div>
                     <?php if (!empty($tr['vehicle_title'])): ?>
                     <div class="booking-transfer-meta-item">

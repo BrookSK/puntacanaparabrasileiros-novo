@@ -644,10 +644,9 @@ class CheckoutController extends Controller
             if (!empty($items)) {
                 $msg .= "🎯 *PASSEIOS:*\n";
                 foreach ($items as $item) {
-                    $pax = (int)($item['total_pax'] ?? 1);
                     $msg .= "• {$item['trip_title']}\n";
                     $msg .= "  📅 " . (!empty($item['trip_date']) ? date('d/m/Y', strtotime($item['trip_date'])) : '') . " às {$item['trip_time']}\n";
-                    $msg .= "  👥 {$pax} passageiro(s)\n";
+                    $msg .= "  👥 " . pax_label($item['pax'] ?? [], (int)($item['total_pax'] ?? 1)) . "\n";
                     if (!empty($item['hotel_name'])) {
                         $msg .= "  🏨 Hotel: {$item['hotel_name']}\n";
                     }
@@ -658,11 +657,10 @@ class CheckoutController extends Controller
             if (!empty($transfers)) {
                 $msg .= "🚐 *TRANSFERS:*\n";
                 foreach ($transfers as $tr) {
-                    $pax = (int)($tr['adults'] ?? 0) + (int)($tr['children'] ?? 0) + (int)($tr['infants'] ?? 0);
                     $msg .= "• {$tr['vehicle_title']}\n";
                     $msg .= "  📍 {$tr['origin_title']} → {$tr['destination_title']}\n";
                     $msg .= "  📅 " . (!empty($tr['date']) ? date('d/m/Y', strtotime($tr['date'])) : '') . " às {$tr['time']}\n";
-                    $msg .= "  👥 {$pax} passageiro(s)\n\n";
+                    $msg .= "  👥 " . transfer_pax_label($tr['adults'] ?? 0, $tr['children'] ?? 0, $tr['infants'] ?? 0) . "\n\n";
                 }
             }
 

@@ -113,7 +113,7 @@
                         <tr>
                             <td style="padding:6px 0;color:#64748b;border-top:1px solid #f0f0f0;">Passageiros</td>
                             <td style="padding:6px 0;font-weight:600;color:#1e293b;border-top:1px solid #f0f0f0;">
-                                <?= (int)($tr['adults'] ?? 1) ?> adulto(s)<?= ((int)($tr['children'] ?? 0) > 0) ? ', ' . (int)$tr['children'] . ' criança(s)' : '' ?>
+                                <?= e(transfer_pax_label($tr['adults'] ?? 0, $tr['children'] ?? 0, $tr['infants'] ?? 0)) ?>
                             </td>
                         </tr>
                         <?php if (!empty($tr['flight_number'])): ?>
@@ -165,7 +165,7 @@
                         <tr>
                             <td style="padding:5px 0;color:#64748b;border-top:1px solid #f0f0f0;">Passageiros</td>
                             <td style="padding:5px 0;font-weight:600;color:#1e293b;border-top:1px solid #f0f0f0;">
-                                <?= (int)($tr['adults'] ?? 1) ?> adulto(s)<?= ((int)($tr['children'] ?? 0) > 0) ? ', ' . (int)$tr['children'] . ' criança(s)' : '' ?>
+                                <?= e(transfer_pax_label($tr['adults'] ?? 0, $tr['children'] ?? 0, $tr['infants'] ?? 0)) ?>
                             </td>
                         </tr>
                         <tr>
@@ -211,7 +211,7 @@
                     <tr>
                         <td style="padding:7px 0;color:#374151;border-top:1px solid #d1fae5;">Passageiros</td>
                         <td style="padding:7px 0;font-weight:600;color:#1e293b;border-top:1px solid #d1fae5;">
-                            <?= (int)($tr['adults'] ?? 1) ?> adulto(s)<?= ((int)($tr['children'] ?? 0) > 0) ? ', ' . (int)$tr['children'] . ' criança(s)' : '' ?>
+                            <?= e(transfer_pax_label($tr['adults'] ?? 0, $tr['children'] ?? 0, $tr['infants'] ?? 0)) ?>
                         </td>
                     </tr>
                     <tr>

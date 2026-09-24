@@ -109,27 +109,7 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
             </div>
             <div class="v-cell">
                 <div class="v-cell-label">Passageiros</div>
-                <div class="v-cell-value"><?php
-                    $paxData = is_string($item['pax'] ?? '') ? json_decode($item['pax'], true) : ($item['pax'] ?? []);
-                    if (is_array($paxData) && !empty($paxData)) {
-                        $paxLabels = [];
-                        // Buscar nomes das categorias
-                        $db = \Core\Database::getInstance();
-                        $categories = $db->fetchAll("SELECT id, name FROM traveler_categories ORDER BY sort_order ASC");
-                        $catMap = [];
-                        foreach ($categories as $cat) { $catMap[$cat['id']] = $cat['name']; }
-                        foreach ($paxData as $catId => $qty) {
-                            $qty = (int) $qty;
-                            if ($qty > 0) {
-                                $catName = $catMap[$catId] ?? 'Pessoa';
-                                $paxLabels[] = $qty . ' ' . $catName . '(s)';
-                            }
-                        }
-                        echo e(implode(', ', $paxLabels) ?: '1 Adulto(s)');
-                    } else {
-                        echo '1 Adulto(s)';
-                    }
-                ?></div>
+                <div class="v-cell-value"><?= e(pax_label($item['pax'] ?? [], (int)($item['total_pax'] ?? 1))) ?></div>
             </div>
         </div>
     </div>

@@ -91,7 +91,7 @@ class WhatsAppService
             'destination' => $transferData['destination_title'] ?? '',
             'date' => $transferData['date'] ?? '',
             'time' => $transferData['time'] ?? '',
-            'pax_info' => ($transferData['adults'] ?? 0) . ' adulto(s)',
+            'pax_info' => transfer_pax_label($transferData['adults'] ?? 0, $transferData['children'] ?? 0, $transferData['infants'] ?? 0),
             'reference' => $transferData['reference'] ?? '',
         ]);
 
@@ -260,8 +260,7 @@ class WhatsAppService
             $message .= "⏰ *Horário:* {$transferData['time']}\n";
         }
 
-        $adults = $transferData['adults'] ?? 0;
-        $message .= "👥 *Passageiros:* {$adults} adulto(s)\n";
+        $message .= "👥 *Passageiros:* " . transfer_pax_label($transferData['adults'] ?? 0, $transferData['children'] ?? 0, $transferData['infants'] ?? 0) . "\n";
 
         if (!empty($transferData['reference'])) {
             $message .= "📋 *Referência:* {$transferData['reference']}\n";

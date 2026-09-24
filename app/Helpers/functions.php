@@ -192,6 +192,107 @@ function slugify(string $text): string
 }
 
 /**
+ * Pluraliza um nome de categoria de passageiro em português.
+ * Ex.: "Adulto" -> "Adultos", "Criança" -> "Crianças", "Infantil" -> "Infantis".
+ */
+function pluralize_category(string $name, int $qty): string
+{
+    $name = trim($name);
+    if ($qty <= 1 || $name === '') {
+        return $name;
+    }
+    $lower = mb_strtolower($name, 'UTF-8');
+    // Palavras terminadas em -l viram -is (infantil -> infantis).
+    if (mb_substr($lower, -1) === 'l') {
+        return mb_substr($name, 0, -1) . 'is';
+    }
+    // Terminadas em vogal ou -ão simples: adiciona "s".
+    return $name . 's';
+}
+
+/**
+ * Monta o rótulo de passageiros de um PASSEIO com a composição por categoria.
+ * Recebe o mapa { traveler_category_id: quantidade } (coluna booking_items.pax
+ * já decodificada, ou o "pax" do item de carrinho) e devolve algo como:
+ *   "5 passageiros (2 adultos, 2 crianças, 1 infantil)"
+ * Se não houver dados por categoria, cai num fallback com o total informado.
+ *
+ * @param mixed $pax  array {cat_id:qtd}, JSON string, ou null
+ * @param int   $fallbackTotal total a usar quando não há composição por categoria
+ */
+function pax_label($pax, int $fallbackTotal = 0): string
+{
+    // Aceita JSON string ou array.
+    if (is_string($pax)) {
+        $decoded = json_decode($pax, true);
+        $pax = is_array($decoded) ? $decoded : [];
+    }
+    if (!is_array($pax)) {
+        $pax = [];
+    }
+
+    // Nomes das categorias (cacheados por request).
+    static $catMap = null;
+    if ($catMap === null) {
+        $catMap = [];
+        try {
+            $rows = \Core\Database::getInstance()->fetchAll(
+                "SELECT id, name FROM traveler_categories ORDER BY sort_order ASC"
+            );
+            foreach ($rows as $r) {
+                $catMap[(int) $r['id']] = $r['name'];
+            }
+        } catch (\Throwable $e) {
+            $catMap = [];
+        }
+    }
+
+    $total = 0;
+    $parts = [];
+    foreach ($pax as $catId => $qty) {
+        $qty = (int) $qty;
+        if ($qty <= 0) continue;
+        $total += $qty;
+        $name = $catMap[(int) $catId] ?? 'Passageiro';
+        $parts[] = $qty . ' ' . mb_strtolower(pluralize_category($name, $qty), 'UTF-8');
+    }
+
+    if ($total === 0) {
+        // Sem composição por categoria: usa o total informado (fallback).
+        $total = max(0, $fallbackTotal);
+        return $total . ' ' . ($total === 1 ? 'passageiro' : 'passageiros');
+    }
+
+    $label = $total . ' ' . ($total === 1 ? 'passageiro' : 'passageiros');
+    return $label . ' (' . implode(', ', $parts) . ')';
+}
+
+/**
+ * Monta o rótulo de passageiros de um TRANSFER a partir das colunas
+ * adults/children/infants. Devolve algo como:
+ *   "4 passageiros (2 adultos, 1 criança, 1 infantil)"
+ */
+function transfer_pax_label($adults, $children = 0, $infants = 0): string
+{
+    $adults = (int) $adults;
+    $children = (int) $children;
+    $infants = (int) $infants;
+    $total = $adults + $children + $infants;
+
+    $parts = [];
+    if ($adults > 0)   $parts[] = $adults . ' ' . ($adults === 1 ? 'adulto' : 'adultos');
+    if ($children > 0) $parts[] = $children . ' ' . ($children === 1 ? 'criança' : 'crianças');
+    if ($infants > 0)  $parts[] = $infants . ' ' . ($infants === 1 ? 'infantil' : 'infantis');
+
+    if ($total === 0) {
+        return '0 passageiros';
+    }
+
+    $label = $total . ' ' . ($total === 1 ? 'passageiro' : 'passageiros');
+    return empty($parts) ? $label : $label . ' (' . implode(', ', $parts) . ')';
+}
+
+/**
  * Gera campo hidden com CSRF token.
  */
 function csrf_field(): string
