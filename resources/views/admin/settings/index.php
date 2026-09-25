@@ -63,6 +63,10 @@
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/></svg>
             Aparência
         </button>
+        <button type="button" class="settings-tab" data-tab="lrv">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+            Integração LRV
+        </button>
     </div>
 
     <!-- Tab: Geral -->
@@ -486,6 +490,27 @@
                 <div class="form-group col-6"><label>WhatsApp (número botão flutuante)</label><input type="text" name="whatsapp_float_number" class="form-control" value="<?= e($settings['appearance']['whatsapp_float_number']['setting_value'] ?? '') ?>" placeholder="5511999999999"></div>
                 <div class="form-group col-6"><label>Texto do Botão WhatsApp</label><input type="text" name="whatsapp_float_text" class="form-control" value="<?= e($settings['appearance']['whatsapp_float_text']['setting_value'] ?? 'Fale conosco!') ?>"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- Tab: Integração LRV -->
+    <div class="settings-panel" id="tab-lrv">
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-icon admin-card-icon-blue">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                </div>
+                <div>
+                    <h3>Integração LRV (helpdeskON)</h3>
+                    <p class="admin-card-subtitle">Envio automático das demandas de Suporte para o LRV via API.</p>
+                </div>
+            </div>
+            <div class="form-group"><label><input type="checkbox" name="lrv_enabled" value="1" <?= ($settings['integrations']['lrv_enabled']['setting_value'] ?? '') === '1' ? 'checked' : '' ?>> Ativar envio ao LRV</label></div>
+            <div class="form-row">
+                <div class="form-group col-6"><label>URL Base do LRV</label><input type="url" name="lrv_base_url" class="form-control" placeholder="https://seu-dominio-lrv" value="<?= e($settings['integrations']['lrv_base_url']['setting_value'] ?? '') ?>"></div>
+                <div class="form-group col-6"><label>API Key (X-Api-Key)</label><input type="password" name="lrv_api_key" class="form-control" placeholder="hk_live_..." value="<?= e($settings['integrations']['lrv_api_key']['setting_value'] ?? '') ?>"></div>
+            </div>
+            <p class="admin-card-subtitle" style="margin-top:8px;">A chave é gerada no painel do LRV (Configurações → Integrações → API Keys). Uma chave por empresa. O endpoint usado é <code>POST /api/v1/tickets</code>.</p>
         </div>
     </div>
 

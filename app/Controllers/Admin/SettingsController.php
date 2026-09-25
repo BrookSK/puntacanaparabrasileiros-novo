@@ -83,6 +83,7 @@ class SettingsController extends Controller
             'checkout_online_enabled', 'checkout_whatsapp_enabled',
             'videocall_enabled', 'google_meet_enabled',
             'aurora_enabled',
+            'lrv_enabled',
         ];
         foreach ($booleanFields as $field) {
             $data[$field] = isset($data[$field]) ? '1' : '0';
@@ -113,6 +114,7 @@ class SettingsController extends Controller
             'aurora_model' => 'aurora', 'aurora_system_prompt' => 'aurora',
             'aurora_crm_board_id' => 'aurora', 'aurora_max_replies' => 'aurora',
             'aurora_history_limit' => 'aurora',
+            'lrv_enabled' => 'integrations', 'lrv_base_url' => 'integrations', 'lrv_api_key' => 'integrations',
         ];
 
         // Salvar no banco

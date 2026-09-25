@@ -22,6 +22,7 @@ use App\Controllers\Admin\VouchersController as AdminVouchersController;
 use App\Controllers\Admin\AffiliatesController as AdminAffiliatesController;
 use App\Controllers\Admin\AgenciesController as AdminAgenciesController;
 use App\Controllers\Admin\UsersController as AdminUsersController;
+use App\Controllers\Admin\SuporteController as AdminSuporteController;
 use App\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Controllers\Admin\AuditLogsController as AdminAuditLogsController;
 use App\Controllers\Admin\NewsletterController as AdminNewsletterController;
@@ -306,6 +307,12 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/usuarios/{id}/editar', [AdminUsersController::class, 'update'], [CsrfMiddleware::class], 'admin.users.update');
     $router->post('/usuarios/{id}/excluir', [AdminUsersController::class, 'destroy'], [CsrfMiddleware::class], 'admin.users.destroy');
     $router->get('/usuarios/{id}/impersonate', [AdminUsersController::class, 'impersonate'], [], 'admin.users.impersonate');
+
+    // Suporte (demandas enviadas ao LRV)
+    $router->get('/suporte', [AdminSuporteController::class, 'index'], [], 'admin.support.index');
+    $router->get('/suporte/criar', [AdminSuporteController::class, 'create'], [], 'admin.support.create');
+    $router->post('/suporte/criar', [AdminSuporteController::class, 'store'], [CsrfMiddleware::class], 'admin.support.store');
+    $router->post('/suporte/{id}/reenviar', [AdminSuporteController::class, 'resend'], [CsrfMiddleware::class], 'admin.support.resend');
 
     // Configurações
     $router->get('/configuracoes', [AdminSettingsController::class, 'index'], [], 'admin.settings.index');
