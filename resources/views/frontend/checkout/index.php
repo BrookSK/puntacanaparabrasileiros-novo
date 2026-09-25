@@ -267,7 +267,7 @@
                             foreach ($cart['trips'] as $tripItem) {
                                 $whatsappMsg .= "• " . ($tripItem['trip_title'] ?? 'Passeio') . "\n";
                                 $whatsappMsg .= "  📅 Data: " . format_date($tripItem['date'] ?? '') . (!empty($tripItem['time']) ? " às " . $tripItem['time'] : '') . "\n";
-                                $whatsappMsg .= "  👥 " . (int)($tripItem['total_pax'] ?? 1) . " passageiro(s)\n";
+                                $whatsappMsg .= "  👥 " . pax_label($tripItem['pax'] ?? [], (int)($tripItem['total_pax'] ?? 1)) . "\n";
                                 $whatsappMsg .= "  💵 " . money((float)($tripItem['total'] ?? 0)) . " USD\n\n";
                             }
                         }
@@ -278,8 +278,7 @@
                                 $whatsappMsg .= "• " . ($transferItem['origin_title'] ?? '') . " → " . ($transferItem['destination_title'] ?? '') . "\n";
                                 $whatsappMsg .= "  🚗 " . ($transferItem['vehicle_title'] ?? 'Transfer') . "\n";
                                 $whatsappMsg .= "  📅 " . format_date($transferItem['date'] ?? '') . " às " . ($transferItem['time'] ?? '') . "\n";
-                                $pax = (int)($transferItem['adults'] ?? 0) + (int)($transferItem['children'] ?? 0) + (int)($transferItem['infants'] ?? 0);
-                                $whatsappMsg .= "  👥 " . $pax . " passageiro(s)\n";
+                                $whatsappMsg .= "  👥 " . transfer_pax_label($transferItem['adults'] ?? 0, $transferItem['children'] ?? 0, $transferItem['infants'] ?? 0) . "\n";
                                 $whatsappMsg .= "  💵 " . money((float)($transferItem['price'] ?? 0)) . " USD\n\n";
                             }
                         }
@@ -384,7 +383,7 @@
                                 <?php if (!empty($item['package_title'])): ?>
                                 <span class="summary-product-meta">Pacote: <?= e($item['package_title']) ?></span>
                                 <?php endif; ?>
-                                <span class="summary-product-meta"><?= (int)$item['total_pax'] ?> passageiro(s)</span>
+                                <span class="summary-product-meta"><?= e(pax_label($item['pax'] ?? [], (int)($item['total_pax'] ?? 1))) ?></span>
                             </div>
                             <div class="summary-product-price"><?= money($item['total']) ?></div>
                         </div>
@@ -407,7 +406,7 @@
                                     | <?= e($item['type'] === 'arrival' ? 'Chegada' : 'Partida') ?>
                                 </span>
                                 <span class="summary-product-meta">
-                                    <?= (int)$item['adults'] + (int)$item['children'] + (int)$item['infants'] ?> passageiro(s)
+                                    <?= e(transfer_pax_label($item['adults'] ?? 0, $item['children'] ?? 0, $item['infants'] ?? 0)) ?>
                                 </span>
                             </div>
                             <div class="summary-product-price"><?= money((float)$item['price']) ?></div>

@@ -28,7 +28,7 @@
             <td><?= e($booking['customer_name'] ?? '-') ?></td>
             <td><?= e(($booking['origin_title'] ?? '?') . ' → ' . ($booking['destination_title'] ?? '?')) ?></td>
             <td><?= e($booking['transfer_date'] ?? '-') ?></td>
-            <td><?= (int)($booking['adults'] ?? 0) + (int)($booking['children'] ?? 0) ?></td>
+            <td><?= e(transfer_pax_label($booking['adults'] ?? 0, $booking['children'] ?? 0, $booking['infants'] ?? 0)) ?></td>
             <td>$<?= number_format((float)($booking['total_price'] ?? 0), 2) ?></td>
             <td>
                 <span class="badge badge-<?= ($booking['status'] ?? '') === 'confirmed' ? 'success' : (($booking['status'] ?? '') === 'cancelled' ? 'danger' : 'warning') ?>">

@@ -33,7 +33,10 @@
 <h3>Passeios:</h3>
 <ul>
     <?php foreach ($items as $item): ?>
-    <li><?= e($item['trip_title'] ?? 'Passeio') ?> — <?= e($item['trip_date'] ?? '') ?></li>
+    <li>
+        <?= e($item['trip_title'] ?? 'Passeio') ?> — <?= e($item['trip_date'] ?? '') ?>
+        <br><span style="color:#64748b;font-size:13px;"><?= e(pax_label($item['pax'] ?? [], (int)($item['total_pax'] ?? 1))) ?></span>
+    </li>
     <?php endforeach; ?>
 </ul>
 <?php endif; ?>
@@ -42,7 +45,10 @@
 <h3>Transfers:</h3>
 <ul>
     <?php foreach ($transfers as $tr): ?>
-    <li><?= e(($tr['origin_title'] ?? '') . ' → ' . ($tr['destination_title'] ?? '')) ?> — <?= e($tr['transfer_date'] ?? $tr['date'] ?? '') ?></li>
+    <li>
+        <?= e(($tr['origin_title'] ?? '') . ' → ' . ($tr['destination_title'] ?? '')) ?> — <?= e($tr['transfer_date'] ?? $tr['date'] ?? '') ?>
+        <br><span style="color:#64748b;font-size:13px;"><?= e(transfer_pax_label($tr['adults'] ?? 0, $tr['children'] ?? 0, $tr['infants'] ?? 0)) ?></span>
+    </li>
     <?php endforeach; ?>
 </ul>
 <?php endif; ?>

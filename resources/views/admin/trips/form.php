@@ -487,10 +487,6 @@ function previewFeaturedImage(input) {
     }
 }
 
-function previewGalleryFiles(input, skipAccumulate) {
-    // DEPRECATED - usar handleGalleryFileSelect
-}
-
 // Array global para armazenar os arquivos da galeria
 window._galleryFiles = window._galleryFiles || [];
 window._galleryDT = window._galleryDT || null;
@@ -498,39 +494,36 @@ window._galleryDT = window._galleryDT || null;
 function handleGalleryFileSelect(input) {
     const previewsEl = document.getElementById('galleryPreviews');
     const countEl = document.getElementById('galleryCount');
-    
+
     // Inicializar DataTransfer se necessário
     if (!window._galleryDT) {
         window._galleryDT = new DataTransfer();
     }
-    
-    // Adicionar novos arquivos ao DataTransfer
+
+    // Adicionar SOMENTE os novos arquivos escolhidos ao DataTransfer acumulado
     for (let i = 0; i < input.files.length; i++) {
         window._galleryDT.items.add(input.files[i]);
         window._galleryFiles.push(input.files[i]);
     }
-    
-    // Atribuir todos os arquivos acumulados ao input
+
+    // Atribuir todos os arquivos acumulados ao input (serão enviados no submit)
     input.files = window._galleryDT.files;
-    
-    // Atualizar contador
-    countEl.textContent = window._galleryDT.files.length + ' arquivo(s) selecionado(s)';
-    
-    // Recriar previews
+
+    // Recriar previews (também atualiza o contador)
     rebuildGalleryPreviews();
 }
 
 function rebuildGalleryPreviews() {
     const previewsEl = document.getElementById('galleryPreviews');
     const countEl = document.getElementById('galleryCount');
-    
+
     // Limpar previews
     previewsEl.innerHTML = '';
-    
+
     // Atualizar contador
     const total = window._galleryDT ? window._galleryDT.files.length : 0;
     countEl.textContent = total > 0 ? total + ' arquivo(s) selecionado(s)' : '';
-    
+
     // Criar previews
     if (window._galleryDT) {
         for (let i = 0; i < window._galleryDT.files.length; i++) {
@@ -552,20 +545,20 @@ function rebuildGalleryPreviews() {
 
 function removeGalleryFileByIndex(idx) {
     const input = document.getElementById('galleryFiles');
-    
-    // Criar novo DataTransfer sem o arquivo removido
+
+    // Criar novo DataTransfer sem o arquivo removido (não re-adiciona, evita duplicar)
     const newDT = new DataTransfer();
     for (let i = 0; i < window._galleryDT.files.length; i++) {
         if (i !== idx) {
             newDT.items.add(window._galleryDT.files[i]);
         }
     }
-    
+
     // Atualizar referências
     window._galleryDT = newDT;
     window._galleryFiles = Array.from(newDT.files);
     input.files = newDT.files;
-    
+
     // Reconstruir previews
     rebuildGalleryPreviews();
 }
@@ -576,15 +569,22 @@ function removeGalleryFile(idx) {
 }
 document.addEventListener('click', function(e) { if (e.target.classList.contains('repeater-remove')) { e.target.closest('.repeater-item, .package-item').remove(); } });
 
+// Chamado no onchange do input: adiciona os arquivos recém-escolhidos ao acumulado.
 function previewDocFiles(input) {
-    const container = document.getElementById('docPreviews');
-    // Acumular arquivos usando DataTransfer
     if (!window._docDT) window._docDT = new DataTransfer();
     for (let i = 0; i < input.files.length; i++) {
         window._docDT.items.add(input.files[i]);
     }
+    syncDocInput();
+}
+
+// Reflete o DataTransfer acumulado no input e (re)desenha a lista.
+function syncDocInput() {
+    const input = document.getElementById('docFiles');
+    const container = document.getElementById('docPreviews');
+    if (!window._docDT) window._docDT = new DataTransfer();
+
     input.files = window._docDT.files;
-    // Renderizar lista
     container.innerHTML = '';
     for (let i = 0; i < window._docDT.files.length; i++) {
         const file = window._docDT.files[i];
@@ -596,14 +596,12 @@ function previewDocFiles(input) {
 }
 
 function removeDocFile(idx) {
-    const input = document.getElementById('docFiles');
     const dt = new DataTransfer();
     for (let i = 0; i < window._docDT.files.length; i++) {
         if (i !== idx) dt.items.add(window._docDT.files[i]);
     }
     window._docDT = dt;
-    input.files = dt.files;
-    previewDocFiles(input);
+    syncDocInput();
 }
 document.getElementById('addPackageBtn')?.addEventListener('click', function() { const list = document.getElementById('packages-list'), i = list.children.length; const cats = <?= json_encode($travelerCategories ?? []) ?>; let ch = ''; cats.forEach(tc => { ch += `<label class="checkbox-label"><input type="checkbox" name="packages[${i}][categories][]" value="${tc.id}"> ${tc.name}</label>`; }); const d = document.createElement('div'); d.className = 'package-item card-inner'; d.innerHTML = `<div class="form-row"><div class="form-group col-6"><label>Nome</label><input type="text" name="packages[${i}][title]" class="form-control"></div><div class="form-group col-6"><label>Descrição</label><input type="text" name="packages[${i}][description]" class="form-control"></div></div><div class="form-group"><label>Categorias</label><div class="checkbox-grid">${ch}</div></div><button type="button" class="btn btn-sm btn-danger repeater-remove">&times; Remover</button>`; list.appendChild(d); });
 

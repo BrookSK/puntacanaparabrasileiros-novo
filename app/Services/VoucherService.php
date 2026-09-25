@@ -395,14 +395,14 @@ class VoucherService
                 $tripName = $tripInfo['trip_title'] ?? ($voucher['trip_name'] ?? 'Passeio');
                 $tripDate = $tripInfo['trip_date'] ?? '';
                 $tripTime = $tripInfo['trip_time'] ?? '';
-                $tripPax = (int)($tripInfo['total_pax'] ?? 1);
+                $tripPaxLabel = pax_label($tripInfo['pax'] ?? [], (int)($tripInfo['total_pax'] ?? 1));
                 $tripHotel = $tripInfo['hotel_name'] ?? '';
 
                 $caption = "🎯 *VOUCHER PASSEIO*\n\n";
                 $caption .= "📍 *{$tripName}*\n";
                 $caption .= "📅 Data: " . (!empty($tripDate) ? date('d/m/Y', strtotime($tripDate)) : '') . "\n";
                 $caption .= "⏰ Horário: {$tripTime}\n";
-                $caption .= "👥 {$tripPax} passageiro(s)\n";
+                $caption .= "👥 {$tripPaxLabel}\n";
                 if (!empty($tripHotel)) {
                     $caption .= "🏨 Hotel: {$tripHotel}\n";
                 }
@@ -423,14 +423,14 @@ class VoucherService
                 $destination = $transferInfo['destination_title'] ?? '';
                 $date = $transferInfo['date'] ?? '';
                 $time = $transferInfo['time'] ?? '';
-                $pax = (int)($transferInfo['adults'] ?? 0) + (int)($transferInfo['children'] ?? 0) + (int)($transferInfo['infants'] ?? 0);
+                $paxLabel = transfer_pax_label($transferInfo['adults'] ?? 0, $transferInfo['children'] ?? 0, $transferInfo['infants'] ?? 0);
 
                 $caption = "🚐 *VOUCHER TRANSFER*\n\n";
                 $caption .= "🚗 *{$vehicleName}*\n";
                 $caption .= "📍 {$origin} → {$destination}\n";
                 $caption .= "📅 Data: " . (!empty($date) ? date('d/m/Y', strtotime($date)) : '') . "\n";
                 $caption .= "⏰ Horário: {$time}\n";
-                $caption .= "👥 {$pax} passageiro(s)\n";
+                $caption .= "👥 {$paxLabel}\n";
                 $caption .= "🔢 Código: {$voucher['reference_code']}";
 
                 $fileName = 'Voucher-Transfer-' . $voucher['reference_code'] . '.html';

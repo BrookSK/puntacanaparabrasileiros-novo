@@ -97,7 +97,7 @@ body{font-family:'Segoe UI',Roboto,Arial,sans-serif;color:#1a1a1a;background:#ff
             </div>
             <div class="v-cell">
                 <div class="v-cell-label">Passageiros</div>
-                <div class="v-cell-value"><?= (int)($transfer['adults'] ?? 1) ?> adulto(s), <?= (int)($transfer['children'] ?? 0) ?> criança(s)</div>
+                <div class="v-cell-value"><?= e(transfer_pax_label($transfer['adults'] ?? 0, $transfer['children'] ?? 0, $transfer['infants'] ?? 0)) ?></div>
             </div>
             <div class="v-cell">
                 <div class="v-cell-label">Serviço</div>
