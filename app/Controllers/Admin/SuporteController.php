@@ -134,6 +134,45 @@ class SuporteController extends Controller
     }
 
     /**
+     * Exibe os detalhes de uma demanda.
+     */
+    public function show(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $ticket = $this->ticketModel->find($id);
+
+        if (!$ticket) {
+            $this->flash('error', 'Demanda não encontrada.');
+            $this->redirect('/admin/suporte');
+            return;
+        }
+
+        $this->view('admin/suporte/show', [
+            'ticket' => $ticket,
+            'pageTitle' => 'Demanda: ' . $ticket['title'],
+        ], 'admin');
+    }
+
+    /**
+     * Exclui uma demanda (apenas do registro local da Punta Cana).
+     */
+    public function destroy(Request $request, Response $response): void
+    {
+        $id = (int) $request->param('id');
+        $ticket = $this->ticketModel->find($id);
+
+        if (!$ticket) {
+            $this->flash('error', 'Demanda não encontrada.');
+            $this->redirect('/admin/suporte');
+            return;
+        }
+
+        $this->ticketModel->delete($id);
+        $this->flash('success', 'Demanda excluída.');
+        $this->redirect('/admin/suporte');
+    }
+
+    /**
      * Reenvia ao LRV uma demanda que ficou pendente/falha.
      */
     public function resend(Request $request, Response $response): void

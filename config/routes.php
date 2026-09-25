@@ -312,7 +312,9 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/suporte', [AdminSuporteController::class, 'index'], [], 'admin.support.index');
     $router->get('/suporte/criar', [AdminSuporteController::class, 'create'], [], 'admin.support.create');
     $router->post('/suporte/criar', [AdminSuporteController::class, 'store'], [CsrfMiddleware::class], 'admin.support.store');
+    $router->get('/suporte/{id}', [AdminSuporteController::class, 'show'], [], 'admin.support.show');
     $router->post('/suporte/{id}/reenviar', [AdminSuporteController::class, 'resend'], [CsrfMiddleware::class], 'admin.support.resend');
+    $router->post('/suporte/{id}/excluir', [AdminSuporteController::class, 'destroy'], [CsrfMiddleware::class], 'admin.support.destroy');
 
     // Configurações
     $router->get('/configuracoes', [AdminSettingsController::class, 'index'], [], 'admin.settings.index');

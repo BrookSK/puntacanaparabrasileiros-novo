@@ -66,12 +66,17 @@
             </td>
             <td><?= !empty($t['created_at']) ? date('d/m/Y H:i', strtotime((string)$t['created_at'])) : '-' ?></td>
             <td class="actions-cell">
+                <a href="/admin/suporte/<?= (int)$t['id'] ?>" class="btn btn-sm btn-outline">Ver</a>
                 <?php if (($t['sync_status'] ?? '') !== 'synced'): ?>
                 <form method="POST" action="/admin/suporte/<?= (int)$t['id'] ?>/reenviar" class="inline-form" onsubmit="return confirm('Reenviar esta demanda ao LRV?')">
                     <?= csrf_field() ?>
                     <button class="btn btn-sm btn-outline">Reenviar ao LRV</button>
                 </form>
                 <?php endif; ?>
+                <form method="POST" action="/admin/suporte/<?= (int)$t['id'] ?>/excluir" class="inline-form" onsubmit="return confirm('Excluir esta demanda? Esta ação não pode ser desfeita.')">
+                    <?= csrf_field() ?>
+                    <button class="btn btn-sm btn-danger">Excluir</button>
+                </form>
             </td>
         </tr>
         <?php endforeach; ?>
