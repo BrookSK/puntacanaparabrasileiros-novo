@@ -34,7 +34,7 @@
                         <li><a href="/">Home</a></li>
                         <li><a href="/passeios">Experiências</a></li>
                         <li><a href="/programa-de-afiliados">Afiliados</a></li>
-                        <li><a href="/cadastro-agencia">Agência Parceira</a></li>
+                        <li><a href="/programa-de-agencias">Agência Parceira</a></li>
                         <li><a href="/blog">Blog</a></li>
                         <li><a href="/sobre-nos">Sobre Nós</a></li>
                         <li><a href="/contato">Contato</a></li>

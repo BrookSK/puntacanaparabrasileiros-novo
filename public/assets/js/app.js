@@ -390,6 +390,53 @@
         });
     }
 
+    // ==================== TRIP GALLERY LIGHTBOX ====================
+    // Botão "Galeria" no slider do passeio: abre todas as fotos em tela cheia.
+    const galleryBtn = document.getElementById('galleryBtn');
+    if (galleryBtn) {
+        // Coleta as imagens dos slides (imagem destacada + galeria).
+        const images = Array.from(document.querySelectorAll('#tripSliderTrack .trip-slide img'))
+            .map(img => img.getAttribute('src'))
+            .filter(Boolean);
+
+        if (images.length > 0) {
+            // Cria o overlay do lightbox uma única vez.
+            const overlay = document.createElement('div');
+            overlay.className = 'trip-gallery-lightbox';
+            overlay.setAttribute('aria-hidden', 'true');
+            overlay.innerHTML =
+                '<button type="button" class="trip-gallery-lightbox-close" aria-label="Fechar">&times;</button>' +
+                '<div class="trip-gallery-lightbox-grid">' +
+                images.map(src =>
+                    '<div class="trip-gallery-lightbox-item"><img src="' + src + '" alt="Foto do passeio" loading="lazy"></div>'
+                ).join('') +
+                '</div>';
+            document.body.appendChild(overlay);
+
+            const closeBtn = overlay.querySelector('.trip-gallery-lightbox-close');
+
+            const openGallery = function () {
+                overlay.classList.add('open');
+                overlay.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            };
+            const closeGallery = function () {
+                overlay.classList.remove('open');
+                overlay.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            };
+
+            galleryBtn.addEventListener('click', openGallery);
+            closeBtn.addEventListener('click', closeGallery);
+            overlay.addEventListener('click', function (e) {
+                if (e.target === overlay) closeGallery();
+            });
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && overlay.classList.contains('open')) closeGallery();
+            });
+        }
+    }
+
     // ==================== GALLERY ====================
     window.changeGallery = function(thumb) {
         const main = document.getElementById('galleryMain');

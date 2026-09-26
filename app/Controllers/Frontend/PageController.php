@@ -305,6 +305,14 @@ class PageController extends Controller
     // AGÊNCIAS — cadastro público (espelha o fluxo de afiliado)
     // ============================================================
 
+    public function agencyProgram(Request $request, Response $response): void
+    {
+        $this->view('frontend/pages/agency-program', [
+            'pageTitle' => 'Programa de Agências Parceiras - Punta Cana para Brasileiros',
+            'metaDescription' => 'Torne sua agência uma parceira oficial da Punta Cana para Brasileiros e ofereça experiências turísticas aos seus clientes com comissões atrativas.',
+        ], 'app');
+    }
+
     public function agencyRegister(Request $request, Response $response): void
     {
         $this->view('frontend/pages/agency-register', [

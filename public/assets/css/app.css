@@ -2680,9 +2680,62 @@ img { max-width: 100%; height: auto; }
     background: var(--white);
 }
 
+/* Lightbox da galeria do passeio (aberto pelo botão "Galeria") */
+.trip-gallery-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.9);
+    z-index: 2000;
+    display: none;
+    overflow-y: auto;
+    padding: 60px 20px 40px;
+}
+.trip-gallery-lightbox.open {
+    display: block;
+}
+.trip-gallery-lightbox-close {
+    position: fixed;
+    top: 18px;
+    right: 24px;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 28px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2010;
+    transition: background .2s;
+}
+.trip-gallery-lightbox-close:hover {
+    background: rgba(255,255,255,0.3);
+}
+.trip-gallery-lightbox-grid {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+.trip-gallery-lightbox-item img {
+    width: 100%;
+    height: 260px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+}
+
 @media (max-width: 768px) {
     .trip-slide img {
         height: 280px;
+    }
+    .trip-gallery-lightbox-grid {
+        grid-template-columns: 1fr;
+    }
+    .trip-gallery-lightbox-item img {
+        height: 220px;
     }
 }
 

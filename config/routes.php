@@ -81,6 +81,7 @@ $router->post('/cadastro-afiliado', [PageController::class, 'affiliateRegisterSt
 $router->get('/login-afiliado', [PageController::class, 'affiliateLogin'], [], 'pages.affiliate_login');
 
 // Agências — cadastro público
+$router->get('/programa-de-agencias', [PageController::class, 'agencyProgram'], [], 'pages.agency_program');
 $router->get('/cadastro-agencia', [PageController::class, 'agencyRegister'], [], 'pages.agency_register');
 $router->post('/cadastro-agencia', [PageController::class, 'agencyRegisterStore'], [CsrfMiddleware::class], 'pages.agency_register.store');
 $router->get('/login-agencia', [PageController::class, 'agencyLogin'], [], 'pages.agency_login');
