@@ -45,7 +45,16 @@ $priorityLabels = ['low' => 'Baixa', 'medium' => 'Média', 'high' => 'Alta', 'ur
         <div class="form-row">
             <div class="form-group col-12">
                 <label>Categoria</label>
-                <input type="text" name="category" class="form-control" maxlength="100" placeholder="Ex.: suporte, financeiro, técnico" value="<?= e($old['category'] ?? '') ?>">
+                <?php
+                    $categories = ['Design', 'Desenvolvimento', 'Marketing', 'Suporte', 'Outro'];
+                    $selectedCategory = $old['category'] ?? '';
+                ?>
+                <select name="category" class="form-control">
+                    <option value="">Selecione</option>
+                    <?php foreach ($categories as $cat): ?>
+                    <option value="<?= e($cat) ?>" <?= $selectedCategory === $cat ? 'selected' : '' ?>><?= e($cat) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
         </div>
 

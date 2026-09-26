@@ -18,7 +18,7 @@ class SupportTicket extends Model
     protected array $fillable = [
         'title', 'description', 'priority', 'category',
         'requester_name', 'requester_company', 'external_ref',
-        'lrv_id', 'lrv_client_ticket_number', 'lrv_status',
+        'lrv_id', 'lrv_client_ticket_number', 'lrv_status', 'lrv_status_changed_at',
         'sync_status', 'sync_error', 'synced_at', 'created_by',
     ];
 
@@ -62,5 +62,38 @@ class SupportTicket extends Model
             'sync_status' => 'failed',
             'sync_error' => mb_substr($error, 0, 2000),
         ]);
+    }
+
+    /**
+     * Valores de status que o LRV pode enviar no callback de mudança de status.
+     */
+    public const LRV_STATUSES = [
+        'open', 'in_progress', 'em_revisao_interna', 'waiting_client',
+        'em_homologacao', 'aprovado_producao', 'completed', 'denied', 'archived',
+    ];
+
+    /**
+     * Atualiza o status do LRV a partir do callback (helpdeskON → Punta Cana).
+     * Idempotente: se a demanda não existir ou já estiver no status recebido,
+     * não faz nada. Retorna true se um registro foi efetivamente atualizado.
+     */
+    public function updateStatusByExternalRef(string $externalRef, string $status): bool
+    {
+        $ticket = $this->findWhere('external_ref', $externalRef);
+        if (!$ticket) {
+            return false;
+        }
+
+        // Já está nesse status? Nada a fazer (dedupe de reenvios do callback).
+        if (($ticket['lrv_status'] ?? '') === $status) {
+            return false;
+        }
+
+        $this->db->update($this->table, [
+            'lrv_status' => $status,
+            'lrv_status_changed_at' => date('Y-m-d H:i:s'),
+        ], 'id = ?', [(int) $ticket['id']]);
+
+        return true;
     }
 }

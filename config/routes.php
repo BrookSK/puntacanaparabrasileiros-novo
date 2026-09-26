@@ -35,6 +35,7 @@ use App\Controllers\Api\ScheduleController as ApiScheduleController;
 use App\Controllers\Api\PricingController;
 use App\Controllers\Api\CartController as ApiCartController;
 use App\Controllers\Api\WebhookController;
+use App\Controllers\Api\LrvCallbackController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\AdminMiddleware;
 use App\Middleware\CsrfMiddleware;
@@ -177,6 +178,9 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->post('/webhook/stripe', [WebhookController::class, 'handleStripe'], [], 'api.webhook.stripe');
     $router->post('/webhook/pix-status', [WebhookController::class, 'pixStatus'], [], 'api.webhook.pix_status');
     $router->post('/webhooks/pagbank', [WebhookController::class, 'handlePagBank'], [], 'api.webhook.pagbank');
+
+    // Callback de status do LRV (helpdeskON → Punta Cana). Token no caminho.
+    $router->post('/lrv/callback/{token}', [LrvCallbackController::class, 'handle'], [], 'api.lrv.callback');
     $router->get('/videocall/slots', [VideoCallController::class, 'slots'], [], 'api.videocall.slots');
     $router->get('/cron/videocall-reminders', [WebhookController::class, 'videocallReminders'], [], 'api.cron.videocall_reminders');
     $router->get('/cron/videocall-test', [WebhookController::class, 'videocallTest'], [], 'api.cron.videocall_test');

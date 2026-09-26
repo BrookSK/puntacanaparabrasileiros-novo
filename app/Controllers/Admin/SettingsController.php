@@ -115,6 +115,7 @@ class SettingsController extends Controller
             'aurora_crm_board_id' => 'aurora', 'aurora_max_replies' => 'aurora',
             'aurora_history_limit' => 'aurora',
             'lrv_enabled' => 'integrations', 'lrv_base_url' => 'integrations', 'lrv_api_key' => 'integrations',
+            'lrv_callback_token' => 'integrations',
         ];
 
         // Salvar no banco

@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS `support_tickets` (
     `lrv_id`                  BIGINT UNSIGNED NULL,
     `lrv_client_ticket_number` INT UNSIGNED NULL,
     `lrv_status`              VARCHAR(50) NULL,
+    `lrv_status_changed_at`   DATETIME NULL,
 
     -- Estado da sincronização com o LRV
     -- pending  = gravado local, ainda não confirmado no LRV (reenviar)

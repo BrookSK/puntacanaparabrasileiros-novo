@@ -3,6 +3,12 @@ $priorityLabels = ['low' => 'Baixa', 'medium' => 'Média', 'high' => 'Alta', 'ur
 $priorityColors = ['low' => 'secondary', 'medium' => 'info', 'high' => 'warning', 'urgent' => 'danger'];
 $syncLabels = ['synced' => 'Sincronizado', 'pending' => 'Pendente', 'failed' => 'Falhou'];
 $syncColors = ['synced' => 'success', 'pending' => 'warning', 'failed' => 'danger'];
+$lrvStatusLabels = [
+    'open' => 'Aberto', 'in_progress' => 'Em andamento', 'em_revisao_interna' => 'Em revisão interna',
+    'waiting_client' => 'Aguardando cliente', 'em_homologacao' => 'Em homologação',
+    'aprovado_producao' => 'Aprovado p/ produção', 'completed' => 'Concluído',
+    'denied' => 'Negado', 'archived' => 'Arquivado',
+];
 $p = $ticket['priority'] ?? 'medium';
 $s = $ticket['sync_status'] ?? 'pending';
 ?>
@@ -91,7 +97,16 @@ $s = $ticket['sync_status'] ?? 'pending';
         </div>
         <div class="form-group col-4">
             <label>Status no LRV</label>
-            <div><?= e($ticket['lrv_status'] ?? '-') ?: '-' ?></div>
+            <div>
+                <?php if (!empty($ticket['lrv_status'])): ?>
+                    <?= e($lrvStatusLabels[$ticket['lrv_status']] ?? $ticket['lrv_status']) ?>
+                    <?php if (!empty($ticket['lrv_status_changed_at'])): ?>
+                    <br><small style="color:#636e72;">atualizado em <?= date('d/m/Y H:i', strtotime((string)$ticket['lrv_status_changed_at'])) ?></small>
+                    <?php endif; ?>
+                <?php else: ?>
+                    -
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 

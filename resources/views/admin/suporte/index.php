@@ -15,6 +15,12 @@
     $priorityColors = ['low' => 'secondary', 'medium' => 'info', 'high' => 'warning', 'urgent' => 'danger'];
     $syncLabels = ['synced' => 'Sincronizado', 'pending' => 'Pendente', 'failed' => 'Falhou'];
     $syncColors = ['synced' => 'success', 'pending' => 'warning', 'failed' => 'danger'];
+    $lrvStatusLabels = [
+        'open' => 'Aberto', 'in_progress' => 'Em andamento', 'em_revisao_interna' => 'Em revisão interna',
+        'waiting_client' => 'Aguardando cliente', 'em_homologacao' => 'Em homologação',
+        'aprovado_producao' => 'Aprovado p/ produção', 'completed' => 'Concluído',
+        'denied' => 'Negado', 'archived' => 'Arquivado',
+    ];
 ?>
 
 <table class="table">
@@ -53,6 +59,9 @@
             <td>
                 <?php if (!empty($t['lrv_client_ticket_number'])): ?>
                     #<?= (int) $t['lrv_client_ticket_number'] ?>
+                    <?php if (!empty($t['lrv_status'])): ?>
+                    <br><small style="color:#636e72;"><?= e($lrvStatusLabels[$t['lrv_status']] ?? $t['lrv_status']) ?></small>
+                    <?php endif; ?>
                 <?php else: ?>
                     -
                 <?php endif; ?>
