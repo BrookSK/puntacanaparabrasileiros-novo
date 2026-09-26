@@ -74,6 +74,7 @@ $router->get('/termos-afiliados', [PageController::class, 'affiliateTerms'], [],
 $router->get('/politicas-de-cancelamento', [PageController::class, 'cancellationPolicy'], [], 'pages.cancellation_policy');
 $router->get('/politicas-de-cancelamento/pdf', [PageController::class, 'cancellationPolicyPdf'], [], 'pages.cancellation_policy.pdf');
 $router->get('/politicas-de-privacidade', [PageController::class, 'privacyPolicy'], [], 'pages.privacy_policy');
+$router->get('/politicas-de-privacidade-agencia', [PageController::class, 'agencyPrivacyPolicy'], [], 'pages.agency_privacy_policy');
 $router->get('/programa-de-afiliados', [PageController::class, 'affiliateProgram'], [], 'pages.affiliate_program');
 $router->get('/cadastro-afiliado', [PageController::class, 'affiliateRegister'], [], 'pages.affiliate_register');
 $router->post('/cadastro-afiliado', [PageController::class, 'affiliateRegisterStore'], [CsrfMiddleware::class], 'pages.affiliate_register.store');

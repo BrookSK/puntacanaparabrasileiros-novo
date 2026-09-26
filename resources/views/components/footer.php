@@ -62,6 +62,7 @@
                         <li><a href="/politicas-de-privacidade">Políticas de Privacidade</a></li>
                         <li><a href="/politicas-de-cancelamento">Políticas de Cancelamento</a></li>
                         <li><a href="/termos-afiliados">Políticas de Afiliados</a></li>
+                        <li><a href="/politicas-de-privacidade-agencia">Política de Privacidade da Agência</a></li>
                         <li><a href="/termos-e-condicoes">Termos e Condições</a></li>
                         <li><a href="/minha-conta/cancelamentos">Cancelamentos</a></li>
                     </ul>

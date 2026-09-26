@@ -93,6 +93,14 @@ class PageController extends Controller
         ], 'app');
     }
 
+    public function agencyPrivacyPolicy(Request $request, Response $response): void
+    {
+        $this->view('frontend/pages/agency-privacy-policy', [
+            'pageTitle' => 'Política de Privacidade da Agência - Punta Cana para Brasileiros',
+            'metaDescription' => 'Política de privacidade e proteção de dados das agências parceiras da Punta Cana para Brasileiros.',
+        ], 'app');
+    }
+
     public function affiliateProgram(Request $request, Response $response): void
     {
         $this->view('frontend/pages/affiliate-program', [
