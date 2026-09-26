@@ -11,17 +11,9 @@
 <section class="section section-legal-content">
     <div class="container">
         <div class="legal-content">
-            <p>Que bom ter você como parceira! Antes de tudo, queremos ser transparentes sobre como cuidamos das informações da sua agência. Esta página explica, de forma simples e direta, o que fazemos com os seus dados quando você participa do nosso Programa de Agências Parceiras.</p>
-
-            <p>A sua confiança é o que sustenta essa parceria, e levamos isso a sério. Sempre que tiver qualquer dúvida sobre os assuntos aqui tratados, é só falar com a gente pelos canais no final desta página.</p>
-
-            <h2>Quem somos</h2>
-            <p>Somos a <strong>Punta Cana para Brasileiros</strong>, uma agência de turismo receptivo especializada em atender brasileiros que visitam Punta Cana, na República Dominicana. Ajudamos viajantes a viverem passeios e experiências inesquecíveis no Caribe, com atendimento em português e todo o cuidado com quem está longe de casa.</p>
-            <p>Ao formar parcerias com agências, operadoras e consultores de viagem, ampliamos esse cuidado para ainda mais clientes — e, para isso, tratamos alguns dados da sua agência conforme descrito abaixo.</p>
-            <p>Dados da empresa responsável:</p>
             <p>Punta Cana para Brasileiros – Oliveira &amp; Ramos SRL<br>RNC: 1-33-28776-5<br>Residência Fiscal: Avenida Barceló, nº 01, Local 7 – Plaza Arrecife<br>Punta Cana – República Dominicana – Código Postal 23000</p>
 
-            <p>Esta Política de Privacidade descreve como coletamos, utilizamos, armazenamos e protegemos os dados das agências parceiras e de seus representantes no âmbito do Programa de Agências Parceiras. Ao se cadastrar como agência, o representante declara ter lido e aceitado esta Política.</p>
+            <p>Esta Política de Privacidade descreve como a Punta Cana para Brasileiros coleta, utiliza, armazena e protege os dados das agências parceiras e de seus representantes no âmbito do Programa de Agências Parceiras. Ao se cadastrar como agência, o representante declara ter lido e aceitado esta Política.</p>
 
             <h2>1. Dados que Coletamos</h2>
             <p>Ao cadastrar sua agência, coletamos os dados fornecidos no formulário e durante o relacionamento comercial, tais como:</p>
@@ -62,8 +54,7 @@
             <p>Esta Política poderá ser atualizada a qualquer momento em razão de mudanças legais ou operacionais. Recomendamos que a agência a consulte periodicamente.</p>
 
             <h2>9. Contato</h2>
-            <p>Ficou com alguma dúvida ou quer exercer algum dos seus direitos? Estamos por aqui para ajudar. É só enviar um e-mail para <a href="mailto:contato@puntacanaparabrasileiros.com">contato@puntacanaparabrasileiros.com</a> e nossa equipe terá o maior prazer em atender a sua agência.</p>
-            <p>Obrigado por caminhar com a Punta Cana para Brasileiros. Juntos, levamos o melhor do Caribe para cada vez mais viajantes. 🌴</p>
+            <p>Em caso de dúvidas sobre esta Política de Privacidade da Agência ou sobre o tratamento de dados, entre em contato pelo e-mail <a href="mailto:contato@puntacanaparabrasileiros.com">contato@puntacanaparabrasileiros.com</a>.</p>
         </div>
     </div>
 </section>
