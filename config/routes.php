@@ -22,6 +22,7 @@ use App\Controllers\Admin\VouchersController as AdminVouchersController;
 use App\Controllers\Admin\AffiliatesController as AdminAffiliatesController;
 use App\Controllers\Admin\AgenciesController as AdminAgenciesController;
 use App\Controllers\Admin\UsersController as AdminUsersController;
+use App\Controllers\Admin\SuporteController as AdminSuporteController;
 use App\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Controllers\Admin\AuditLogsController as AdminAuditLogsController;
 use App\Controllers\Admin\NewsletterController as AdminNewsletterController;
@@ -34,6 +35,7 @@ use App\Controllers\Api\ScheduleController as ApiScheduleController;
 use App\Controllers\Api\PricingController;
 use App\Controllers\Api\CartController as ApiCartController;
 use App\Controllers\Api\WebhookController;
+use App\Controllers\Api\LrvCallbackController;
 use App\Middleware\AuthMiddleware;
 use App\Middleware\AdminMiddleware;
 use App\Middleware\CsrfMiddleware;
@@ -72,12 +74,14 @@ $router->get('/termos-afiliados', [PageController::class, 'affiliateTerms'], [],
 $router->get('/politicas-de-cancelamento', [PageController::class, 'cancellationPolicy'], [], 'pages.cancellation_policy');
 $router->get('/politicas-de-cancelamento/pdf', [PageController::class, 'cancellationPolicyPdf'], [], 'pages.cancellation_policy.pdf');
 $router->get('/politicas-de-privacidade', [PageController::class, 'privacyPolicy'], [], 'pages.privacy_policy');
+$router->get('/politicas-de-privacidade-agencia', [PageController::class, 'agencyPrivacyPolicy'], [], 'pages.agency_privacy_policy');
 $router->get('/programa-de-afiliados', [PageController::class, 'affiliateProgram'], [], 'pages.affiliate_program');
 $router->get('/cadastro-afiliado', [PageController::class, 'affiliateRegister'], [], 'pages.affiliate_register');
 $router->post('/cadastro-afiliado', [PageController::class, 'affiliateRegisterStore'], [CsrfMiddleware::class], 'pages.affiliate_register.store');
 $router->get('/login-afiliado', [PageController::class, 'affiliateLogin'], [], 'pages.affiliate_login');
 
 // Agências — cadastro público
+$router->get('/programa-de-agencias', [PageController::class, 'agencyProgram'], [], 'pages.agency_program');
 $router->get('/cadastro-agencia', [PageController::class, 'agencyRegister'], [], 'pages.agency_register');
 $router->post('/cadastro-agencia', [PageController::class, 'agencyRegisterStore'], [CsrfMiddleware::class], 'pages.agency_register.store');
 $router->get('/login-agencia', [PageController::class, 'agencyLogin'], [], 'pages.agency_login');
@@ -176,6 +180,9 @@ $router->group(['prefix' => '/api'], function ($router) {
     $router->post('/webhook/stripe', [WebhookController::class, 'handleStripe'], [], 'api.webhook.stripe');
     $router->post('/webhook/pix-status', [WebhookController::class, 'pixStatus'], [], 'api.webhook.pix_status');
     $router->post('/webhooks/pagbank', [WebhookController::class, 'handlePagBank'], [], 'api.webhook.pagbank');
+
+    // Callback de status do LRV (helpdeskON → Punta Cana). Token no caminho.
+    $router->post('/lrv/callback/{token}', [LrvCallbackController::class, 'handle'], [], 'api.lrv.callback');
     $router->get('/videocall/slots', [VideoCallController::class, 'slots'], [], 'api.videocall.slots');
     $router->get('/cron/videocall-reminders', [WebhookController::class, 'videocallReminders'], [], 'api.cron.videocall_reminders');
     $router->get('/cron/videocall-test', [WebhookController::class, 'videocallTest'], [], 'api.cron.videocall_test');
@@ -306,6 +313,14 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->post('/usuarios/{id}/editar', [AdminUsersController::class, 'update'], [CsrfMiddleware::class], 'admin.users.update');
     $router->post('/usuarios/{id}/excluir', [AdminUsersController::class, 'destroy'], [CsrfMiddleware::class], 'admin.users.destroy');
     $router->get('/usuarios/{id}/impersonate', [AdminUsersController::class, 'impersonate'], [], 'admin.users.impersonate');
+
+    // Suporte (demandas enviadas ao LRV)
+    $router->get('/suporte', [AdminSuporteController::class, 'index'], [], 'admin.support.index');
+    $router->get('/suporte/criar', [AdminSuporteController::class, 'create'], [], 'admin.support.create');
+    $router->post('/suporte/criar', [AdminSuporteController::class, 'store'], [CsrfMiddleware::class], 'admin.support.store');
+    $router->get('/suporte/{id}', [AdminSuporteController::class, 'show'], [], 'admin.support.show');
+    $router->post('/suporte/{id}/reenviar', [AdminSuporteController::class, 'resend'], [CsrfMiddleware::class], 'admin.support.resend');
+    $router->post('/suporte/{id}/excluir', [AdminSuporteController::class, 'destroy'], [CsrfMiddleware::class], 'admin.support.destroy');
 
     // Configurações
     $router->get('/configuracoes', [AdminSettingsController::class, 'index'], [], 'admin.settings.index');

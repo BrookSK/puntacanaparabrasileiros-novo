@@ -751,6 +751,16 @@ class TripsController extends Controller
                 ]);
                 $processedIds[] = $packageId;
             }
+
+            // Sincroniza as categorias de viajante marcadas no card "Pacotes".
+            // Vincula/desvincula preservando os preços já cadastrados (a tela de
+            // Preços é quem define os valores). O campo oculto categories_present
+            // é sempre enviado pelo form, então mesmo com zero checkboxes marcados
+            // conseguimos desvincular todas — só pulamos quando a seção não veio
+            // no POST (ex.: request truncado), para não apagar vínculos por engano.
+            if (!empty($pkg['categories_present'])) {
+                $this->syncPackageCategories($packageId, $pkg['categories'] ?? []);
+            }
         }
 
         // Remover pacotes que foram deletados pelo admin no form
@@ -759,6 +769,58 @@ class TripsController extends Controller
                 $this->db->delete('trip_package_categories', 'package_id = ?', [(int)$ep['id']]);
                 $this->db->delete('trip_packages', 'id = ?', [(int)$ep['id']]);
             }
+        }
+    }
+
+    /**
+     * Sincroniza as categorias de viajante de um pacote a partir dos checkboxes
+     * do card "Pacotes", SEM perder os preços já cadastrados.
+     *
+     * - Categorias recém-marcadas: cria o vínculo em trip_package_categories
+     *   com preço 0 (o valor é definido depois na tela de Preços).
+     * - Categorias desmarcadas: remove o vínculo (e, por consequência, seus preços).
+     * - Categorias que continuam marcadas: NÃO são tocadas (preço preservado).
+     *
+     * @param array $categoryIds ids de traveler_categories marcados no form.
+     */
+    private function syncPackageCategories(int $packageId, array $categoryIds): void
+    {
+        // Normaliza os ids marcados (inteiros positivos, sem duplicados).
+        $selected = array_values(array_unique(array_filter(
+            array_map('intval', $categoryIds),
+            static fn($id) => $id > 0
+        )));
+
+        // Ids já vinculados a este pacote hoje.
+        $existing = array_map(
+            static fn($row) => (int) $row['traveler_category_id'],
+            $this->db->fetchAll(
+                "SELECT traveler_category_id FROM trip_package_categories WHERE package_id = ?",
+                [$packageId]
+            )
+        );
+
+        // Remover os que foram desmarcados.
+        $toRemove = array_diff($existing, $selected);
+        foreach ($toRemove as $catId) {
+            $this->db->delete(
+                'trip_package_categories',
+                'package_id = ? AND traveler_category_id = ?',
+                [$packageId, $catId]
+            );
+        }
+
+        // Inserir os novos (preço 0; será ajustado na tela de Preços).
+        $toAdd = array_diff($selected, $existing);
+        foreach ($toAdd as $catId) {
+            $this->db->insert('trip_package_categories', [
+                'package_id' => $packageId,
+                'traveler_category_id' => $catId,
+                'price' => 0,
+                'sale_price' => null,
+                'min_pax' => 0,
+                'max_pax' => null,
+            ]);
         }
     }
 
