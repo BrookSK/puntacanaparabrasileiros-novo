@@ -259,6 +259,83 @@
         }, 5000);
     });
 
+    // ==================== EQUIPE SLIDER (Nossa equipe — Sobre Nós) ====================
+    // Carrossel de 1 membro por vez: setas + dots + contador dinâmico (X/N) +
+    // autoplay 5s + swipe no mobile. O número de slides acompanha automaticamente
+    // a quantidade de membros publicados (renderizados pelo servidor).
+    (function initEquipeSlider() {
+        const slider = document.getElementById('equipeSlider');
+        if (!slider) return;
+        const track = document.getElementById('equipeTrack');
+        if (!track) return;
+
+        const total = track.children.length;
+        if (total === 0) return;
+
+        const prevBtn = document.getElementById('equipePrev');
+        const nextBtn = document.getElementById('equipeNext');
+        const dots = Array.from(document.querySelectorAll('#equipeDots .equipe-dot'));
+        const counter = document.getElementById('equipeCounter');
+        let current = 0;
+        let autoTimer = null;
+
+        function render() {
+            track.style.transform = `translateX(-${current * 100}%)`;
+            dots.forEach((d, i) => d.classList.toggle('active', i === current));
+            if (counter) counter.textContent = (current + 1) + ' / ' + total;
+        }
+
+        function goTo(index) {
+            if (index < 0) index = total - 1;
+            if (index >= total) index = 0;
+            current = index;
+            render();
+        }
+
+        function next() { goTo(current + 1); }
+        function prev() { goTo(current - 1); }
+
+        // Com apenas 1 membro, não há navegação: esconde setas/dots.
+        if (total <= 1) {
+            if (prevBtn) prevBtn.style.display = 'none';
+            if (nextBtn) nextBtn.style.display = 'none';
+            const dotsWrap = document.getElementById('equipeDots');
+            if (dotsWrap) dotsWrap.style.display = 'none';
+            render();
+            return;
+        }
+
+        function startAuto() {
+            stopAuto();
+            autoTimer = setInterval(next, 5000);
+        }
+        function stopAuto() {
+            if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+        }
+
+        nextBtn && nextBtn.addEventListener('click', () => { next(); startAuto(); });
+        prevBtn && prevBtn.addEventListener('click', () => { prev(); startAuto(); });
+        dots.forEach(dot => dot.addEventListener('click', () => {
+            goTo(parseInt(dot.dataset.slide) || 0); startAuto();
+        }));
+
+        // Swipe no mobile
+        let startX = 0;
+        track.addEventListener('touchstart', e => { startX = e.touches[0].clientX; stopAuto(); }, { passive: true });
+        track.addEventListener('touchend', e => {
+            const diff = startX - e.changedTouches[0].clientX;
+            if (Math.abs(diff) > 50) { diff > 0 ? next() : prev(); }
+            startAuto();
+        });
+
+        // Pausa o autoplay com o mouse sobre o carrossel.
+        slider.addEventListener('mouseenter', stopAuto);
+        slider.addEventListener('mouseleave', startAuto);
+
+        render();
+        startAuto();
+    })();
+
     // ==================== CART BADGE ====================
     function updateCartBadge() {
         ajax('/api/cart/count', { method: 'GET', headers: { 'X-Requested-With': 'XMLHttpRequest' } })

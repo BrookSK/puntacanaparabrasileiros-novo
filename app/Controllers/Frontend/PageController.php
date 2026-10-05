@@ -12,7 +12,17 @@ class PageController extends Controller
 {
     public function about(Request $request, Response $response): void
     {
+        // Membros publicados do carrossel "Nossa equipe".
+        // try/catch para não quebrar a página caso a migration ainda não tenha sido aplicada.
+        $team = [];
+        try {
+            $team = (new \App\Models\TeamMember())->getPublished();
+        } catch (\Throwable $e) {
+            $team = [];
+        }
+
         $this->view('frontend/pages/about', [
+            'team' => $team,
             'pageTitle' => 'Sobre Nós - Punta Cana para Brasileiros',
             'metaDescription' => 'Conheça o casal apaixonado por Punta Cana que dedica sua vida a criar experiências únicas e memoráveis para brasileiros.',
         ], 'app');

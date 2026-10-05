@@ -15,6 +15,7 @@ use App\Controllers\Auth\RegisterController;
 use App\Controllers\Admin\DashboardController;
 use App\Controllers\Admin\TripsController as AdminTripsController;
 use App\Controllers\Admin\CategoriesController as AdminCategoriesController;
+use App\Controllers\Admin\TeamController as AdminTeamController;
 use App\Controllers\Admin\CouponsController as AdminCouponsController;
 use App\Controllers\Admin\TransfersController as AdminTransfersController;
 use App\Controllers\Admin\BookingsController as AdminBookingsController;
@@ -230,6 +231,14 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/categorias/{id}/editar', [AdminCategoriesController::class, 'edit'], [], 'admin.categories.edit');
     $router->post('/categorias/{id}/editar', [AdminCategoriesController::class, 'update'], [CsrfMiddleware::class], 'admin.categories.update');
     $router->post('/categorias/{id}/excluir', [AdminCategoriesController::class, 'destroy'], [CsrfMiddleware::class], 'admin.categories.destroy');
+
+    // Equipe (carrossel "Nossa equipe" da página Sobre Nós)
+    $router->get('/equipe', [AdminTeamController::class, 'index'], [], 'admin.team.index');
+    $router->get('/equipe/criar', [AdminTeamController::class, 'create'], [], 'admin.team.create');
+    $router->post('/equipe/criar', [AdminTeamController::class, 'store'], [CsrfMiddleware::class], 'admin.team.store');
+    $router->get('/equipe/{id}/editar', [AdminTeamController::class, 'edit'], [], 'admin.team.edit');
+    $router->post('/equipe/{id}/editar', [AdminTeamController::class, 'update'], [CsrfMiddleware::class], 'admin.team.update');
+    $router->post('/equipe/{id}/excluir', [AdminTeamController::class, 'destroy'], [CsrfMiddleware::class], 'admin.team.destroy');
 
     // Cupons de Desconto
     $router->get('/cupons', [AdminCouponsController::class, 'index'], [], 'admin.coupons.index');

@@ -49,6 +49,67 @@
     </div>
 </section>
 
+<?php if (!empty($team)): ?>
+<!-- Nossa Equipe (carrossel) -->
+<section class="section section-nossa-equipe">
+    <div class="container">
+        <div class="section-intro">
+            <h2 class="section-title">Nossa equipe</h2>
+            <p class="section-subtitle">Conheça as pessoas que tornam cada viagem para Punta Cana uma experiência única, com atendimento próximo, conhecimento local e muito cuidado em cada detalhe.</p>
+        </div>
+
+        <div class="equipe-slider" id="equipeSlider">
+            <!-- Seta anterior -->
+            <button type="button" class="equipe-arrow equipe-arrow-prev" id="equipePrev" aria-label="Anterior">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+
+            <div class="equipe-viewport">
+                <div class="equipe-track" id="equipeTrack">
+                    <?php foreach ($team as $member): ?>
+                    <div class="equipe-card">
+                        <div class="equipe-photo">
+                            <?php if (!empty($member['photo'])): ?>
+                            <img src="<?= e($member['photo']) ?>" alt="<?= e($member['name']) ?>" loading="lazy">
+                            <?php else: ?>
+                            <div class="equipe-photo-placeholder">
+                                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                        <div class="equipe-info">
+                            <h3 class="equipe-name"><?= e($member['name']) ?></h3>
+                            <?php if (!empty($member['role'])): ?>
+                            <span class="equipe-role"><?= e($member['role']) ?></span>
+                            <?php endif; ?>
+                            <?php if (!empty($member['bio'])): ?>
+                            <p class="equipe-bio"><?= nl2br(e($member['bio'])) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+
+            <!-- Seta próxima -->
+            <button type="button" class="equipe-arrow equipe-arrow-next" id="equipeNext" aria-label="Próximo">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+        </div>
+
+        <!-- Dots + Contador (acompanham a quantidade de slides publicados) -->
+        <div class="equipe-footer">
+            <div class="equipe-dots" id="equipeDots">
+                <?php foreach ($team as $i => $member): ?>
+                <span class="equipe-dot<?= $i === 0 ? ' active' : '' ?>" data-slide="<?= $i ?>"></span>
+                <?php endforeach; ?>
+            </div>
+            <div class="equipe-counter" id="equipeCounter">1 / <?= count($team) ?></div>
+        </div>
+    </div>
+</section>
+<?php endif; ?>
+
 <!-- Experiências em Destaque -->
 <section class="section section-experiencias-destaque">
     <div class="container">
