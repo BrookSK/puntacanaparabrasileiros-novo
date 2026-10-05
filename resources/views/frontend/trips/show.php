@@ -90,6 +90,10 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                     <?php endif; ?>
                 </div>
 
+                <?php if (!empty($trip['short_description'])): ?>
+                <p class="trip-lead"><?= nl2br(e($trip['short_description'])) ?></p>
+                <?php endif; ?>
+
                 <?php
                 // ── Cards de destaque com ícones ──
                 // Fonte: itinerário (título + descrição) com fallback para "includes" (frases).
@@ -161,12 +165,10 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                 <div class="trip-tab-content active" id="tab-visao-geral">
                     <h2>Visão Geral</h2>
                     <div class="trip-body-content">
-                        <?php if ($trip['short_description']): ?>
-                        <?= nl2br(e($trip['short_description'])) ?>
-                        <?php endif; ?>
-
-                        <?php if ($trip['description']): ?>
+                        <?php if (!empty($trip['description'])): ?>
                         <?= nl2br(e($trip['description'])) ?>
+                        <?php elseif (!empty($trip['short_description'])): ?>
+                        <?= nl2br(e($trip['short_description'])) ?>
                         <?php endif; ?>
                     </div>
 
@@ -548,8 +550,8 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                     ?>
 
                     <?php if (!$isGroupPricing && !empty($priceCategories)): ?>
-                    <!-- Preços por categoria (igual ao site antigo) -->
-                    <div class="trip-price-grid">
+                    <!-- Preços por categoria (uma por linha, como na referência) -->
+                    <div class="trip-price-list">
                         <?php foreach ($priceCategories as $cat): ?>
                         <?php
                             $catRegular = (float) ($cat['price'] ?? 0);
@@ -557,10 +559,13 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                             $catFinal = ($catSale !== null && $catSale > 0) ? $catSale : $catRegular;
                             $catName = $cat['category_name'] ?? 'Categoria';
                             $catAge = !empty($cat['age_group']) ? ': ' . $cat['age_group'] : '';
+                            $isFree = $catFinal <= 0;
                         ?>
-                        <div class="trip-price-cat">
-                            <span class="price-from">De</span>
-                            <?php if ($catSale !== null && $catSale > 0 && $catSale < $catRegular): ?>
+                        <div class="trip-price-row">
+                            <span class="price-from">A partir de</span>
+                            <?php if ($isFree): ?>
+                            <span class="trip-price-value trip-price-free">Cortesia</span>
+                            <?php elseif ($catSale !== null && $catSale > 0 && $catSale < $catRegular): ?>
                             <span class="trip-price-value">
                                 <span class="trip-price-old"><?= money($catRegular) ?></span>
                                 <?= money($catFinal) ?>
@@ -574,9 +579,9 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                     </div>
                     <?php else: ?>
                     <!-- Preço único (group pricing ou sem categorias cadastradas) -->
-                    <div class="trip-price-header">
-                        <span class="price-from">De</span>
-                        <span class="trip-price-value"><?= money($basePrice) ?></span>
+                    <div class="trip-price-row">
+                        <span class="price-from">A partir de</span>
+                        <span class="trip-price-value"><?= (float)$basePrice > 0 ? money($basePrice) : 'Cortesia' ?></span>
                         <span class="price-per"><?= $priceLabel ?></span>
                     </div>
                     <?php endif; ?>

@@ -2748,16 +2748,16 @@ img { max-width: 100%; height: auto; }
 .trip-gallery-grid {
     position: relative;
     display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 12px;
-    height: 420px;
+    grid-template-columns: 1.7fr 1fr;
+    grid-auto-rows: 140px;
+    gap: 10px;
 }
 .trip-gallery-main {
     position: relative;
-    border-radius: 16px;
+    grid-row: span 2;        /* ocupa a altura das duas miniaturas */
+    border-radius: 14px;
     overflow: hidden;
     cursor: pointer;
-    height: 100%;
 }
 .trip-gallery-main img {
     width: 100%;
@@ -2770,14 +2770,11 @@ img { max-width: 100%; height: auto; }
     transform: scale(1.03);
 }
 .trip-gallery-side {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    gap: 12px;
-    height: 100%;
+    display: contents;       /* as miniaturas entram direto no grid principal */
 }
 .trip-gallery-thumb {
     position: relative;
-    border-radius: 16px;
+    border-radius: 14px;
     overflow: hidden;
     cursor: pointer;
 }
@@ -2795,30 +2792,32 @@ img { max-width: 100%; height: auto; }
     position: absolute;
     inset: 0;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    align-items: flex-end;
+    justify-content: flex-end;
+    gap: 6px;
+    padding: 10px 12px;
     width: 100%;
     border: none;
-    background: rgba(16, 24, 40, 0.55);
+    background: linear-gradient(to top, rgba(16,24,40,0.65), rgba(16,24,40,0) 55%);
     color: #fff;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     font-family: var(--font);
     transition: background .2s;
 }
+.trip-gallery-more svg { flex-shrink: 0; }
 .trip-gallery-more:hover {
-    background: rgba(16, 24, 40, 0.68);
+    background: linear-gradient(to top, rgba(16,24,40,0.8), rgba(16,24,40,0.1) 60%);
 }
 .trip-gallery-btn {
     position: absolute;
-    bottom: 14px;
-    left: 14px;
+    bottom: 12px;
+    left: 12px;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
+    padding: 7px 13px;
     background: rgba(255, 255, 255, 0.92);
     border: none;
     border-radius: 8px;
@@ -2835,14 +2834,13 @@ img { max-width: 100%; height: auto; }
 }
 @media (max-width: 768px) {
     .trip-gallery-grid {
-        grid-template-columns: 1fr;
-        grid-template-rows: 220px 1fr;
-        height: auto;
-    }
-    .trip-gallery-side {
-        grid-template-rows: none;
         grid-template-columns: 1fr 1fr;
-        height: 120px;
+        grid-auto-rows: 90px;
+    }
+    .trip-gallery-main {
+        grid-column: span 2;
+        grid-row: auto;
+        height: 200px;
     }
 }
 
@@ -2918,6 +2916,15 @@ img { max-width: 100%; height: auto; }
     .trip-highlights-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* Descrição curta (lead) logo abaixo do título */
+.trip-lead {
+    font-size: 15px;
+    color: #475569;
+    line-height: 1.6;
+    margin: 6px 0 4px;
+    max-width: 640px;
 }
 
 .trip-gallery { margin-bottom: 20px; }
@@ -6075,8 +6082,9 @@ img { max-width: 100%; height: auto; }
 }
 .trip-tab:hover { color: var(--dark); }
 .trip-tab.active {
-    color: var(--dark);
-    border-bottom-color: var(--dark);
+    color: var(--text-green);
+    border-bottom-color: var(--text-green);
+    font-weight: 600;
 }
 .trip-tab-content {
     display: none;
@@ -6188,48 +6196,45 @@ img { max-width: 100%; height: auto; }
     border-radius: 16px;
     padding: 24px;
     margin-bottom: 20px;
-    text-align: center;
+    text-align: left;
     box-shadow: 0 8px 28px rgba(16, 24, 40, 0.08);
     position: sticky;
     top: 90px;
-}
-.trip-price-header {
-    margin-bottom: 16px;
 }
 .price-from {
     display: block;
     font-size: 12px;
     color: var(--gray);
 }
-.trip-price-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: var(--dark);
-}
 .price-per {
     font-size: 13px;
     color: var(--gray);
 }
-/* Grid de preços por categoria (Adulto/Criança/Infantil) — igual ao site antigo */
-.trip-price-grid {
+/* Lista de preços por categoria (uma por linha, alinhada à esquerda) */
+.trip-price-list {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 14px 12px;
+    gap: 16px 14px;
     margin-bottom: 18px;
     text-align: left;
 }
-.trip-price-cat {
-    padding: 2px 4px;
-}
-.trip-price-cat .price-from {
+.trip-price-row {
     text-align: left;
 }
-.trip-price-cat .trip-price-value {
+.trip-price-row .price-from {
+    margin-bottom: 2px;
+}
+.trip-price-row .trip-price-value {
     display: block;
     font-size: 26px;
+    font-weight: 700;
+    color: var(--text-green);
     line-height: 1.15;
 }
-.trip-price-cat .price-per {
+.trip-price-row .trip-price-free {
+    color: var(--text-green);
+}
+.trip-price-row .price-per {
     display: block;
     margin-top: 2px;
 }
