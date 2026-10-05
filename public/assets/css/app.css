@@ -2739,6 +2739,187 @@ img { max-width: 100%; height: auto; }
     }
 }
 
+/* ============================================================
+   GALERIA EM GRADE (novo layout — centralizada no container)
+   ============================================================ */
+.trip-gallery-section {
+    padding: 24px 0 0;
+}
+.trip-gallery-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 12px;
+    height: 420px;
+}
+.trip-gallery-main {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    height: 100%;
+}
+.trip-gallery-main img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .4s ease;
+}
+.trip-gallery-main:hover img {
+    transform: scale(1.03);
+}
+.trip-gallery-side {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+    height: 100%;
+}
+.trip-gallery-thumb {
+    position: relative;
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+}
+.trip-gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform .4s ease;
+}
+.trip-gallery-thumb:hover img {
+    transform: scale(1.03);
+}
+.trip-gallery-more {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    border: none;
+    background: rgba(16, 24, 40, 0.55);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: background .2s;
+}
+.trip-gallery-more:hover {
+    background: rgba(16, 24, 40, 0.68);
+}
+.trip-gallery-btn {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: rgba(255, 255, 255, 0.92);
+    border: none;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dark);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 5;
+    font-family: var(--font);
+}
+.trip-gallery-btn:hover {
+    background: #fff;
+}
+@media (max-width: 768px) {
+    .trip-gallery-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: 220px 1fr;
+        height: auto;
+    }
+    .trip-gallery-side {
+        grid-template-rows: none;
+        grid-template-columns: 1fr 1fr;
+        height: 120px;
+    }
+}
+
+/* ============================================================
+   BARRA DE AVALIAÇÕES (Google reviews)
+   ============================================================ */
+.trip-rating-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 18px;
+    padding: 8px 16px;
+    background: #f4fbf1;
+    border: 1px solid #d7edcf;
+    border-radius: 999px;
+    font-size: 13px;
+    color: var(--dark);
+}
+.trip-rating-stars {
+    color: #fbbc05;
+    font-size: 15px;
+    letter-spacing: 1px;
+}
+.trip-rating-text {
+    color: #475569;
+}
+.trip-rating-value {
+    font-weight: 700;
+    color: var(--text-green);
+}
+
+/* ============================================================
+   CARDS DE DESTAQUE COM ÍCONES
+   ============================================================ */
+.trip-highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin: 22px 0 10px;
+}
+.trip-highlight-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--white);
+    border: 1px solid #eef0f2;
+    border-radius: 12px;
+    transition: border-color .2s, box-shadow .2s;
+}
+.trip-highlight-card:hover {
+    border-color: #d7edcf;
+    box-shadow: 0 4px 14px rgba(16, 24, 40, 0.05);
+}
+.trip-highlight-icon {
+    flex-shrink: 0;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: #f4fbf1;
+    color: var(--text-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.trip-highlight-text {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--dark);
+    line-height: 1.35;
+}
+@media (max-width: 640px) {
+    .trip-highlights-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
 .trip-gallery { margin-bottom: 20px; }
 .gallery-main img { width: 100%; border-radius: var(--radius); max-height: 450px; object-fit: cover; }
 .gallery-thumbs { display: flex; gap: 8px; margin-top: 10px; overflow-x: auto; }
@@ -6003,11 +6184,14 @@ img { max-width: 100%; height: auto; }
 /* Sidebar: Price Card */
 .trip-price-card {
     background: var(--white);
-    border: 1px solid #eee;
-    border-radius: 12px;
-    padding: 22px;
+    border: 1px solid #eef0f2;
+    border-radius: 16px;
+    padding: 24px;
     margin-bottom: 20px;
     text-align: center;
+    box-shadow: 0 8px 28px rgba(16, 24, 40, 0.08);
+    position: sticky;
+    top: 90px;
 }
 .trip-price-header {
     margin-bottom: 16px;

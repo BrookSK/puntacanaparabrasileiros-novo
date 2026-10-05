@@ -1,35 +1,81 @@
-<!-- Galeria Full-Width Slider -->
-<section class="trip-gallery-hero">
-    <div class="trip-slider" id="tripSlider">
-        <div class="trip-slider-track" id="tripSliderTrack">
-            <div class="trip-slide active">
-                <img src="<?= e($trip['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($trip['title']) ?>">
+<?php
+// Monta a lista de imagens da galeria: imagem destacada + galeria.
+$galleryImages = [];
+if (!empty($trip['featured_image'])) {
+    $galleryImages[] = $trip['featured_image'];
+}
+if (!empty($gallery)) {
+    foreach ($gallery as $g) {
+        if (!empty($g)) $galleryImages[] = $g;
+    }
+}
+if (empty($galleryImages)) {
+    $galleryImages[] = '/assets/images/placeholder.jpg';
+}
+// Primeira imagem = destaque (grande); próximas = miniaturas laterais.
+$heroImage = $galleryImages[0];
+$sideImages = array_slice($galleryImages, 1, 2);
+$extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
+?>
+<!-- Galeria em grade (dentro do container, centralizada) -->
+<section class="trip-gallery-section">
+    <div class="container">
+        <div class="trip-gallery-grid" id="tripSlider">
+            <!-- Foto principal -->
+            <div class="trip-gallery-main">
+                <img src="<?= e($heroImage) ?>" alt="<?= e($trip['title']) ?>" loading="eager">
             </div>
-            <?php if (!empty($gallery)): ?>
-            <?php foreach ($gallery as $img): ?>
-            <div class="trip-slide">
-                <img src="<?= e($img) ?>" alt="<?= e($trip['title']) ?>">
+
+            <!-- Fotos laterais -->
+            <div class="trip-gallery-side">
+                <?php for ($i = 0; $i < 2; $i++): ?>
+                <?php if (!empty($sideImages[$i])): ?>
+                <div class="trip-gallery-thumb">
+                    <img src="<?= e($sideImages[$i]) ?>" alt="<?= e($trip['title']) ?>" loading="lazy">
+                    <?php if ($i === 1 && $extraCount > 0): ?>
+                    <button type="button" class="trip-gallery-more" id="galleryBtn">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        Galeria &middot; +<?= $extraCount ?> fotos
+                    </button>
+                    <?php endif; ?>
+                </div>
+                <?php endif; ?>
+                <?php endfor; ?>
             </div>
-            <?php endforeach; ?>
-            <?php endif; ?>
+
+            <!-- Botão Galeria (sempre disponível para abrir o lightbox) -->
+            <button type="button" class="trip-gallery-btn" id="galleryBtnMain">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                Galeria
+            </button>
+
+            <!-- Fonte de imagens para o lightbox (lida pelo JS; não exibida) -->
+            <div class="trip-slider-track" id="tripSliderTrack" hidden>
+                <?php foreach ($galleryImages as $img): ?>
+                <div class="trip-slide"><img src="<?= e($img) ?>" alt="<?= e($trip['title']) ?>"></div>
+                <?php endforeach; ?>
+            </div>
         </div>
-        <!-- Setas de navegação -->
-        <button class="trip-slider-arrow trip-slider-prev" id="sliderPrev">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-        </button>
-        <button class="trip-slider-arrow trip-slider-next" id="sliderNext">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
-        </button>
-        <!-- Botão Galeria -->
-        <button class="trip-gallery-btn" id="galleryBtn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            Galeria
-        </button>
     </div>
 </section>
 
 <section class="trip-detail">
     <div class="container">
+        <?php
+            $reviewCountDisplay = is_array($reviews) ? count($reviews) : 0;
+            $ratingDisplay = (float) ($rating ?? 0);
+        ?>
+        <?php if ($ratingDisplay > 0 && $reviewCountDisplay > 0): ?>
+        <!-- Barra de avaliações -->
+        <div class="trip-rating-bar">
+            <span class="trip-rating-stars">
+                <?php for ($s = 1; $s <= 5; $s++): ?><?= $s <= round($ratingDisplay) ? '&#9733;' : '&#9734;' ?><?php endfor; ?>
+            </span>
+            <span class="trip-rating-text">Avaliações reais de clientes no Google <strong>(<?= $reviewCountDisplay ?>)</strong></span>
+            <span class="trip-rating-value"><?= number_format($ratingDisplay, 1, ',', '') ?></span>
+        </div>
+        <?php endif; ?>
+
         <div class="trip-content-grid">
             <!-- Main Content -->
             <div class="trip-main">
@@ -43,6 +89,65 @@
                     </div>
                     <?php endif; ?>
                 </div>
+
+                <?php
+                // ── Cards de destaque com ícones ──
+                // Fonte: itinerário (título + descrição) com fallback para "includes" (frases).
+                $highlightItems = [];
+                if (!empty($itinerary)) {
+                    foreach ($itinerary as $it) {
+                        if (!empty($it['title'])) {
+                            $highlightItems[] = $it['title'];
+                        }
+                    }
+                } elseif (!empty($includes)) {
+                    foreach ($includes as $inc) {
+                        if (!empty($inc)) $highlightItems[] = $inc;
+                    }
+                }
+                $highlightItems = array_slice($highlightItems, 0, 8);
+
+                // Mapeia uma palavra-chave do texto para um ícone SVG (acento verde).
+                $highlightIcon = function (string $text): string {
+                    $t = mb_strtolower($text, 'UTF-8');
+                    $has = fn(array $words) => (bool) array_filter($words, fn($w) => mb_strpos($t, $w) !== false);
+                    if ($has(['brasil', 'brasileiro', 'português', 'portugues'])) {
+                        return '<path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/><circle cx="12" cy="12" r="10"/>';
+                    }
+                    if ($has(['guia', 'guide'])) {
+                        return '<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>';
+                    }
+                    if ($has(['transfer', 'transporte', 'traslado', 'ônibus', 'onibus', 'van'])) {
+                        return '<rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>';
+                    }
+                    if ($has(['almoço', 'almoco', 'buffet', 'comida', 'refeição', 'refeicao', 'jantar'])) {
+                        return '<path d="M3 2v7c0 1.1.9 2 2 2h0a2 2 0 002-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 00-5 5v6c0 1.1.9 2 2 2h3z"/>';
+                    }
+                    if ($has(['open bar', 'bar', 'bebida', 'drink', 'espumante', 'brinde'])) {
+                        return '<path d="M8 22h8"/><path d="M12 11v11"/><path d="M5 3h14l-1 7a6 6 0 01-12 0z"/>';
+                    }
+                    if ($has(['praia', 'piscina', 'natural', 'mar', 'ilha', 'saona', 'catamarã', 'catamara', 'lancha', 'barco'])) {
+                        return '<path d="M2 20a6 6 0 006-6 6 6 0 006 6 6 6 0 006-6"/><path d="M12 2v10"/><path d="M12 2l4 4-4 2-4-2z"/>';
+                    }
+                    if ($has(['estrela', 'star', 'premium', 'vip', 'exclusiv'])) {
+                        return '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
+                    }
+                    // Ícone padrão: check dentro de círculo.
+                    return '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
+                };
+                ?>
+                <?php if (!empty($highlightItems)): ?>
+                <div class="trip-highlights-grid">
+                    <?php foreach ($highlightItems as $hl): ?>
+                    <div class="trip-highlight-card">
+                        <span class="trip-highlight-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><?= $highlightIcon($hl) ?></svg>
+                        </span>
+                        <span class="trip-highlight-text"><?= e($hl) ?></span>
+                    </div>
+                    <?php endforeach; ?>
+                </div>
+                <?php endif; ?>
 
                 <!-- Tabs -->
                 <div class="trip-tabs">
