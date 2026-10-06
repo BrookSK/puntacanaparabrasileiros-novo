@@ -280,7 +280,7 @@ class TripsController extends Controller
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));
-        } elseif ($request->input('remove_featured_image') === '1') {
+        } elseif (in_array((string) $request->input('remove_featured_image', '0'), ['1', 'true', 'on'], true)) {
             // Admin clicou em remover a imagem destacada (sem enviar outra).
             $data['featured_image'] = null;
         }
