@@ -366,8 +366,9 @@ $ratingDisplay = (float) ($rating ?? 0);
                             } else {
                                 $capacityInfo = 'Grupos maiores: consulte nossa equipe';
                             }
-                            $departureInfo = !empty($trip['departure_time_info']) ? $trip['departure_time_info'] : '';
-                            $returnInfo = !empty($trip['return_time_info']) ? $trip['return_time_info'] : '';
+                            // Usa ?? para não gerar warning caso a coluna ainda não exista no array do passeio.
+                            $departureInfo = !empty($trip['departure_time_info']) ? $trip['departure_time_info'] : 'Consulte nossa equipe';
+                            $returnInfo = !empty($trip['return_time_info']) ? $trip['return_time_info'] : 'Consulte nossa equipe';
                             $availabilityInfo = !empty($trip['availability_info']) ? $trip['availability_info'] : 'Sujeita a quórum, capacidade e clima';
                         ?>
                         <div class="trip-facts">
@@ -382,12 +383,8 @@ $ratingDisplay = (float) ($rating ?? 0);
                             <?php if (!empty($trip['duration'])): ?>
                             <div><small>Duração</small><span>Aprox. <?= e($trip['duration']) ?> <?= $trip['duration_unit'] === 'hours' ? 'horas' : 'dias' ?></span></div>
                             <?php endif; ?>
-                            <?php if ($departureInfo !== ''): ?>
                             <div><small>Saída do hotel</small><span><?= e($departureInfo) ?></span></div>
-                            <?php endif; ?>
-                            <?php if ($returnInfo !== ''): ?>
                             <div><small>Retorno ao hotel</small><span><?= e($returnInfo) ?></span></div>
-                            <?php endif; ?>
                             <div><small>Capacidade</small><span><?= e($capacityInfo) ?></span></div>
                             <div><small>Disponibilidade</small><span><?= e($availabilityInfo) ?></span></div>
                             <?php if (!empty($fixedDates)): ?>
