@@ -164,6 +164,37 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 <div class="form-group"><label>Não Inclui</label><div id="excludes-list" class="repeater-list"><?php $excludes = $isEdit && !empty($trip['excludes']) ? json_decode($trip['excludes'], true) : ['']; foreach ($excludes as $exc): ?><div class="repeater-item"><input type="text" name="excludes[]" value="<?= e($exc) ?>" class="form-control" placeholder="Ex: Bebidas alcoólicas"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div><?php endforeach; ?></div><button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('excludes-list', 'excludes[]', 'Ex: Bebidas alcoólicas')">+ Adicionar</button></div>
             </div>
 
+            <!-- Roteiro / Itinerário -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon" style="background:#dcfce7;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 2a8 8 0 00-8 8c0 5.4 8 12 8 12s8-6.6 8-12a8 8 0 00-8-8z"/></svg>
+                    </div>
+                    <div><h3>Roteiro</h3><p class="admin-card-subtitle">Etapas do passeio, em ordem. Para mostrar um horário/duração no card, comece a descrição com ele seguido de "|" — ex.: "7h00 – 8h00 | Busca no hotel...".</p></div>
+                </div>
+                <!-- Sentinela: garante que a chave "itinerary" sempre chegue ao POST,
+                     permitindo salvar um roteiro vazio (apagar todas as etapas). -->
+                <input type="hidden" name="itinerary[__sentinel__]" value="1">
+                <div id="itinerary-list" class="itinerary-list">
+                    <?php
+                    $itineraryItems = ($isEdit && !empty($itinerary)) ? $itinerary : [];
+                    ?>
+                    <?php if (!empty($itineraryItems)): ?>
+                    <?php foreach ($itineraryItems as $idx => $step): ?>
+                    <div class="itinerary-item">
+                        <span class="itinerary-num"><?= $idx + 1 ?></span>
+                        <div class="itinerary-fields">
+                            <input type="text" name="itinerary[<?= $idx ?>][title]" value="<?= e($step['title'] ?? '') ?>" class="form-control" placeholder="Título da etapa — ex.: Saída do hotel">
+                            <textarea name="itinerary[<?= $idx ?>][description]" class="form-control" rows="2" placeholder="Descrição — ex.: 7h00 – 8h00 | Busca no hotel e traslado até a marina."><?= e($step['description'] ?? '') ?></textarea>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger itinerary-remove" title="Remover etapa">&times;</button>
+                    </div>
+                    <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+                <button type="button" class="btn btn-outline" id="addItineraryBtn">+ Adicionar etapa</button>
+            </div>
+
             <!-- Tabela de Preços por Grupo -->
             <div class="admin-card">
                 <div class="admin-card-header">
@@ -568,6 +599,48 @@ function removeGalleryFile(idx) {
     removeGalleryFileByIndex(idx);
 }
 document.addEventListener('click', function(e) { if (e.target.classList.contains('repeater-remove')) { e.target.closest('.repeater-item, .package-item').remove(); } });
+
+// ==================== ROTEIRO / ITINERÁRIO ====================
+(function() {
+    var list = document.getElementById('itinerary-list');
+    var addBtn = document.getElementById('addItineraryBtn');
+    if (!list || !addBtn) return;
+
+    // Renumera os itens e reindexa os name="itinerary[i][...]" após adicionar/remover.
+    function reindex() {
+        var items = list.querySelectorAll('.itinerary-item');
+        items.forEach(function(item, i) {
+            var num = item.querySelector('.itinerary-num');
+            if (num) num.textContent = (i + 1);
+            var title = item.querySelector('input[type="text"]');
+            var desc = item.querySelector('textarea');
+            if (title) title.name = 'itinerary[' + i + '][title]';
+            if (desc) desc.name = 'itinerary[' + i + '][description]';
+        });
+    }
+
+    function addItem() {
+        var i = list.querySelectorAll('.itinerary-item').length;
+        var div = document.createElement('div');
+        div.className = 'itinerary-item';
+        div.innerHTML =
+            '<span class="itinerary-num">' + (i + 1) + '</span>' +
+            '<div class="itinerary-fields">' +
+                '<input type="text" name="itinerary[' + i + '][title]" value="" class="form-control" placeholder="Título da etapa — ex.: Saída do hotel">' +
+                '<textarea name="itinerary[' + i + '][description]" class="form-control" rows="2" placeholder="Descrição — ex.: 7h00 – 8h00 | Busca no hotel e traslado até a marina."></textarea>' +
+            '</div>' +
+            '<button type="button" class="btn btn-sm btn-danger itinerary-remove" title="Remover etapa">&times;</button>';
+        list.appendChild(div);
+    }
+
+    addBtn.addEventListener('click', addItem);
+    list.addEventListener('click', function(e) {
+        if (e.target.classList.contains('itinerary-remove')) {
+            e.target.closest('.itinerary-item').remove();
+            reindex();
+        }
+    });
+})();
 
 // Validação: todo pacote precisa ter um nome preenchido antes de salvar.
 document.querySelector('form.admin-form')?.addEventListener('submit', function(e) {

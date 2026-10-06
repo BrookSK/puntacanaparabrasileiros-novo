@@ -63,6 +63,7 @@ class TripsController extends Controller
             'trip' => null,
             'categories' => $categories,
             'travelerCategories' => $travelerCategories,
+            'itinerary' => [],
             'pageTitle' => 'Novo Passeio',
         ], 'admin');
     }
