@@ -6064,44 +6064,8 @@ img { max-width: 100%; height: auto; }
     margin-bottom: 20px;
 }
 
-/* Trip Tabs */
-.trip-tabs {
-    display: flex;
-    gap: 0;
-    border-bottom: 2px solid #eee;
-    margin-bottom: 24px;
-}
-.trip-tab {
-    padding: 12px 20px;
-    border: none;
-    background: none;
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--gray);
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    margin-bottom: -2px;
-    font-family: var(--font);
-    transition: all .2s;
-}
-.trip-tab:hover { color: var(--dark); }
-.trip-tab.active {
-    color: var(--text-green);
-    border-bottom-color: var(--text-green);
-    font-weight: 600;
-}
-.trip-tab-content {
-    display: none;
-}
-.trip-tab-content.active {
-    display: block;
-}
-.trip-tab-content h2 {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--dark);
-    margin-bottom: 16px;
-}
+/* Trip Tabs — estilos movidos para o bloco "ABAS FIXAS + navegação por âncoras"
+   no final deste arquivo (seções agora empilhadas numa única página). */
 .trip-body-content {
     font-size: 14px;
     color: #444;
@@ -7545,11 +7509,76 @@ img { max-width: 100%; height: auto; }
 }
 
 /* ============================================================
-   ABAS FIXAS (sticky) — detalhe de passeio
+   ABAS FIXAS (sticky) + navegação por âncoras — detalhe de passeio
    ============================================================ */
 .trip-tabs {
     position: sticky;
     top: 70px;
     z-index: 20;
     background: #fff;
+    border-bottom: 2px solid #eef0f2;
+    margin: 26px 0 0;
+}
+.trip-tabs nav {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.trip-tabs nav::-webkit-scrollbar { display: none; }
+.trip-tabs .trip-tab {
+    flex: none;
+    text-decoration: none;
+    color: var(--gray);
+    font-weight: 600;
+    font-size: 14.5px;
+    padding: 14px 14px 12px;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    background: none;
+    cursor: pointer;
+    transition: color .2s;
+}
+.trip-tabs .trip-tab:hover { color: var(--dark); }
+.trip-tabs .trip-tab.active {
+    color: var(--text-green);
+    border-bottom-color: var(--text-green);
+}
+
+/* Seções empilhadas: espaço para a âncora não ficar sob as abas fixas */
+.trip-main .trip-sec[id] { scroll-margin-top: 130px; padding-top: 30px; }
+
+/* Badge de tempo na timeline (ex.: "7h00 – 8h00", "~35 min") */
+.trip-tl-t {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text-green);
+    background: #e3f1e2;
+    padding: 2px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+/* Chips de dias de funcionamento (facts) */
+.trip-days {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+    flex-wrap: wrap;
+}
+.trip-days em {
+    font-style: normal;
+    font-size: 12.5px;
+    font-weight: 600;
+    min-width: 38px;
+    text-align: center;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: #eef4ec;
+    color: var(--gray);
+}
+.trip-days em.on {
+    background: var(--text-green);
+    color: #fff;
 }
