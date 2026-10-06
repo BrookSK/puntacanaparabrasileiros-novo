@@ -13,6 +13,7 @@ class Trip extends Model
         'gallery', 'documents', 'duration', 'duration_unit', 'difficulty', 'min_pax', 'max_pax',
         'includes', 'excludes', 'ideal_for', 'map_latitude', 'map_longitude', 'map_embed',
         'weather_info', 'meeting_point', 'important_notes',
+        'departure_time_info', 'return_time_info', 'availability_info',
         'partial_payment_enabled', 'partial_payment_percent',
         'group_discount_enabled', 'group_discount_rules',
         'group_pricing_enabled', 'group_pricing',

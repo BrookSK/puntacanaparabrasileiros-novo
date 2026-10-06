@@ -73,6 +73,7 @@ class TripsController extends Controller
         $data = $request->only([
             'title', 'description', 'short_description', 'duration', 'duration_unit',
             'difficulty', 'min_pax', 'max_pax', 'meeting_point', 'important_notes',
+            'departure_time_info', 'return_time_info', 'availability_info',
             'partial_payment_enabled', 'partial_payment_percent',
             'group_discount_enabled', 'group_discount_rules',
             'group_pricing_enabled',
@@ -228,6 +229,7 @@ class TripsController extends Controller
         $data = $request->only([
             'title', 'description', 'short_description', 'duration', 'duration_unit',
             'difficulty', 'min_pax', 'max_pax', 'meeting_point', 'important_notes',
+            'departure_time_info', 'return_time_info', 'availability_info',
             'partial_payment_enabled', 'partial_payment_percent',
             'group_discount_enabled', 'group_discount_rules',
             'group_pricing_enabled',

@@ -356,6 +356,20 @@ $ratingDisplay = (float) ($rating ?? 0);
                                 }
                             }
                         ?>
+                        <?php
+                            // Valores variáveis (com fallback para o padrão quando não houver dado cadastrado).
+                            $capacityInfo = '';
+                            if (!empty($trip['max_pax'])) {
+                                $capacityInfo = 'Até ' . (int) $trip['max_pax'] . ' pessoas';
+                            } elseif (!empty($trip['min_pax'])) {
+                                $capacityInfo = 'A partir de ' . (int) $trip['min_pax'] . ' pessoa(s)';
+                            } else {
+                                $capacityInfo = 'Grupos maiores: consulte nossa equipe';
+                            }
+                            $departureInfo = !empty($trip['departure_time_info']) ? $trip['departure_time_info'] : '';
+                            $returnInfo = !empty($trip['return_time_info']) ? $trip['return_time_info'] : '';
+                            $availabilityInfo = !empty($trip['availability_info']) ? $trip['availability_info'] : 'Sujeita a quórum, capacidade e clima';
+                        ?>
                         <div class="trip-facts">
                             <?php if (!empty($activeDows)): ?>
                             <div><small>Dias de funcionamento</small>
@@ -368,12 +382,14 @@ $ratingDisplay = (float) ($rating ?? 0);
                             <?php if (!empty($trip['duration'])): ?>
                             <div><small>Duração</small><span>Aprox. <?= e($trip['duration']) ?> <?= $trip['duration_unit'] === 'hours' ? 'horas' : 'dias' ?></span></div>
                             <?php endif; ?>
-                            <?php if (!empty($trip['min_pax']) || !empty($trip['max_pax'])): ?>
-                            <div><small>Capacidade</small><span>
-                                <?php if (!empty($trip['max_pax'])): ?>Até <?= (int)$trip['max_pax'] ?> pessoas<?php else: ?>A partir de <?= (int)$trip['min_pax'] ?> pessoa(s)<?php endif; ?>
-                            </span></div>
+                            <?php if ($departureInfo !== ''): ?>
+                            <div><small>Saída do hotel</small><span><?= e($departureInfo) ?></span></div>
                             <?php endif; ?>
-                            <div><small>Disponibilidade</small><span>Sujeita a quórum, capacidade e clima</span></div>
+                            <?php if ($returnInfo !== ''): ?>
+                            <div><small>Retorno ao hotel</small><span><?= e($returnInfo) ?></span></div>
+                            <?php endif; ?>
+                            <div><small>Capacidade</small><span><?= e($capacityInfo) ?></span></div>
+                            <div><small>Disponibilidade</small><span><?= e($availabilityInfo) ?></span></div>
                             <?php if (!empty($fixedDates)): ?>
                             <div><small>Próximas saídas</small><span><?= count($fixedDates) ?> data<?= count($fixedDates) > 1 ? 's' : '' ?> disponível<?= count($fixedDates) > 1 ? 'eis' : '' ?></span></div>
                             <?php endif; ?>

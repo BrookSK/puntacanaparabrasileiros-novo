@@ -25,6 +25,11 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 <div class="form-group"><label>Descrição Curta</label><textarea name="short_description" class="form-control" rows="3" placeholder="Resumo do passeio"><?= e($trip['short_description'] ?? '') ?></textarea></div>
                 <div class="form-group"><label>Descrição Completa</label><textarea name="description" class="form-control" rows="8" placeholder="Descrição detalhada..."><?= e($trip['description'] ?? '') ?></textarea></div>
                 <div class="form-group"><label>Ponto de Encontro</label><input type="text" name="meeting_point" value="<?= e($trip['meeting_point'] ?? '') ?>" class="form-control" placeholder="Ex: Lobby do hotel"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Saída do hotel</label><input type="text" name="departure_time_info" value="<?= e($trip['departure_time_info'] ?? '') ?>" class="form-control" placeholder="Ex: Entre 7h00 e 8h00"></div>
+                    <div class="form-group"><label>Retorno ao hotel</label><input type="text" name="return_time_info" value="<?= e($trip['return_time_info'] ?? '') ?>" class="form-control" placeholder="Ex: Entre 18h00 e 19h00"></div>
+                </div>
+                <div class="form-group"><label>Disponibilidade</label><input type="text" name="availability_info" value="<?= e($trip['availability_info'] ?? '') ?>" class="form-control" placeholder="Ex: Sujeita a quórum, capacidade e clima"><small class="form-hint">Deixe em branco para usar o texto padrão "Sujeita a quórum, capacidade e clima".</small></div>
                 <div class="form-group"><label>Notas Importantes</label><textarea name="important_notes" class="form-control" rows="3" placeholder="Informações importantes..."><?= e($trip['important_notes'] ?? '') ?></textarea></div>
             </div>
 
