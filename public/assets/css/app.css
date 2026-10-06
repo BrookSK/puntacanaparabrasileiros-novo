@@ -7565,6 +7565,12 @@ img { max-width: 100%; height: auto; }
     white-space: nowrap;
 }
 
+/* FAQ dentro da página do passeio: largura total da coluna (sem limite de 720px) */
+#sec-faqs .faq-list {
+    max-width: none;
+    margin: 0;
+}
+
 /* Chips "Ideal para" */
 .trip-ideal {
     display: flex;

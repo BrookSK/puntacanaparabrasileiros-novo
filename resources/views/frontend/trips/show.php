@@ -70,12 +70,6 @@ $ratingDisplay = (float) ($rating ?? 0);
                 <?php endfor; ?>
             </div>
 
-            <!-- Botão Galeria (sempre disponível para abrir o lightbox) -->
-            <button type="button" class="trip-gallery-btn" id="galleryBtnMain">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                Galeria &middot; <?= $galleryCount ?> foto<?= $galleryCount > 1 ? 's' : '' ?>
-            </button>
-
             <!-- Fonte de imagens para o lightbox (lida pelo JS; nunca exibida). -->
             <div class="trip-lightbox-source" id="tripSliderTrack" aria-hidden="true" style="display:none !important;">
                 <?php foreach ($galleryImages as $img): ?>
