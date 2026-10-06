@@ -2745,6 +2745,10 @@ img { max-width: 100%; height: auto; }
 .trip-gallery-section {
     padding: 24px 0 0;
 }
+/* Fonte oculta de imagens do lightbox (nunca aparece na página) */
+.trip-lightbox-source {
+    display: none !important;
+}
 .trip-gallery-grid {
     position: relative;
     display: grid;

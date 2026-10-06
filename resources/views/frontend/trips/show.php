@@ -49,8 +49,8 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                 Galeria
             </button>
 
-            <!-- Fonte de imagens para o lightbox (lida pelo JS; não exibida) -->
-            <div class="trip-slider-track" id="tripSliderTrack" hidden>
+            <!-- Fonte de imagens para o lightbox (lida pelo JS; nunca exibida) -->
+            <div class="trip-lightbox-source" id="tripSliderTrack" aria-hidden="true">
                 <?php foreach ($galleryImages as $img): ?>
                 <div class="trip-slide"><img src="<?= e($img) ?>" alt="<?= e($trip['title']) ?>"></div>
                 <?php endforeach; ?>
