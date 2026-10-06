@@ -115,6 +115,10 @@ class TripsController extends Controller
         $data['includes'] = !empty($includes) ? json_encode(array_filter($includes)) : null;
         $data['excludes'] = !empty($excludes) ? json_encode(array_filter($excludes)) : null;
 
+        // Ideal para (chips) como JSON
+        $idealFor = $request->input('ideal_for', []);
+        $data['ideal_for'] = !empty($idealFor) ? json_encode(array_values(array_filter($idealFor))) : null;
+
         // Upload de imagem
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));
@@ -267,6 +271,10 @@ class TripsController extends Controller
         $excludes = $request->input('excludes', []);
         $data['includes'] = !empty($includes) ? json_encode(array_filter($includes)) : null;
         $data['excludes'] = !empty($excludes) ? json_encode(array_filter($excludes)) : null;
+
+        // Ideal para (chips) como JSON
+        $idealFor = $request->input('ideal_for', []);
+        $data['ideal_for'] = !empty($idealFor) ? json_encode(array_values(array_filter($idealFor))) : null;
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));

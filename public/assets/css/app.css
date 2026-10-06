@@ -2372,7 +2372,7 @@ img { max-width: 100%; height: auto; }
     padding: 0 24px;
 }
 .faq-item.active .faq-answer {
-    max-height: 400px;
+    max-height: 1000px;
     padding: 0 24px 20px;
 }
 .faq-answer p {
@@ -2816,23 +2816,28 @@ img { max-width: 100%; height: auto; }
 }
 .trip-gallery-btn {
     position: absolute;
-    bottom: 12px;
-    left: 12px;
+    bottom: 10px;
+    left: 10px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 13px;
+    gap: 5px;
+    padding: 5px 10px;
     background: rgba(255, 255, 255, 0.92);
     border: none;
-    border-radius: 8px;
-    font-size: 12px;
+    border-radius: 7px;
+    font-size: 11px;
+    line-height: 1;
     font-weight: 600;
     color: var(--dark);
     cursor: pointer;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
     z-index: 5;
     font-family: var(--font);
+    white-space: nowrap;
+    width: auto;
+    max-width: max-content;
 }
+.trip-gallery-btn svg { flex-shrink: 0; }
 .trip-gallery-btn:hover {
     background: #fff;
 }
@@ -7558,6 +7563,21 @@ img { max-width: 100%; height: auto; }
     padding: 2px 9px;
     border-radius: 999px;
     white-space: nowrap;
+}
+
+/* Chips "Ideal para" */
+.trip-ideal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.trip-chip {
+    background: #e3f1e2;
+    color: var(--text-green);
+    border-radius: 999px;
+    padding: 5px 13px;
+    font-size: 13px;
+    font-weight: 600;
 }
 
 /* Chips de dias de funcionamento (facts) */

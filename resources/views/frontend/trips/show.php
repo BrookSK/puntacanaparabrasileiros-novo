@@ -200,6 +200,21 @@ $ratingDisplay = (float) ($rating ?? 0);
                     </div>
 
                     <?php
+                        $idealForList = !empty($trip['ideal_for']) ? json_decode($trip['ideal_for'], true) : [];
+                        $idealForList = is_array($idealForList) ? array_values(array_filter($idealForList)) : [];
+                    ?>
+                    <?php if (!empty($idealForList)): ?>
+                    <div class="trip-block">
+                        <h3>Ideal para</h3>
+                        <div class="trip-ideal">
+                            <?php foreach ($idealForList as $if): ?>
+                            <span class="trip-chip"><?= e($if) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php
                         $displayIncludes = !empty($includes) ? $includes : [];
                         $displayExcludes = !empty($excludes) ? $excludes : [];
                     ?>
