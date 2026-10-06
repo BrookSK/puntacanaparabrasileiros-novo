@@ -72,17 +72,17 @@ $action = $isEdit ? '/admin/equipe/' . $member['id'] . '/editar' : '/admin/equip
 
                     <div class="form-group">
                         <label>Foto</label>
+                        <input type="hidden" name="remove_photo" id="removeMemberPhoto" value="0">
                         <div class="file-upload-area">
-                            <input type="file" name="photo" id="memberPhoto" class="file-input-hidden" accept="image/jpeg,image/png,image/webp">
+                            <input type="file" name="photo" id="memberPhoto" class="file-input-hidden" accept="image/jpeg,image/png,image/webp" onchange="previewMemberPhoto(this)">
                             <label for="memberPhoto" class="file-upload-label">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                                 <span>Escolher imagem</span>
                             </label>
-                            <?php if ($isEdit && !empty($member['photo'])): ?>
-                            <div class="file-upload-preview">
-                                <img src="<?= e($member['photo']) ?>" alt="<?= e($member['name']) ?>">
+                            <div class="file-upload-preview" id="memberPhotoPreview" style="<?= ($isEdit && !empty($member['photo'])) ? '' : 'display:none;' ?>">
+                                <img id="memberPhotoPreviewImg" src="<?= ($isEdit && !empty($member['photo'])) ? e($member['photo']) : '' ?>" alt="<?= e($member['name'] ?? '') ?>">
+                                <button type="button" class="img-remove-btn" onclick="removeMemberPhoto()" title="Remover imagem">&times;</button>
                             </div>
-                            <?php endif; ?>
                         </div>
                         <small class="form-hint">JPG, PNG ou WebP. Recomendado: 600x600px (quadrada).</small>
                     </div>
@@ -99,3 +99,33 @@ $action = $isEdit ? '/admin/equipe/' . $member['id'] . '/editar' : '/admin/equip
         </div>
     </div>
 </form>
+
+<script>
+// Pré-visualiza a nova foto escolhida e cancela a marcação de remoção.
+function previewMemberPhoto(input) {
+    var preview = document.getElementById('memberPhotoPreview');
+    var img = document.getElementById('memberPhotoPreviewImg');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+            preview.style.display = '';
+        };
+        reader.readAsDataURL(input.files[0]);
+        var flag = document.getElementById('removeMemberPhoto');
+        if (flag) flag.value = '0';
+    }
+}
+
+// Remove a foto do membro: limpa preview/input e marca para o backend apagar.
+function removeMemberPhoto() {
+    var preview = document.getElementById('memberPhotoPreview');
+    var img = document.getElementById('memberPhotoPreviewImg');
+    var fileInput = document.getElementById('memberPhoto');
+    var flag = document.getElementById('removeMemberPhoto');
+    if (img) img.src = '';
+    if (preview) preview.style.display = 'none';
+    if (fileInput) fileInput.value = '';
+    if (flag) flag.value = '1';
+}
+</script>

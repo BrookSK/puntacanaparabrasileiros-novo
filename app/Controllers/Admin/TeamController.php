@@ -104,6 +104,9 @@ class TeamController extends Controller
             if ($uploaded) {
                 $data['photo'] = $uploaded;
             }
+        } elseif ($request->input('remove_photo') === '1') {
+            // Admin clicou em remover a foto (sem enviar outra).
+            $data['photo'] = null;
         }
 
         $this->teamModel->update($id, $data);

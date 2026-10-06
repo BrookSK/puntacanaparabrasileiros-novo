@@ -90,8 +90,10 @@ a { color: var(--primary); text-decoration: none; }
 .file-input-hidden { position: absolute; opacity: 0; width: 0; height: 0; }
 .file-upload-label { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border: 2px dashed #e2e8f0; border-radius: 8px; cursor: pointer; transition: all .15s; color: #64748b; font-size: 13px; font-weight: 500; }
 .file-upload-label:hover { border-color: #0077b6; color: #0077b6; background: #f8fbff; }
-.file-upload-preview { margin-top: 12px; }
-.file-upload-preview img { max-width: 100%; max-height: 160px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; }
+.file-upload-preview { margin-top: 12px; position: relative; display: inline-block; }
+.file-upload-preview img { max-width: 100%; max-height: 160px; border-radius: 8px; object-fit: cover; border: 1px solid #e2e8f0; display: block; }
+.img-remove-btn { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; border-radius: 50%; border: none; background: rgba(220,38,38,0.92); color: #fff; font-size: 18px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.25); transition: background .15s; }
+.img-remove-btn:hover { background: #b91c1c; }
 
 /* Route Blocks */
 .route-block { background: #f8fafc; border: 1px solid #f1f5f9; border-radius: 8px; padding: 20px; margin-bottom: 16px; }

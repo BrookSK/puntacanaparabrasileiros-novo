@@ -458,7 +458,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                              Para voltar a exibir, troque o hidden por um input number visível. */ ?>
                     <input type="hidden" name="sort_order" value="<?= e($trip['sort_order'] ?? '0') ?>">
                     <div class="form-group"><label class="checkbox-label"><input type="checkbox" name="featured" <?= !empty($trip['featured']) ? 'checked' : '' ?>> Passeio em Destaque</label></div>
-                    <div class="form-group"><label>Imagem Destacada</label><div class="file-upload-area"><input type="file" name="featured_image" id="featImg" class="file-input-hidden" accept="image/*" onchange="previewFeaturedImage(this)"><label for="featImg" class="file-upload-label" onclick="document.getElementById('featImg').click(); return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Escolher imagem</span></label><div class="file-upload-preview" id="featImgPreview" style="<?= ($isEdit && !empty($trip['featured_image'])) ? '' : 'display:none;' ?>"><img id="featImgPreviewImg" src="<?= ($isEdit && !empty($trip['featured_image'])) ? e($trip['featured_image']) : '' ?>" alt=""></div></div><small class="form-hint">JPG, PNG ou WebP. Recomendado: 1200x800px (proporção 3:2, paisagem).</small></div>
+                    <div class="form-group"><label>Imagem Destacada</label><input type="hidden" name="remove_featured_image" id="removeFeatImg" value="0"><div class="file-upload-area"><input type="file" name="featured_image" id="featImg" class="file-input-hidden" accept="image/*" onchange="previewFeaturedImage(this)"><label for="featImg" class="file-upload-label" onclick="document.getElementById('featImg').click(); return false;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span>Escolher imagem</span></label><div class="file-upload-preview" id="featImgPreview" style="<?= ($isEdit && !empty($trip['featured_image'])) ? '' : 'display:none;' ?>"><img id="featImgPreviewImg" src="<?= ($isEdit && !empty($trip['featured_image'])) ? e($trip['featured_image']) : '' ?>" alt=""><button type="button" class="img-remove-btn" onclick="removeFeaturedImage()" title="Remover imagem">&times;</button></div></div><small class="form-hint">JPG, PNG ou WebP. Recomendado: 1200x800px (proporção 3:2, paisagem).</small></div>
                     <div class="form-group">
                         <label>Galeria de Fotos</label>
                         <p style="font-size:11px;color:#94a3b8;margin-bottom:10px;">Adicione imagens ao carrossel do passeio (apenas upload)</p>
@@ -521,7 +521,22 @@ function previewFeaturedImage(input) {
             preview.style.display = '';
         };
         reader.readAsDataURL(input.files[0]);
+        // Escolheu nova imagem: cancela qualquer marcação de remoção.
+        var flag = document.getElementById('removeFeatImg');
+        if (flag) flag.value = '0';
     }
+}
+
+// Remove a imagem destacada: limpa o preview, o input de arquivo e marca para o backend apagar.
+function removeFeaturedImage() {
+    var preview = document.getElementById('featImgPreview');
+    var img = document.getElementById('featImgPreviewImg');
+    var fileInput = document.getElementById('featImg');
+    var flag = document.getElementById('removeFeatImg');
+    if (img) img.src = '';
+    if (preview) preview.style.display = 'none';
+    if (fileInput) fileInput.value = '';
+    if (flag) flag.value = '1';
 }
 
 // Array global para armazenar os arquivos da galeria
