@@ -7171,3 +7171,385 @@ img { max-width: 100%; height: auto; }
 
 /* Actions */
 .success-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+
+/* ============================================================
+   TRIP DETAIL — Layout de referência (Saona) · fundo branco
+   ============================================================ */
+.trip-main { min-width: 0; }
+
+/* Lead abaixo do título */
+.trip-lead {
+    font-size: 16px;
+    color: #475467;
+    line-height: 1.6;
+    margin: 14px 0 0;
+    max-width: 68ch;
+}
+
+/* Seções e blocos de conteúdo */
+.trip-sec { padding-top: 8px; }
+.trip-sec h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 0 0 14px;
+}
+.trip-block {
+    background: var(--white);
+    border: 1px solid #e7ebe4;
+    border-radius: 14px;
+    padding: 20px;
+    margin-top: 16px;
+}
+.trip-block h3 {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--text-green);
+    margin: 0 0 12px;
+}
+.trip-block .trip-body-content { margin-bottom: 0; }
+.trip-block p { max-width: 70ch; }
+
+.trip-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-top: 16px;
+}
+.trip-two-col .trip-block { margin-top: 0; }
+@media (max-width: 620px) {
+    .trip-two-col { grid-template-columns: 1fr; }
+}
+
+/* Bloco de aviso (informações importantes) */
+.trip-notice {
+    background: #fff8e8;
+    border-color: #f3e2b0;
+}
+.trip-notice h3 { color: #8a5a00; }
+
+.trip-companion-price {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #334155;
+}
+.trip-companion-price strong { color: var(--text-green); }
+.trip-small {
+    font-size: 13px;
+    color: var(--gray);
+    margin-top: 8px;
+}
+
+/* Listas de inclui / não inclui com ícone antes do item */
+.trip-check-list.trip-no-list li::before,
+.trip-check-list li::before {
+    content: "\2713";
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    background: #e3f1e2;
+    color: var(--text-green);
+}
+.trip-check-list.trip-no-list li::before {
+    content: "\2715";
+    background: #fbe9e5;
+    color: #b4432f;
+}
+.trip-block .trip-check-list li {
+    align-items: center;
+}
+
+/* Documentos */
+.trip-docs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+.trip-docs a {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    text-decoration: none;
+    color: var(--dark);
+    border: 1px solid #e7ebe4;
+    border-radius: 10px;
+    padding: 12px;
+    transition: border-color .2s;
+}
+.trip-docs a:hover { border-color: var(--text-green); }
+.trip-doc-ext {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #e3f1e2;
+    color: var(--text-green);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 800;
+}
+.trip-doc-info strong { display: block; font-size: 14px; }
+.trip-doc-info small { color: var(--gray); font-size: 12px; }
+@media (max-width: 520px) {
+    .trip-docs { grid-template-columns: 1fr; }
+}
+
+/* Vídeo embed responsivo */
+.trip-video-embed {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border-radius: 10px;
+}
+.trip-video-embed iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ============================================================
+   TIMELINE (Roteiro)
+   ============================================================ */
+.trip-timeline {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    position: relative;
+}
+.trip-timeline::before {
+    content: "";
+    position: absolute;
+    left: 17px;
+    top: 10px;
+    bottom: 10px;
+    width: 2px;
+    background: #e7ebe4;
+}
+.trip-timeline li {
+    position: relative;
+    padding-left: 54px;
+    padding-bottom: 18px;
+}
+.trip-timeline li:last-child { padding-bottom: 0; }
+.trip-tl-n {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--text-green);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 0 0 4px #fff;
+}
+.trip-tl-card {
+    background: var(--white);
+    border: 1px solid #e7ebe4;
+    border-radius: 12px;
+    padding: 14px 16px;
+}
+.trip-tl-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 4px 12px;
+    align-items: baseline;
+}
+.trip-tl-head b { font-size: 15.5px; color: var(--dark); }
+.trip-tl-card p { margin: 6px 0 0; color: var(--gray); font-size: 14px; }
+.trip-note {
+    font-size: 13px;
+    color: var(--gray);
+    margin-top: 14px;
+    font-style: italic;
+}
+.trip-subsec {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--dark);
+    margin: 24px 0 12px;
+}
+
+/* ============================================================
+   CARDS DE PREÇO (Adulto / Criança / Infante)
+   ============================================================ */
+.trip-price-cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+}
+.trip-pc {
+    border: 1px solid #e7ebe4;
+    border-radius: 12px;
+    padding: 16px;
+    background: var(--white);
+}
+.trip-pc-main { border: 2px solid var(--text-green); }
+.trip-pc-lbl { font-weight: 700; font-size: 14px; color: var(--dark); }
+.trip-pc small { display: block; color: var(--gray); font-size: 12.5px; font-weight: 500; margin-top: 2px; }
+.trip-pc-v {
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text-green);
+    margin-top: 6px;
+}
+.trip-pc-v.trip-pc-free { color: #8a5a00; font-size: 22px; }
+.trip-pc-old {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--gray);
+    text-decoration: line-through;
+    margin-right: 6px;
+}
+@media (max-width: 520px) {
+    .trip-price-cards { grid-template-columns: 1fr; }
+}
+
+/* Grade de informações (facts) */
+.trip-facts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: #e7ebe4;
+    border: 1px solid #e7ebe4;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 16px;
+}
+.trip-facts div { background: var(--white); padding: 12px 16px; }
+.trip-facts small {
+    display: block;
+    color: var(--gray);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    font-weight: 600;
+}
+.trip-facts span { font-weight: 600; font-size: 14.5px; color: var(--dark); }
+@media (max-width: 520px) {
+    .trip-facts { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   ACCORDIONS (Como pagar / Política de cancelamento)
+   ============================================================ */
+.trip-accordions {
+    display: grid;
+    gap: 12px;
+    margin-top: 20px;
+}
+.trip-detail-acc {
+    background: var(--white);
+    border: 1px solid #e7ebe4;
+    border-radius: 12px;
+    overflow: hidden;
+}
+.trip-detail-acc summary {
+    cursor: pointer;
+    list-style: none;
+    padding: 16px 20px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text-green);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+.trip-detail-acc summary::-webkit-details-marker { display: none; }
+.trip-detail-acc summary::after {
+    content: "+";
+    color: var(--text-green);
+    font-size: 20px;
+    line-height: 1;
+    flex: none;
+}
+.trip-detail-acc[open] summary::after { content: "\2013"; }
+.trip-detail-acc[open] summary { border-bottom: 1px solid #e7ebe4; }
+.trip-acc-body { padding: 18px 20px; }
+.trip-acc-body p { margin: 0 0 10px; color: var(--dark); max-width: 72ch; }
+.trip-acc-body p:last-child { margin: 0; }
+.trip-acc-body .trip-small { color: var(--gray); }
+
+/* Política de cancelamento */
+.trip-cancel { display: grid; gap: 10px; }
+.trip-cancel div { display: flex; gap: 12px; align-items: center; }
+.trip-cancel p { margin: 0; font-size: 14px; }
+.trip-cx {
+    flex: none;
+    width: 56px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 6px 0;
+    font-weight: 800;
+}
+.trip-cx.ok { background: #e3f1e2; color: var(--text-green); }
+.trip-cx.mid { background: #fff4d1; color: #8a5a00; }
+.trip-cx.bad { background: #fbe9e5; color: #b4432f; }
+
+/* ============================================================
+   REVIEWS EM GRADE
+   ============================================================ */
+.trip-reviews {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+.trip-rv {
+    background: var(--white);
+    border: 1px solid #e7ebe4;
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.trip-rv-stars { color: var(--secondary); letter-spacing: 2px; }
+.trip-rv p {
+    margin: 6px 0;
+    font-size: 14px;
+    color: var(--dark);
+    line-height: 1.55;
+    flex: 1;
+}
+.trip-rv small { font-size: 12.5px; font-weight: 600; color: var(--dark); }
+.trip-rv small span {
+    display: block;
+    font-weight: 400;
+    color: var(--gray);
+    font-size: 12px;
+}
+@media (max-width: 760px) {
+    .trip-reviews { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   ABAS FIXAS (sticky) — detalhe de passeio
+   ============================================================ */
+.trip-tabs {
+    position: sticky;
+    top: 70px;
+    z-index: 20;
+    background: #fff;
+}

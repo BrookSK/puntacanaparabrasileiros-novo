@@ -16,8 +16,35 @@ if (empty($galleryImages)) {
 $heroImage = $galleryImages[0];
 $sideImages = array_slice($galleryImages, 1, 2);
 $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
+$galleryCount = count($galleryImages);
+
+// ── Pré-cálculos de preços (usados no card lateral, nos cards de preço e na barra mobile) ──
+$basePrice = 0;
+$priceLabel = '/ Adulto';
+$isGroupPricing = (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing']) && empty($trip['composition_pricing_enabled']));
+$priceCategories = [];
+
+if ($isGroupPricing) {
+    $gpRules = json_decode($trip['group_pricing'], true);
+    if (is_array($gpRules) && !empty($gpRules)) {
+        usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+        $basePrice = (float) $gpRules[0]['price'];
+        $paxLabel = (int) $gpRules[0]['pax'];
+        $priceLabel = $paxLabel === 1 ? '/ Pessoa' : '/ ' . $paxLabel . ' pessoas';
+    }
+} elseif (!empty($packages)) {
+    $basePrice = $packages[0]['base_price'] ?? 0;
+    $priceCategories = $packages[0]['categories'] ?? [];
+}
+
+// Avaliações
+$reviewCountDisplay = is_array($reviews) ? count($reviews) : 0;
+$ratingDisplay = (float) ($rating ?? 0);
 ?>
-<!-- Galeria em grade (dentro do container, centralizada) -->
+
+<!-- ============================================================ -->
+<!-- GALERIA EM GRADE                                             -->
+<!-- ============================================================ -->
 <section class="trip-gallery-section">
     <div class="container">
         <div class="trip-gallery-grid" id="tripSlider">
@@ -46,26 +73,17 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
             <!-- Botão Galeria (sempre disponível para abrir o lightbox) -->
             <button type="button" class="trip-gallery-btn" id="galleryBtnMain">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                Galeria
+                Galeria &middot; <?= $galleryCount ?> foto<?= $galleryCount > 1 ? 's' : '' ?>
             </button>
 
-            <!-- Fonte de imagens para o lightbox (lida pelo JS; nunca exibida).
-                 display:none inline garante que fique oculta mesmo com CSS em cache. -->
+            <!-- Fonte de imagens para o lightbox (lida pelo JS; nunca exibida). -->
             <div class="trip-lightbox-source" id="tripSliderTrack" aria-hidden="true" style="display:none !important;">
                 <?php foreach ($galleryImages as $img): ?>
                 <div class="trip-slide"><img src="<?= e($img) ?>" alt="<?= e($trip['title']) ?>"></div>
                 <?php endforeach; ?>
             </div>
         </div>
-    </div>
-</section>
 
-<section class="trip-detail">
-    <div class="container">
-        <?php
-            $reviewCountDisplay = is_array($reviews) ? count($reviews) : 0;
-            $ratingDisplay = (float) ($rating ?? 0);
-        ?>
         <?php if ($ratingDisplay > 0 && $reviewCountDisplay > 0): ?>
         <!-- Barra de avaliações -->
         <div class="trip-rating-bar">
@@ -76,9 +94,16 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
             <span class="trip-rating-value"><?= number_format($ratingDisplay, 1, ',', '') ?></span>
         </div>
         <?php endif; ?>
+    </div>
+</section>
 
+<!-- ============================================================ -->
+<!-- CONTEÚDO                                                     -->
+<!-- ============================================================ -->
+<section class="trip-detail">
+    <div class="container">
         <div class="trip-content-grid">
-            <!-- Main Content -->
+            <!-- ========================= MAIN ========================= -->
             <div class="trip-main">
                 <!-- Título + Badge duração -->
                 <div class="trip-title-row">
@@ -86,7 +111,7 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                     <?php if ($trip['duration']): ?>
                     <div class="trip-duration-badge">
                         <span class="duration-number"><?= e($trip['duration']) ?></span>
-                        <span class="duration-unit"><?= $trip['duration_unit'] === 'hours' ? 'Horas' : 'Dias' ?></span>
+                        <span class="duration-unit"><?= $trip['duration_unit'] === 'hours' ? 'horas' : 'dias' ?></span>
                     </div>
                     <?php endif; ?>
                 </div>
@@ -97,13 +122,10 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
 
                 <?php
                 // ── Cards de destaque com ícones ──
-                // Fonte: itinerário (título + descrição) com fallback para "includes" (frases).
                 $highlightItems = [];
                 if (!empty($itinerary)) {
                     foreach ($itinerary as $it) {
-                        if (!empty($it['title'])) {
-                            $highlightItems[] = $it['title'];
-                        }
+                        if (!empty($it['title'])) $highlightItems[] = $it['title'];
                     }
                 } elseif (!empty($includes)) {
                     foreach ($includes as $inc) {
@@ -137,7 +159,6 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                     if ($has(['estrela', 'star', 'premium', 'vip', 'exclusiv'])) {
                         return '<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>';
                     }
-                    // Ícone padrão: check dentro de círculo.
                     return '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
                 };
                 ?>
@@ -154,112 +175,105 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                 </div>
                 <?php endif; ?>
 
-                <!-- Tabs -->
+                <!-- ===================== ABAS ===================== -->
                 <div class="trip-tabs">
-                    <button class="trip-tab active" data-tab="visao-geral">Visão geral</button>
-                    <button class="trip-tab" data-tab="custo">Custo</button>
-                    <button class="trip-tab" data-tab="datas">Datas</button>
-                    <button class="trip-tab" data-tab="faqs">FAQs</button>
+                    <button class="trip-tab active" data-tab="visao-geral">Visão Geral</button>
+                    <?php if (!empty($itinerary)): ?><button class="trip-tab" data-tab="roteiro">Roteiro</button><?php endif; ?>
+                    <button class="trip-tab" data-tab="precos">Preços e Datas</button>
+                    <button class="trip-tab" data-tab="faqs">FAQ</button>
                 </div>
 
-                <!-- Tab: Visão Geral -->
+                <!-- ===================== TAB: VISÃO GERAL ===================== -->
                 <div class="trip-tab-content active" id="tab-visao-geral">
-                    <h2>Visão Geral</h2>
-                    <div class="trip-body-content">
-                        <?php if (!empty($trip['description'])): ?>
-                        <?= nl2br(e($trip['description'])) ?>
-                        <?php elseif (!empty($trip['short_description'])): ?>
-                        <?= nl2br(e($trip['short_description'])) ?>
-                        <?php endif; ?>
-                    </div>
-
-                    <!-- Ponto de Encontro -->
-                    <?php if (!empty($trip['meeting_point'])): ?>
-                    <div class="trip-section">
-                        <h3>Ponto de Encontro</h3>
-                        <div class="trip-body-content">
-                            <?= nl2br(e($trip['meeting_point'])) ?>
+                    <section class="trip-sec">
+                        <h2>Visão Geral</h2>
+                        <div class="trip-block">
+                            <div class="trip-body-content">
+                                <?php if (!empty($trip['description'])): ?>
+                                <?= nl2br(e($trip['description'])) ?>
+                                <?php elseif (!empty($trip['short_description'])): ?>
+                                <?= nl2br(e($trip['short_description'])) ?>
+                                <?php endif; ?>
+                            </div>
                         </div>
-                    </div>
-                    <?php endif; ?>
 
-                    <!-- Notas Importantes / Avisos -->
-                    <?php if (!empty($trip['important_notes'])): ?>
-                    <div class="trip-section">
-                        <h3>Notas Importantes</h3>
-                        <div class="trip-body-content">
-                            <?= nl2br(e($trip['important_notes'])) ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <!-- Itinerário / Destaques -->
-                    <?php if (!empty($itinerary)): ?>
-                    <div class="trip-section">
-                        <h3>Destaques</h3>
-                        <ul class="trip-check-list">
-                            <?php foreach ($itinerary as $day): ?>
-                            <li><span class="check-icon">&#10003;</span> <?= e($day['title']) ?><?= $day['description'] ? ' - ' . e($day['description']) : '' ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                    <?php endif; ?>
-
-                    <!-- Documentos Extras -->
-                    <?php
-                    $tripDocuments = !empty($trip['documents']) ? json_decode($trip['documents'], true) : [];
-                    ?>
-                    <?php if (!empty($tripDocuments)): ?>
-                    <div class="trip-section">
-                        <h3>Documentos Importantes</h3>
-                        <p style="font-size:14px;color:#636e72;margin-bottom:14px;">Documentos necessários para este passeio. Baixe e leia antes da data reservada.</p>
-                        <div style="display:flex;flex-direction:column;gap:10px;">
-                            <?php foreach ($tripDocuments as $doc): ?>
-                            <a href="<?= e($doc['path']) ?>" target="_blank" download style="display:flex;align-items:center;gap:12px;background:#f8faf8;border:1px solid #e8f0e8;border-radius:10px;padding:14px 18px;text-decoration:none;transition:border-color .2s;">
-                                <span style="width:38px;height:38px;border-radius:8px;background:#e8f5e9;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-                                    <?php if (($doc['type'] ?? '') === 'pdf'): ?>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                                    <?php else: ?>
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                                    <?php endif; ?>
-                                </span>
-                                <span style="flex:1;overflow:hidden;">
-                                    <strong style="display:block;font-size:14px;color:#1C2011;margin-bottom:2px;"><?= e($doc['name'] ?? 'Documento') ?></strong>
-                                    <span style="font-size:12px;color:#636e72;text-transform:uppercase;"><?= e(strtoupper($doc['type'] ?? 'FILE')) ?> • <?= $doc['size'] ? number_format($doc['size'] / 1024, 0) . ' KB' : '' ?></span>
-                                </span>
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2" style="flex-shrink:0;"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            </a>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($trip['companion_enabled']) && !empty($trip['companion_description'])): ?>
-                    <!-- Regras de Acompanhantes -->
-                    <div class="trip-section" style="margin-top:24px;">
-                        <h3 style="font-size:1.1rem;margin-bottom:12px;">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:6px;"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
-                            Regras de <?= e($trip['companion_label'] ?? 'Acompanhante') ?>
-                        </h3>
-                        <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px 20px;">
-                            <p style="font-size:14px;color:#334155;margin:0;line-height:1.6;"><?= nl2br(e($trip['companion_description'])) ?></p>
-                            <?php if (!empty($trip['companion_price'])): ?>
-                            <div style="margin-top:10px;padding-top:10px;border-top:1px solid #e2e8f0;display:flex;align-items:center;gap:8px;">
-                                <span style="font-size:13px;color:#475569;">Valor por acompanhante:</span>
-                                <span style="font-size:15px;font-weight:700;color:#059669;"><?= money((float)$trip['companion_price']) ?></span>
+                        <?php
+                            $displayIncludes = !empty($includes) ? $includes : [];
+                            $displayExcludes = !empty($excludes) ? $excludes : [];
+                        ?>
+                        <?php if (!empty($displayIncludes) || !empty($displayExcludes)): ?>
+                        <div class="trip-two-col">
+                            <?php if (!empty($displayIncludes)): ?>
+                            <div class="trip-block">
+                                <h3>O que inclui</h3>
+                                <ul class="trip-check-list">
+                                    <?php foreach ($displayIncludes as $item): ?>
+                                    <li><?= e($item) ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
                             </div>
                             <?php endif; ?>
-                            <?php if (!empty($trip['companion_max_per_participant'])): ?>
-                            <p style="font-size:12px;color:#6b7280;margin:6px 0 0;">Máximo de <?= (int)$trip['companion_max_per_participant'] ?> acompanhante<?= (int)$trip['companion_max_per_participant'] > 1 ? 's' : '' ?> por participante.</p>
+                            <?php if (!empty($displayExcludes)): ?>
+                            <div class="trip-block">
+                                <h3>Não inclui</h3>
+                                <ul class="trip-check-list trip-no-list">
+                                    <?php foreach ($displayExcludes as $item): ?>
+                                    <li><?= e($item) ?></li>
+                                    <?php endforeach; ?>
+                                </ul>
+                            </div>
                             <?php endif; ?>
                         </div>
-                    </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
 
-                    <?php if (!empty($trip['youtube_url'])): ?>
-                    <!-- Vídeo do Passeio -->
-                    <div style="margin-top:24px;">
-                        <h3 style="font-size:1.1rem;margin-bottom:12px;">Vídeo do Passeio</h3>
+                        <?php if (!empty($trip['important_notes'])): ?>
+                        <div class="trip-block trip-notice">
+                            <h3>Informações importantes</h3>
+                            <div class="trip-body-content"><?= nl2br(e($trip['important_notes'])) ?></div>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($trip['meeting_point'])): ?>
+                        <div class="trip-block">
+                            <h3>Ponto de encontro e transporte</h3>
+                            <div class="trip-body-content"><?= nl2br(e($trip['meeting_point'])) ?></div>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($trip['companion_enabled']) && !empty($trip['companion_description'])): ?>
+                        <div class="trip-block">
+                            <h3>Regras de <?= e($trip['companion_label'] ?? 'Acompanhante') ?></h3>
+                            <div class="trip-body-content"><?= nl2br(e($trip['companion_description'])) ?></div>
+                            <?php if (!empty($trip['companion_price'])): ?>
+                            <p class="trip-companion-price">Valor por acompanhante: <strong><?= money((float)$trip['companion_price']) ?></strong></p>
+                            <?php endif; ?>
+                            <?php if (!empty($trip['companion_max_per_participant'])): ?>
+                            <p class="trip-small">Máximo de <?= (int)$trip['companion_max_per_participant'] ?> acompanhante<?= (int)$trip['companion_max_per_participant'] > 1 ? 's' : '' ?> por participante.</p>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php
+                        $tripDocuments = !empty($trip['documents']) ? json_decode($trip['documents'], true) : [];
+                        ?>
+                        <?php if (!empty($tripDocuments)): ?>
+                        <div class="trip-block">
+                            <h3>Documentos importantes</h3>
+                            <div class="trip-docs">
+                                <?php foreach ($tripDocuments as $doc): ?>
+                                <a href="<?= e($doc['path']) ?>" target="_blank" rel="noopener" download>
+                                    <span class="trip-doc-ext"><?= e(strtoupper($doc['type'] ?? 'FILE')) ?></span>
+                                    <span class="trip-doc-info">
+                                        <strong><?= e($doc['name'] ?? 'Documento') ?></strong>
+                                        <small><?= e(strtoupper($doc['type'] ?? 'FILE')) ?><?= !empty($doc['size']) ? ' · ' . number_format($doc['size'] / 1024, 0) . ' KB' : '' ?></small>
+                                    </span>
+                                </a>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($trip['youtube_url'])): ?>
                         <?php
                         $ytUrl = $trip['youtube_url'];
                         $ytId = '';
@@ -268,212 +282,245 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                         elseif (preg_match('/embed\/([^?]+)/', $ytUrl, $m)) $ytId = $m[1];
                         ?>
                         <?php if ($ytId): ?>
-                        <div style="position:relative;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:10px;">
-                            <iframe src="https://www.youtube.com/embed/<?= e($ytId) ?>" style="position:absolute;top:0;left:0;width:100%;height:100%;border:none;" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                        <div class="trip-block">
+                            <h3>Vídeo do passeio</h3>
+                            <div class="trip-video-embed">
+                                <iframe src="https://www.youtube.com/embed/<?= e($ytId) ?>" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                            </div>
                         </div>
                         <?php endif; ?>
-                    </div>
-                    <?php endif; ?>
+                        <?php endif; ?>
+                    </section>
                 </div>
 
-                <!-- Tab: Custo -->
-                <div class="trip-tab-content" id="tab-custo">
-                    <h2>Inclui / Exclui</h2>
-
-                    <?php
-                    $displayIncludes = !empty($includes) ? $includes : ['Transporte ida e volta do hotel', 'Guia em portugues', 'Equipamentos inclusos'];
-                    $displayExcludes = !empty($excludes) ? $excludes : ['Fotos profissionais', 'Gorjetas (opcional)', 'Itens pessoais'];
-                    ?>
-
-                    <div class="trip-section">
-                        <h3>Inclui</h3>
-                        <ul class="trip-check-list">
-                            <?php foreach ($displayIncludes as $item): ?>
-                            <li><span class="check-icon">&#10003;</span> <?= e($item) ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-
-                    <div class="trip-section">
-                        <h3>Não Inclui</h3>
-                        <ul class="trip-x-list">
-                            <?php foreach ($displayExcludes as $item): ?>
-                            <li><span class="x-icon">&#10007;</span> <?= e($item) ?></li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-
-                    <?php foreach ($packages as $pkg): ?>
-                    <div class="trip-package-card">
-                        <h4><?= e($pkg['title']) ?></h4>
-                        <?php if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing'])): ?>
-                        <?php $gpRulesDisplay = json_decode($trip['group_pricing'], true); ?>
-                        <?php if (is_array($gpRulesDisplay) && !empty($gpRulesDisplay)): ?>
-                        <?php usort($gpRulesDisplay, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0)); ?>
-                        <h5 style="margin-bottom:8px;font-size:14px;color:#1e40af;">Preço por Grupo (Adultos)</h5>
-                        <table class="table">
-                            <thead><tr><th>Adultos</th><th>Preço Total</th></tr></thead>
-                            <tbody>
-                            <?php foreach ($gpRulesDisplay as $gpRule): ?>
-                            <tr>
-                                <td><?= (int)$gpRule['pax'] ?> adulto<?= (int)$gpRule['pax'] > 1 ? 's' : '' ?></td>
-                                <td><strong><?= money((float)$gpRule['price']) ?></strong></td>
-                            </tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                        <p style="font-size:12px;color:#6b7280;margin-top:8px;">* Preço fixo por grupo de adultos. Crianças e infantis somam separadamente.</p>
-
-                        <?php if (!empty($pkg['categories'])): ?>
-                        <?php
-                        $nonAdultCats = array_filter($pkg['categories'], fn($c) => strtolower($c['category_slug'] ?? '') !== 'adulto');
-                        ?>
-                        <?php if (!empty($nonAdultCats)): ?>
-                        <h5 style="margin:16px 0 8px;font-size:14px;color:#475569;">Crianças / Infantis</h5>
-                        <table class="table">
-                            <thead><tr><th>Categoria</th><th>Idade</th><th>Preço / Pessoa</th></tr></thead>
-                            <tbody>
-                            <?php foreach ($nonAdultCats as $cat): ?>
-                            <tr>
-                                <td><?= e($cat['category_name']) ?></td>
-                                <td><?= e($cat['age_group'] ?? '') ?></td>
-                                <td>
-                                    <?php if ($cat['sale_price']): ?>
-                                    <span style="text-decoration:line-through;color:#999"><?= money((float)$cat['price']) ?></span>
-                                    <strong><?= money((float)$cat['sale_price']) ?></strong>
-                                    <?php else: ?>
-                                    <strong><?= (float)$cat['price'] > 0 ? money((float)$cat['price']) : 'Gratuito' ?></strong>
+                <!-- ===================== TAB: ROTEIRO ===================== -->
+                <?php if (!empty($itinerary)): ?>
+                <div class="trip-tab-content" id="tab-roteiro">
+                    <section class="trip-sec">
+                        <h2>Roteiro</h2>
+                        <ol class="trip-timeline">
+                            <?php foreach ($itinerary as $index => $step): ?>
+                            <li>
+                                <span class="trip-tl-n"><?= $index + 1 ?></span>
+                                <div class="trip-tl-card">
+                                    <div class="trip-tl-head">
+                                        <b><?= e($step['title']) ?></b>
+                                    </div>
+                                    <?php if (!empty($step['description'])): ?>
+                                    <p><?= nl2br(e($step['description'])) ?></p>
                                     <?php endif; ?>
-                                </td>
-                            </tr>
+                                </div>
+                            </li>
                             <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                        <?php endif; ?>
-                        <?php endif; ?>
-                        <?php endif; ?>
-                        <?php elseif (!empty($pkg['categories'])): ?>
-                        <table class="table">
-                            <thead><tr><th>Categoria</th><th>Idade</th><th>Preço</th></tr></thead>
-                            <tbody>
-                            <?php foreach ($pkg['categories'] as $cat): ?>
-                            <tr>
-                                <td><?= e($cat['category_name']) ?></td>
-                                <td><?= e($cat['age_group'] ?? '') ?></td>
-                                <td>
-                                    <?php if ($cat['sale_price']): ?>
-                                    <span style="text-decoration:line-through;color:#999"><?= money((float)$cat['price']) ?></span>
-                                    <strong><?= money((float)$cat['sale_price']) ?></strong>
-                                    <?php else: ?>
-                                    <strong><?= money((float)$cat['price']) ?></strong>
-                                    <?php endif; ?>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                        <?php endif; ?>
-                    </div>
-                    <?php endforeach; ?>
-
-                    <?php if (!empty($extraServices)): ?>
-                    <h3 style="margin-top:20px">Serviços Extras</h3>
-                    <ul class="trip-check-list">
-                        <?php foreach ($extraServices as $svc): ?>
-                        <li><span class="check-icon">+</span> <?= e($svc['name']) ?> — <?= money((float)$svc['price']) ?></li>
-                        <?php endforeach; ?>
-                    </ul>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Tab: Datas -->
-                <div class="trip-tab-content" id="tab-datas">
-                    <h2>Datas Disponíveis</h2>
-                    <?php if (!empty($fixedDates)): ?>
-                    <div class="trip-dates-list">
-                        <?php foreach ($fixedDates as $fd): ?>
-                        <div class="trip-date-item">
-                            <span class="trip-date-value"><?= format_date($fd['date']) ?></span>
-                            <?php if ($fd['time']): ?><span class="trip-date-time"><?= e($fd['time']) ?></span><?php endif; ?>
-                            <span class="badge badge-<?= $fd['status'] === 'available' ? 'success' : 'danger' ?>"><?= $fd['status'] === 'available' ? 'Disponível' : 'Esgotado' ?></span>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php else: ?>
-                    <p style="color:var(--gray)">Disponível durante todo o ano. Selecione a data desejada no momento da reserva.</p>
-                    <?php endif; ?>
-                </div>
-
-                <!-- Tab: FAQs -->
-                <div class="trip-tab-content" id="tab-faqs">
-                    <div class="trip-faq-header">
-                        <h2>FAQ (Perguntas Frequentes)</h2>
-                        <label class="expand-all-toggle">
-                            <span>Expandir tudo</span>
-                            <input type="checkbox" id="expandAllFaqs" onchange="toggleAllFaqs(this.checked)">
-                            <span class="toggle-switch"></span>
-                        </label>
-                    </div>
-                    <div class="faq-list">
-                        <?php if (!empty($tripFaqs)): ?>
-                        <?php foreach ($tripFaqs as $faq): ?>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span><?= e($faq['question']) ?></span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p><?= e($faq['answer']) ?></p></div>
-                        </div>
-                        <?php endforeach; ?>
-                        <?php else: ?>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>O que está incluído no passeio?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Confira os itens incluídos na aba "Custo" acima.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>O que não está incluído?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Confira os itens não incluídos na aba "Custo" acima.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>Crianças podem participar?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Sim, crianças a partir de 2 anos podem participar acompanhadas de um adulto responsável.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>Gestantes podem fazer o passeio?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Depende do passeio. Consulte as notas importantes no topo da página ou entre em contato.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>Quanto tempo dura o passeio?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>A duração está indicada no badge ao lado do título. Geralmente entre 4 e 10 horas.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>O que devo levar?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Roupas confortáveis, protetor solar, repelente, roupa de banho, toalha e dinheiro para fotos.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>O passeio acontece mesmo com chuva?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Em caso de condições climáticas adversas, o passeio pode ser reagendado ou reembolsado integralmente.</p></div>
-                        </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <!-- Reviews -->
-                <?php if (!empty($reviews)): ?>
-                <div class="trip-section" style="margin-top:30px">
-                    <h3>Avaliações dos Clientes</h3>
-                    <?php foreach ($reviews as $review): ?>
-                    <div class="review-item">
-                        <div class="review-header">
-                            <span class="review-stars"><?= str_repeat('&#9733;', (int)$review['rating']) ?></span>
-                            <span class="review-author"><?= e($review['first_name'] ?? $review['author_name'] ?? 'Anônimo') ?></span>
-                            <span class="review-date"><?= format_date($review['created_at']) ?></span>
-                        </div>
-                        <p><?= e($review['comment']) ?></p>
-                    </div>
-                    <?php endforeach; ?>
+                        </ol>
+                        <p class="trip-note">A ordem das paradas pode ser alterada por condições climáticas ou operacionais.</p>
+                    </section>
                 </div>
                 <?php endif; ?>
 
-                <!-- Formulário de Consulta -->
-                <div class="trip-contact-form">
+                <!-- ===================== TAB: PREÇOS E DATAS ===================== -->
+                <div class="trip-tab-content" id="tab-precos">
+                    <section class="trip-sec">
+                        <h2>Preços e Datas</h2>
+
+                        <?php if ($isGroupPricing): ?>
+                        <!-- Preço por grupo -->
+                        <?php $gpRulesDisplay = json_decode($trip['group_pricing'], true); ?>
+                        <?php if (is_array($gpRulesDisplay) && !empty($gpRulesDisplay)): ?>
+                        <?php usort($gpRulesDisplay, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0)); ?>
+                        <div class="trip-price-cards">
+                            <?php foreach ($gpRulesDisplay as $i => $gpRule): ?>
+                            <div class="trip-pc<?= $i === 0 ? ' trip-pc-main' : '' ?>">
+                                <span class="trip-pc-lbl"><?= (int)$gpRule['pax'] ?> adulto<?= (int)$gpRule['pax'] > 1 ? 's' : '' ?></span>
+                                <small>Preço fechado por grupo</small>
+                                <div class="trip-pc-v"><?= money((float)$gpRule['price']) ?></div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <p class="trip-small">* Preço fixo por grupo de adultos. Crianças e infantis somam separadamente.</p>
+                        <?php endif; ?>
+                        <?php elseif (!empty($priceCategories)): ?>
+                        <!-- Cards de preço por categoria -->
+                        <div class="trip-price-cards">
+                            <?php foreach ($priceCategories as $i => $cat): ?>
+                            <?php
+                                $catRegular = (float) ($cat['price'] ?? 0);
+                                $catSale = isset($cat['sale_price']) && $cat['sale_price'] !== null && $cat['sale_price'] !== '' ? (float) $cat['sale_price'] : null;
+                                $catFinal = ($catSale !== null && $catSale > 0) ? $catSale : $catRegular;
+                                $isFree = $catFinal <= 0;
+                            ?>
+                            <div class="trip-pc<?= $i === 0 ? ' trip-pc-main' : '' ?>">
+                                <span class="trip-pc-lbl"><?= e($cat['category_name'] ?? 'Categoria') ?></span>
+                                <?php if (!empty($cat['age_group'])): ?><small><?= e($cat['age_group']) ?></small><?php endif; ?>
+                                <?php if ($isFree): ?>
+                                <div class="trip-pc-v trip-pc-free">Cortesia</div>
+                                <?php elseif ($catSale !== null && $catSale > 0 && $catSale < $catRegular): ?>
+                                <div class="trip-pc-v"><span class="trip-pc-old"><?= money($catRegular) ?></span><?= money($catFinal) ?></div>
+                                <?php else: ?>
+                                <div class="trip-pc-v"><?= money($catFinal) ?></div>
+                                <?php endif; ?>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php endif; ?>
+
+                        <!-- Grade de informações (facts) -->
+                        <div class="trip-facts">
+                            <?php if (!empty($trip['duration'])): ?>
+                            <div><small>Duração</small><span>Aprox. <?= e($trip['duration']) ?> <?= $trip['duration_unit'] === 'hours' ? 'horas' : 'dias' ?></span></div>
+                            <?php endif; ?>
+                            <?php if (!empty($trip['min_pax']) || !empty($trip['max_pax'])): ?>
+                            <div><small>Capacidade</small><span>
+                                <?php if (!empty($trip['max_pax'])): ?>Até <?= (int)$trip['max_pax'] ?> pessoas<?php else: ?>A partir de <?= (int)$trip['min_pax'] ?> pessoa(s)<?php endif; ?>
+                            </span></div>
+                            <?php endif; ?>
+                            <div><small>Disponibilidade</small><span>Sujeita a quórum, capacidade e clima</span></div>
+                            <?php if (!empty($fixedDates)): ?>
+                            <div><small>Próximas saídas</small><span><?= count($fixedDates) ?> data<?= count($fixedDates) > 1 ? 's' : '' ?> disponível<?= count($fixedDates) > 1 ? 'eis' : '' ?></span></div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Datas fixas -->
+                        <?php if (!empty($fixedDates)): ?>
+                        <h3 class="trip-subsec">Datas disponíveis</h3>
+                        <div class="trip-dates-list">
+                            <?php foreach ($fixedDates as $fd): ?>
+                            <div class="trip-date-item">
+                                <span class="trip-date-value"><?= format_date($fd['date']) ?></span>
+                                <?php if ($fd['time']): ?><span class="trip-date-time"><?= e($fd['time']) ?></span><?php endif; ?>
+                                <span class="badge badge-<?= $fd['status'] === 'available' ? 'success' : 'danger' ?>"><?= $fd['status'] === 'available' ? 'Disponível' : 'Esgotado' ?></span>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                        <?php else: ?>
+                        <p class="trip-small">Disponível durante todo o ano. Selecione a data desejada no momento da reserva.</p>
+                        <?php endif; ?>
+
+                        <!-- Pacotes detalhados (quando houver tabela de categorias) -->
+                        <?php foreach ($packages as $pkg): ?>
+                        <?php if (!empty($pkg['categories']) && !$isGroupPricing): ?>
+                        <div class="trip-package-card">
+                            <h4><?= e($pkg['title']) ?></h4>
+                            <table class="table">
+                                <thead><tr><th>Categoria</th><th>Idade</th><th>Preço</th></tr></thead>
+                                <tbody>
+                                <?php foreach ($pkg['categories'] as $cat): ?>
+                                <tr>
+                                    <td><?= e($cat['category_name']) ?></td>
+                                    <td><?= e($cat['age_group'] ?? '') ?></td>
+                                    <td>
+                                        <?php if ($cat['sale_price']): ?>
+                                        <span style="text-decoration:line-through;color:#999"><?= money((float)$cat['price']) ?></span>
+                                        <strong><?= money((float)$cat['sale_price']) ?></strong>
+                                        <?php else: ?>
+                                        <strong><?= (float)$cat['price'] > 0 ? money((float)$cat['price']) : 'Cortesia' ?></strong>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                        <?php endif; ?>
+                        <?php endforeach; ?>
+
+                        <?php if (!empty($extraServices)): ?>
+                        <h3 class="trip-subsec">Serviços extras</h3>
+                        <ul class="trip-check-list">
+                            <?php foreach ($extraServices as $svc): ?>
+                            <li><?= e($svc['name']) ?> — <?= money((float)$svc['price']) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <?php endif; ?>
+
+                        <!-- Accordions: pagamento e cancelamento -->
+                        <div class="trip-accordions">
+                            <details class="trip-detail-acc">
+                                <summary>Como reservar e pagar</summary>
+                                <div class="trip-acc-body">
+                                    <?php if (!empty($trip['partial_payment_enabled'])): ?>
+                                    <?php $signalPct = (int)($trip['partial_payment_percent'] ?? 50); ?>
+                                    <p>Reserve com <b><?= $signalPct ?>% de sinal via Pix, em reais</b>, e envie o comprovante. Pague os <?= 100 - $signalPct ?>% restantes no primeiro contato presencial com nossa equipe no destino.</p>
+                                    <?php else: ?>
+                                    <p>Reserve com nossa equipe e confirme o pagamento conforme as instruções enviadas. A reserva é confirmada após o envio do comprovante.</p>
+                                    <?php endif; ?>
+                                    <p class="trip-small">A reserva é confirmada após o sinal e o envio do comprovante. Em caso de dúvida, fale com nossa equipe pelo WhatsApp.</p>
+                                </div>
+                            </details>
+                            <details class="trip-detail-acc">
+                                <summary>Política de cancelamento</summary>
+                                <div class="trip-acc-body">
+                                    <div class="trip-cancel">
+                                        <div><span class="trip-cx ok">100%</span><p>Reembolso integral cancelando com <b>mais de 48h</b> de antecedência.</p></div>
+                                        <div><span class="trip-cx mid">50%</span><p>Reembolso cancelando <b>entre 48h e 24h</b> antes do passeio.</p></div>
+                                        <div><span class="trip-cx bad">0%</span><p><b>Menos de 24h</b> ou não comparecimento (no show).</p></div>
+                                    </div>
+                                    <ul class="trip-check-list" style="margin-top:14px">
+                                        <li>Troca de data gratuita com pelo menos 24h de antecedência, sujeita à disponibilidade.</li>
+                                        <li>Se cancelarmos por clima, operação ou segurança, você escolhe: reagendar ou reembolso total.</li>
+                                        <li>Reembolso pelo mesmo método de pagamento, em 3 a 10 dias úteis.</li>
+                                    </ul>
+                                </div>
+                            </details>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ===================== TAB: FAQ ===================== -->
+                <div class="trip-tab-content" id="tab-faqs">
+                    <section class="trip-sec">
+                        <div class="trip-faq-header">
+                            <h2>FAQ (Perguntas Frequentes)</h2>
+                            <label class="expand-all-toggle">
+                                <span>Expandir tudo</span>
+                                <input type="checkbox" id="expandAllFaqs" onchange="toggleAllFaqs(this.checked)">
+                                <span class="toggle-switch"></span>
+                            </label>
+                        </div>
+                        <div class="faq-list">
+                            <?php if (!empty($tripFaqs)): ?>
+                            <?php foreach ($tripFaqs as $faq): ?>
+                            <div class="faq-item">
+                                <button class="faq-question" type="button"><span><?= e($faq['question']) ?></span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                                <div class="faq-answer"><p><?= e($faq['answer']) ?></p></div>
+                            </div>
+                            <?php endforeach; ?>
+                            <?php else: ?>
+                            <div class="faq-item">
+                                <button class="faq-question" type="button"><span>O que está incluído no passeio?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                                <div class="faq-answer"><p>Confira os itens incluídos na aba "Preços e Datas" acima.</p></div>
+                            </div>
+                            <div class="faq-item">
+                                <button class="faq-question" type="button"><span>Crianças podem participar?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                                <div class="faq-answer"><p>Sim, crianças podem participar acompanhadas de um adulto responsável. Confira as faixas de idade e preços.</p></div>
+                            </div>
+                            <div class="faq-item">
+                                <button class="faq-question" type="button"><span>O passeio acontece mesmo com chuva?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                                <div class="faq-answer"><p>Em caso de condições climáticas adversas, o passeio pode ser reagendado ou reembolsado integralmente.</p></div>
+                            </div>
+                            <?php endif; ?>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ===================== REVIEWS ===================== -->
+                <?php if (!empty($reviews)): ?>
+                <section class="trip-sec" style="margin-top:30px">
+                    <h2>Quem já foi</h2>
+                    <div class="trip-reviews">
+                        <?php foreach ($reviews as $review): ?>
+                        <div class="trip-rv">
+                            <div class="trip-rv-stars"><?= str_repeat('&#9733;', max(1, (int)$review['rating'])) ?></div>
+                            <p><?= e($review['comment']) ?></p>
+                            <small><?= e($review['first_name'] ?? $review['author_name'] ?? 'Anônimo') ?><span>Avaliação no Google</span></small>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </section>
+                <?php endif; ?>
+
+                <!-- ===================== FORMULÁRIO DE CONSULTA ===================== -->
+                <div class="trip-contact-form" id="booking-section">
                     <h3>Você pode enviar sua consulta através do formulário abaixo.</h3>
                     <p class="trip-contact-trip-name">Nome da viagem: * <strong><?= e($trip['title']) ?></strong></p>
 
@@ -521,37 +568,11 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                 </div>
             </div>
 
-            <!-- Sidebar -->
+            <!-- ========================= SIDEBAR ========================= -->
             <aside class="trip-sidebar">
-                <!-- Card de Preço + CTA -->
                 <div class="trip-price-card">
-                    <?php
-                    // ── Cálculo dos preços exibidos no card ──
-                    // Mantém $basePrice/$priceLabel para a barra fixa mobile e demais usos,
-                    // mas o card lateral mostra TODAS as categorias cadastradas (Adulto/Criança/Infantil).
-                    $basePrice = 0;
-                    $priceLabel = '/ Adulto';
-                    $isGroupPricing = (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing']) && empty($trip['composition_pricing_enabled']));
-                    $priceCategories = [];
-
-                    if ($isGroupPricing) {
-                        // Group pricing ativo (sem composition): usar preço da primeira faixa
-                        $gpRules = json_decode($trip['group_pricing'], true);
-                        if (is_array($gpRules) && !empty($gpRules)) {
-                            usort($gpRules, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
-                            $basePrice = (float) $gpRules[0]['price'];
-                            $paxLabel = (int) $gpRules[0]['pax'];
-                            $priceLabel = $paxLabel === 1 ? '/ Pessoa' : '/ ' . $paxLabel . ' pessoas';
-                        }
-                    } elseif (!empty($packages)) {
-                        $basePrice = $packages[0]['base_price'] ?? 0;
-                        // Categorias de preço do 1º pacote (Adulto/Criança/Infantil...)
-                        $priceCategories = $packages[0]['categories'] ?? [];
-                    }
-                    ?>
-
                     <?php if (!$isGroupPricing && !empty($priceCategories)): ?>
-                    <!-- Preços por categoria (uma por linha, como na referência) -->
+                    <!-- Preços por categoria -->
                     <div class="trip-price-list">
                         <?php foreach ($priceCategories as $cat): ?>
                         <?php
@@ -579,7 +600,7 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                         <?php endforeach; ?>
                     </div>
                     <?php else: ?>
-                    <!-- Preço único (group pricing ou sem categorias cadastradas) -->
+                    <!-- Preço único -->
                     <div class="trip-price-row">
                         <span class="price-from">A partir de</span>
                         <span class="trip-price-value"><?= (float)$basePrice > 0 ? money($basePrice) : 'Cortesia' ?></span>
@@ -625,7 +646,6 @@ $extraCount = max(0, count($galleryImages) - 3); // fotos além das 3 visíveis
                                     text.textContent = 'Adicionar à Lista de Desejos';
                                     btn.classList.remove('active');
                                 }
-                                // Update wishlist badge in header
                                 var badge = document.getElementById('wishlistBadge');
                                 if (badge) {
                                     fetch('/api/wishlist/count', { headers: {'X-Requested-With': 'XMLHttpRequest'} })
@@ -744,7 +764,7 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
 <div class="trip-mobile-cta">
     <div class="trip-mobile-cta-price">
         <span class="trip-mobile-cta-from">A partir de</span>
-        <span class="trip-mobile-cta-value"><?= money($basePrice) ?> <small><?= $priceLabel ?></small></span>
+        <span class="trip-mobile-cta-value"><?= (float)$basePrice > 0 ? money($basePrice) : 'Cortesia' ?> <small><?= $priceLabel ?></small></span>
     </div>
     <a href="#booking-section" class="trip-mobile-cta-btn btn-verificar">Verificar Disponibilidade</a>
 </div>
@@ -879,7 +899,6 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
     function open(){
         overlay.classList.add('open');
         overlay.setAttribute('aria-hidden','false');
-        // Inicializa o seletor de país (bandeira + DDI) no campo de WhatsApp
         if (typeof window.initPhoneCountrySelector === 'function') {
             window.initPhoneCountrySelector();
         }
@@ -930,8 +949,6 @@ document.querySelectorAll('.trip-tab').forEach(tab => {
         clearError();
         if (!timeInput.value){ showError('Selecione um horário disponível.'); return; }
 
-        // O seletor de país move o name="phone" para um input hidden com o valor "+DDI numero".
-        // Por isso capturamos via querySelector (pega o hidden), com fallback para o visível.
         var phoneEl = form.querySelector('[name="phone"]');
         var phoneVal = phoneEl ? phoneEl.value : (form.phone ? form.phone.value : '');
 
