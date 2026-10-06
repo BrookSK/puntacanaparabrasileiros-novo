@@ -372,14 +372,16 @@ $ratingDisplay = (float) ($rating ?? 0);
                             $availabilityInfo = !empty($trip['availability_info']) ? $trip['availability_info'] : 'Sujeita a quórum, capacidade e clima';
                         ?>
                         <div class="trip-facts">
-                            <?php if (!empty($activeDows)): ?>
                             <div><small>Dias de funcionamento</small>
+                                <?php if (!empty($activeDows)): ?>
                                 <div class="trip-days">
                                     <?php for ($d = 1; $d <= 6; $d++): ?><em class="<?= isset($activeDows[$d]) ? 'on' : '' ?>"><?= $weekLabels[$d] ?></em><?php endfor; ?>
                                     <em class="<?= isset($activeDows[0]) ? 'on' : '' ?>"><?= $weekLabels[0] ?></em>
                                 </div>
+                                <?php else: ?>
+                                <span>Consulte as datas disponíveis</span>
+                                <?php endif; ?>
                             </div>
-                            <?php endif; ?>
                             <?php if (!empty($trip['duration'])): ?>
                             <div><small>Duração</small><span>Aprox. <?= e($trip['duration']) ?> <?= $trip['duration_unit'] === 'hours' ? 'horas' : 'dias' ?></span></div>
                             <?php endif; ?>

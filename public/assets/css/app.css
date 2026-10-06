@@ -7406,6 +7406,8 @@ img { max-width: 100%; height: auto; }
     margin-top: 16px;
 }
 .trip-facts div { background: var(--white); padding: 12px 16px; }
+/* Se o total de células for ímpar, a última ocupa a linha inteira — evita o quadrado cinza vazio. */
+.trip-facts > div:last-child:nth-child(odd) { grid-column: 1 / -1; }
 .trip-facts small {
     display: block;
     color: var(--gray);
