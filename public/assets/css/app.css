@@ -7667,9 +7667,11 @@ img { max-width: 100%; height: auto; }
 .trip-related-grid .related-trip-info { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
 .trip-related-grid .related-trip-info h5 { margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; }
 
-@media (max-width: 900px) {
+@media (max-width: 992px) {
     .trip-related-grid { grid-template-columns: 1fr 1fr; }
-    /* No mobile o grid vira 1 coluna e o card não precisa ser sticky. */
+}
+@media (max-width: 768px) {
+    /* Nesta largura o grid principal já empilha a sidebar, então o card não é sticky. */
     .trip-sidebar .trip-price-card { position: static; max-height: none; overflow: visible; }
 }
 @media (max-width: 560px) {

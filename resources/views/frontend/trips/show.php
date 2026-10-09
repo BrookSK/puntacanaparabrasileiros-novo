@@ -96,6 +96,25 @@ $ratingDisplay = (float) ($rating ?? 0);
 <!-- ============================================================ -->
 <!-- CONTEÚDO                                                     -->
 <!-- ============================================================ -->
+<!-- CSS crítico inline: garante grid dos relacionados e sticky contido
+     mesmo que o app.css esteja em cache no navegador (asset_version antiga). -->
+<style>
+.trip-sidebar .trip-price-card { position: sticky; top: 90px; z-index: 10; max-height: calc(100vh - 110px); overflow-y: auto; }
+.trip-related-fullwidth { margin-top: 48px; padding-top: 32px; border-top: 1px solid #eef2ee; display: flex; flex-direction: column; gap: 40px; }
+.trip-related-fullwidth .trip-related-section-title { font-size: 20px; font-weight: 700; margin: 0 0 18px; color: #0f172a; }
+.trip-related-fullwidth .trip-related-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
+.trip-related-fullwidth .trip-related-grid .related-trip-item { display: block; text-decoration: none; border: 1px solid #eef0f2; border-radius: 12px; overflow: hidden; background: #fff; transition: box-shadow .2s, transform .2s; }
+.trip-related-fullwidth .trip-related-grid .related-trip-item:hover { box-shadow: 0 10px 28px rgba(16,24,40,.1); transform: translateY(-2px); }
+.trip-related-fullwidth .trip-related-grid .related-trip-img { width: 100%; height: 160px; }
+.trip-related-fullwidth .trip-related-grid .related-trip-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.trip-related-fullwidth .trip-related-grid .related-trip-info { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.trip-related-fullwidth .trip-related-grid .related-trip-info h5 { margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; }
+@media (max-width: 992px) { .trip-related-fullwidth .trip-related-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 768px) {
+    .trip-sidebar .trip-price-card { position: static; max-height: none; overflow: visible; }
+}
+@media (max-width: 560px) { .trip-related-fullwidth .trip-related-grid { grid-template-columns: 1fr; } }
+</style>
 <section class="trip-detail">
     <div class="container">
         <div class="trip-content-grid">
