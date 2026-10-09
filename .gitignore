@@ -8,3 +8,4 @@ storage/sessions/*
 
 # Config local
 .env
+.zcodeignore
