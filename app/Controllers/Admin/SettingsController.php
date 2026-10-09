@@ -116,6 +116,7 @@ class SettingsController extends Controller
             'aurora_history_limit' => 'aurora',
             'lrv_enabled' => 'integrations', 'lrv_base_url' => 'integrations', 'lrv_api_key' => 'integrations',
             'lrv_callback_token' => 'integrations',
+            'google_places_api_key' => 'integrations',
         ];
 
         // Salvar no banco

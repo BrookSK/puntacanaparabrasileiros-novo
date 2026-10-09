@@ -11,9 +11,12 @@ class Trip extends Model
     protected array $fillable = [
         'title', 'slug', 'description', 'short_description', 'featured_image',
         'gallery', 'documents', 'duration', 'duration_unit', 'difficulty', 'min_pax', 'max_pax',
-        'includes', 'excludes', 'ideal_for', 'map_latitude', 'map_longitude', 'map_embed',
+        'includes', 'excludes', 'ideal_for', 'detail_highlights', 'what_to_bring',
+        'map_latitude', 'map_longitude', 'map_embed',
         'weather_info', 'meeting_point', 'important_notes',
         'departure_time_info', 'return_time_info', 'availability_info',
+        'departure_time_start', 'departure_time_end', 'return_time_start', 'return_time_end',
+        'google_place_id', 'google_rating', 'google_reviews_count', 'google_reviews_url',
         'partial_payment_enabled', 'partial_payment_percent',
         'group_discount_enabled', 'group_discount_rules',
         'group_pricing_enabled', 'group_pricing',

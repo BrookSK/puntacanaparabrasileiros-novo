@@ -353,6 +353,17 @@ class TripsController extends Controller
         $gallery = $trip['gallery'] ? json_decode($trip['gallery'], true) : [];
         $includes = $trip['includes'] ? json_decode($trip['includes'], true) : [];
         $excludes = $trip['excludes'] ? json_decode($trip['excludes'], true) : [];
+        // O que levar (item individual por passeio)
+        $whatToBring = !empty($trip['what_to_bring']) ? (json_decode($trip['what_to_bring'], true) ?: []) : [];
+        $whatToBring = is_array($whatToBring) ? array_values(array_filter(array_map('trim', $whatToBring), fn($v) => $v !== '')) : [];
+
+        // Avaliações reais do Google (Places API com cache, ou valores manuais do passeio)
+        $googleReviews = null;
+        try {
+            $googleReviews = (new \App\Services\GoogleReviewsService())->getForTrip($trip);
+        } catch (\Throwable $e) {
+            $googleReviews = null;
+        }
 
         // Pacotes de composição
         $compositionPackages = [];
@@ -428,6 +439,8 @@ class TripsController extends Controller
             'gallery' => $gallery,
             'includes' => $includes,
             'excludes' => $excludes,
+            'whatToBring' => $whatToBring,
+            'googleReviews' => $googleReviews,
             'compositionPackages' => $compositionPackages,
             'pageTitle' => $trip['meta_title'] ?: $trip['title'],
             'metaDescription' => $trip['meta_description'] ?: $trip['short_description'],

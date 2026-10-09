@@ -78,15 +78,17 @@ $ratingDisplay = (float) ($rating ?? 0);
             </div>
         </div>
 
-        <?php if ($ratingDisplay > 0 && $reviewCountDisplay > 0): ?>
-        <!-- Barra de avaliações -->
-        <div class="trip-rating-bar">
+        <?php if (!empty($googleReviews)): ?>
+        <!-- Barra de avaliações reais do Google (item 5) — abre modal ao clicar -->
+        <?php $grRating = (float) $googleReviews['rating']; $grCount = (int) $googleReviews['count']; ?>
+        <button type="button" class="trip-rating-bar trip-rating-bar--btn" id="btnGoogleReviews" title="Ver avaliações do Google">
             <span class="trip-rating-stars">
-                <?php for ($s = 1; $s <= 5; $s++): ?><?= $s <= round($ratingDisplay) ? '&#9733;' : '&#9734;' ?><?php endfor; ?>
+                <?php for ($s = 1; $s <= 5; $s++): ?><?= $s <= round($grRating) ? '&#9733;' : '&#9734;' ?><?php endfor; ?>
             </span>
-            <span class="trip-rating-text">Avaliações reais de clientes no Google <strong>(<?= $reviewCountDisplay ?>)</strong></span>
-            <span class="trip-rating-value"><?= number_format($ratingDisplay, 1, ',', '') ?></span>
-        </div>
+            <span class="trip-rating-text">Avaliações reais de clientes no Google <?php if ($grCount > 0): ?><strong>(<?= $grCount ?>)</strong><?php endif; ?></span>
+            <?php if ($grRating > 0): ?><span class="trip-rating-value"><?= number_format($grRating, 1, ',', '') ?></span><?php endif; ?>
+            <svg class="trip-rating-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
         <?php endif; ?>
     </div>
 </section>
@@ -115,15 +117,16 @@ $ratingDisplay = (float) ($rating ?? 0);
                 <?php endif; ?>
 
                 <?php
-                // ── Cards de destaque com ícones ──
+                // ── Cards de destaque com ícones (DETALHES DO PASSEIO) ──
+                // Fonte: campo próprio "detail_highlights", cadastrado no painel.
+                // NÃO reaproveita o Roteiro (item 1 da validação do cliente): são
+                // conteúdos independentes. Sem detalhes cadastrados, a área some.
                 $highlightItems = [];
-                if (!empty($itinerary)) {
-                    foreach ($itinerary as $it) {
-                        if (!empty($it['title'])) $highlightItems[] = $it['title'];
-                    }
-                } elseif (!empty($includes)) {
-                    foreach ($includes as $inc) {
-                        if (!empty($inc)) $highlightItems[] = $inc;
+                $detailHighlights = !empty($trip['detail_highlights']) ? json_decode($trip['detail_highlights'], true) : [];
+                if (is_array($detailHighlights)) {
+                    foreach ($detailHighlights as $dh) {
+                        $dh = trim((string) $dh);
+                        if ($dh !== '') $highlightItems[] = $dh;
                     }
                 }
                 $highlightItems = array_slice($highlightItems, 0, 8);
@@ -176,7 +179,7 @@ $ratingDisplay = (float) ($rating ?? 0);
                         <?php if (!empty($itinerary)): ?><a href="#sec-roteiro" class="trip-tab">Roteiro</a><?php endif; ?>
                         <a href="#sec-precos" class="trip-tab">Preços e Datas</a>
                         <?php if (!empty($reviews) || !empty($trip['youtube_url']) || !empty($trip['documents'])): ?><a href="#sec-confianca" class="trip-tab">Quem já foi</a><?php endif; ?>
-                        <a href="#sec-faqs" class="trip-tab">FAQ</a>
+                        <?php if (!empty($tripFaqs)): ?><a href="#sec-faqs" class="trip-tab">FAQ</a><?php endif; ?>
                     </nav>
                 </div>
 
@@ -237,6 +240,18 @@ $ratingDisplay = (float) ($rating ?? 0);
                     </div>
                     <?php endif; ?>
 
+                    <?php if (!empty($whatToBring)): ?>
+                    <!-- O que levar — lista individual deste passeio (item 4) -->
+                    <div class="trip-block trip-what-to-bring">
+                        <h3>O que levar</h3>
+                        <ul class="trip-check-list trip-bring-list">
+                            <?php foreach ($whatToBring as $item): ?>
+                            <li><?= e($item) ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                    <?php endif; ?>
+
                     <?php if (!empty($trip['important_notes'])): ?>
                     <div class="trip-block trip-notice">
                         <h3>Informações importantes</h3>
@@ -272,10 +287,13 @@ $ratingDisplay = (float) ($rating ?? 0);
                     <ol class="trip-timeline">
                         <?php foreach ($itinerary as $index => $step): ?>
                         <?php
-                            // Extrai um horário/duração do início da descrição, se houver (ex.: "7h00 – 8h00 | ..." ou "~35 min — ...").
+                            // Horário da etapa: prioriza o campo dedicado step_time (painel).
+                            // Fallback: extrai do início da descrição ("7h00 – 8h00 | ..." ou "~35 min — ...").
                             $stepDesc = (string) ($step['description'] ?? '');
                             $stepTime = '';
-                            if (preg_match('/^\s*([~\d][^|–—\-\n]{0,18}?(?:min|h\d*0?|hora[s]?|h))\s*[|–—-]\s*(.*)$/isu', $stepDesc, $mt)) {
+                            if (!empty($step['step_time'])) {
+                                $stepTime = substr((string) $step['step_time'], 0, 5);
+                            } elseif (preg_match('/^\s*([~\d][^|–—\-\n]{0,18}?(?:min|h\d*0?|hora[s]?|h))\s*[|–—-]\s*(.*)$/isu', $stepDesc, $mt)) {
                                 $stepTime = trim($mt[1]);
                                 $stepDesc = trim($mt[2]);
                             }
@@ -366,9 +384,20 @@ $ratingDisplay = (float) ($rating ?? 0);
                             } else {
                                 $capacityInfo = 'Grupos maiores: consulte nossa equipe';
                             }
-                            // Usa ?? para não gerar warning caso a coluna ainda não exista no array do passeio.
-                            $departureInfo = !empty($trip['departure_time_info']) ? $trip['departure_time_info'] : 'Consulte nossa equipe';
-                            $returnInfo = !empty($trip['return_time_info']) ? $trip['return_time_info'] : 'Consulte nossa equipe';
+                            // Faixa de horário (item 2): prioriza os campos estruturados De/Até.
+                            // Fallback para o texto legado (departure_time_info) quando não houver faixa.
+                            $formatWindow = function (?string $start, ?string $end): string {
+                                $s = $start ? substr($start, 0, 5) : '';
+                                $e = $end ? substr($end, 0, 5) : '';
+                                if ($s !== '' && $e !== '') return $s . ' às ' . $e;
+                                if ($s !== '') return $s;
+                                if ($e !== '') return $e;
+                                return '';
+                            };
+                            $departureWindow = $formatWindow($trip['departure_time_start'] ?? '', $trip['departure_time_end'] ?? '');
+                            $returnWindow = $formatWindow($trip['return_time_start'] ?? '', $trip['return_time_end'] ?? '');
+                            $departureInfo = $departureWindow !== '' ? $departureWindow : (!empty($trip['departure_time_info']) ? $trip['departure_time_info'] : 'Consulte nossa equipe');
+                            $returnInfo = $returnWindow !== '' ? $returnWindow : (!empty($trip['return_time_info']) ? $trip['return_time_info'] : 'Consulte nossa equipe');
                             $availabilityInfo = !empty($trip['availability_info']) ? $trip['availability_info'] : 'Sujeita a quórum, capacidade e clima';
                         ?>
                         <div class="trip-facts">
@@ -532,6 +561,8 @@ $ratingDisplay = (float) ($rating ?? 0);
                 <?php endif; ?>
 
                 <!-- ===================== SEÇÃO: FAQ ===================== -->
+                <!-- Só aparece quando há FAQs cadastradas para este passeio (item 3). -->
+                <?php if (!empty($tripFaqs)): ?>
                 <section class="trip-sec" id="sec-faqs">
                     <div class="trip-faq-header">
                         <h2>FAQ</h2>
@@ -542,29 +573,15 @@ $ratingDisplay = (float) ($rating ?? 0);
                         </label>
                     </div>
                     <div class="faq-list">
-                        <?php if (!empty($tripFaqs)): ?>
                         <?php foreach ($tripFaqs as $faq): ?>
                         <div class="faq-item">
                             <button class="faq-question" type="button"><span><?= e($faq['question']) ?></span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
                             <div class="faq-answer"><p><?= e($faq['answer']) ?></p></div>
                         </div>
                         <?php endforeach; ?>
-                        <?php else: ?>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>O que está incluído no passeio?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Confira os itens incluídos na seção "Preços e Datas" acima.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>Crianças podem participar?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Sim, crianças podem participar acompanhadas de um adulto responsável. Confira as faixas de idade e preços.</p></div>
-                        </div>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span>O passeio acontece mesmo com chuva?</span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p>Em caso de condições climáticas adversas, o passeio pode ser reagendado ou reembolsado integralmente.</p></div>
-                        </div>
-                        <?php endif; ?>
                     </div>
                 </section>
+                <?php endif; ?>
 
                 <!-- ===================== FORMULÁRIO DE CONSULTA ===================== -->
                 <div class="trip-contact-form" id="booking-section">
@@ -715,9 +732,17 @@ $ratingDisplay = (float) ($rating ?? 0);
                     <p class="trip-price-help">Precisa de ajuda com a reserva? <a href="/contato">Envie-Nos Uma Mensagem</a></p>
                 </div>
 
-                <!-- Related Trips -->
-                <div class="trip-related-card">
-                    <h4>Passeios relacionados que podem te interessar</h4>
+            </aside>
+        </div>
+
+        <?php if (!empty($relatedTrips)): ?>
+        <!-- ===================== RELACIONADOS / DESTAQUES (largura total, fora da sidebar) ===================== -->
+        <!-- Movidos para fora da coluna lateral para que o card de preço sticky
+             não cubra estes conteúdos ao rolar a página (item 6 da validação). -->
+        <div class="trip-related-fullwidth">
+            <div class="trip-related-section">
+                <h3 class="trip-related-section-title">Passeios relacionados que podem te interessar</h3>
+                <div class="trip-related-grid">
                     <?php foreach ($relatedTrips as $related): ?>
                     <a href="/passeios/<?= e($related['slug']) ?>" class="related-trip-item">
                         <div class="related-trip-img">
@@ -747,10 +772,11 @@ $ratingDisplay = (float) ($rating ?? 0);
                     </a>
                     <?php endforeach; ?>
                 </div>
+            </div>
 
-                <!-- Featured Trips -->
-                <div class="trip-related-card">
-                    <h4>Passeios em Destaque</h4>
+            <div class="trip-related-section">
+                <h3 class="trip-related-section-title">Passeios em Destaque</h3>
+                <div class="trip-related-grid">
                     <?php foreach (array_slice($relatedTrips, 0, 3) as $ft): ?>
                     <a href="/passeios/<?= e($ft['slug']) ?>" class="related-trip-item related-trip-featured">
                         <div class="related-trip-img">
@@ -771,8 +797,9 @@ $ratingDisplay = (float) ($rating ?? 0);
                     </a>
                     <?php endforeach; ?>
                 </div>
-            </aside>
+            </div>
         </div>
+        <?php endif; ?>
     </div>
 </section>
 
@@ -838,6 +865,7 @@ const COMPANION_CONFIG = <?= json_encode([
 </script>
 
 <?= partial('modals/booking-modal') ?>
+<?= partial('modals/google-reviews-modal', ['googleReviews' => $googleReviews ?? null]) ?>
 
 <!-- Barra fixa mobile: Preço + Botão Verificar Disponibilidade -->
 <div class="trip-mobile-cta">

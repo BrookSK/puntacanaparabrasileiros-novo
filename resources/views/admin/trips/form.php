@@ -26,11 +26,55 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 <div class="form-group"><label>Descrição Completa</label><textarea name="description" class="form-control" rows="8" placeholder="Descrição detalhada..."><?= e($trip['description'] ?? '') ?></textarea></div>
                 <div class="form-group"><label>Ponto de Encontro</label><input type="text" name="meeting_point" value="<?= e($trip['meeting_point'] ?? '') ?>" class="form-control" placeholder="Ex: Lobby do hotel"></div>
                 <div class="form-row">
-                    <div class="form-group"><label>Saída do hotel</label><input type="text" name="departure_time_info" value="<?= e($trip['departure_time_info'] ?? '') ?>" class="form-control" placeholder="Ex: Entre 7h00 e 8h00"></div>
-                    <div class="form-group"><label>Retorno ao hotel</label><input type="text" name="return_time_info" value="<?= e($trip['return_time_info'] ?? '') ?>" class="form-control" placeholder="Ex: Entre 18h00 e 19h00"></div>
+                    <div class="form-group col-6"><label>Saída do hotel — De</label><input type="time" name="departure_time_start" value="<?= e(substr((string)($trip['departure_time_start'] ?? ''), 0, 5)) ?>" class="form-control"></div>
+                    <div class="form-group col-6"><label>Saída do hotel — Até</label><input type="time" name="departure_time_end" value="<?= e(substr((string)($trip['departure_time_end'] ?? ''), 0, 5)) ?>" class="form-control"></div>
                 </div>
+                <div class="form-row">
+                    <div class="form-group col-6"><label>Retorno ao hotel — De</label><input type="time" name="return_time_start" value="<?= e(substr((string)($trip['return_time_start'] ?? ''), 0, 5)) ?>" class="form-control"></div>
+                    <div class="form-group col-6"><label>Retorno ao hotel — Até</label><input type="time" name="return_time_end" value="<?= e(substr((string)($trip['return_time_end'] ?? ''), 0, 5)) ?>" class="form-control"></div>
+                </div>
+                <small class="form-hint" style="display:block;margin:-6px 0 12px;">Informe a janela operacional (ex.: saída entre 07:00 e 08:00). Deixe "Até" em branco para mostrar só um horário.</small>
                 <div class="form-group"><label>Disponibilidade</label><input type="text" name="availability_info" value="<?= e($trip['availability_info'] ?? '') ?>" class="form-control" placeholder="Ex: Sujeita a quórum, capacidade e clima"><small class="form-hint">Deixe em branco para usar o texto padrão "Sujeita a quórum, capacidade e clima".</small></div>
                 <div class="form-group"><label>Notas Importantes</label><textarea name="important_notes" class="form-control" rows="3" placeholder="Informações importantes..."><?= e($trip['important_notes'] ?? '') ?></textarea></div>
+            </div>
+
+            <!-- Detalhes do passeio (cards de destaque abaixo do título) -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon" style="background:#dcfce7;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1B6F00" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <div><h3>Detalhes do passeio</h3><p class="admin-card-subtitle">Informações curtas destacadas logo abaixo do título (ex.: Guia em português, Transfer incluído, Almoço buffet). Independente do Roteiro.</p></div>
+                </div>
+                <div class="form-group">
+                    <div id="detailhighlights-list" class="repeater-list">
+                        <?php
+                        $detailHighlights = $isEdit && !empty($trip['detail_highlights']) ? json_decode($trip['detail_highlights'], true) : [];
+                        if (!is_array($detailHighlights) || empty($detailHighlights)) $detailHighlights = [''];
+                        foreach ($detailHighlights as $dh): ?>
+                        <div class="repeater-item"><input type="text" name="detail_highlights[]" value="<?= e($dh) ?>" class="form-control" placeholder="Ex: Guia em português"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('detailhighlights-list', 'detail_highlights[]', 'Ex: Guia em português')">+ Adicionar</button>
+                    <small class="form-hint">Deixe em branco para esconder essa área. Esses itens NÃO vêm do Roteiro — são cadastrados aqui.</small>
+                </div>
+            </div>
+
+            <!-- Avaliações do Google -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <div class="admin-card-icon" style="background:#fef3c7;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                    </div>
+                    <div><h3>Avaliações do Google</h3><p class="admin-card-subtitle">Mostradas abaixo das fotos. Com o Place ID + chave da API (em Configurações → Integrações), busca as avaliações reais. Sem isso, usa a nota/quantidade informadas abaixo.</p></div>
+                </div>
+                <div class="form-group"><label>Google Place ID</label><input type="text" name="google_place_id" value="<?= e($trip['google_place_id'] ?? '') ?>" class="form-control" placeholder="Ex: ChIJ...."><small class="form-hint">ID do local no Google (Place ID). Habilita a busca das avaliações reais via API.</small></div>
+                <div class="form-row">
+                    <div class="form-group col-4"><label>Nota (0 a 5)</label><input type="number" step="0.1" min="0" max="5" name="google_rating" value="<?= e($trip['google_rating'] ?? '') ?>" class="form-control" placeholder="Ex: 4.8"></div>
+                    <div class="form-group col-4"><label>Qtd. de avaliações</label><input type="number" min="0" name="google_reviews_count" value="<?= e($trip['google_reviews_count'] ?? '') ?>" class="form-control" placeholder="Ex: 320"></div>
+                    <div class="form-group col-4"><label>Link "Ver todas"</label><input type="url" name="google_reviews_url" value="<?= e($trip['google_reviews_url'] ?? '') ?>" class="form-control" placeholder="https://..."></div>
+                </div>
+                <small class="form-hint">Nota, quantidade e link são usados como fallback quando não há integração via API. Deixe tudo em branco para esconder a área de avaliações.</small>
             </div>
 
             <!-- Vídeo YouTube -->
@@ -167,6 +211,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg></div><div><h3>O que Inclui / Não Inclui</h3><p class="admin-card-subtitle">Itens inclusos e não inclusos</p></div></div>
                 <div class="form-group"><label>Inclui</label><div id="includes-list" class="repeater-list"><?php $includes = $isEdit && !empty($trip['includes']) ? json_decode($trip['includes'], true) : ['']; foreach ($includes as $inc): ?><div class="repeater-item"><input type="text" name="includes[]" value="<?= e($inc) ?>" class="form-control" placeholder="Ex: Almoço incluso"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div><?php endforeach; ?></div><button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('includes-list', 'includes[]', 'Ex: Almoço incluso')">+ Adicionar</button></div>
                 <div class="form-group"><label>Não Inclui</label><div id="excludes-list" class="repeater-list"><?php $excludes = $isEdit && !empty($trip['excludes']) ? json_decode($trip['excludes'], true) : ['']; foreach ($excludes as $exc): ?><div class="repeater-item"><input type="text" name="excludes[]" value="<?= e($exc) ?>" class="form-control" placeholder="Ex: Bebidas alcoólicas"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div><?php endforeach; ?></div><button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('excludes-list', 'excludes[]', 'Ex: Bebidas alcoólicas')">+ Adicionar</button></div>
+                <div class="form-group"><label>O que levar</label><div id="whattobring-list" class="repeater-list"><?php $whatToBring = $isEdit && !empty($trip['what_to_bring']) ? json_decode($trip['what_to_bring'], true) : ['']; if (!is_array($whatToBring) || empty($whatToBring)) $whatToBring = ['']; foreach ($whatToBring as $wtb): ?><div class="repeater-item"><input type="text" name="what_to_bring[]" value="<?= e($wtb) ?>" class="form-control" placeholder="Ex: Protetor solar"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div><?php endforeach; ?></div><button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('whattobring-list', 'what_to_bring[]', 'Ex: Protetor solar')">+ Adicionar</button><small class="form-hint">Itens que o cliente deve levar neste passeio (ex.: Roupa de banho, Protetor solar, Repelente). Específico por passeio.</small></div>
                 <div class="form-group"><label>Ideal para</label><div id="idealfor-list" class="repeater-list"><?php $idealFor = $isEdit && !empty($trip['ideal_for']) ? json_decode($trip['ideal_for'], true) : ['']; foreach ($idealFor as $if): ?><div class="repeater-item"><input type="text" name="ideal_for[]" value="<?= e($if) ?>" class="form-control" placeholder="Ex: Casais"><button type="button" class="btn btn-sm btn-danger repeater-remove">&times;</button></div><?php endforeach; ?></div><button type="button" class="btn btn-sm btn-outline" onclick="addRepeater('idealfor-list', 'ideal_for[]', 'Ex: Casais')">+ Adicionar</button><small class="form-hint">Perfis exibidos como etiquetas na página (ex.: Casais, Famílias, Grupos de amigos).</small></div>
             </div>
 
@@ -190,8 +235,11 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                     <div class="itinerary-item">
                         <span class="itinerary-num"><?= $idx + 1 ?></span>
                         <div class="itinerary-fields">
-                            <input type="text" name="itinerary[<?= $idx ?>][title]" value="<?= e($step['title'] ?? '') ?>" class="form-control" placeholder="Título da etapa — ex.: Saída do hotel">
-                            <textarea name="itinerary[<?= $idx ?>][description]" class="form-control" rows="2" placeholder="Descrição — ex.: 7h00 – 8h00 | Busca no hotel e traslado até a marina."><?= e($step['description'] ?? '') ?></textarea>
+                            <div class="form-row">
+                                <div class="form-group col-3"><input type="time" name="itinerary[<?= $idx ?>][step_time]" value="<?= e(substr((string)($step['step_time'] ?? ''), 0, 5)) ?>" class="form-control" title="Horário da etapa (opcional)"></div>
+                                <div class="form-group col-9"><input type="text" name="itinerary[<?= $idx ?>][title]" value="<?= e($step['title'] ?? '') ?>" class="form-control" placeholder="Título da etapa — ex.: Saída do hotel"></div>
+                            </div>
+                            <textarea name="itinerary[<?= $idx ?>][description]" class="form-control" rows="2" placeholder="Descrição da etapa"><?= e($step['description'] ?? '') ?></textarea>
                         </div>
                         <button type="button" class="btn btn-sm btn-danger itinerary-remove" title="Remover etapa">&times;</button>
                     </div>
@@ -633,8 +681,10 @@ document.addEventListener('click', function(e) { if (e.target.classList.contains
         items.forEach(function(item, i) {
             var num = item.querySelector('.itinerary-num');
             if (num) num.textContent = (i + 1);
+            var time = item.querySelector('input[type="time"]');
             var title = item.querySelector('input[type="text"]');
             var desc = item.querySelector('textarea');
+            if (time) time.name = 'itinerary[' + i + '][step_time]';
             if (title) title.name = 'itinerary[' + i + '][title]';
             if (desc) desc.name = 'itinerary[' + i + '][description]';
         });
@@ -647,8 +697,11 @@ document.addEventListener('click', function(e) { if (e.target.classList.contains
         div.innerHTML =
             '<span class="itinerary-num">' + (i + 1) + '</span>' +
             '<div class="itinerary-fields">' +
-                '<input type="text" name="itinerary[' + i + '][title]" value="" class="form-control" placeholder="Título da etapa — ex.: Saída do hotel">' +
-                '<textarea name="itinerary[' + i + '][description]" class="form-control" rows="2" placeholder="Descrição — ex.: 7h00 – 8h00 | Busca no hotel e traslado até a marina."></textarea>' +
+                '<div class="form-row">' +
+                    '<div class="form-group col-3"><input type="time" name="itinerary[' + i + '][step_time]" value="" class="form-control" title="Horário da etapa (opcional)"></div>' +
+                    '<div class="form-group col-9"><input type="text" name="itinerary[' + i + '][title]" value="" class="form-control" placeholder="Título da etapa — ex.: Saída do hotel"></div>' +
+                '</div>' +
+                '<textarea name="itinerary[' + i + '][description]" class="form-control" rows="2" placeholder="Descrição da etapa"></textarea>' +
             '</div>' +
             '<button type="button" class="btn btn-sm btn-danger itinerary-remove" title="Remover etapa">&times;</button>';
         list.appendChild(div);

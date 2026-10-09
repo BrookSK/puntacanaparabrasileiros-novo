@@ -525,6 +525,19 @@
             </div>
             <p class="admin-card-subtitle" style="margin-top:8px;">O token deixa a URL não adivinhável (o callback não é assinado). Depois de definir/alterar o token, clique em <strong>Salvar Configurações</strong> para a URL acima ser gerada.</p>
         </div>
+
+        <div class="admin-card">
+            <div class="admin-card-header">
+                <div class="admin-card-icon" style="background:#fef3c7;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                </div>
+                <div>
+                    <h3>Google Places (Avaliações)</h3>
+                    <p class="admin-card-subtitle">Chave da API do Google Places usada para buscar as avaliações reais exibidas nas páginas dos passeios. Cadastre o Place ID de cada passeio na edição dele.</p>
+                </div>
+            </div>
+            <div class="form-group"><label>API Key do Google Places</label><input type="password" name="google_places_api_key" class="form-control" placeholder="AIza..." value="<?= e($settings['integrations']['google_places_api_key']['setting_value'] ?? '') ?>"><small style="color:#6b7280;">Habilite a "Places API" no Google Cloud. Sem esta chave, cada passeio exibe apenas a nota/quantidade informadas manualmente na edição.</small></div>
+        </div>
     </div>
 
     <!-- Botão Salvar -->

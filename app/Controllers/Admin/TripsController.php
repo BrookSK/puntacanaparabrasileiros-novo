@@ -120,6 +120,22 @@ class TripsController extends Controller
         $idealFor = $request->input('ideal_for', []);
         $data['ideal_for'] = !empty($idealFor) ? json_encode(array_values(array_filter($idealFor))) : null;
 
+        // Detalhes do passeio (cards de destaque abaixo do título) — independentes do roteiro
+        $detailHighlights = $request->input('detail_highlights', []);
+        $detailHighlights = array_values(array_filter(array_map('trim', (array) $detailHighlights), fn($v) => $v !== ''));
+        $data['detail_highlights'] = !empty($detailHighlights) ? json_encode($detailHighlights) : null;
+
+        // O que levar (lista individual por passeio) como JSON
+        $whatToBring = $request->input('what_to_bring', []);
+        $whatToBring = array_values(array_filter(array_map('trim', (array) $whatToBring), fn($v) => $v !== ''));
+        $data['what_to_bring'] = !empty($whatToBring) ? json_encode($whatToBring) : null;
+
+        // Faixas de horário de saída/chegada do hotel (De/Até)
+        $data = $this->applyTripTimeWindows($data, $request);
+
+        // Avaliações do Google (Place ID + valores manuais de fallback)
+        $data = $this->applyGoogleReviewsFields($data, $request);
+
         // Upload de imagem
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));
@@ -277,6 +293,22 @@ class TripsController extends Controller
         // Ideal para (chips) como JSON
         $idealFor = $request->input('ideal_for', []);
         $data['ideal_for'] = !empty($idealFor) ? json_encode(array_values(array_filter($idealFor))) : null;
+
+        // Detalhes do passeio (cards de destaque abaixo do título) — independentes do roteiro
+        $detailHighlights = $request->input('detail_highlights', []);
+        $detailHighlights = array_values(array_filter(array_map('trim', (array) $detailHighlights), fn($v) => $v !== ''));
+        $data['detail_highlights'] = !empty($detailHighlights) ? json_encode($detailHighlights) : null;
+
+        // O que levar (lista individual por passeio) como JSON
+        $whatToBring = $request->input('what_to_bring', []);
+        $whatToBring = array_values(array_filter(array_map('trim', (array) $whatToBring), fn($v) => $v !== ''));
+        $data['what_to_bring'] = !empty($whatToBring) ? json_encode($whatToBring) : null;
+
+        // Faixas de horário de saída/chegada do hotel (De/Até)
+        $data = $this->applyTripTimeWindows($data, $request);
+
+        // Avaliações do Google (Place ID + valores manuais de fallback)
+        $data = $this->applyGoogleReviewsFields($data, $request);
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));
@@ -848,12 +880,13 @@ class TripsController extends Controller
         $items = $request->input('itinerary', []);
         $this->db->delete('trip_itinerary', 'trip_id = ?', [$tripId]);
         foreach ($items as $i => $item) {
-            if (empty($item['title'])) continue;
+            if (!is_array($item) || empty($item['title'])) continue;
             $this->db->insert('trip_itinerary', [
                 'trip_id' => $tripId,
                 'day_number' => (int) ($item['day_number'] ?? ($i + 1)),
                 'title' => $item['title'],
                 'description' => $item['description'] ?? null,
+                'step_time' => $this->normalizeTimeInput($item['step_time'] ?? null),
                 'sort_order' => $i,
             ]);
         }
@@ -922,6 +955,72 @@ class TripsController extends Controller
     }
 
     /**
+     * Normaliza um horário recebido do form para HH:MM (ou null se vazio/inválido).
+     */
+    private function normalizeTimeInput(mixed $value): ?string
+    {
+        $value = trim((string) ($value ?? ''));
+        if ($value === '') return null;
+        if (preg_match('/^(\d{1,2}):(\d{2})(?::\d{2})?$/', $value, $m)) {
+            return sprintf('%02d:%s', (int) $m[1], $m[2]);
+        }
+        return null;
+    }
+
+    /**
+     * Aplica as faixas De/Até de saída e chegada do hotel (item 2 do cliente).
+     * Também mantém os campos de texto antigos (departure_time_info/return_time_info)
+     * preenchidos a partir da faixa, para compatibilidade com qualquer uso legado.
+     */
+    private function applyTripTimeWindows(array $data, Request $request): array
+    {
+        $ds = $this->normalizeTimeInput($request->input('departure_time_start'));
+        $de = $this->normalizeTimeInput($request->input('departure_time_end'));
+        $rs = $this->normalizeTimeInput($request->input('return_time_start'));
+        $re = $this->normalizeTimeInput($request->input('return_time_end'));
+
+        $data['departure_time_start'] = $ds;
+        $data['departure_time_end'] = $de;
+        $data['return_time_start'] = $rs;
+        $data['return_time_end'] = $re;
+
+        // Monta um texto legível a partir da faixa (fallback mantém o que o admin digitou).
+        $format = function (?string $start, ?string $end): ?string {
+            $s = $start ? substr($start, 0, 5) : '';
+            $e = $end ? substr($end, 0, 5) : '';
+            if ($s !== '' && $e !== '') return $s . ' às ' . $e;
+            if ($s !== '') return $s;
+            if ($e !== '') return $e;
+            return null;
+        };
+        $depText = $format($ds, $de);
+        $retText = $format($rs, $re);
+        if ($depText !== null) $data['departure_time_info'] = $depText;
+        if ($retText !== null) $data['return_time_info'] = $retText;
+
+        return $data;
+    }
+
+    /**
+     * Aplica e valida os campos de avaliações do Google (item 5 do cliente).
+     * google_place_id habilita a busca via Places API; os demais são fallback manual.
+     */
+    private function applyGoogleReviewsFields(array $data, Request $request): array
+    {
+        $placeId = trim((string) $request->input('google_place_id', ''));
+        $rating = trim((string) $request->input('google_rating', ''));
+        $count = trim((string) $request->input('google_reviews_count', ''));
+        $url = trim((string) $request->input('google_reviews_url', ''));
+
+        $data['google_place_id'] = $placeId !== '' ? $placeId : null;
+        $data['google_rating'] = $rating !== '' ? min(5.0, max(0.0, (float) $rating)) : null;
+        $data['google_reviews_count'] = $count !== '' ? max(0, (int) $count) : null;
+        $data['google_reviews_url'] = $url !== '' ? $url : null;
+
+        return $data;
+    }
+
+    /**
      * Grava uma linha no log de diagnóstico de upload (storage/upload-debug.log).
      * Serve para descobrir POR QUE um upload falha no servidor de produção,
      * onde não dá pra depurar ao vivo. Pode ser removido depois que resolver.
@@ -973,6 +1072,12 @@ class TripsController extends Controller
             @mkdir($uploadDir, 0775, true);
             $this->uploadLog('  -> pasta de uploads não existia, tentei criar: ' . $uploadDir);
         }
+        // Se a pasta existe mas não está gravável, tenta corrigir a permissão
+        // antes de desistir (servidores compartilhados às vezes criam a pasta 755).
+        if (!is_writable($uploadDir)) {
+            @chmod($uploadDir, 0775);
+            $this->uploadLog('  -> pasta não gravável, tentei chmod 0775: ' . $uploadDir);
+        }
         if (!is_writable($uploadDir)) {
             $this->uploadLog('  -> ABORTADO: pasta de uploads NÃO GRAVÁVEL: ' . $uploadDir);
             return null;
@@ -981,12 +1086,22 @@ class TripsController extends Controller
         $filename = 'trip-' . uniqid() . '.' . $ext;
         $destination = $uploadDir . '/' . $filename;
 
+        // Tenta move_uploaded_file (caminho normal). Se falhar, cai para copy()
+        // como fallback — em alguns ambientes (open_basedir, tmp em outro mount)
+        // o move falha mas o copy funciona.
         if (!move_uploaded_file($file['tmp_name'], $destination)) {
-            $this->uploadLog('  -> ABORTADO: move_uploaded_file FALHOU para: ' . $destination);
-            return null;
+            $this->uploadLog('  -> move_uploaded_file FALHOU, tentando copy() como fallback: ' . $destination);
+            if (!@copy($file['tmp_name'], $destination)) {
+                $this->uploadLog('  -> ABORTADO: copy() também FALHOU para: ' . $destination);
+                return null;
+            }
+            $this->uploadLog('  -> OK via copy() fallback: ' . $destination);
+        } else {
+            $this->uploadLog('  -> OK: gravado em ' . $destination);
         }
 
-        $this->uploadLog('  -> OK: gravado em ' . $destination);
+        // Garante que o arquivo gravado seja legível pelo servidor web.
+        @chmod($destination, 0644);
         return '/uploads/' . $filename;
     }
 

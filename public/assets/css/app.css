@@ -7610,3 +7610,162 @@ img { max-width: 100%; height: auto; }
     background: var(--text-green);
     color: #fff;
 }
+
+/* ============================================================
+   AJUSTES DA PÁGINA DE PASSEIOS (validação cliente)
+   - Item 6: card de preço sticky restrito à coluna lateral
+   - Relacionados/destaques em seção de largura total
+   - Item 5: barra de avaliações clicável + modal do Google
+   ============================================================ */
+
+/* Item 6: o card sticky acompanha o scroll, mas limitado à altura da viewport
+   e com scroll interno se o conteúdo for alto. Como os relacionados saíram da
+   sidebar, o card não cobre mais nenhum conteúdo inferior. */
+.trip-sidebar .trip-price-card {
+    position: sticky;
+    top: 90px;
+    z-index: 10;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+}
+
+/* Relacionados / destaques: seção de largura total abaixo do conteúdo */
+.trip-related-fullwidth {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid #eef2ee;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+.trip-related-section-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin: 0 0 18px;
+    color: #0f172a;
+}
+.trip-related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+}
+.trip-related-grid .related-trip-item {
+    display: block;
+    text-decoration: none;
+    border: 1px solid #eef0f2;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--white);
+    transition: box-shadow .2s, transform .2s;
+}
+.trip-related-grid .related-trip-item:hover {
+    box-shadow: 0 10px 28px rgba(16, 24, 40, .1);
+    transform: translateY(-2px);
+}
+.trip-related-grid .related-trip-img { width: 100%; height: 160px; }
+.trip-related-grid .related-trip-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.trip-related-grid .related-trip-info { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+.trip-related-grid .related-trip-info h5 { margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; }
+
+@media (max-width: 900px) {
+    .trip-related-grid { grid-template-columns: 1fr 1fr; }
+    /* No mobile o grid vira 1 coluna e o card não precisa ser sticky. */
+    .trip-sidebar .trip-price-card { position: static; max-height: none; overflow: visible; }
+}
+@media (max-width: 560px) {
+    .trip-related-grid { grid-template-columns: 1fr; }
+}
+
+/* Item 5: barra de avaliações clicável (abre o modal do Google) */
+.trip-rating-bar--btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: #fffdf5;
+    border: 1px solid #f2e3b3;
+    border-radius: 999px;
+    padding: 8px 16px;
+    margin-top: 14px;
+    cursor: pointer;
+    font: inherit;
+    color: #1f2937;
+    transition: box-shadow .2s, border-color .2s;
+}
+.trip-rating-bar--btn:hover { box-shadow: 0 4px 14px rgba(16, 24, 40, .1); border-color: #e4cf86; }
+.trip-rating-bar--btn .trip-rating-stars { color: #f5b301; letter-spacing: 1px; }
+.trip-rating-bar--btn .trip-rating-value { font-weight: 700; }
+.trip-rating-bar--btn .trip-rating-chevron { color: #9ca3af; }
+
+/* Modal de avaliações do Google */
+.greviews-modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, .55);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+}
+.greviews-modal-overlay.is-open { display: flex; }
+.greviews-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 560px;
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 24px 60px rgba(16, 24, 40, .3);
+}
+.greviews-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    color: #94a3b8;
+}
+.greviews-head { padding: 24px 24px 16px; border-bottom: 1px solid #f1f5f9; }
+.greviews-logo { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; }
+.greviews-summary { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.greviews-score { font-size: 32px; font-weight: 800; color: #0f172a; line-height: 1; }
+.greviews-stars { color: #f5b301; font-size: 18px; letter-spacing: 1px; }
+.greviews-count { color: #64748b; font-size: 14px; }
+.greviews-title { margin: 12px 0 0; font-size: 16px; font-weight: 700; color: #0f172a; }
+.greviews-body { padding: 8px 24px; overflow-y: auto; }
+.greviews-list { list-style: none; margin: 0; padding: 0; }
+.greviews-item { padding: 16px 0; border-bottom: 1px solid #f1f5f9; }
+.greviews-item:last-child { border-bottom: none; }
+.greviews-item-head { display: flex; align-items: center; gap: 10px; }
+.greviews-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+.greviews-avatar--letter { display: flex; align-items: center; justify-content: center; background: #1B6F00; color: #fff; font-weight: 700; text-transform: uppercase; }
+.greviews-item-meta { display: flex; flex-direction: column; gap: 2px; }
+.greviews-author { font-size: 14px; color: #0f172a; }
+.greviews-item-stars { color: #f5b301; font-size: 13px; letter-spacing: 1px; }
+.greviews-when { color: #94a3b8; font-size: 12px; margin-left: 6px; letter-spacing: normal; }
+.greviews-text { margin: 10px 0 0; color: #475569; font-size: 14px; line-height: 1.6; }
+.greviews-empty { color: #64748b; font-size: 14px; padding: 16px 0; }
+.greviews-foot { padding: 16px 24px 24px; border-top: 1px solid #f1f5f9; }
+.greviews-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    justify-content: center;
+    background: #1B6F00;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    padding: 12px 18px;
+    border-radius: 10px;
+    transition: background .2s;
+}
+.greviews-all-btn:hover { background: #155a00; }
+
+/* O que levar (item 4) */
+.trip-what-to-bring .trip-bring-list { margin-top: 6px; }
