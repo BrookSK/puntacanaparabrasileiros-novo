@@ -96,24 +96,9 @@ $ratingDisplay = (float) ($rating ?? 0);
 <!-- ============================================================ -->
 <!-- CONTEÚDO                                                     -->
 <!-- ============================================================ -->
-<!-- CSS crítico inline: garante grid dos relacionados e sticky contido
-     mesmo que o app.css esteja em cache no navegador (asset_version antiga). -->
+<!-- Card de preço estático (não sticky) — mantém o layout original. -->
 <style>
-.trip-sidebar .trip-price-card { position: sticky; top: 90px; z-index: 10; max-height: calc(100vh - 110px); overflow-y: auto; }
-.trip-related-fullwidth { margin-top: 48px; padding-top: 32px; border-top: 1px solid #eef2ee; display: flex; flex-direction: column; gap: 40px; }
-.trip-related-fullwidth .trip-related-section-title { font-size: 20px; font-weight: 700; margin: 0 0 18px; color: #0f172a; }
-.trip-related-fullwidth .trip-related-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-.trip-related-fullwidth .trip-related-grid .related-trip-item { display: block; text-decoration: none; border: 1px solid #eef0f2; border-radius: 12px; overflow: hidden; background: #fff; transition: box-shadow .2s, transform .2s; }
-.trip-related-fullwidth .trip-related-grid .related-trip-item:hover { box-shadow: 0 10px 28px rgba(16,24,40,.1); transform: translateY(-2px); }
-.trip-related-fullwidth .trip-related-grid .related-trip-img { width: 100%; height: 160px; }
-.trip-related-fullwidth .trip-related-grid .related-trip-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.trip-related-fullwidth .trip-related-grid .related-trip-info { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
-.trip-related-fullwidth .trip-related-grid .related-trip-info h5 { margin: 0; font-size: 15px; font-weight: 700; color: #0f172a; }
-@media (max-width: 992px) { .trip-related-fullwidth .trip-related-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 768px) {
-    .trip-sidebar .trip-price-card { position: static; max-height: none; overflow: visible; }
-}
-@media (max-width: 560px) { .trip-related-fullwidth .trip-related-grid { grid-template-columns: 1fr; } }
+.trip-sidebar .trip-price-card { position: static; max-height: none; overflow: visible; }
 </style>
 <section class="trip-detail">
     <div class="container">
@@ -751,17 +736,9 @@ $ratingDisplay = (float) ($rating ?? 0);
                     <p class="trip-price-help">Precisa de ajuda com a reserva? <a href="/contato">Envie-Nos Uma Mensagem</a></p>
                 </div>
 
-            </aside>
-        </div>
-
-        <?php if (!empty($relatedTrips)): ?>
-        <!-- ===================== RELACIONADOS / DESTAQUES (largura total, fora da sidebar) ===================== -->
-        <!-- Movidos para fora da coluna lateral para que o card de preço sticky
-             não cubra estes conteúdos ao rolar a página (item 6 da validação). -->
-        <div class="trip-related-fullwidth">
-            <div class="trip-related-section">
-                <h3 class="trip-related-section-title">Passeios relacionados que podem te interessar</h3>
-                <div class="trip-related-grid">
+                <!-- Related Trips (em lista, dentro da coluna direita) -->
+                <div class="trip-related-card">
+                    <h4>Passeios relacionados que podem te interessar</h4>
                     <?php foreach ($relatedTrips as $related): ?>
                     <a href="/passeios/<?= e($related['slug']) ?>" class="related-trip-item">
                         <div class="related-trip-img">
@@ -791,11 +768,10 @@ $ratingDisplay = (float) ($rating ?? 0);
                     </a>
                     <?php endforeach; ?>
                 </div>
-            </div>
 
-            <div class="trip-related-section">
-                <h3 class="trip-related-section-title">Passeios em Destaque</h3>
-                <div class="trip-related-grid">
+                <!-- Featured Trips (em lista, dentro da coluna direita) -->
+                <div class="trip-related-card">
+                    <h4>Passeios em Destaque</h4>
                     <?php foreach (array_slice($relatedTrips, 0, 3) as $ft): ?>
                     <a href="/passeios/<?= e($ft['slug']) ?>" class="related-trip-item related-trip-featured">
                         <div class="related-trip-img">
@@ -816,9 +792,8 @@ $ratingDisplay = (float) ($rating ?? 0);
                     </a>
                     <?php endforeach; ?>
                 </div>
-            </div>
+            </aside>
         </div>
-        <?php endif; ?>
     </div>
 </section>
 
