@@ -177,13 +177,25 @@ $ratingDisplay = (float) ($rating ?? 0);
                 <?php endif; ?>
 
                 <!-- ===================== NAV DE ÂNCORAS (abas sticky) ===================== -->
+                <?php
+                    // Abas (item 2): a navegação deve ser consistente entre todos os
+                    // passeios. Cada aba só é renderizada quando a seção correspondente
+                    // existe na página — assim o link sempre leva a um conteúdo real e
+                    // nunca rola para o vazio. As seções abaixo verificam as mesmas
+                    // condições, mantendo abas e conteúdo sempre em sincronia.
+                    $hasRoteiro      = !empty($itinerary);
+                    $hasRelacionados = !empty($relatedTrips);
+                    $hasConfianca    = !empty($reviews) || !empty($trip['youtube_url']) || !empty($trip['documents']);
+                    $hasFaqs         = !empty($tripFaqs);
+                ?>
                 <div class="trip-tabs" id="tripTabs">
                     <nav aria-label="Seções do passeio">
                         <a href="#sec-visao" class="trip-tab active">Visão Geral</a>
-                        <?php if (!empty($itinerary)): ?><a href="#sec-roteiro" class="trip-tab">Roteiro</a><?php endif; ?>
+                        <?php if ($hasRoteiro): ?><a href="#sec-roteiro" class="trip-tab">Roteiro</a><?php endif; ?>
                         <a href="#sec-precos" class="trip-tab">Preços e Datas</a>
-                        <?php if (!empty($reviews) || !empty($trip['youtube_url']) || !empty($trip['documents'])): ?><a href="#sec-confianca" class="trip-tab">Quem já foi</a><?php endif; ?>
-                        <?php if (!empty($tripFaqs)): ?><a href="#sec-faqs" class="trip-tab">FAQ</a><?php endif; ?>
+                        <?php if ($hasRelacionados): ?><a href="#sec-relacionados" class="trip-tab">Passeios relacionados</a><?php endif; ?>
+                        <?php if ($hasConfianca): ?><a href="#sec-confianca" class="trip-tab">Quem já foi</a><?php endif; ?>
+                        <?php if ($hasFaqs): ?><a href="#sec-faqs" class="trip-tab">FAQ</a><?php endif; ?>
                     </nav>
                 </div>
 
@@ -291,11 +303,31 @@ $ratingDisplay = (float) ($rating ?? 0);
                     <ol class="trip-timeline">
                         <?php foreach ($itinerary as $index => $step): ?>
                         <?php
-                            // Horário da etapa: prioriza o campo dedicado step_time (painel).
-                            // Fallback: extrai do início da descrição ("7h00 – 8h00 | ..." ou "~35 min — ...").
+                            // Horário da etapa.
+                            // Regra (item 1): se a descrição começar com uma FAIXA de horário
+                            // (ex.: "7h00 – 8h00 | ...") usamos a faixa inteira no selo verde,
+                            // pois é mais informativa que o horário único cadastrado em step_time.
+                            // Prioridades: 1) faixa detectada na descrição; 2) campo step_time;
+                            // 3) horário/duração solto no início da descrição ("~35 min — ...").
                             $stepDesc = (string) ($step['description'] ?? '');
                             $stepTime = '';
-                            if (!empty($step['step_time'])) {
+
+                            // Normaliza uma marcação de horário "7", "7h", "7h00", "07:00" → "07:00".
+                            $fmtClock = function (string $raw): string {
+                                $raw = trim($raw);
+                                if (preg_match('/^(\d{1,2})\s*[:h]\s*(\d{2})?/i', $raw, $c)) {
+                                    $h = str_pad($c[1], 2, '0', STR_PAD_LEFT);
+                                    $m = isset($c[2]) && $c[2] !== '' ? $c[2] : '00';
+                                    return $h . ':' . $m;
+                                }
+                                return $raw;
+                            };
+
+                            // 1) Faixa no início da descrição: "7h00 – 8h00 | ..." / "7h - 8h: ..."
+                            if (preg_match('/^\s*(\d{1,2}\s*[:h]\s*\d{0,2})\s*[–—-]\s*(\d{1,2}\s*[:h]\s*\d{0,2})\s*[|:–—-]\s*(.*)$/isu', $stepDesc, $mr)) {
+                                $stepTime = $fmtClock($mr[1]) . ' - ' . $fmtClock($mr[2]);
+                                $stepDesc = trim($mr[3]);
+                            } elseif (!empty($step['step_time'])) {
                                 $stepTime = substr((string) $step['step_time'], 0, 5);
                             } elseif (preg_match('/^\s*([~\d][^|–—\-\n]{0,18}?(?:min|h\d*0?|hora[s]?|h))\s*[|–—-]\s*(.*)$/isu', $stepDesc, $mt)) {
                                 $stepTime = trim($mt[1]);
@@ -511,6 +543,71 @@ $ratingDisplay = (float) ($rating ?? 0);
                             </details>
                         </div>
                 </section>
+
+                <!-- ===================== SEÇÃO: PASSEIOS RELACIONADOS / EM DESTAQUE ===================== -->
+                <!-- Item 4: movido da sidebar para a coluna principal, entre "Preços e -->
+                <!-- Datas" e "Quem já foi". Exibido em grade de cards horizontal. -->
+                <?php if (!empty($relatedTrips)): ?>
+                <section class="trip-sec trip-related-sec" id="sec-relacionados">
+                    <h2>Passeios relacionados que podem te interessar</h2>
+                    <div class="trip-related-grid">
+                        <?php foreach (array_slice($relatedTrips, 0, 4) as $related): ?>
+                        <?php
+                            $rprice = 0;
+                            if (!empty($related['group_pricing_enabled']) && !empty($related['group_pricing'])) {
+                                $rgp = json_decode($related['group_pricing'], true);
+                                if (is_array($rgp) && !empty($rgp)) {
+                                    usort($rgp, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                                    $rprice = (float) $rgp[0]['price'];
+                                }
+                            } else {
+                                $rpkg = (new \App\Models\TripPackage())->getByTrip((int)$related['id']);
+                                $rprice = !empty($rpkg) ? (new \App\Models\TripPackage())->getBasePrice((int)$rpkg[0]['id']) : 0;
+                            }
+                        ?>
+                        <a href="/passeios/<?= e($related['slug']) ?>" class="trip-related-grid-item">
+                            <div class="trip-related-grid-img">
+                                <img src="<?= e($related['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($related['title']) ?>" loading="lazy">
+                            </div>
+                            <div class="trip-related-grid-info">
+                                <h5><?= e($related['title']) ?></h5>
+                                <span class="related-trip-location">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    Punta Cana
+                                </span>
+                                <span class="related-trip-price"><?= money($rprice) ?></span>
+                            </div>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <?php $featuredList = array_slice($relatedTrips, 0, 4); ?>
+                    <?php if (!empty($featuredList)): ?>
+                    <h3 class="trip-subsec">Passeios em Destaque</h3>
+                    <div class="trip-related-grid">
+                        <?php foreach ($featuredList as $ft): ?>
+                        <a href="/passeios/<?= e($ft['slug']) ?>" class="trip-related-grid-item">
+                            <div class="trip-related-grid-img">
+                                <img src="<?= e($ft['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($ft['title']) ?>" loading="lazy">
+                            </div>
+                            <div class="trip-related-grid-info">
+                                <h5><?= e($ft['title']) ?></h5>
+                                <span class="related-trip-location">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    Punta Cana
+                                </span>
+                                <span class="related-trip-duration">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    <?= e($ft['duration'] ?? '4') ?> Horas
+                                </span>
+                                <div class="related-trip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                            </div>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </section>
+                <?php endif; ?>
 
                 <!-- ===================== SEÇÃO: QUEM JÁ FOI E QUEM LEVA VOCÊ ===================== -->
                 <?php
@@ -734,63 +831,6 @@ $ratingDisplay = (float) ($rating ?? 0);
                     </a>
                     <?php endif; ?>
                     <p class="trip-price-help">Precisa de ajuda com a reserva? <a href="/contato">Envie-Nos Uma Mensagem</a></p>
-                </div>
-
-                <!-- Related Trips (em lista, dentro da coluna direita) -->
-                <div class="trip-related-card">
-                    <h4>Passeios relacionados que podem te interessar</h4>
-                    <?php foreach ($relatedTrips as $related): ?>
-                    <a href="/passeios/<?= e($related['slug']) ?>" class="related-trip-item">
-                        <div class="related-trip-img">
-                            <img src="<?= e($related['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($related['title']) ?>" loading="lazy">
-                        </div>
-                        <div class="related-trip-info">
-                            <h5><?= e($related['title']) ?></h5>
-                            <span class="related-trip-location">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                Punta Cana
-                            </span>
-                            <span class="related-trip-price"><?php
-                                $rprice = 0;
-                                if (!empty($related['group_pricing_enabled']) && !empty($related['group_pricing'])) {
-                                    $rgp = json_decode($related['group_pricing'], true);
-                                    if (is_array($rgp) && !empty($rgp)) {
-                                        usort($rgp, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
-                                        $rprice = (float) $rgp[0]['price'];
-                                    }
-                                } else {
-                                    $rpkg = (new \App\Models\TripPackage())->getByTrip((int)$related['id']);
-                                    $rprice = !empty($rpkg) ? (new \App\Models\TripPackage())->getBasePrice((int)$rpkg[0]['id']) : 0;
-                                }
-                                echo money($rprice);
-                            ?></span>
-                        </div>
-                    </a>
-                    <?php endforeach; ?>
-                </div>
-
-                <!-- Featured Trips (em lista, dentro da coluna direita) -->
-                <div class="trip-related-card">
-                    <h4>Passeios em Destaque</h4>
-                    <?php foreach (array_slice($relatedTrips, 0, 3) as $ft): ?>
-                    <a href="/passeios/<?= e($ft['slug']) ?>" class="related-trip-item related-trip-featured">
-                        <div class="related-trip-img">
-                            <img src="<?= e($ft['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="" loading="lazy">
-                        </div>
-                        <div class="related-trip-info">
-                            <h5><?= e($ft['title']) ?></h5>
-                            <span class="related-trip-location">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                Punta Cana
-                            </span>
-                            <span class="related-trip-duration">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                <?= e($ft['duration'] ?? '4') ?> Horas
-                            </span>
-                            <div class="related-trip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                        </div>
-                    </a>
-                    <?php endforeach; ?>
                 </div>
             </aside>
         </div>
