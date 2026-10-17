@@ -184,7 +184,6 @@ $ratingDisplay = (float) ($rating ?? 0);
                     // nunca rola para o vazio. As seções abaixo verificam as mesmas
                     // condições, mantendo abas e conteúdo sempre em sincronia.
                     $hasRoteiro      = !empty($itinerary);
-                    $hasRelacionados = !empty($relatedTrips);
                     $hasConfianca    = !empty($reviews) || !empty($trip['youtube_url']) || !empty($trip['documents']);
                     $hasFaqs         = !empty($tripFaqs);
                 ?>
@@ -193,7 +192,6 @@ $ratingDisplay = (float) ($rating ?? 0);
                         <a href="#sec-visao" class="trip-tab active">Visão Geral</a>
                         <?php if ($hasRoteiro): ?><a href="#sec-roteiro" class="trip-tab">Roteiro</a><?php endif; ?>
                         <a href="#sec-precos" class="trip-tab">Preços e Datas</a>
-                        <?php if ($hasRelacionados): ?><a href="#sec-relacionados" class="trip-tab">Passeios relacionados</a><?php endif; ?>
                         <?php if ($hasConfianca): ?><a href="#sec-confianca" class="trip-tab">Quem já foi</a><?php endif; ?>
                         <?php if ($hasFaqs): ?><a href="#sec-faqs" class="trip-tab">FAQ</a><?php endif; ?>
                     </nav>
@@ -544,71 +542,6 @@ $ratingDisplay = (float) ($rating ?? 0);
                         </div>
                 </section>
 
-                <!-- ===================== SEÇÃO: PASSEIOS RELACIONADOS / EM DESTAQUE ===================== -->
-                <!-- Item 4: movido da sidebar para a coluna principal, entre "Preços e -->
-                <!-- Datas" e "Quem já foi". Exibido em grade de cards horizontal. -->
-                <?php if (!empty($relatedTrips)): ?>
-                <section class="trip-sec trip-related-sec" id="sec-relacionados">
-                    <h2>Passeios relacionados que podem te interessar</h2>
-                    <div class="trip-related-grid">
-                        <?php foreach (array_slice($relatedTrips, 0, 4) as $related): ?>
-                        <?php
-                            $rprice = 0;
-                            if (!empty($related['group_pricing_enabled']) && !empty($related['group_pricing'])) {
-                                $rgp = json_decode($related['group_pricing'], true);
-                                if (is_array($rgp) && !empty($rgp)) {
-                                    usort($rgp, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
-                                    $rprice = (float) $rgp[0]['price'];
-                                }
-                            } else {
-                                $rpkg = (new \App\Models\TripPackage())->getByTrip((int)$related['id']);
-                                $rprice = !empty($rpkg) ? (new \App\Models\TripPackage())->getBasePrice((int)$rpkg[0]['id']) : 0;
-                            }
-                        ?>
-                        <a href="/passeios/<?= e($related['slug']) ?>" class="trip-related-grid-item">
-                            <div class="trip-related-grid-img">
-                                <img src="<?= e($related['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($related['title']) ?>" loading="lazy">
-                            </div>
-                            <div class="trip-related-grid-info">
-                                <h5><?= e($related['title']) ?></h5>
-                                <span class="related-trip-location">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                    Punta Cana
-                                </span>
-                                <span class="related-trip-price"><?= money($rprice) ?></span>
-                            </div>
-                        </a>
-                        <?php endforeach; ?>
-                    </div>
-
-                    <?php $featuredList = array_slice($relatedTrips, 0, 4); ?>
-                    <?php if (!empty($featuredList)): ?>
-                    <h3 class="trip-subsec">Passeios em Destaque</h3>
-                    <div class="trip-related-grid">
-                        <?php foreach ($featuredList as $ft): ?>
-                        <a href="/passeios/<?= e($ft['slug']) ?>" class="trip-related-grid-item">
-                            <div class="trip-related-grid-img">
-                                <img src="<?= e($ft['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($ft['title']) ?>" loading="lazy">
-                            </div>
-                            <div class="trip-related-grid-info">
-                                <h5><?= e($ft['title']) ?></h5>
-                                <span class="related-trip-location">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-                                    Punta Cana
-                                </span>
-                                <span class="related-trip-duration">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                    <?= e($ft['duration'] ?? '4') ?> Horas
-                                </span>
-                                <div class="related-trip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-                            </div>
-                        </a>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php endif; ?>
-                </section>
-                <?php endif; ?>
-
                 <!-- ===================== SEÇÃO: QUEM JÁ FOI E QUEM LEVA VOCÊ ===================== -->
                 <?php
                 $tripDocuments = !empty($trip['documents']) ? json_decode($trip['documents'], true) : [];
@@ -681,6 +614,71 @@ $ratingDisplay = (float) ($rating ?? 0);
                         </div>
                         <?php endforeach; ?>
                     </div>
+                </section>
+                <?php endif; ?>
+
+                <!-- ===================== SEÇÃO: PASSEIOS RELACIONADOS / EM DESTAQUE ===================== -->
+                <!-- Posicionada após o FAQ e antes do formulário de consulta. -->
+                <!-- Não possui aba na navegação; aparece só ao rolar até o fim da página. -->
+                <?php if (!empty($relatedTrips)): ?>
+                <section class="trip-sec trip-related-sec">
+                    <h2>Passeios relacionados que podem te interessar</h2>
+                    <div class="trip-related-grid">
+                        <?php foreach (array_slice($relatedTrips, 0, 4) as $related): ?>
+                        <?php
+                            $rprice = 0;
+                            if (!empty($related['group_pricing_enabled']) && !empty($related['group_pricing'])) {
+                                $rgp = json_decode($related['group_pricing'], true);
+                                if (is_array($rgp) && !empty($rgp)) {
+                                    usort($rgp, fn($a, $b) => (int)($a['pax'] ?? 0) - (int)($b['pax'] ?? 0));
+                                    $rprice = (float) $rgp[0]['price'];
+                                }
+                            } else {
+                                $rpkg = (new \App\Models\TripPackage())->getByTrip((int)$related['id']);
+                                $rprice = !empty($rpkg) ? (new \App\Models\TripPackage())->getBasePrice((int)$rpkg[0]['id']) : 0;
+                            }
+                        ?>
+                        <a href="/passeios/<?= e($related['slug']) ?>" class="trip-related-grid-item">
+                            <div class="trip-related-grid-img">
+                                <img src="<?= e($related['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($related['title']) ?>" loading="lazy">
+                            </div>
+                            <div class="trip-related-grid-info">
+                                <h5><?= e($related['title']) ?></h5>
+                                <span class="related-trip-location">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    Punta Cana
+                                </span>
+                                <span class="related-trip-price"><?= money($rprice) ?></span>
+                            </div>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <?php $featuredList = array_slice($relatedTrips, 0, 4); ?>
+                    <?php if (!empty($featuredList)): ?>
+                    <h3 class="trip-subsec">Passeios em Destaque</h3>
+                    <div class="trip-related-grid">
+                        <?php foreach ($featuredList as $ft): ?>
+                        <a href="/passeios/<?= e($ft['slug']) ?>" class="trip-related-grid-item">
+                            <div class="trip-related-grid-img">
+                                <img src="<?= e($ft['featured_image'] ?? '/assets/images/placeholder.jpg') ?>" alt="<?= e($ft['title']) ?>" loading="lazy">
+                            </div>
+                            <div class="trip-related-grid-info">
+                                <h5><?= e($ft['title']) ?></h5>
+                                <span class="related-trip-location">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                                    Punta Cana
+                                </span>
+                                <span class="related-trip-duration">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    <?= e($ft['duration'] ?? '4') ?> Horas
+                                </span>
+                                <div class="related-trip-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+                            </div>
+                        </a>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
                 </section>
                 <?php endif; ?>
 
