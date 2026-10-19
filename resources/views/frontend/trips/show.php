@@ -620,6 +620,43 @@ $ratingDisplay = (float) ($rating ?? 0);
                 <!-- ===================== SEÇÃO: PASSEIOS RELACIONADOS / EM DESTAQUE ===================== -->
                 <!-- Posicionada após o FAQ e antes do formulário de consulta. -->
                 <!-- Não possui aba na navegação; aparece só ao rolar até o fim da página. -->
+                <!-- Estilos inline escopados: garantem a grade lado a lado e imagens -->
+                <!-- menores mesmo quando o app.css está em cache antigo no servidor. -->
+                <style>
+                .trip-related-sec .trip-related-grid{
+                    display:grid !important;
+                    grid-template-columns:repeat(4,1fr) !important;
+                    gap:16px !important;
+                    margin-top:14px;
+                }
+                .trip-related-sec .trip-related-grid-item{
+                    display:flex;flex-direction:column;background:#fff;
+                    border:1px solid #eee;border-radius:12px;overflow:hidden;
+                    text-decoration:none;transition:box-shadow .18s,transform .18s;
+                }
+                .trip-related-sec .trip-related-grid-item:hover{
+                    box-shadow:0 8px 22px rgba(0,0,0,.1);transform:translateY(-2px);
+                }
+                .trip-related-sec .trip-related-grid-img{
+                    width:100%;height:120px;overflow:hidden;
+                }
+                .trip-related-sec .trip-related-grid-img img{
+                    width:100%;height:100%;object-fit:cover;display:block;
+                }
+                .trip-related-sec .trip-related-grid-info{
+                    display:flex;flex-direction:column;gap:3px;padding:10px 12px 12px;
+                }
+                .trip-related-sec .trip-related-grid-info h5{
+                    font-size:13.5px;font-weight:700;line-height:1.3;margin:0;
+                }
+                @media (max-width:860px){
+                    .trip-related-sec .trip-related-grid{grid-template-columns:repeat(2,1fr) !important;}
+                }
+                @media (max-width:480px){
+                    .trip-related-sec .trip-related-grid{grid-template-columns:repeat(2,1fr) !important;}
+                    .trip-related-sec .trip-related-grid-img{height:92px;}
+                }
+                </style>
                 <?php if (!empty($relatedTrips)): ?>
                 <section class="trip-sec trip-related-sec">
                     <h2>Passeios relacionados que podem te interessar</h2>
