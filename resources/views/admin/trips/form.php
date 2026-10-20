@@ -60,23 +60,6 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                 </div>
             </div>
 
-            <!-- Avaliações do Google -->
-            <div class="admin-card">
-                <div class="admin-card-header">
-                    <div class="admin-card-icon" style="background:#fef3c7;">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                    </div>
-                    <div><h3>Avaliações do Google</h3><p class="admin-card-subtitle">Mostradas abaixo das fotos. Com o Place ID + chave da API (em Configurações → Integrações), busca as avaliações reais. Sem isso, usa a nota/quantidade informadas abaixo.</p></div>
-                </div>
-                <div class="form-group"><label>Google Place ID</label><input type="text" name="google_place_id" value="<?= e($trip['google_place_id'] ?? '') ?>" class="form-control" placeholder="Ex: ChIJ...."><small class="form-hint">ID do local no Google (Place ID). Habilita a busca das avaliações reais via API.</small></div>
-                <div class="form-row">
-                    <div class="form-group col-4"><label>Nota (0 a 5)</label><input type="number" step="0.1" min="0" max="5" name="google_rating" value="<?= e($trip['google_rating'] ?? '') ?>" class="form-control" placeholder="Ex: 4.8"></div>
-                    <div class="form-group col-4"><label>Qtd. de avaliações</label><input type="number" min="0" name="google_reviews_count" value="<?= e($trip['google_reviews_count'] ?? '') ?>" class="form-control" placeholder="Ex: 320"></div>
-                    <div class="form-group col-4"><label>Link "Ver todas"</label><input type="url" name="google_reviews_url" value="<?= e($trip['google_reviews_url'] ?? '') ?>" class="form-control" placeholder="https://..."></div>
-                </div>
-                <small class="form-hint">Nota, quantidade e link são usados como fallback quando não há integração via API. Deixe tudo em branco para esconder a área de avaliações.</small>
-            </div>
-
             <!-- Vídeo YouTube -->
             <div class="admin-card">
                 <div class="admin-card-header"><div class="admin-card-icon admin-card-icon-blue"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg></div><div><h3>Vídeo do Passeio</h3><p class="admin-card-subtitle">Link do YouTube para exibir na página do passeio</p></div></div>

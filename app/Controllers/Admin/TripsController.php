@@ -133,9 +133,6 @@ class TripsController extends Controller
         // Faixas de horário de saída/chegada do hotel (De/Até)
         $data = $this->applyTripTimeWindows($data, $request);
 
-        // Avaliações do Google (Place ID + valores manuais de fallback)
-        $data = $this->applyGoogleReviewsFields($data, $request);
-
         // Upload de imagem
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));
@@ -306,9 +303,6 @@ class TripsController extends Controller
 
         // Faixas de horário de saída/chegada do hotel (De/Até)
         $data = $this->applyTripTimeWindows($data, $request);
-
-        // Avaliações do Google (Place ID + valores manuais de fallback)
-        $data = $this->applyGoogleReviewsFields($data, $request);
 
         if ($request->hasFile('featured_image')) {
             $data['featured_image'] = $this->uploadImage($request->file('featured_image'));
@@ -997,25 +991,6 @@ class TripsController extends Controller
         $retText = $format($rs, $re);
         if ($depText !== null) $data['departure_time_info'] = $depText;
         if ($retText !== null) $data['return_time_info'] = $retText;
-
-        return $data;
-    }
-
-    /**
-     * Aplica e valida os campos de avaliações do Google (item 5 do cliente).
-     * google_place_id habilita a busca via Places API; os demais são fallback manual.
-     */
-    private function applyGoogleReviewsFields(array $data, Request $request): array
-    {
-        $placeId = trim((string) $request->input('google_place_id', ''));
-        $rating = trim((string) $request->input('google_rating', ''));
-        $count = trim((string) $request->input('google_reviews_count', ''));
-        $url = trim((string) $request->input('google_reviews_url', ''));
-
-        $data['google_place_id'] = $placeId !== '' ? $placeId : null;
-        $data['google_rating'] = $rating !== '' ? min(5.0, max(0.0, (float) $rating)) : null;
-        $data['google_reviews_count'] = $count !== '' ? max(0, (int) $count) : null;
-        $data['google_reviews_url'] = $url !== '' ? $url : null;
 
         return $data;
     }
