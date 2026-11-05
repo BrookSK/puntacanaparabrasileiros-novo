@@ -124,6 +124,17 @@ class CheckoutController extends Controller
             return;
         }
 
+        // Revalida disponibilidade (a data pode ter sido fechada depois de ir ao carrinho)
+        $availability = new \App\Services\TripAvailabilityService();
+        foreach (($this->cartService->getSummary()['trips'] ?? []) as $cartTrip) {
+            $err = $availability->validate((int) ($cartTrip['trip_id'] ?? 0), (string) ($cartTrip['date'] ?? ''), $cartTrip['time'] ?? null);
+            if ($err !== null) {
+                $title = (string) ($cartTrip['trip_title'] ?? 'Passeio');
+                $this->json(['success' => false, 'error' => $title . ': ' . $err . ' Remova o item do carrinho e escolha outra data.'], 400);
+                return;
+            }
+        }
+
         $this->db->beginTransaction();
 
         try {

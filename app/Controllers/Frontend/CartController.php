@@ -202,6 +202,32 @@ class CartController extends Controller
             return;
         }
 
+        // Dias fechados / datas especiais / horários de saída (Admin → Dias e Horários)
+        $availability = new \App\Services\TripAvailabilityService();
+        $availabilityError = $availability->validate($tripId, (string) $date, $time !== null ? (string) $time : null);
+        if ($availabilityError !== null) {
+            if ($request->expectsJson()) {
+                $this->json(['error' => $availabilityError], 400);
+                return;
+            }
+            $this->flash('error', $availabilityError);
+            $this->back();
+            return;
+        }
+        // Único horário do dia: grava esse horário mesmo que o cliente não tenha clicado
+        if (trim((string) $time) === '') {
+            $dayTimes = $availability->getDepartureTimesForDate($tripId, (string) $date);
+            if (count($dayTimes) === 1) $time = $dayTimes[0]['time'];
+        }
+
+        // O pacote precisa ser deste passeio
+        $pkgTrip = (int) $this->db->fetchColumn("SELECT trip_id FROM trip_packages WHERE id = ?", [$packageId]);
+        if ($pkgTrip !== $tripId) {
+            $this->flash('error', 'Pacote inválido para este passeio.');
+            $this->back();
+            return;
+        }
+
         $pricingService = new PricingService();
         $compositionPackageId = $request->input('composition_package_id') ? (int) $request->input('composition_package_id') : null;
         $companionCount = (int) $request->input('companion_count', 0);
@@ -223,7 +249,7 @@ class CartController extends Controller
             'date' => $date,
             'time' => $time,
             'hotel_id' => $request->input('hotel_id', ''),
-            'hotel_name' => $request->input('hotel_name', ''),
+            'hotel_name' => mb_substr(trim((string) $request->input('hotel_name', '')), 0, 250),
             'pickup_time' => $request->input('pickup_time', ''),
             'pax' => $pax,
             'extra_services' => $extraServiceIds,

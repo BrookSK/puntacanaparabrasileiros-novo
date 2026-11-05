@@ -148,6 +148,7 @@ class TransfersController extends Controller
         $data = $request->only(['title', 'address', 'latitude', 'longitude', 'location_type', 'sort_order']);
         $data['slug'] = slugify($data['title']);
         $data['status'] = 1;
+        $data = $this->withPickupLead($data, $request);
         $this->locationModel->create($data);
         $this->flash('success', 'Local criado!');
         $this->redirect('/admin/transfers/locais');
@@ -157,9 +158,29 @@ class TransfersController extends Controller
     {
         $id = (int) $request->param('id');
         $data = $request->only(['title', 'address', 'latitude', 'longitude', 'location_type', 'sort_order', 'status']);
+        $data = $this->withPickupLead($data, $request);
         $this->locationModel->update($id, $data);
         $this->flash('success', 'Local atualizado!');
         $this->redirect('/admin/transfers/locais');
+    }
+
+    /**
+     * "Busca antes do voo" (horas) do local → pickup_lead_minutes.
+     * Vazio = usa o padrão geral (Admin → Políticas e Câmbio). Só grava se a
+     * coluna já existir (migration 036).
+     */
+    private function withPickupLead(array $data, Request $request): array
+    {
+        try {
+            $this->db->fetchColumn("SELECT pickup_lead_minutes FROM transfer_locations LIMIT 1");
+        } catch (\Throwable $e) {
+            return $data;
+        }
+        $raw = str_replace(',', '.', trim((string) $request->input('pickup_lead_hours', '')));
+        $data['pickup_lead_minutes'] = ($raw !== '' && is_numeric($raw) && (float) $raw >= 0 && (float) $raw <= 12)
+            ? (int) round((float) $raw * 60)
+            : null;
+        return $data;
     }
 
     public function deleteLocation(Request $request, Response $response): void

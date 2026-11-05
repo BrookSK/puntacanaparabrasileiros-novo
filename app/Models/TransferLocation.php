@@ -10,7 +10,7 @@ class TransferLocation extends Model
     protected string $table = 'transfer_locations';
     protected array $fillable = [
         'title', 'slug', 'address', 'latitude', 'longitude',
-        'location_type', 'sort_order', 'status',
+        'location_type', 'sort_order', 'status', 'pickup_lead_minutes',
     ];
 
     public function getActive(): array

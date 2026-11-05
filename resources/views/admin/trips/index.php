@@ -38,6 +38,7 @@
         <div class="trip-list-actions">
             <a href="/admin/passeios/<?= (int)$trip['id'] ?>/editar" class="btn btn-sm btn-outline">Editar</a>
             <a href="/admin/passeios/<?= (int)$trip['id'] ?>/precos" class="btn btn-sm btn-outline">Preços</a>
+            <a href="/admin/passeios/<?= (int)$trip['id'] ?>/disponibilidade" class="btn btn-sm btn-outline">Dias e Horários</a>
             <form method="POST" action="/admin/passeios/<?= (int)$trip['id'] ?>/duplicar" class="inline-form" onsubmit="return confirm('Duplicar este passeio? Será criada uma cópia como rascunho.')">
                 <?= csrf_field() ?>
                 <button class="btn btn-sm btn-outline">Duplicar</button>

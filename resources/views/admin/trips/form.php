@@ -5,6 +5,12 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
 
 <div class="card-header">
     <h2><?= $isEdit ? 'Editar Passeio' : 'Novo Passeio' ?></h2>
+    <?php if ($isEdit): ?>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-left:auto;margin-right:8px;">
+        <a href="/admin/passeios/<?= (int)$trip['id'] ?>/precos" class="btn btn-outline">Preços</a>
+        <a href="/admin/passeios/<?= (int)$trip['id'] ?>/disponibilidade" class="btn btn-outline">Dias e Horários</a>
+    </div>
+    <?php endif; ?>
     <a href="/admin/passeios" class="btn btn-back">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
         Voltar para Passeios
@@ -422,7 +428,7 @@ $action = $isEdit ? '/admin/passeios/' . $trip['id'] . '/editar' : '/admin/passe
                     </div>
                     <div>
                         <h3>Horários por Hotel</h3>
-                        <p class="admin-card-subtitle">Hotéis e horários de busca para este passeio</p>
+                        <p class="admin-card-subtitle">Hotéis e horários de busca para este passeio. Com mais de uma saída (em "Dias e Horários"), cadastre a busca de cada hotel na mesma ordem das saídas: 1ª busca = 1ª saída.</p>
                     </div>
                 </div>
 

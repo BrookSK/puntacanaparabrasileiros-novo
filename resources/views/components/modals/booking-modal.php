@@ -101,6 +101,17 @@
                             </div>
                         </div>
 
+                        <!-- Hotel fora da lista / hospedagem que não é resort -->
+                        <button type="button" class="bm-hotel-manual-link" id="bmHotelManualOpen">Meu hotel não está na lista (digitar nome ou endereço)</button>
+                        <div class="bm-hotel-manual" id="bmHotelManual" style="display:none">
+                            <label for="bmHotelManualInput">Nome do hotel ou endereço da hospedagem</label>
+                            <textarea id="bmHotelManualInput" rows="2" maxlength="250" placeholder="Ex: Hotel Exemplo, ou Rua X, nº 10, Bávaro (Airbnb)"></textarea>
+                            <div class="bm-hotel-manual-actions">
+                                <button type="button" class="bm-hotel-manual-cancel" id="bmHotelManualCancel">Voltar para a lista</button>
+                                <button type="button" class="bm-hotel-manual-ok" id="bmHotelManualOk">Usar este endereço</button>
+                            </div>
+                        </div>
+
                         <!-- Hotel selecionado (aparece no lugar da lista após escolher) -->
                         <div class="bm-hotel-selected" id="bmHotelSelected" style="display:none">
                             <div class="bm-hotel-selected-info">
@@ -116,7 +127,7 @@
                     <!-- Horários de Busca (aparece logo abaixo após selecionar hotel) -->
                     <div class="bm-pickup-section" id="bmPickupSection" style="display:none">
                         <h4 class="bm-section-title">Horário de Busca</h4>
-                        <p class="bm-section-subtitle">Selecione o horário de busca</p>
+                        <p class="bm-section-subtitle" id="bmPickupSubtitle">Selecione o horário de busca</p>
                         <div class="bm-pickup-times" id="bmPickupTimes"></div>
                     </div>
 

@@ -628,7 +628,7 @@
                     <input type="date" name="multi_date_${newIndex}" class="tf-input multi-date" min="${new Date().toISOString().split('T')[0]}">
                 </div>
                 <div class="tf-field tf-field-sm">
-                    <label>HORA</label>
+                    <label>HORA DA BUSCA</label>
                     <input type="time" name="multi_time_${newIndex}" class="tf-input multi-time">
                 </div>
             </div>
@@ -973,6 +973,14 @@
         return `${d}/${m}/${y}`;
     }
 
+    // Horário de busca e do voo de cada trecho (calculado na página de transfers).
+    // Trecho 1 = origem → destino; trecho 2 = volta (destino → origem).
+    function transferLegTimes(leg) {
+        if (typeof window.getTransferLegTimes === 'function') return window.getTransferLegTimes(leg);
+        const v = document.querySelector(leg === 1 ? '[name="arrival_time"]' : '[name="departure_time"]')?.value || '';
+        return { time: v, flight_time: '' };
+    }
+
     // Add to cart button
     document.getElementById('btnAddCart')?.addEventListener('click', () => {
         const sel = window._transferSelection;
@@ -1004,12 +1012,12 @@
             origin_id: originId,
             destination_id: destinationId,
             date: document.querySelector('[name="arrival_date"]').value,
-            time: document.querySelector('[name="arrival_time"]').value,
+            time: transferLegTimes(1).time,
             type: 'arrival',
             service_type: serviceType,
             group_id: groupId,
             flight_number: flightNumber,
-            flight_time: flightTime,
+            flight_time: transferLegTimes(1).flight_time || flightTime,
         });
 
         const addArrival = ajax('/api/cart/add-transfer', { body: JSON.stringify(arrivalPayload) });
@@ -1020,12 +1028,12 @@
                 origin_id: destinationId,
                 destination_id: originId,
                 date: document.querySelector('[name="departure_date"]').value,
-                time: document.querySelector('[name="departure_time"]').value,
+                time: transferLegTimes(2).time,
                 type: 'departure',
                 service_type: serviceType,
                 group_id: groupId,
                 flight_number: flightNumber,
-                flight_time: flightTime,
+                flight_time: transferLegTimes(2).flight_time || flightTime,
             });
             addArrival.then(arrResult => {
                 if (!arrResult.success) {
@@ -1087,12 +1095,12 @@
             origin_id: originId,
             destination_id: destinationId,
             date: document.querySelector('[name="arrival_date"]').value,
-            time: document.querySelector('[name="arrival_time"]').value,
+            time: transferLegTimes(1).time,
             type: 'arrival',
             service_type: serviceType,
             group_id: groupId,
             flight_number: flightNumberDC,
-            flight_time: flightTimeDC,
+            flight_time: transferLegTimes(1).flight_time || flightTimeDC,
         });
 
         ajax('/api/cart/add-transfer', { body: JSON.stringify(arrivalPayload) }).then(arrivalResult => {
@@ -1111,12 +1119,12 @@
                     origin_id: destinationId,
                     destination_id: originId,
                     date: document.querySelector('[name="departure_date"]').value,
-                    time: document.querySelector('[name="departure_time"]').value,
+                    time: transferLegTimes(2).time,
                     type: 'departure',
                     service_type: serviceType,
                     group_id: groupId,
                     flight_number: flightNumberDC,
-                    flight_time: flightTimeDC,
+                    flight_time: transferLegTimes(2).flight_time || flightTimeDC,
                 });
                 ajax('/api/cart/add-transfer', { body: JSON.stringify(departurePayload) }).then(depResult => {
                     if (!depResult.success) {
@@ -1466,6 +1474,12 @@
         if (picker) picker.style.display = 'block';
         if (selectedBox) selectedBox.style.display = 'none';
         if (pickup) pickup.style.display = 'none';
+        const manualBox = document.getElementById('bmHotelManual');
+        const manualLink = document.getElementById('bmHotelManualOpen');
+        const manualInput = document.getElementById('bmHotelManualInput');
+        if (manualBox) manualBox.style.display = 'none';
+        if (manualLink) manualLink.style.display = '';
+        if (manualInput) manualInput.value = '';
         const searchEl = document.getElementById('bmHotelSearch');
         if (searchEl) searchEl.value = '';
         const hint = document.getElementById('bmHotelHint');
@@ -1508,6 +1522,8 @@
                 document.getElementById('bmHotelHint').style.display = 'block';
                 if (data.success && data.hotels && data.hotels.length > 0) { hotelsData = data.hotels; }
                 else { hotelsData = []; }
+                // Passeio sem lista de hotéis: o cliente digita o hotel/endereço direto.
+                if (!hotelsData.length && !selectedHotel) openManualHotel();
             }).catch(err => {
                 loading.style.display = 'none';
                 document.getElementById('bmHotelHint').innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin:0 auto 8px;display:block;color:#e74c3c;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Erro ao carregar hot\u00E9is. ' + err.message;
@@ -1517,7 +1533,7 @@
     function renderHotelList(hotels) {
         const list = document.getElementById('bmHotelList');
         if (!hotels.length) {
-            list.innerHTML = '<div class="bm-hotel-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;color:#bbb;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Nenhum hotel encontrado com esse nome.</div>';
+            list.innerHTML = '<div class="bm-hotel-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;color:#bbb;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Nenhum hotel encontrado com esse nome.<br><small>Use o bot\u00E3o abaixo para digitar o nome ou o endere\u00E7o.</small></div>';
             return;
         }
         list.innerHTML = hotels.map(h => `<div class="bm-hotel-item ${selectedHotel && selectedHotel.id === h.id ? 'selected' : ''}" data-hotel-id="${h.id}" onclick="selectHotel(${h.id})"><div class="bm-hotel-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><div class="bm-hotel-item-content"><span class="bm-hotel-name notranslate" translate="no">${h.hotel_name}</span><span class="bm-hotel-times-count">${h.schedules.length} hor\u00E1rio(s) de busca</span></div><div class="bm-hotel-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>`).join('');
@@ -1541,26 +1557,82 @@
         renderHotelList(filtered);
     });
 
-    window.selectHotel = function(hotelId) {
-        selectedHotel = hotelsData.find(h => h.id === hotelId); selectedPickupTime = null;
-        if (!selectedHotel) return;
+    // Horários de busca do hotel para a saída escolhida.
+    // Regra: se o hotel tem a mesma quantidade de horários de busca que o passeio
+    // tem de saídas, o 1º horário de busca = 1ª saída, o 2º = 2ª saída, etc.
+    function pickupTimesForHotel(hotel) {
+        const schedules = (hotel && hotel.schedules) ? hotel.schedules : [];
+        const all = allDepartures();
+        if (selectedTime && all.length > 1 && schedules.length === all.length) {
+            const idx = all.findIndex(t => t.time === selectedTime);
+            if (idx >= 0 && schedules[idx]) return [schedules[idx]];
+        }
+        return schedules;
+    }
 
-        // Colapsa a busca/lista e mostra apenas o hotel escolhido (some com as outras opções).
+    function showSelectedHotel() {
         const picker = document.getElementById('bmHotelPicker');
         const selectedBox = document.getElementById('bmHotelSelected');
         const selectedName = document.getElementById('bmHotelSelectedName');
+        const manualBox = document.getElementById('bmHotelManual');
+        const manualLink = document.getElementById('bmHotelManualOpen');
         if (picker) picker.style.display = 'none';
+        if (manualBox) manualBox.style.display = 'none';
+        if (manualLink) manualLink.style.display = 'none';
         if (selectedName) selectedName.textContent = selectedHotel.hotel_name;
         if (selectedBox) selectedBox.style.display = 'flex';
 
-        // Exibe o horário de busca logo abaixo, sem precisar rolar.
         const section = document.getElementById('bmPickupSection');
-        document.getElementById('bmPickupTimes').innerHTML = selectedHotel.schedules.map(s => `<button type="button" class="bm-pickup-time-btn" data-time="${s.time}" onclick="selectPickupTime('${s.time}')">${s.time}</button>`).join('');
+        const subtitle = document.getElementById('bmPickupSubtitle');
+        const timesBox = document.getElementById('bmPickupTimes');
+        const times = selectedHotel.manual ? [] : pickupTimesForHotel(selectedHotel);
+        if (times.length === 0) {
+            subtitle.textContent = 'Nossa equipe confirma o hor\u00E1rio de busca com voc\u00EA pelo WhatsApp.';
+            timesBox.innerHTML = '';
+        } else {
+            if (times.length === 1) selectedPickupTime = times[0].time;
+            subtitle.textContent = times.length === 1 ? 'Seu hor\u00E1rio de busca no hotel' : 'Selecione o hor\u00E1rio de busca';
+            timesBox.innerHTML = times.map(s => `<button type="button" class="bm-pickup-time-btn ${selectedPickupTime === s.time ? 'selected' : ''}" data-time="${s.time}" onclick="selectPickupTime('${s.time}')">${s.time}</button>`).join('');
+        }
         section.style.display = 'block';
-        // Traz o horário de busca para a área visível do modal.
         section.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         updateSidebar();
+    }
+
+    window.selectHotel = function(hotelId) {
+        selectedHotel = hotelsData.find(h => h.id === hotelId); selectedPickupTime = null;
+        if (!selectedHotel) return;
+        showSelectedHotel();
     };
+
+    // Hotel fora da lista / endereço (não-resort)
+    function openManualHotel() {
+        const picker = document.getElementById('bmHotelPicker');
+        const manualBox = document.getElementById('bmHotelManual');
+        const manualLink = document.getElementById('bmHotelManualOpen');
+        const input = document.getElementById('bmHotelManualInput');
+        if (picker) picker.style.display = 'none';
+        if (manualLink) manualLink.style.display = 'none';
+        if (manualBox) manualBox.style.display = 'block';
+        const typed = document.getElementById('bmHotelSearch')?.value || '';
+        if (input && !input.value && typed) input.value = typed;
+        const cancel = document.getElementById('bmHotelManualCancel');
+        if (cancel) cancel.style.display = hotelsData.length ? '' : 'none';
+        input?.focus();
+    }
+    document.getElementById('bmHotelManualOpen')?.addEventListener('click', openManualHotel);
+    document.getElementById('bmHotelManualCancel')?.addEventListener('click', () => {
+        document.getElementById('bmHotelManual').style.display = 'none';
+        document.getElementById('bmHotelPicker').style.display = 'block';
+        document.getElementById('bmHotelManualOpen').style.display = '';
+    });
+    document.getElementById('bmHotelManualOk')?.addEventListener('click', () => {
+        const val = (document.getElementById('bmHotelManualInput')?.value || '').trim();
+        if (val.length < 3) { alert('Digite o nome do hotel ou o endere\u00E7o da hospedagem.'); return; }
+        selectedHotel = { id: '', hotel_name: val, schedules: [], manual: true };
+        selectedPickupTime = null;
+        showSelectedHotel();
+    });
 
     // Botão "Trocar": volta a mostrar a busca/lista de hotéis.
     document.getElementById('bmHotelChange')?.addEventListener('click', () => {
@@ -1568,6 +1640,9 @@
         const picker = document.getElementById('bmHotelPicker');
         const selectedBox = document.getElementById('bmHotelSelected');
         const section = document.getElementById('bmPickupSection');
+        const manualLink = document.getElementById('bmHotelManualOpen');
+        if (manualLink) manualLink.style.display = '';
+        if (!hotelsData.length) { if (selectedBox) selectedBox.style.display = 'none'; if (section) section.style.display = 'none'; openManualHotel(); updateSidebar(); return; }
         if (picker) picker.style.display = 'block';
         if (selectedBox) selectedBox.style.display = 'none';
         if (section) section.style.display = 'none';
@@ -1613,45 +1688,139 @@
             const isToday = d === today.getDate() && currentMonth === today.getMonth() && currentYear === today.getFullYear();
             const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
             const isSelected = selectedDate === dateStr;
+            const isClosed = !isPast && !isTripDateOpen(dateStr);
             let classes = 'bm-day';
-            if (isPast) classes += ' disabled';
+            if (isPast || isClosed) classes += ' disabled';
             else classes += ' available';
+            if (isClosed) classes += ' closed';
             if (isToday && !isSelected) classes += ' today';
             if (isSelected) classes += ' selected';
-            html += `<div class="${classes}" data-date="${dateStr}" onclick="selectBookingDate('${dateStr}')">${d}</div>`;
+            const click = (isPast || isClosed) ? '' : ` onclick="selectBookingDate('${dateStr}')"`;
+            const title = isClosed ? ' title="Indispon\u00EDvel nesta data"' : '';
+            html += `<div class="${classes}" data-date="${dateStr}"${click}${title}>${d}</div>`;
         }
         daysContainer.innerHTML = html;
     }
 
+    // ===== Disponibilidade do passeio (Admin → Passeios → Dias e Horários) =====
+    const AVAIL = (typeof TRIP_AVAILABILITY !== 'undefined' && TRIP_AVAILABILITY) ? TRIP_AVAILABILITY : { closed_weekdays: [], exceptions: [], departure_times: [] };
+
+    function weekdayOf(dateStr) {
+        const [y, m, d] = dateStr.split('-').map(Number);
+        return new Date(y, m - 1, d).getDay();
+    }
+
+    // Exceção "fechado" > exceção "aberto" > dia da semana fechado > aberto
+    function isTripDateOpen(dateStr) {
+        let open = false;
+        for (const ex of (AVAIL.exceptions || [])) {
+            if (dateStr < ex.start || dateStr > ex.end) continue;
+            if (ex.type === 'closed') return false;
+            if (ex.type === 'open') open = true;
+        }
+        if (open) return true;
+        return (AVAIL.closed_weekdays || []).indexOf(weekdayOf(dateStr)) === -1;
+    }
+
+    // Todos os horários cadastrados (ordem do admin) e os válidos para a data
+    function allDepartures() { return AVAIL.departure_times || []; }
+    function departuresForDate(dateStr) {
+        if (!dateStr) return [];
+        const w = weekdayOf(dateStr);
+        return allDepartures().filter(t => (t.weekdays || []).indexOf(w) !== -1);
+    }
+    function departureLabel(t) {
+        const label = String(t.label || '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        return label ? `${t.time} \u2013 ${label}` : t.time;
+    }
+
     window.selectBookingDate = function(dateStr) {
+        if (!isTripDateOpen(dateStr)) return;
         selectedDate = dateStr;
+        selectedTime = null;
+        selectedPickupTime = null;
         renderCalendar();
         showTimeSlots(dateStr);
+        refreshDayPrices();
         updateSidebar();
-        document.getElementById('bmContinue').disabled = false;
     };
 
     function showTimeSlots(dateStr) {
         const container = document.getElementById('bmTimes');
         const list = document.getElementById('bmTimesList');
-        // Horários do passeio (os mesmos de antes, independente do horário de busca no hotel)
-        const slots = ['9:00 AM – 12:00 PM', '12:00 PM – 3:00 PM', '3:00 PM – 6:00 PM'];
-        list.innerHTML = slots.map(s => `<button type="button" class="bm-time-slot ${selectedTime === s ? 'selected' : ''}" onclick="selectBookingTime('${s}')">${s}</button>`).join('');
+        const continueBtn = document.getElementById('bmContinue');
+        const hasAny = allDepartures().length > 0;
+        const slots = departuresForDate(dateStr);
+
+        // Passeio sem horários cadastrados: só a data.
+        if (!hasAny) {
+            container.style.display = 'none';
+            list.innerHTML = '';
+            continueBtn.disabled = false;
+            return;
+        }
+        if (slots.length === 0) {
+            list.innerHTML = '<p class="bm-times-empty">N\u00E3o h\u00E1 hor\u00E1rios para este dia. Escolha outra data.</p>';
+            container.style.display = 'block';
+            continueBtn.disabled = true;
+            return;
+        }
+        // Um único horário: escolhido automaticamente.
+        if (slots.length === 1) selectedTime = slots[0].time;
+
+        const title = slots.length === 1 ? 'Hor\u00E1rio de sa\u00EDda' : 'Escolha o hor\u00E1rio';
+        list.innerHTML = `<div class="bm-times-title">${title}</div>` + slots.map(s =>
+            `<button type="button" class="bm-time-slot ${selectedTime === s.time ? 'selected' : ''}" data-time="${s.time}" onclick="selectBookingTime('${s.time}')">${departureLabel(s)}</button>`
+        ).join('');
         container.style.display = 'block';
+        continueBtn.disabled = !selectedTime;
     }
 
     window.selectBookingTime = function(time) {
         selectedTime = time;
-        document.querySelectorAll('.bm-time-slot').forEach(el => el.classList.remove('selected'));
-        if (event && event.target) event.target.classList.add('selected');
+        selectedPickupTime = null;
+        document.querySelectorAll('.bm-time-slot').forEach(el => el.classList.toggle('selected', el.dataset.time === time));
+        document.getElementById('bmContinue').disabled = false;
         updateSidebar();
     };
+
+    // Preço do dia escolhido (preço por dia da semana / data). Atualiza o resumo.
+    function refreshDayPrices() {
+        if (!selectedPackage || !selectedDate) return;
+        const pkgId = selectedPackage.id;
+        const date = selectedDate;
+        fetch('/api/pricing/day-prices', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-TOKEN': CSRF },
+            body: JSON.stringify({ package_id: pkgId, date: date, _token: CSRF })
+        }).then(r => r.ok ? r.json() : null).then(data => {
+            if (!data || !data.success || !Array.isArray(data.prices)) return;
+            if (!selectedPackage || selectedPackage.id !== pkgId || selectedDate !== date) return;
+            const byCat = {};
+            data.prices.forEach(p => { byCat[p.traveler_category_id] = p; });
+            selectedPackage = Object.assign({}, selectedPackage, {
+                categories: (selectedPackage.categories || []).map(c => {
+                    const p = byCat[c.traveler_category_id];
+                    return p ? Object.assign({}, c, { price: p.price, sale_price: p.sale_price }) : c;
+                })
+            });
+            updateSidebar();
+        }).catch(() => {});
+    }
 
     // Voltar Data (step 2) → Tipo de Pacote (step 3, primeiro passo)
     document.getElementById('bmBackStep2')?.addEventListener('click', () => { goToStep(3); });
 
     // Continuar da Data (step 2) → Hotel (step 1, último passo, opcional)
-    document.getElementById('bmContinue')?.addEventListener('click', () => { goToStep(1); });
+    document.getElementById('bmContinue')?.addEventListener('click', () => {
+        if (!selectedDate) return;
+        if (allDepartures().length > 0 && departuresForDate(selectedDate).length > 1 && !selectedTime) {
+            alert('Escolha o hor\u00E1rio do passeio.');
+            return;
+        }
+        goToStep(1);
+        if (selectedHotel) showSelectedHotel(); // recalcula a busca conforme a saída escolhida
+    });
 
     // Continuar do Tipo de Pacote (step 3) → Data e Hora (step 2)
     document.getElementById('bmContinueStep3')?.addEventListener('click', () => { goToStep(2); renderCalendar(); });
@@ -1671,6 +1840,7 @@
         document.querySelector(`.bm-package-btn[data-pkg="${index}"]`)?.classList.add('selected');
         renderTravelers();
         updateSidebar();
+        if (selectedDate) refreshDayPrices();
     };
 
     function renderTravelers() {
@@ -1798,7 +1968,7 @@
             if (gpEnabled && slug === 'adulto') {
                 priceLabel = 'Preço por grupo (ver tabela)';
             } else {
-                priceLabel = price > 0 ? '$' + price.toFixed(2) + ' / Pessoa' : 'Gratuito';
+                priceLabel = price > 0 ? '$' + price.toFixed(2) + ' / Pessoa' : 'Cortesia (sem custo)';
             }
             return `<div class="bm-traveler-row">
                 <div class="bm-traveler-info">
@@ -2062,7 +2232,7 @@
                         if (price > 0) {
                             travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}</span><span>$${line.toFixed(2)}</span></div>`;
                         } else {
-                            travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}</span><span>Gratuito</span></div>`;
+                            travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}</span><span>Cortesia</span></div>`;
                         }
                     }
                 });
@@ -2103,7 +2273,7 @@
                         if (price > 0) {
                             travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}</span><span>$${line.toFixed(2)}</span></div>`;
                         } else {
-                            travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}</span><span>Gratuito</span></div>`;
+                            travHtml += `<div class="bm-sidebar-traveler-line"><span>${cat.category_name}: ${qty}</span><span>Cortesia</span></div>`;
                         }
                     }
                 });
@@ -2172,6 +2342,8 @@
 
     function submitBooking(redirect) {
         if (!selectedDate || !selectedPackage) { alert('Selecione data e pacote.'); return; }
+        if (!isTripDateOpen(selectedDate)) { alert('Este passeio n\u00E3o est\u00E1 dispon\u00EDvel na data escolhida.'); return; }
+        if (allDepartures().length > 0 && departuresForDate(selectedDate).length > 0 && !selectedTime) { alert('Escolha o hor\u00E1rio do passeio.'); goToStep(2); return; }
 
         // Verificar se é modo composição
         const compEnabled = typeof COMPOSITION_PRICING_ENABLED !== 'undefined' && COMPOSITION_PRICING_ENABLED;
@@ -2200,11 +2372,13 @@
             <input name="date" value="${selectedDate}">
             <input name="time" value="${selectedTime || ''}">
             <input name="hotel_id" value="${selectedHotel ? selectedHotel.id : ''}">
-            <input name="hotel_name" value="${selectedHotel ? selectedHotel.hotel_name : ''}">
+            <input name="hotel_name" value="">
             <input name="pickup_time" value="${selectedPickupTime || ''}">
             <input name="redirect" value="${redirect}">
             <input name="companion_count" value="${window._companionCount || 0}">`;
         Object.entries(pax).forEach(([k, v]) => { form.innerHTML += `<input name="pax[${k}]" value="${v}">`; });
+        // Texto livre digitado pelo cliente: atribui via DOM (sem montar HTML com ele).
+        form.querySelector('[name="hotel_name"]').value = selectedHotel ? selectedHotel.hotel_name : '';
         document.body.appendChild(form);
         form.submit();
     }

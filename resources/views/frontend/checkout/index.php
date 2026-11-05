@@ -267,6 +267,7 @@
                             foreach ($cart['trips'] as $tripItem) {
                                 $whatsappMsg .= "• " . ($tripItem['trip_title'] ?? 'Passeio') . "\n";
                                 $whatsappMsg .= "  📅 Data: " . format_date($tripItem['date'] ?? '') . (!empty($tripItem['time']) ? " às " . $tripItem['time'] : '') . "\n";
+                                if (!empty($tripItem['hotel_name'])) $whatsappMsg .= "  🏨 " . $tripItem['hotel_name'] . (!empty($tripItem['pickup_time']) ? " (busca " . $tripItem['pickup_time'] . ")" : '') . "\n";
                                 $whatsappMsg .= "  👥 " . pax_label($tripItem['pax'] ?? [], (int)($tripItem['total_pax'] ?? 1)) . "\n";
                                 $whatsappMsg .= "  💵 " . money((float)($tripItem['total'] ?? 0)) . " USD\n\n";
                             }
@@ -277,7 +278,8 @@
                             foreach ($cart['transfers'] as $transferItem) {
                                 $whatsappMsg .= "• " . ($transferItem['origin_title'] ?? '') . " → " . ($transferItem['destination_title'] ?? '') . "\n";
                                 $whatsappMsg .= "  🚗 " . ($transferItem['vehicle_title'] ?? 'Transfer') . "\n";
-                                $whatsappMsg .= "  📅 " . format_date($transferItem['date'] ?? '') . " às " . ($transferItem['time'] ?? '') . "\n";
+                                $whatsappMsg .= "  📅 " . format_date($transferItem['date'] ?? '') . " — busca às " . ($transferItem['time'] ?? '') . "\n";
+                                if (!empty($transferItem['flight_time'])) $whatsappMsg .= "  ✈️ Voo: " . $transferItem['flight_time'] . "\n";
                                 $whatsappMsg .= "  👥 " . transfer_pax_label($transferItem['adults'] ?? 0, $transferItem['children'] ?? 0, $transferItem['infants'] ?? 0) . "\n";
                                 $whatsappMsg .= "  💵 " . money((float)($transferItem['price'] ?? 0)) . " USD\n\n";
                             }

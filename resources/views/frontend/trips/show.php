@@ -515,18 +515,28 @@ $ratingDisplay = (float) ($rating ?? 0);
                             <details class="trip-detail-acc">
                                 <summary>Como reservar e pagar</summary>
                                 <div class="trip-acc-body">
-                                    <?php if (!empty($trip['partial_payment_enabled'])): ?>
+                                    <?php $customPaymentText = trim((string) setting('policy_payment_text', '')); ?>
+                                    <?php if ($customPaymentText !== ''): ?>
+                                    <?php $signalPct = (int)($trip['partial_payment_percent'] ?? 50); if ($signalPct <= 0) $signalPct = 50; ?>
+                                    <?= simple_text_to_html(strtr($customPaymentText, ['{sinal}' => (string) $signalPct, '{restante}' => (string) (100 - $signalPct)])) ?>
+                                    <?php elseif (!empty($trip['partial_payment_enabled'])): ?>
                                     <?php $signalPct = (int)($trip['partial_payment_percent'] ?? 50); ?>
                                     <p>Reserve com <b><?= $signalPct ?>% de sinal via Pix, em reais</b>, e envie o comprovante. Pague os <?= 100 - $signalPct ?>% restantes no primeiro contato presencial com nossa equipe no destino.</p>
                                     <?php else: ?>
                                     <p>Reserve com nossa equipe e confirme o pagamento conforme as instruções enviadas. A reserva é confirmada após o envio do comprovante.</p>
                                     <?php endif; ?>
+                                    <?php if ($customPaymentText === ''): ?>
                                     <p class="trip-small">A reserva é confirmada após o sinal e o envio do comprovante. Em caso de dúvida, fale com nossa equipe pelo WhatsApp.</p>
+                                    <?php endif; ?>
                                 </div>
                             </details>
                             <details class="trip-detail-acc">
                                 <summary>Política de cancelamento</summary>
                                 <div class="trip-acc-body">
+                                    <?php $customCancelText = trim((string) setting('policy_cancellation_summary', '')); ?>
+                                    <?php if ($customCancelText !== ''): ?>
+                                    <div class="trip-custom-policy"><?= simple_text_to_html($customCancelText) ?></div>
+                                    <?php else: ?>
                                     <div class="trip-cancel">
                                         <div><span class="trip-cx ok">100%</span><p>Reembolso integral cancelando com <b>mais de 48h</b> de antecedência.</p></div>
                                         <div><span class="trip-cx mid">50%</span><p>Reembolso cancelando <b>entre 48h e 24h</b> antes do passeio.</p></div>
@@ -537,6 +547,7 @@ $ratingDisplay = (float) ($rating ?? 0);
                                         <li>Se cancelarmos por clima, operação ou segurança, você escolhe: reagendar ou reembolso total.</li>
                                         <li>Reembolso pelo mesmo método de pagamento, em 3 a 10 dias úteis.</li>
                                     </ul>
+                                    <?php endif; ?>
                                 </div>
                             </details>
                         </div>
@@ -875,6 +886,7 @@ $ratingDisplay = (float) ($rating ?? 0);
 <script>
 const TRIP_ID = <?= (int)$trip['id'] ?>;
 const PACKAGES = <?= json_encode($packages) ?>;
+const TRIP_AVAILABILITY = <?= json_encode($tripAvailability ?? ['closed_weekdays' => [], 'exceptions' => [], 'departure_times' => []], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
 const GROUP_PRICING_ENABLED = <?= !empty($trip['group_pricing_enabled']) ? 'true' : 'false' ?>;
 const GROUP_PRICING_TABLE = <?= !empty($trip['group_pricing']) ? $trip['group_pricing'] : '[]' ?>;
 const COMPOSITION_PRICING_ENABLED = <?= !empty($trip['composition_pricing_enabled']) ? 'true' : 'false' ?>;

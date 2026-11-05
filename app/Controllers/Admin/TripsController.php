@@ -532,6 +532,31 @@ class TripsController extends Controller
                 ]);
             }
 
+            // 7b) Horários de saída e datas especiais futuras (Dias e Horários)
+            if ($this->tableExists('trip_departure_times')) {
+                foreach ($this->db->fetchAll("SELECT * FROM trip_departure_times WHERE trip_id = ?", [$id]) as $dt) {
+                    $this->db->insert('trip_departure_times', [
+                        'trip_id' => $newTripId,
+                        'departure_time' => $dt['departure_time'],
+                        'label' => $dt['label'] ?? null,
+                        'weekdays' => $dt['weekdays'],
+                        'sort_order' => (int) $dt['sort_order'],
+                        'is_active' => (int) $dt['is_active'],
+                    ]);
+                }
+            }
+            if ($this->tableExists('trip_date_exceptions')) {
+                foreach ($this->db->fetchAll("SELECT * FROM trip_date_exceptions WHERE trip_id = ? AND date_end >= CURDATE()", [$id]) as $ex) {
+                    $this->db->insert('trip_date_exceptions', [
+                        'trip_id' => $newTripId,
+                        'exception_type' => $ex['exception_type'],
+                        'date_start' => $ex['date_start'],
+                        'date_end' => $ex['date_end'],
+                        'note' => $ex['note'] ?? null,
+                    ]);
+                }
+            }
+
             // 8) Pacotes de composição
             if ($this->tableExists('trip_composition_packages')) {
                 $comps = $this->db->fetchAll("SELECT * FROM trip_composition_packages WHERE trip_id = ? ORDER BY sort_order ASC", [$id]);
@@ -591,11 +616,13 @@ class TripsController extends Controller
         $packages = $this->packageModel->getByTrip($id);
         foreach ($packages as &$pkg) {
             $pkg['categories'] = $this->packageModel->getCategories((int) $pkg['id']);
-            $pkg['day_pricing'] = $this->db->fetchAll(
+            $rows = $this->db->fetchAll(
                 "SELECT * FROM trip_day_pricing WHERE package_id = ? ORDER BY rule_type, day_key",
                 [(int) $pkg['id']]
             );
+            $pkg['rules'] = $this->groupPricingRulesForForm($rows);
         }
+        unset($pkg);
 
         $travelerCategories = $this->db->fetchAll("SELECT * FROM traveler_categories ORDER BY sort_order ASC");
 
@@ -610,59 +637,69 @@ class TripsController extends Controller
     public function savePricing(Request $request, Response $response): void
     {
         $id = (int) $request->param('id');
-        $rules = $request->input('pricing_rules', []);
+        $rules = (array) $request->input('pricing_rules', []);
+        $basePrices = (array) $request->input('base', []);
 
-        // Limpar regras antigas e inserir novas
         $packages = $this->packageModel->getByTrip($id);
-        foreach ($packages as $pkg) {
-            $this->db->delete('trip_day_pricing', 'package_id = ?', [(int) $pkg['id']]);
-        }
+        $packageIds = array_map(static fn($p) => (int) $p['id'], $packages);
 
-        // Guardar preços antigos para detectar mudanças
+        // Guardar preços antigos (antes de mexer) para detectar mudanças
         $oldPrices = [];
         foreach ($packages as $pkg) {
             $oldPrices[(int)$pkg['id']] = $this->packageModel->getBasePrice((int)$pkg['id']);
         }
 
-        foreach ($rules as $rule) {
-            if (empty($rule['package_id']) || empty($rule['category_id']) || empty($rule['price'])) continue;
-
-            $packageId = (int) $rule['package_id'];
-            $categoryId = (int) $rule['category_id'];
-            $price = (float) $rule['price'];
-            $salePrice = !empty($rule['sale_price']) ? (float) $rule['sale_price'] : null;
-
-            // Inserir regra dinâmica
-            $this->db->insert('trip_day_pricing', [
-                'package_id' => $packageId,
-                'traveler_category_id' => $categoryId,
-                'rule_type' => $rule['rule_type'] ?? 'weekday',
-                'day_key' => $rule['day_key'] ?? '0',
-                'price' => $price,
-                'sale_price' => $salePrice,
-                'label' => $rule['label'] ?? null,
-                'active' => 1,
-            ]);
-
-            // TAMBÉM atualizar o preço base na trip_package_categories
-            $existing = $this->db->fetchOne(
-                "SELECT id FROM trip_package_categories WHERE package_id = ? AND traveler_category_id = ?",
-                [$packageId, $categoryId]
-            );
-            if ($existing) {
+        // 1) Preço normal de cada faixa etária (aceita 0 = Cortesia).
+        //    Só altera categorias já vinculadas ao pacote (o vínculo é feito no card "Pacotes").
+        foreach ($basePrices as $packageId => $cats) {
+            $packageId = (int) $packageId;
+            if (!in_array($packageId, $packageIds, true) || !is_array($cats)) continue;
+            foreach ($cats as $categoryId => $row) {
+                if (!is_array($row)) continue;
+                $price = $this->parseMoney($row['price'] ?? '');
+                $sale = $this->parseMoney($row['sale_price'] ?? '');
                 $this->db->update('trip_package_categories', [
-                    'price' => $price,
-                    'sale_price' => $salePrice,
-                ], 'id = ?', [(int) $existing['id']]);
-            } else {
-                // Criar se não existe
-                $this->db->insert('trip_package_categories', [
+                    'price' => $price ?? 0,
+                    'sale_price' => ($sale !== null && $sale > 0) ? $sale : null,
+                ], 'package_id = ? AND traveler_category_id = ?', [$packageId, (int) $categoryId]);
+            }
+        }
+
+        // 2) Regras por dia/data: limpa e recria. NÃO alteram mais o preço normal.
+        foreach ($packageIds as $pid) {
+            $this->db->delete('trip_day_pricing', 'package_id = ?', [$pid]);
+        }
+
+        $typeAlias = ['yearly' => 'annual', 'specific_date' => 'specific'];
+        $seen = [];
+        foreach ($rules as $rule) {
+            if (!is_array($rule)) continue;
+            $packageId = (int) ($rule['package_id'] ?? 0);
+            $categoryId = (int) ($rule['category_id'] ?? 0);
+            if (!$packageId || !$categoryId || !in_array($packageId, $packageIds, true)) continue;
+
+            // Preço vazio = linha incompleta (ignora). Preço 0 é válido (Cortesia).
+            $price = $this->parseMoney($rule['price'] ?? '');
+            if ($price === null) continue;
+            $sale = $this->parseMoney($rule['sale_price'] ?? '');
+            $salePrice = ($sale !== null && $sale > 0) ? $sale : null;
+
+            $type = (string) ($rule['rule_type'] ?? 'weekday');
+            $type = $typeAlias[$type] ?? $type;
+
+            foreach ($this->pricingRuleKeys($type, $rule) as $dayKey) {
+                $uniq = $packageId . '|' . $categoryId . '|' . $type . '|' . $dayKey;
+                if (isset($seen[$uniq])) continue; // mesma regra duas vezes: vale a primeira
+                $seen[$uniq] = true;
+                $this->db->insert('trip_day_pricing', [
                     'package_id' => $packageId,
                     'traveler_category_id' => $categoryId,
+                    'rule_type' => $type,
+                    'day_key' => $dayKey,
                     'price' => $price,
                     'sale_price' => $salePrice,
-                    'min_pax' => 1,
-                    'max_pax' => null,
+                    'label' => trim((string) ($rule['label'] ?? '')) ?: null,
+                    'active' => 1,
                 ]);
             }
         }
@@ -688,7 +725,7 @@ class TripsController extends Controller
             $this->notifyClientsOfPriceChange($id, $trip['title'], $oldPrices, $newPrices);
         }
 
-        $this->flash('success', 'Regras de preço salvas com sucesso!');
+        $this->flash('success', 'Preços salvos! O site já está usando os novos valores.');
         $this->redirect('/admin/passeios/' . $id . '/precos');
     }
 
@@ -933,6 +970,98 @@ class TripsController extends Controller
         $packages = $request->input('composition_packages', []);
         $compositionModel = new \App\Models\TripCompositionPackage();
         $compositionModel->syncForTrip($tripId, $packages);
+    }
+
+    /**
+     * Converte valor monetário do form ("12,50", "12.50", "0") em float.
+     * Retorna null quando vazio/inválido (0 é um valor válido = Cortesia).
+     */
+    private function parseMoney(mixed $value): ?float
+    {
+        $value = trim((string) ($value ?? ''));
+        if ($value === '') return null;
+        $value = str_replace(',', '.', $value);
+        if (!is_numeric($value) || (float) $value < 0) return null;
+        return round((float) $value, 2);
+    }
+
+    /**
+     * Gera as chaves (day_key) de uma regra de preço vinda do form amigável.
+     *  weekday  → um registro por dia marcado (0=dom … 6=sáb)
+     *  specific → data DD/MM/AAAA (input date Y-m-d)
+     *  holiday  → DD/MM (todo ano)
+     *  monthly  → dia do mês (1-31)
+     *  annual   → mês (1-12)
+     */
+    private function pricingRuleKeys(string $type, array $rule): array
+    {
+        switch ($type) {
+            case 'weekday':
+                $days = (array) ($rule['weekdays'] ?? []);
+                if (empty($days) && isset($rule['day_key']) && $rule['day_key'] !== '') $days = [$rule['day_key']];
+                return array_map('strval', \App\Services\TripAvailabilityService::parseWeekdays(implode(',', $days)));
+            case 'specific':
+                $raw = trim((string) ($rule['date'] ?? $rule['day_key'] ?? ''));
+                $d = \DateTime::createFromFormat('Y-m-d', $raw) ?: \DateTime::createFromFormat('d/m/Y', $raw);
+                return $d ? [$d->format('d/m/Y')] : [];
+            case 'holiday':
+                $day = (int) ($rule['day'] ?? 0);
+                $month = (int) ($rule['month'] ?? 0);
+                if ((!$day || !$month) && preg_match('/^(\d{1,2})\/(\d{1,2})$/', trim((string) ($rule['day_key'] ?? '')), $m)) {
+                    [$day, $month] = [(int) $m[1], (int) $m[2]];
+                }
+                return ($day >= 1 && $day <= 31 && $month >= 1 && $month <= 12) ? [sprintf('%02d/%02d', $day, $month)] : [];
+            case 'monthly':
+                $day = (int) ($rule['day'] ?? $rule['day_key'] ?? 0);
+                return ($day >= 1 && $day <= 31) ? [(string) $day] : [];
+            case 'annual':
+                $month = (int) ($rule['month'] ?? $rule['day_key'] ?? 0);
+                return ($month >= 1 && $month <= 12) ? [(string) $month] : [];
+        }
+        return [];
+    }
+
+    /**
+     * Agrupa as regras salvas para o form: regras "dia da semana" com mesma
+     * categoria/preço/promo/nome viram uma linha só com vários dias marcados.
+     * Regras antigas do tipo "default" são ignoradas (já viraram o preço normal).
+     */
+    private function groupPricingRulesForForm(array $rows): array
+    {
+        $typeAlias = ['yearly' => 'annual', 'specific_date' => 'specific'];
+        $out = [];
+        $weekdayIdx = [];
+        foreach ($rows as $r) {
+            $type = $typeAlias[$r['rule_type']] ?? $r['rule_type'];
+            if (!in_array($type, ['weekday', 'specific', 'holiday', 'monthly', 'annual'], true)) continue;
+            $base = [
+                'category_id' => (int) $r['traveler_category_id'],
+                'rule_type' => $type,
+                'price' => (float) $r['price'],
+                'sale_price' => $r['sale_price'] !== null ? (float) $r['sale_price'] : null,
+                'label' => (string) ($r['label'] ?? ''),
+                'weekdays' => [], 'date' => '', 'day' => '', 'month' => '',
+            ];
+            $key = (string) $r['day_key'];
+            if ($type === 'weekday') {
+                $g = $base['category_id'] . '|' . $base['price'] . '|' . $base['sale_price'] . '|' . $base['label'];
+                if (!isset($weekdayIdx[$g])) { $weekdayIdx[$g] = count($out); $out[] = $base; }
+                $out[$weekdayIdx[$g]]['weekdays'][] = (int) $key;
+                continue;
+            }
+            if ($type === 'specific') {
+                $d = \DateTime::createFromFormat('d/m/Y', $key) ?: \DateTime::createFromFormat('Y-m-d', $key);
+                $base['date'] = $d ? $d->format('Y-m-d') : '';
+            } elseif ($type === 'holiday') {
+                if (preg_match('/^(\d{1,2})\/(\d{1,2})$/', $key, $m)) { $base['day'] = (int) $m[1]; $base['month'] = (int) $m[2]; }
+            } elseif ($type === 'monthly') {
+                $base['day'] = (int) $key;
+            } else {
+                $base['month'] = (int) $key;
+            }
+            $out[] = $base;
+        }
+        return $out;
     }
 
     /**

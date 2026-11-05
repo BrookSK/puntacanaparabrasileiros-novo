@@ -94,6 +94,28 @@ class CartController extends Controller
         $origin = $locationModel->find($originId);
         $destination = $locationModel->find($destinationId);
 
+        // Saída para o aeroporto: a busca no hotel é sempre calculada pelo horário do voo
+        // (padrão 4h antes; ou o tempo configurado no local — vale o maior dos dois locais).
+        $flightTimeNorm = (is_string($flightTime) && preg_match('/^(\d{1,2}):(\d{2})/', $flightTime, $fm)) ? sprintf('%02d:%s', (int) $fm[1], $fm[2]) : null;
+        $originIsAirport = ($origin['location_type'] ?? '') === 'airport';
+        $destIsAirport = ($destination['location_type'] ?? '') === 'airport';
+        if ($destIsAirport && !$originIsAirport && $flightTimeNorm !== null) {
+            $leads = array_filter([
+                $origin['pickup_lead_minutes'] ?? null,
+                $destination['pickup_lead_minutes'] ?? null,
+            ], static fn($v) => $v !== null && $v !== '');
+            $lead = $leads ? max(array_map('intval', $leads)) : (int) $this->setting('transfer_pickup_lead_minutes', '240');
+            [$h, $m] = array_map('intval', explode(':', $flightTimeNorm));
+            $raw = $h * 60 + $m - $lead;
+            $mins = (($raw % 1440) + 1440) % 1440;
+            $time = sprintf('%02d:%02d', intdiv($mins, 60), $mins % 60);
+            // Voo de madrugada: a busca cai no dia anterior
+            if ($raw < 0 && ($dObj = \DateTime::createFromFormat('Y-m-d', (string) $date))) {
+                $date = $dObj->modify('-1 day')->format('Y-m-d');
+            }
+        }
+        $flightTime = $flightTimeNorm;
+
         $transferItem = [
             'vehicle_id' => $vehicleId,
             'vehicle_title' => $vehicle['title'] ?? '',

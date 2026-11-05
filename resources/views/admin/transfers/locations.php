@@ -24,9 +24,13 @@
                     <option value="other">Outro</option>
                 </select>
             </div>
-            <div class="form-group col-3">
+            <div class="form-group col-2">
                 <label>Endereço</label>
                 <input type="text" name="address" id="loc-address" class="form-control">
+            </div>
+            <div class="form-group col-2">
+                <label title="Para transfer até o aeroporto: quantas horas antes do voo buscar neste local. Vazio = padrão (4h).">Busca antes do voo (h)</label>
+                <input type="text" inputmode="decimal" name="pickup_lead_hours" id="loc-lead" class="form-control" placeholder="Padrão">
             </div>
             <div class="form-group col-1">
                 <label>Ordem</label>
@@ -54,6 +58,7 @@
             <th>Título</th>
             <th>Tipo</th>
             <th>Endereço</th>
+            <th>Busca antes do voo</th>
             <th>Ordem</th>
             <th>Status</th>
             <th>Ações</th>
@@ -62,7 +67,7 @@
     <tbody>
         <?php if (empty($locations)): ?>
         <tr>
-            <td colspan="7" class="text-center">Nenhum local cadastrado.</td>
+            <td colspan="8" class="text-center">Nenhum local cadastrado.</td>
         </tr>
         <?php else: ?>
         <?php foreach ($locations as $loc): ?>
@@ -71,6 +76,8 @@
             <td><strong><?= e($loc['title']) ?></strong></td>
             <td><?= e($loc['location_type'] ?? '-') ?></td>
             <td><?= e($loc['address'] ?? '-') ?></td>
+            <?php $leadH = isset($loc['pickup_lead_minutes']) && $loc['pickup_lead_minutes'] !== null ? rtrim(rtrim(number_format(((int)$loc['pickup_lead_minutes']) / 60, 2, ',', ''), '0'), ',') : ''; ?>
+            <td><?= $leadH !== '' ? e($leadH) . 'h' : '<span class="text-muted">padrão</span>' ?></td>
             <td><?= (int)($loc['sort_order'] ?? 0) ?></td>
             <td>
                 <span class="badge badge-<?= (int)($loc['status'] ?? 1) === 1 ? 'success' : 'secondary' ?>">
@@ -78,7 +85,7 @@
                 </span>
             </td>
             <td class="actions-cell">
-                <button type="button" class="btn btn-sm btn-outline" onclick="editLocation(<?= (int)$loc['id'] ?>, '<?= e(addslashes($loc['title'])) ?>', '<?= e(addslashes($loc['address'] ?? '')) ?>', '<?= e($loc['location_type'] ?? 'hotel') ?>', <?= (int)($loc['sort_order'] ?? 0) ?>, <?= (int)($loc['status'] ?? 1) ?>)">Editar</button>
+                <button type="button" class="btn btn-sm btn-outline" onclick="editLocation(<?= (int)$loc['id'] ?>, '<?= e(addslashes($loc['title'])) ?>', '<?= e(addslashes($loc['address'] ?? '')) ?>', '<?= e($loc['location_type'] ?? 'hotel') ?>', <?= (int)($loc['sort_order'] ?? 0) ?>, <?= (int)($loc['status'] ?? 1) ?>, '<?= e($leadH) ?>')">Editar</button>
                 <form method="POST" action="/admin/transfers/locais/<?= (int)$loc['id'] ?>/excluir" style="display:inline" onsubmit="return confirm('Excluir este local?')">
                     <?= csrf_field() ?>
                     <button type="submit" class="btn btn-sm btn-danger">Excluir</button>
@@ -91,7 +98,8 @@
 </table>
 
 <script>
-function editLocation(id, title, address, type, order, status) {
+function editLocation(id, title, address, type, order, status, leadHours) {
+    document.getElementById('loc-lead').value = leadHours || '';
     // Mudar o formulário para modo edição
     document.getElementById('form-title').textContent = 'Editar Local #' + id;
     document.getElementById('location-form').action = '/admin/transfers/locais/' + id + '/editar';
@@ -118,6 +126,7 @@ function cancelEdit() {
     document.getElementById('location-form').action = '/admin/transfers/locais/criar';
     document.getElementById('loc-title').value = '';
     document.getElementById('loc-address').value = '';
+    document.getElementById('loc-lead').value = '';
     document.getElementById('loc-type').value = 'airport';
     document.getElementById('loc-order').value = '0';
     document.getElementById('status-group').style.display = 'none';

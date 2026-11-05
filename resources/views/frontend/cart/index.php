@@ -65,7 +65,8 @@
                         <h4><?= e($transfer['vehicle_title']) ?></h4>
                         <p class="cart-item-meta">
                             <?= e($transfer['origin_title']) ?> &rarr; <?= e($transfer['destination_title']) ?><br>
-                            <?= format_date($transfer['date']) ?> às <?= e($transfer['time']) ?>
+                            <?= format_date($transfer['date']) ?> — busca às <?= e($transfer['time']) ?>
+                            <?php if (!empty($transfer['flight_time'])): ?> | Voo: <?= e($transfer['flight_time']) ?><?php endif; ?>
                             | <?= e($transfer['type'] === 'arrival' ? 'Chegada' : 'Partida') ?>
                             | <?= e(transfer_pax_label($transfer['adults'] ?? 0, $transfer['children'] ?? 0, $transfer['infants'] ?? 0)) ?>
                         </p>

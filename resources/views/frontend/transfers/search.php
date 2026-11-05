@@ -54,6 +54,10 @@
                         <label>HORA</label>
                         <input type="time" name="arrival_time" id="arrivalTime" class="tf-input">
                     </div>
+                    <div class="tf-field tf-field-sm tf-field-extra" id="arrivalPickupField">
+                        <label title="Para transfer privado: a que horas o motorista deve te buscar">BUSCA DESEJADA</label>
+                        <input type="time" name="arrival_pickup_time" id="arrivalPickupTime" class="tf-input" title="Opcional. Em branco = buscamos no horário de chegada do voo.">
+                    </div>
                     <div class="tf-field departure-field" id="departureDate">
                         <label>DATA PARTIDA</label>
                         <input type="date" name="departure_date" class="tf-input" min="<?= date('Y-m-d') ?>">
@@ -62,6 +66,11 @@
                         <label>HORA</label>
                         <input type="time" name="departure_time" class="tf-input">
                     </div>
+                    <div class="tf-field tf-field-sm tf-field-extra" id="departurePickupField">
+                        <label title="Para transfer privado: a que horas o motorista deve te buscar">BUSCA DESEJADA</label>
+                        <input type="time" name="departure_pickup_time" id="departurePickupTime" class="tf-input" title="Opcional. Em branco = buscamos no horário de chegada do voo.">
+                    </div>
+                    <div class="tf-pickup-info" id="tfPickupInfo"></div>
                 </div>
                 <div class="transfer-form-row transfer-form-row-bottom">
                     <div class="tf-field tf-field-pax">
@@ -130,7 +139,7 @@
                                 <input type="date" name="multi_date_1" class="tf-input multi-date" min="<?= date('Y-m-d') ?>">
                             </div>
                             <div class="tf-field tf-field-sm">
-                                <label>HORA</label>
+                                <label>HORA DA BUSCA</label>
                                 <input type="time" name="multi_time_1" class="tf-input multi-time">
                             </div>
                         </div>
@@ -166,7 +175,7 @@
                                 <input type="date" name="multi_date_2" class="tf-input multi-date" min="<?= date('Y-m-d') ?>">
                             </div>
                             <div class="tf-field tf-field-sm">
-                                <label>HORA</label>
+                                <label>HORA DA BUSCA</label>
                                 <input type="time" name="multi_time_2" class="tf-input multi-time">
                             </div>
                         </div>
@@ -388,7 +397,8 @@
 
 
 <script>
-const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['id' => (int)$loc['id'], 'title' => $loc['title'], 'type' => $loc['location_type'] ?? 'other']; }, $locations)) ?>;
+const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['id' => (int)$loc['id'], 'title' => $loc['title'], 'type' => $loc['location_type'] ?? 'other', 'lead' => isset($loc['pickup_lead_minutes']) && $loc['pickup_lead_minutes'] !== null ? (int)$loc['pickup_lead_minutes'] : null]; }, $locations)) ?>;
+const TRANSFER_DEFAULT_LEAD = <?= max(0, (int) setting('transfer_pickup_lead_minutes', '240')) ?>;
 
 (function() {
     function setupAutocomplete(inputId, hiddenId, listId) {
@@ -466,88 +476,139 @@ const TRANSFER_LOCATIONS = <?= json_encode(array_map(function($loc) { return ['i
     setupAutocomplete('destinationInput', 'destinationSelect', 'destinationList');
 })();
 
-// Lógica de detecção de aeroporto: muda label HORA → HORÁRIO DO VOO
+// Horários do transfer conforme o tipo de trajeto (aeroporto → hotel, hotel → aeroporto, outros).
+//  - Chegada no aeroporto: cliente informa o horário de chegada do voo (+ busca desejada, se privado).
+//  - Saída para o aeroporto: cliente informa o horário do voo; a busca no hotel é calculada
+//    automaticamente (padrão 4h antes, ou o tempo do local em Admin → Transfers → Locais).
+//  - Outros (shopping, restaurante, hotel → hotel): horário de ida e de volta / horário de busca.
 (function() {
-    var arrivalTimeLabel = document.querySelector('#arrivalTime')?.closest('.tf-field')?.querySelector('label');
-    var departureTimeLabel = document.querySelector('[name="departure_time"]')?.closest('.tf-field')?.querySelector('label');
+    var arrivalTimeInput = document.getElementById('arrivalTime');
+    if (!arrivalTimeInput) return;
+    var arrivalTimeLabel = arrivalTimeInput.closest('.tf-field').querySelector('label');
+    var arrivalDateLabel = document.getElementById('arrivalDate')?.closest('.tf-field')?.querySelector('label');
+    var departureTimeInput = document.querySelector('[name="departure_time"]');
+    var departureTimeLabel = departureTimeInput?.closest('.tf-field')?.querySelector('label');
+    var departureDateLabel = document.querySelector('#departureDate label');
+    var arrivalPickupField = document.getElementById('arrivalPickupField');
+    var departurePickupField = document.getElementById('departurePickupField');
+    var info = document.getElementById('tfPickupInfo');
+    var WHATSAPP_URL = 'https://api.whatsapp.com/send?phone=18294582170&text=' + encodeURIComponent('Olá! Quero ajustar o horário de busca do meu transfer.');
+    var PLANE = ' <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>';
 
-    if (!arrivalTimeLabel) return;
-
-    function getLocationType(locationId) {
-        if (!locationId) return null;
+    function loc(id) {
+        if (!id) return null;
         for (var i = 0; i < TRANSFER_LOCATIONS.length; i++) {
-            if (String(TRANSFER_LOCATIONS[i].id) === String(locationId)) {
-                return TRANSFER_LOCATIONS[i].type;
-            }
+            if (String(TRANSFER_LOCATIONS[i].id) === String(id)) return TRANSFER_LOCATIONS[i];
         }
         return null;
     }
+    function isAirport(l) { return !!l && l.type === 'airport'; }
+    function leadMinutes(a, b) {
+        var vals = [a, b].filter(function(l) { return l && l.lead !== null && l.lead !== undefined; }).map(function(l) { return l.lead; });
+        return vals.length ? Math.max.apply(null, vals) : TRANSFER_DEFAULT_LEAD;
+    }
+    function minusMinutes(hhmm, minutes) {
+        if (!/^\d{1,2}:\d{2}/.test(hhmm || '')) return '';
+        var p = hhmm.split(':');
+        var total = ((parseInt(p[0], 10) * 60 + parseInt(p[1], 10) - minutes) % 1440 + 1440) % 1440;
+        return String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
+    }
+    function fmtLead(min) {
+        var h = Math.floor(min / 60), m = min % 60;
+        return h + 'h' + (m ? String(m).padStart(2, '0') : '');
+    }
+    function isRoundtrip() { return (document.querySelector('.transfer-tab.active')?.dataset.tab || 'roundtrip') === 'roundtrip'; }
+    function isPrivate() { return (document.getElementById('serviceType')?.value || 'private') === 'private'; }
 
-    function updateLabels() {
-        var originId = document.getElementById('originSelect').value;
-        var destinationId = document.getElementById('destinationSelect').value;
-        var originType = getLocationType(originId);
-        var destType = getLocationType(destinationId);
-
-        // Chegada: se ORIGEM é aeroporto → label vira "HORÁRIO DO VOO"
-        if (originType === 'airport') {
-            arrivalTimeLabel.innerHTML = 'HORÁRIO DO VOO <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>';
-            document.getElementById('arrivalTime').title = 'Informe o horário de chegada do seu voo';
-        } else {
-            arrivalTimeLabel.textContent = 'HORA';
-            document.getElementById('arrivalTime').title = '';
-        }
-
-        // Partida: se DESTINO é aeroporto → label vira "HORÁRIO DO VOO"
-        if (departureTimeLabel) {
-            if (destType === 'airport') {
-                departureTimeLabel.innerHTML = 'HORÁRIO DO VOO <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>';
-                var depInput = document.querySelector('[name="departure_time"]');
-                if (depInput) depInput.title = 'Informe o horário de partida do seu voo. Busca no hotel será ~3h antes.';
-            } else {
-                departureTimeLabel.textContent = 'HORA';
-                var depInput2 = document.querySelector('[name="departure_time"]');
-                if (depInput2) depInput2.title = '';
-            }
-        }
-
-        // Mostrar/esconder dica de voo
-        var existingTip = document.getElementById('airportFlightTip');
-        if (originType === 'airport' || destType === 'airport') {
-            if (!existingTip) {
-                var tipDiv = document.createElement('div');
-                tipDiv.id = 'airportFlightTip';
-                tipDiv.style.cssText = 'grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:#f0f9ff;border:1px solid #bae6fd;border-radius:8px;font-size:0.82rem;color:#0369a1;margin-top:-4px;';
-                if (destType === 'airport' && originType !== 'airport') {
-                    tipDiv.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Recomendamos chegar ao aeroporto 3 horas antes do voo. O horário de busca no hotel será calculado automaticamente considerando o tempo de deslocamento.</span>';
-                } else {
-                    tipDiv.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg><span>Informe o horário de chegada do seu voo. O motorista estará aguardando no aeroporto.</span>';
-                }
-                var formRow = document.querySelector('.transfer-form-row');
-                if (formRow) formRow.parentNode.insertBefore(tipDiv, formRow.nextSibling);
-            } else {
-                existingTip.style.display = 'flex';
-                if (destType === 'airport' && originType !== 'airport') {
-                    existingTip.querySelector('span').textContent = 'Recomendamos chegar ao aeroporto 3 horas antes do voo. O horário de busca no hotel será calculado automaticamente considerando o tempo de deslocamento.';
-                } else {
-                    existingTip.querySelector('span').textContent = 'Informe o horário de chegada do seu voo. O motorista estará aguardando no aeroporto.';
-                }
-            }
-        } else {
-            if (existingTip) existingTip.style.display = 'none';
-        }
+    // Leg 1 = origem → destino (campos "arrival_*"); Leg 2 = destino → origem (campos "departure_*").
+    function legInfo(leg) {
+        var o = loc(document.getElementById('originSelect').value);
+        var d = loc(document.getElementById('destinationSelect').value);
+        var from = leg === 1 ? o : d;
+        var to = leg === 1 ? d : o;
+        return { from: from, to: to, fromAirport: isAirport(from), toAirport: isAirport(to) };
     }
 
-    // Polling para detectar mudanças nos selects
-    setInterval(function() {
-        var currentOrigin = document.getElementById('originSelect')?.value || '';
-        var currentDest = document.getElementById('destinationSelect')?.value || '';
-        if (currentOrigin !== (window._lastOriginCheck || '') || currentDest !== (window._lastDestCheck || '')) {
-            window._lastOriginCheck = currentOrigin;
-            window._lastDestCheck = currentDest;
-            updateLabels();
+    // Usado pelo app.js ao adicionar no carrinho: { time: horário de busca, flight_time: horário do voo }
+    window.getTransferLegTimes = function(leg) {
+        var li = legInfo(leg);
+        var input = leg === 1 ? arrivalTimeInput : departureTimeInput;
+        var desired = leg === 1 ? document.getElementById('arrivalPickupTime') : document.getElementById('departurePickupTime');
+        var value = input ? input.value : '';
+        if (li.toAirport && !li.fromAirport) {
+            return { time: minusMinutes(value, leadMinutes(li.from, li.to)) || value, flight_time: value };
         }
-    }, 500);
+        if (li.fromAirport) {
+            var d = (isPrivate() && desired && desired.value) ? desired.value : value;
+            return { time: d, flight_time: value };
+        }
+        return { time: value, flight_time: '' };
+    };
+
+    function setLabel(el, html) { if (el) el.innerHTML = html; }
+
+    function applyLeg(leg) {
+        var li = legInfo(leg);
+        var timeLabel = leg === 1 ? arrivalTimeLabel : departureTimeLabel;
+        var dateLabel = leg === 1 ? arrivalDateLabel : departureDateLabel;
+        var pickupField = leg === 1 ? arrivalPickupField : departurePickupField;
+        var visible = leg === 1 || isRoundtrip();
+
+        if (li.fromAirport) {
+            setLabel(dateLabel, leg === 1 ? 'DATA DE CHEGADA' : 'DATA DA CHEGADA (VOLTA)');
+            setLabel(timeLabel, 'CHEGADA DO VOO' + PLANE);
+        } else if (li.toAirport) {
+            setLabel(dateLabel, 'DATA DO VOO');
+            setLabel(timeLabel, 'HORÁRIO DO VOO' + PLANE);
+        } else if (leg === 1) {
+            setLabel(dateLabel, isRoundtrip() ? 'DATA DA IDA' : 'DATA');
+            setLabel(timeLabel, isRoundtrip() ? 'HORA DA IDA' : 'HORA DA BUSCA');
+        } else {
+            setLabel(dateLabel, 'DATA DA VOLTA');
+            setLabel(timeLabel, 'HORA DA VOLTA');
+        }
+        if (pickupField) pickupField.style.display = (visible && li.fromAirport && isPrivate()) ? '' : 'none';
+        return li;
+    }
+
+    function update() {
+        var l1 = applyLeg(1);
+        var l2 = applyLeg(2);
+        var msgs = [];
+        [[l1, 1], [l2, 2]].forEach(function(pair) {
+            var li = pair[0], leg = pair[1];
+            if (leg === 2 && !isRoundtrip()) return;
+            if (li.toAirport && !li.fromAirport) {
+                var lead = leadMinutes(li.from, li.to);
+                var t = window.getTransferLegTimes(leg);
+                msgs.push(t.flight_time
+                    ? 'Voo às <strong>' + t.flight_time + '</strong> → buscaremos você às <strong>' + t.time + '</strong> (' + fmtLead(lead) + ' antes do voo).'
+                    : 'Informe o horário do voo: a busca no hotel é calculada automaticamente (' + fmtLead(lead) + ' antes do voo).');
+            } else if (li.fromAirport) {
+                msgs.push('Informe o horário de chegada do seu voo. O motorista estará aguardando no aeroporto.' + (isPrivate() ? ' No privado, você pode indicar a busca desejada.' : ''));
+            }
+        });
+        if (!msgs.length) { info.style.display = 'none'; return; }
+        var hasDeparture = msgs.some(function(m) { return m.indexOf('buscaremos') !== -1 || m.indexOf('calculada') !== -1; });
+        info.innerHTML = '<span>' + msgs.join('<br>') + (hasDeparture ? '<br>Quer sair mais cedo ou mais tarde? <a href="' + WHATSAPP_URL + '" target="_blank" rel="noopener">Fale com a gente no WhatsApp</a>.' : '') + '</span>';
+        info.style.display = 'flex';
+    }
+
+    ['arrivalTime', 'arrivalPickupTime', 'departurePickupTime', 'serviceType'].forEach(function(id) {
+        document.getElementById(id)?.addEventListener('input', update);
+        document.getElementById(id)?.addEventListener('change', update);
+    });
+    departureTimeInput?.addEventListener('input', update);
+    departureTimeInput?.addEventListener('change', update);
+    document.querySelectorAll('.transfer-tab').forEach(function(b) { b.addEventListener('click', function() { setTimeout(update, 0); }); });
+
+    // Origem/destino são escolhidos por autocomplete (campo oculto): verifica mudanças.
+    var last = '';
+    setInterval(function() {
+        var cur = (document.getElementById('originSelect')?.value || '') + '|' + (document.getElementById('destinationSelect')?.value || '');
+        if (cur !== last) { last = cur; update(); }
+    }, 400);
+    update();
 })();
 </script>
 

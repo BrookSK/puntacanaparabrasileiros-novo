@@ -213,6 +213,21 @@ $router->group(['prefix' => '/admin', 'middleware' => [AuthMiddleware::class, Ad
     $router->get('/passeios/{id}/precos', [AdminTripsController::class, 'pricing'], [], 'admin.trips.pricing');
     $router->post('/passeios/{id}/precos', [AdminTripsController::class, 'savePricing'], [CsrfMiddleware::class], 'admin.trips.pricing.save');
 
+    // Dias e Horários (dias fechados, datas especiais, horários de saída)
+    $router->get('/passeios/{id}/disponibilidade', [\App\Controllers\Admin\TripAvailabilityController::class, 'show'], [], 'admin.trips.availability');
+    $router->post('/passeios/{id}/disponibilidade', [\App\Controllers\Admin\TripAvailabilityController::class, 'save'], [CsrfMiddleware::class], 'admin.trips.availability.save');
+
+    // Faixas etárias (categorias de viajante: Adulto, Criança, Infantil...)
+    $router->get('/faixas-etarias', [\App\Controllers\Admin\TravelerCategoriesController::class, 'index'], [], 'admin.traveler_categories.index');
+    $router->post('/faixas-etarias', [\App\Controllers\Admin\TravelerCategoriesController::class, 'save'], [CsrfMiddleware::class], 'admin.traveler_categories.save');
+
+    // Políticas comerciais e câmbio
+    $router->get('/politicas', [\App\Controllers\Admin\PoliciesController::class, 'index'], [], 'admin.policies.index');
+    $router->post('/politicas', [\App\Controllers\Admin\PoliciesController::class, 'save'], [CsrfMiddleware::class], 'admin.policies.save');
+
+    // Como usar (tutorial do painel)
+    $router->get('/como-usar', [\App\Controllers\Admin\HelpController::class, 'index'], [], 'admin.help.index');
+
     // Horários por Hotel (sub-recurso do passeio)
     $router->get('/passeios/{id}/horarios', [AdminSchedulesController::class, 'show'], [], 'admin.trips.schedules');
     $router->get('/passeios/{id}/horarios/hotel/criar', [AdminSchedulesController::class, 'createHotel'], [], 'admin.trips.schedules.hotel.create');

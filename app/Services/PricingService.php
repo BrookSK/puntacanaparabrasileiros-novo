@@ -124,11 +124,22 @@ class PricingService
      */
     private function getDayPricing(int $packageId, int $categoryId, string $ruleType, string $dayKey): ?array
     {
+        // Nomes antigos gravados pela tela de preços anterior
+        $aliases = ['specific' => 'specific_date', 'annual' => 'yearly'];
+        $types = [$ruleType];
+        if (isset($aliases[$ruleType])) $types[] = $aliases[$ruleType];
+        $keys = [$dayKey];
+        // Chaves numéricas podem ter sido gravadas com zero à esquerda ("01")
+        if (ctype_digit($dayKey)) $keys[] = str_pad($dayKey, 2, '0', STR_PAD_LEFT);
+        if ($ruleType === 'holiday' && preg_match('/^(\d{2})\/(\d{2})$/', $dayKey, $m)) $keys[] = (int) $m[1] . '/' . (int) $m[2];
+
+        $typeIn = implode(',', array_fill(0, count($types), '?'));
+        $keyIn = implode(',', array_fill(0, count($keys), '?'));
         return $this->db->fetchOne(
             "SELECT * FROM trip_day_pricing
-             WHERE package_id = ? AND traveler_category_id = ? AND rule_type = ? AND day_key = ? AND active = 1
+             WHERE package_id = ? AND traveler_category_id = ? AND rule_type IN ({$typeIn}) AND day_key IN ({$keyIn}) AND active = 1
              LIMIT 1",
-            [$packageId, $categoryId, $ruleType, $dayKey]
+            array_merge([$packageId, $categoryId], $types, array_map('strval', $keys))
         );
     }
 

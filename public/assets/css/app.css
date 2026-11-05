@@ -7777,3 +7777,22 @@ img { max-width: 100%; height: auto; }
 
 /* O que levar (item 4) */
 .trip-what-to-bring .trip-bring-list { margin-top: 6px; }
+
+/* ===== Modal de reserva: dias fechados, horários e hotel digitado ===== */
+.bm-day.closed { text-decoration: line-through; color: #cbd5e1; cursor: not-allowed; }
+.bm-times-title { width: 100%; font-size: 13px; font-weight: 600; color: #334155; margin-bottom: 8px; font-family: var(--font); }
+.bm-times-empty { font-size: 13px; color: #b91c1c; margin: 4px 0; font-family: var(--font); }
+.bm-hotel-manual-link { display: inline-block; margin-top: 10px; background: none; border: none; padding: 0; color: var(--text-green, #1B6F00); font-size: 13px; font-weight: 600; text-decoration: underline; cursor: pointer; font-family: var(--font); }
+.bm-hotel-manual { margin-top: 12px; padding: 14px; border: 1.5px solid #e0e0e0; border-radius: 10px; background: #fafafa; }
+.bm-hotel-manual label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #334155; }
+.bm-hotel-manual textarea { width: 100%; padding: 10px 12px; border: 1.5px solid #d1d5db; border-radius: 8px; font-size: 14px; font-family: var(--font); resize: vertical; box-sizing: border-box; }
+.bm-hotel-manual-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.bm-hotel-manual-cancel { background: none; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 9px 14px; font-size: 12px; cursor: pointer; }
+.bm-hotel-manual-ok { background: var(--text-green, #1B6F00); color: #fff; border: none; border-radius: 8px; padding: 9px 16px; font-size: 12px; font-weight: 700; cursor: pointer; }
+.trip-custom-policy ul { padding-left: 18px; }
+.trip-custom-policy li { margin-bottom: 6px; }
+
+/* ===== Transfer: horários por tipo de trajeto ===== */
+.tf-pickup-info { grid-column: 1 / -1; display: none; align-items: flex-start; gap: 8px; padding: 10px 14px; background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; font-size: 0.82rem; color: #92400e; }
+.tf-pickup-info a { color: #166534; font-weight: 700; }
+.tf-field-extra { display: none; }

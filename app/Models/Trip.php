@@ -16,6 +16,7 @@ class Trip extends Model
         'weather_info', 'meeting_point', 'important_notes',
         'departure_time_info', 'return_time_info', 'availability_info',
         'departure_time_start', 'departure_time_end', 'return_time_start', 'return_time_end',
+        'closed_weekdays',
         'google_place_id', 'google_rating', 'google_reviews_count', 'google_reviews_url',
         'partial_payment_enabled', 'partial_payment_percent',
         'group_discount_enabled', 'group_discount_rules',

@@ -372,6 +372,13 @@ class TripsController extends Controller
             $compositionPackages = $compositionModel->getByTrip($tripId);
         }
 
+        // Dias fechados, datas especiais e horários de saída (calendário do modal de reserva)
+        try {
+            $tripAvailability = (new \App\Services\TripAvailabilityService())->getFrontendConfig($tripId);
+        } catch (\Throwable $e) {
+            $tripAvailability = ['closed_weekdays' => [], 'exceptions' => [], 'departure_times' => []];
+        }
+
         // ── Dados estruturados (JSON-LD) para o Google ──
         $base = site_base_url();
         $minPrice = 0.0;
@@ -442,6 +449,7 @@ class TripsController extends Controller
             'whatToBring' => $whatToBring,
             'googleReviews' => $googleReviews,
             'compositionPackages' => $compositionPackages,
+            'tripAvailability' => $tripAvailability,
             'pageTitle' => $trip['meta_title'] ?: $trip['title'],
             'metaDescription' => $trip['meta_description'] ?: $trip['short_description'],
             'ogImage' => $tripImage,

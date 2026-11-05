@@ -82,8 +82,27 @@ class PageController extends Controller
         ], 'app');
     }
 
+    /**
+     * Se a equipe editou o texto da página em Admin → Políticas e Câmbio,
+     * mostra o texto editado (view genérica). Retorna true se renderizou.
+     */
+    private function renderCustomPolicy(string $settingKey, string $heading, string $pageTitle, string $meta, bool $showCancelCta = false): bool
+    {
+        $custom = trim((string) $this->setting($settingKey, ''));
+        if ($custom === '') return false;
+        $this->view('frontend/pages/custom-policy', [
+            'heading' => $heading,
+            'contentHtml' => simple_text_to_html($custom),
+            'showCancelCta' => $showCancelCta,
+            'pageTitle' => $pageTitle,
+            'metaDescription' => $meta,
+        ], 'app');
+        return true;
+    }
+
     public function cancellationPolicy(Request $request, Response $response): void
     {
+        if ($this->renderCustomPolicy('policy_cancellation_page', 'Políticas de Cancelamento', 'Políticas de Cancelamento - Punta Cana para Brasileiros', 'Política de cancelamento e reembolso da Punta Cana para Brasileiros.', true)) return;
         $this->view('frontend/pages/cancellation-policy', [
             'pageTitle' => 'Políticas de Cancelamento - Punta Cana para Brasileiros',
             'metaDescription' => 'Política de cancelamento e reembolso da Punta Cana para Brasileiros.',
@@ -97,6 +116,7 @@ class PageController extends Controller
 
     public function privacyPolicy(Request $request, Response $response): void
     {
+        if ($this->renderCustomPolicy('policy_privacy_page', 'Políticas de Privacidade', 'Políticas de Privacidade - Punta Cana para Brasileiros', 'Política de privacidade e proteção de dados da Punta Cana para Brasileiros.')) return;
         $this->view('frontend/pages/privacy-policy', [
             'pageTitle' => 'Políticas de Privacidade - Punta Cana para Brasileiros',
             'metaDescription' => 'Política de privacidade e proteção de dados da Punta Cana para Brasileiros.',
@@ -472,6 +492,7 @@ class PageController extends Controller
 
     public function terms(Request $request, Response $response): void
     {
+        if ($this->renderCustomPolicy('policy_terms_page', 'Termos e Condições', 'Termos e Condições - Punta Cana para Brasileiros', 'Termos e condições de uso do site Punta Cana para Brasileiros.')) return;
         $this->view('frontend/pages/terms', [
             'pageTitle' => 'Termos e Condições - Punta Cana para Brasileiros',
             'metaDescription' => 'Termos e condições de uso do site Punta Cana para Brasileiros.',
