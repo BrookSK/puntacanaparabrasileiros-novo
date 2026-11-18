@@ -96,9 +96,11 @@ $ratingDisplay = (float) ($rating ?? 0);
 <!-- ============================================================ -->
 <!-- CONTEÚDO                                                     -->
 <!-- ============================================================ -->
-<!-- Card de preço estático (não sticky) — mantém o layout original. -->
+<!-- Card de preço flutuante: acompanha a rolagem no desktop. -->
 <style>
-.trip-sidebar .trip-price-card { position: static; max-height: none; overflow: visible; }
+.trip-sidebar { align-self: stretch; }
+.trip-sidebar .trip-price-card { position: sticky; top: 90px; max-height: calc(100vh - 110px); overflow-y: auto; }
+@media (max-width: 1024px) { .trip-sidebar .trip-price-card { position: static; max-height: none; overflow: visible; } }
 </style>
 <section class="trip-detail">
     <div class="container">
@@ -553,83 +555,8 @@ $ratingDisplay = (float) ($rating ?? 0);
                         </div>
                 </section>
 
-                <!-- ===================== SEÇÃO: QUEM JÁ FOI E QUEM LEVA VOCÊ ===================== -->
-                <?php
-                $tripDocuments = !empty($trip['documents']) ? json_decode($trip['documents'], true) : [];
-                $ytId = '';
-                if (!empty($trip['youtube_url'])) {
-                    $ytUrl = $trip['youtube_url'];
-                    if (preg_match('/[?&]v=([^&]+)/', $ytUrl, $m)) $ytId = $m[1];
-                    elseif (preg_match('/youtu\.be\/([^?]+)/', $ytUrl, $m)) $ytId = $m[1];
-                    elseif (preg_match('/embed\/([^?]+)/', $ytUrl, $m)) $ytId = $m[1];
-                }
-                ?>
-                <?php if ($ytId || !empty($tripDocuments) || !empty($reviews)): ?>
-                <section class="trip-sec" id="sec-confianca">
-                    <h2>Quem já foi e quem leva você</h2>
-
-                    <?php if ($ytId): ?>
-                    <div class="trip-video-embed">
-                        <iframe src="https://www.youtube.com/embed/<?= e($ytId) ?>" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($tripDocuments)): ?>
-                    <div class="trip-block">
-                        <h3>Documentos importantes</h3>
-                        <div class="trip-docs">
-                            <?php foreach ($tripDocuments as $doc): ?>
-                            <a href="<?= e($doc['path']) ?>" target="_blank" rel="noopener" download>
-                                <span class="trip-doc-ext"><?= e(strtoupper($doc['type'] ?? 'FILE')) ?></span>
-                                <span class="trip-doc-info">
-                                    <strong><?= e($doc['name'] ?? 'Documento') ?></strong>
-                                    <small><?= e(strtoupper($doc['type'] ?? 'FILE')) ?><?= !empty($doc['size']) ? ' · ' . number_format($doc['size'] / 1024, 0) . ' KB' : '' ?></small>
-                                </span>
-                            </a>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($reviews)): ?>
-                    <div class="trip-reviews">
-                        <?php foreach ($reviews as $review): ?>
-                        <div class="trip-rv">
-                            <div class="trip-rv-stars"><?= str_repeat('&#9733;', max(1, (int)$review['rating'])) ?></div>
-                            <p><?= e($review['comment']) ?></p>
-                            <small><?= e($review['first_name'] ?? $review['author_name'] ?? 'Anônimo') ?><span>Avaliação no Google</span></small>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                    <?php endif; ?>
-                </section>
-                <?php endif; ?>
-
-                <!-- ===================== SEÇÃO: FAQ ===================== -->
-                <!-- Só aparece quando há FAQs cadastradas para este passeio (item 3). -->
-                <?php if (!empty($tripFaqs)): ?>
-                <section class="trip-sec" id="sec-faqs">
-                    <div class="trip-faq-header">
-                        <h2>FAQ</h2>
-                        <label class="expand-all-toggle">
-                            <span>Expandir tudo</span>
-                            <input type="checkbox" id="expandAllFaqs" onchange="toggleAllFaqs(this.checked)">
-                            <span class="toggle-switch"></span>
-                        </label>
-                    </div>
-                    <div class="faq-list">
-                        <?php foreach ($tripFaqs as $faq): ?>
-                        <div class="faq-item">
-                            <button class="faq-question" type="button"><span><?= e($faq['question']) ?></span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
-                            <div class="faq-answer"><p><?= e($faq['answer']) ?></p></div>
-                        </div>
-                        <?php endforeach; ?>
-                    </div>
-                </section>
-                <?php endif; ?>
-
                 <!-- ===================== SEÇÃO: PASSEIOS RELACIONADOS / EM DESTAQUE ===================== -->
-                <!-- Posicionada após o FAQ e antes do formulário de consulta. -->
+                <!-- Posicionada logo após a política de cancelamento (pedido do cliente). -->
                 <!-- Não possui aba na navegação; aparece só ao rolar até o fim da página. -->
                 <!-- Estilos inline escopados: garantem a grade lado a lado e imagens -->
                 <!-- menores mesmo quando o app.css está em cache antigo no servidor. -->
@@ -727,6 +654,81 @@ $ratingDisplay = (float) ($rating ?? 0);
                         <?php endforeach; ?>
                     </div>
                     <?php endif; ?>
+                </section>
+                <?php endif; ?>
+
+                <!-- ===================== SEÇÃO: QUEM JÁ FOI E QUEM LEVA VOCÊ ===================== -->
+                <?php
+                $tripDocuments = !empty($trip['documents']) ? json_decode($trip['documents'], true) : [];
+                $ytId = '';
+                if (!empty($trip['youtube_url'])) {
+                    $ytUrl = $trip['youtube_url'];
+                    if (preg_match('/[?&]v=([^&]+)/', $ytUrl, $m)) $ytId = $m[1];
+                    elseif (preg_match('/youtu\.be\/([^?]+)/', $ytUrl, $m)) $ytId = $m[1];
+                    elseif (preg_match('/embed\/([^?]+)/', $ytUrl, $m)) $ytId = $m[1];
+                }
+                ?>
+                <?php if ($ytId || !empty($tripDocuments) || !empty($reviews)): ?>
+                <section class="trip-sec" id="sec-confianca">
+                    <h2>Quem já foi e quem leva você</h2>
+
+                    <?php if ($ytId): ?>
+                    <div class="trip-video-embed">
+                        <iframe src="https://www.youtube.com/embed/<?= e($ytId) ?>" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($tripDocuments)): ?>
+                    <div class="trip-block">
+                        <h3>Documentos importantes</h3>
+                        <div class="trip-docs">
+                            <?php foreach ($tripDocuments as $doc): ?>
+                            <a href="<?= e($doc['path']) ?>" target="_blank" rel="noopener" download>
+                                <span class="trip-doc-ext"><?= e(strtoupper($doc['type'] ?? 'FILE')) ?></span>
+                                <span class="trip-doc-info">
+                                    <strong><?= e($doc['name'] ?? 'Documento') ?></strong>
+                                    <small><?= e(strtoupper($doc['type'] ?? 'FILE')) ?><?= !empty($doc['size']) ? ' · ' . number_format($doc['size'] / 1024, 0) . ' KB' : '' ?></small>
+                                </span>
+                            </a>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($reviews)): ?>
+                    <div class="trip-reviews">
+                        <?php foreach ($reviews as $review): ?>
+                        <div class="trip-rv">
+                            <div class="trip-rv-stars"><?= str_repeat('&#9733;', max(1, (int)$review['rating'])) ?></div>
+                            <p><?= e($review['comment']) ?></p>
+                            <small><?= e($review['first_name'] ?? $review['author_name'] ?? 'Anônimo') ?><span>Avaliação no Google</span></small>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
+                </section>
+                <?php endif; ?>
+
+                <!-- ===================== SEÇÃO: FAQ ===================== -->
+                <!-- Só aparece quando há FAQs cadastradas para este passeio (item 3). -->
+                <?php if (!empty($tripFaqs)): ?>
+                <section class="trip-sec" id="sec-faqs">
+                    <div class="trip-faq-header">
+                        <h2>FAQ</h2>
+                        <label class="expand-all-toggle">
+                            <span>Expandir tudo</span>
+                            <input type="checkbox" id="expandAllFaqs" onchange="toggleAllFaqs(this.checked)">
+                            <span class="toggle-switch"></span>
+                        </label>
+                    </div>
+                    <div class="faq-list">
+                        <?php foreach ($tripFaqs as $faq): ?>
+                        <div class="faq-item">
+                            <button class="faq-question" type="button"><span><?= e($faq['question']) ?></span><svg class="faq-chevron" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button>
+                            <div class="faq-answer"><p><?= e($faq['answer']) ?></p></div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
                 </section>
                 <?php endif; ?>
 

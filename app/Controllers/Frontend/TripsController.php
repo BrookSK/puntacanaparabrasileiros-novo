@@ -306,8 +306,23 @@ class TripsController extends Controller
         $packages = $this->packageModel->getByTrip($tripId);
         foreach ($packages as &$pkg) {
             $pkg['categories'] = $this->packageModel->getCategories((int) $pkg['id']);
+            // Antes de escolher a data, cada faixa mostra o MENOR preço da semana
+            // (preço normal x regras por dia). Ao escolher a data, o modal busca o preço do dia.
+            foreach ($pkg['categories'] as &$c) {
+                $p = (float) $c['price'];
+                $s = ($c['sale_price'] !== null && $c['sale_price'] !== '') ? (float) $c['sale_price'] : 0.0;
+                $eff = ($s > 0 && $s < $p) ? $s : $p;
+                if ($eff <= 0) continue;
+                $minRule = $this->packageModel->minRulePrice((int) $pkg['id'], (int) $c['traveler_category_id']);
+                if ($minRule !== null && $minRule < $eff) {
+                    $c['price'] = $minRule;
+                    $c['sale_price'] = null;
+                }
+            }
+            unset($c);
             $pkg['base_price'] = $this->packageModel->getBasePrice((int) $pkg['id']);
         }
+        unset($pkg);
 
         // Se group pricing ativo (e composition NÃO ativo), sobrescrever base_price com preço da 1ª faixa
         if (!empty($trip['group_pricing_enabled']) && !empty($trip['group_pricing']) && empty($trip['composition_pricing_enabled'])) {

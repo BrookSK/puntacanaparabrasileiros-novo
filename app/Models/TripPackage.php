@@ -53,22 +53,41 @@ class TripPackage extends Model
      */
     public function getBasePrice(int $packageId): float
     {
-        // Primeiro, verificar se há regras dinâmicas com tipo "padrão" (default/weekday) ativas
-        $dynamicPrice = $this->db->fetchColumn(
-            "SELECT MIN(COALESCE(sale_price, price)) FROM trip_day_pricing WHERE package_id = ? AND active = 1 AND COALESCE(sale_price, price) > 0",
-            [$packageId]
-        );
-
-        if ($dynamicPrice && (float) $dynamicPrice > 0) {
-            return (float) $dynamicPrice;
+        // "A partir de" = MENOR preço da semana da faixa principal (a 1ª faixa paga,
+        // normalmente Adulto), comparando o preço normal com as regras por dia/data.
+        // Assim a listagem e a página mostram o mesmo valor; o preço do dia escolhido
+        // (ex.: sexta/sábado mais caro) só aparece ao selecionar a data.
+        $cats = $this->getCategories($packageId);
+        foreach ($cats as $c) {
+            $base = self::effective($c['price'] ?? 0, $c['sale_price'] ?? null);
+            if ($base <= 0) continue;
+            $minRule = $this->minRulePrice($packageId, (int) $c['traveler_category_id']);
+            return ($minRule !== null && $minRule < $base) ? $minRule : $base;
         }
+        return 0.0;
+    }
 
-        // Fallback: preço das categorias do pacote
-        $price = $this->db->fetchColumn(
-            "SELECT MIN(COALESCE(sale_price, price)) FROM trip_package_categories WHERE package_id = ? AND COALESCE(sale_price, price) > 0",
-            [$packageId]
-        );
-        return (float) ($price ?: 0);
+    /** Menor preço (>0) das regras por dia/data de uma faixa do pacote, ou null. */
+    public function minRulePrice(int $packageId, int $categoryId): ?float
+    {
+        try {
+            $v = $this->db->fetchColumn(
+                "SELECT MIN(CASE WHEN sale_price IS NOT NULL AND sale_price > 0 THEN sale_price ELSE price END)
+                 FROM trip_day_pricing WHERE package_id = ? AND traveler_category_id = ? AND active = 1
+                   AND COALESCE(NULLIF(sale_price, 0), price) > 0",
+                [$packageId, $categoryId]
+            );
+        } catch (\Throwable $e) {
+            return null;
+        }
+        return ($v !== null && $v !== false && (float) $v > 0) ? (float) $v : null;
+    }
+
+    private static function effective(mixed $price, mixed $sale): float
+    {
+        $p = (float) $price;
+        $s = ($sale !== null && $sale !== '') ? (float) $sale : 0.0;
+        return ($s > 0 && $s < $p) ? $s : $p;
     }
 
     /**

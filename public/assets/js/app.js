@@ -1536,7 +1536,7 @@
             list.innerHTML = '<div class="bm-hotel-empty"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="display:block;margin:0 auto 8px;color:#bbb;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Nenhum hotel encontrado com esse nome.<br><small>Use o bot\u00E3o abaixo para digitar o nome ou o endere\u00E7o.</small></div>';
             return;
         }
-        list.innerHTML = hotels.map(h => `<div class="bm-hotel-item ${selectedHotel && selectedHotel.id === h.id ? 'selected' : ''}" data-hotel-id="${h.id}" onclick="selectHotel(${h.id})"><div class="bm-hotel-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><div class="bm-hotel-item-content"><span class="bm-hotel-name notranslate" translate="no">${h.hotel_name}</span><span class="bm-hotel-times-count">${h.schedules.length} hor\u00E1rio(s) de busca</span></div><div class="bm-hotel-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>`).join('');
+        list.innerHTML = hotels.map(h => `<div class="bm-hotel-item ${selectedHotel && selectedHotel.id === h.id ? 'selected' : ''}" data-hotel-id="${h.id}" onclick="selectHotel(${h.id})"><div class="bm-hotel-item-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg></div><div class="bm-hotel-item-content"><span class="bm-hotel-name notranslate" translate="no">${h.hotel_name}</span><span class="bm-hotel-times-count">${h.schedules.length ? h.schedules.length + ' hor\u00E1rio(s) de busca' : 'Hor\u00E1rio de busca confirmado pela equipe'}</span></div><div class="bm-hotel-check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div></div>`).join('');
     }
 
 
@@ -1859,7 +1859,7 @@
             let cats = selectedPackage.categories || [];
             const filtered = cats.filter(c => {
                 const slug = (c.category_slug || '').toLowerCase();
-                return slug === 'adulto' || slug === 'crianca' || slug === 'infantil';
+                return !!(slug || c.category_name); // usa exatamente as faixas marcadas no pacote
             });
             cats = filtered.length > 0 ? filtered : [
                 { traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto', age_group: '18-85', price: '0', sale_price: null },
@@ -1879,9 +1879,9 @@
                 </div>
                 <div class="bm-accordion-body" style="display:block;">`;
 
-            travelersHtml += cats.map(cat => {
+            travelersHtml += cats.map((cat, idx) => {
                 const catId = cat.traveler_category_id || cat.id || 0;
-                const defaultQty = (cat.category_slug || '').toLowerCase() === 'adulto' ? 1 : 0;
+                const defaultQty = idx === 0 ? 1 : 0;
                 travelerCounts[catId] = defaultQty;
                 return `<div class="bm-traveler-row">
                     <div class="bm-traveler-info">
@@ -1923,7 +1923,7 @@
         // Filtrar para mostrar apenas Adulto, Criança e Infantil
         const filtered = cats.filter(c => {
             const slug = (c.category_slug || '').toLowerCase();
-            return slug === 'adulto' || slug === 'crianca' || slug === 'infantil';
+            return !!(slug || c.category_name); // usa exatamente as faixas marcadas no pacote
         });
 
         // Usar filtrado se tem resultados, senão fallback
@@ -1958,9 +1958,9 @@
             gpHtml += '</div>';
         }
 
-        container.innerHTML = gpHtml + cats.map(cat => {
+        container.innerHTML = gpHtml + cats.map((cat, idx) => {
             const catId = cat.traveler_category_id || cat.id || 0;
-            const defaultQty = (cat.category_slug || '').toLowerCase() === 'adulto' ? 1 : 0;
+            const defaultQty = idx === 0 ? 1 : 0;
             travelerCounts[catId] = defaultQty;
             const price = parseFloat(cat.sale_price || cat.price || 0);
             const slug = (cat.category_slug || '').toLowerCase();
@@ -2175,7 +2175,7 @@
 
             // Mostrar viajantes detalhados
             let cats = selectedPackage.categories || [];
-            const filteredCats = cats.filter(c => { const s = (c.category_slug || '').toLowerCase(); return s === 'adulto' || s === 'crianca' || s === 'infantil'; });
+            const filteredCats = cats.filter(c => { const s = (c.category_slug || '').toLowerCase(); return !!(s || c.category_name); });
             cats = filteredCats.length > 0 ? filteredCats : [{ traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto' }, { traveler_category_id: 1, category_name: 'Criança', category_slug: 'crianca' }, { traveler_category_id: 2, category_name: 'Infantil', category_slug: 'infantil' }];
             const seenCats = {};
             cats = cats.filter(c => { const k = (c.category_slug || '').toLowerCase(); if (seenCats[k]) return false; seenCats[k] = true; return true; });
@@ -2199,7 +2199,7 @@
             let cats = selectedPackage.categories || [];
             const filtered = cats.filter(c => {
                 const slug = (c.category_slug || '').toLowerCase();
-                return slug === 'adulto' || slug === 'crianca' || slug === 'infantil';
+                return !!(slug || c.category_name); // usa exatamente as faixas marcadas no pacote
             });
             cats = filtered.length > 0 ? filtered : [
                 { traveler_category_id: 0, category_name: 'Adulto', category_slug: 'adulto', price: selectedPackage.base_price || '0', sale_price: null },
@@ -2371,7 +2371,7 @@
             <input name="composition_package_id" value="${compositionPkgId}">
             <input name="date" value="${selectedDate}">
             <input name="time" value="${selectedTime || ''}">
-            <input name="hotel_id" value="${selectedHotel ? selectedHotel.id : ''}">
+            <input name="hotel_id" value="${selectedHotel && selectedHotel.id > 0 ? selectedHotel.id : ''}">
             <input name="hotel_name" value="">
             <input name="pickup_time" value="${selectedPickupTime || ''}">
             <input name="redirect" value="${redirect}">

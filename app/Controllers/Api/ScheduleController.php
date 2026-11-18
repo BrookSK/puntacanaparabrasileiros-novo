@@ -75,9 +75,33 @@ class ScheduleController extends Controller
                 }
             }
 
+            // Passeio sem hotéis próprios: sugere a lista geral de hotéis (de todos os
+            // passeios + locais de transfer do tipo hotel/resort), sem horário de busca.
+            $generic = false;
+            if (empty($result)) {
+                $generic = true;
+                $names = [];
+                try {
+                    foreach ($this->db->fetchAll("SELECT DISTINCT hotel_name FROM trip_hotels WHERE is_active = 1") as $r) {
+                        $names[mb_strtolower(trim($r['hotel_name']))] = trim($r['hotel_name']);
+                    }
+                    foreach ($this->db->fetchAll("SELECT title FROM transfer_locations WHERE status = 1 AND location_type IN ('hotel','resort')") as $r) {
+                        $names[mb_strtolower(trim($r['title']))] ??= trim($r['title']);
+                    }
+                } catch (\Throwable $e) {
+                }
+                natcasesort($names);
+                $i = 0;
+                foreach ($names as $n) {
+                    if ($n === '') continue;
+                    $result[] = ['id' => -(++$i), 'hotel_name' => $n, 'schedules' => [], 'generic' => true];
+                }
+            }
+
             $this->json([
                 'success' => true,
                 'hotels' => $result,
+                'generic' => $generic,
                 'total_hotels' => count($result),
             ]);
         } catch (\Exception $e) {

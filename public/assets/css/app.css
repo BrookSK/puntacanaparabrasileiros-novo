@@ -7676,12 +7676,17 @@ img { max-width: 100%; height: auto; }
 
 /* Item 6: o card de preço NÃO acompanha o scroll — fica estático no topo da
    coluna direita, como no layout original. Sobrescreve a regra sticky anterior. */
+/* Pedido do cliente: o card de preço acompanha a rolagem (fica sempre visível). */
+.trip-sidebar { align-self: stretch; }
 .trip-sidebar .trip-price-card,
 .trip-price-card {
-    position: static;
-    top: auto;
-    max-height: none;
-    overflow: visible;
+    position: sticky;
+    top: 90px;
+    max-height: calc(100vh - 110px);
+    overflow-y: auto;
+}
+@media (max-width: 1024px) {
+    .trip-sidebar .trip-price-card, .trip-price-card { position: static; max-height: none; overflow: visible; }
 }
 
 /* Item 5: barra de avaliações clicável (abre o modal do Google) */
