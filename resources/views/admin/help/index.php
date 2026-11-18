@@ -186,7 +186,7 @@ $sections = [
                 <li>Clique em <strong>+ Adicionar Pacote</strong>.</li>
                 <li>Em <strong>Nome</strong>, escreva como o cliente vai ver (ex.: "Front Row").</li>
                 <li>Em <strong>Descrição</strong> (opcional), explique o que inclui.</li>
-                <li>Em <strong>Categorias de Viajante</strong>, marque quem pode ir nesse pacote: Adulto, Criança, Infantil. <strong>Só aparece para o cliente o que estiver marcado.</strong> Quer que o cliente possa colocar bebê? Marque Infantil.</li>
+                <li>Em <strong>Categorias de Viajante</strong>, marque quem pode ir nesse pacote: Adulto, Criança, Infantil. <strong>Só aparece para o cliente o que estiver marcado.</strong> Quer que o cliente possa colocar bebê? Marque Infantil. Passeio só para adultos (ex.: Coco Bongo, Chic Cabaret)? Marque <strong>só Adulto</strong>: Criança e Infantil somem do pop-up de reserva. A primeira faixa marcada já vem com quantidade 1 no pop-up.</li>
                 <li>Clique em <strong>Salvar</strong> no fim da página.</li>
                 <li>Vá em <strong>Preços</strong> e coloque o valor de cada faixa desse pacote.</li>
             </ol>
@@ -243,6 +243,15 @@ $sections = [
             </ol>
             <h4>Se duas regras valem no mesmo dia, qual ganha?</h4>
             <p>A mais específica: <strong>Data específica</strong> → Feriado → Dia da semana → Dia do mês → Mês → Preço normal.<br>Ex.: sábado 31/12 com regra "Sábado = $90" e "31/12/2026 = $150" → vale $150.</p>
+            <h4>Qual preço aparece em cada lugar</h4>
+            <table class="table help-table">
+                <thead><tr><th>Lugar</th><th>Preço mostrado</th></tr></thead>
+                <tbody>
+                    <tr><td>Listagem de passeios, passeios relacionados e "A partir de" da página</td><td>O <strong>menor preço da semana</strong> da faixa principal (normalmente Adulto), comparando o preço normal com as regras por dia. Ex.: Coco Bongo $125 (ter–dom) e $135 (sex/sáb) → mostra <strong>$125</strong> em todos esses lugares.</td></tr>
+                    <tr><td>Pop-up de reserva, antes de escolher a data</td><td>O menor preço de cada faixa (o mesmo "a partir de").</td></tr>
+                    <tr><td>Pop-up de reserva, depois de escolher a data</td><td>O preço <strong>daquele dia</strong>. Escolheu sexta → passa a mostrar $135. É esse valor que vai para o carrinho.</td></tr>
+                </tbody>
+            </table>
             <h4>Como conferir</h4>
             <p>No site, abra o passeio → <strong>Verificar Disponibilidade</strong> → escolha o pacote e as pessoas → Continuar → clique numa sexta: o <strong>Total</strong> do resumo (à direita) muda para o preço da sexta. O carrinho cobra esse valor.</p>
             <div class="help-dont"><strong>Para remover uma regra:</strong> botão vermelho <strong>Remover</strong> na regra → <strong>Salvar preços</strong>. Só some depois de salvar.</div>
@@ -331,6 +340,12 @@ $sections = [
             <h4>Passeio com várias saídas</h4>
             <p>Se o passeio tem 3 saídas em Dias e Horários, cadastre <strong>3 horários de busca</strong> em cada hotel, um para cada saída. O 1º horário de busca (o mais cedo) corresponde à 1ª saída, o 2º à 2ª, e assim por diante. O site mostra ao cliente só a busca da saída que ele escolheu.</p>
             <div class="help-ex"><strong>Exemplo Golfinhos:</strong> saídas 09:00, 11:00 e 13:00. Hotel Barceló: buscas 07:40, 09:40, 11:40. Cliente escolhe 11:00 → vê "Busca no hotel: 09:40".</div>
+            <h4>Passeio sem hotéis cadastrados (ex.: Parasailing, Chic Cabaret)</h4>
+            <p>Mesmo sem cadastrar hotéis no passeio, quando o cliente digita (2 letras ou mais) o site <strong>sugere a lista geral de hotéis</strong>: todos os hotéis cadastrados em outros passeios + os locais de transfer do tipo Hotel/Resort (Transfers → Gerenciar Locais). Esses hotéis aparecem com "Horário de busca confirmado pela equipe": vocês combinam a busca pelo WhatsApp.</p>
+            <ul>
+                <li>Para o cliente já ver o <strong>horário de busca</strong>, cadastre os hotéis no próprio passeio (+ Adicionar Hotel ou Importar Planilha). A partir do primeiro hotel cadastrado, o passeio passa a mostrar só os hotéis dele.</li>
+                <li>Hotel novo que falta na lista geral: cadastre em Transfers → Gerenciar Locais com Tipo "Hotel" ou "Resort". Ele passa a aparecer nas sugestões de todos os passeios sem hotéis.</li>
+            </ul>
             <h4>Hotel fora da lista</h4>
             <p>O cliente clica em <strong>"Meu hotel não está na lista (digitar nome ou endereço)"</strong> e escreve o hotel ou o endereço (Airbnb, casa). A reserva chega com esse texto e <strong>sem horário de busca</strong>: vocês combinam o horário pelo WhatsApp. Num passeio sem nenhum hotel cadastrado, esse campo já aparece aberto.</p>
             <div class="help-dont"><strong>Não faça:</strong> "Limpar Tudo" apaga todos os hotéis e horários do passeio, sem volta.</div>
@@ -652,7 +667,8 @@ $sections = [
         <section class="admin-card help-sec" id="cliente">
             <h3>32. O que o cliente vê ao reservar</h3>
             <ol class="steps">
-                <li>Abre o passeio e clica em <strong>Verificar Disponibilidade</strong>.</li>
+                <li>Abre o passeio. No computador, a caixa de preço da direita (com "A partir de" e o botão <strong>Verificar Disponibilidade</strong>) <strong>acompanha a rolagem</strong> e fica sempre visível. No celular e tablet, o preço fica na barra fixa de baixo. Logo abaixo da política de cancelamento aparecem "Passeios relacionados" e "Passeios em Destaque".</li>
+                <li>Clica em <strong>Verificar Disponibilidade</strong>.</li>
                 <li><strong>Tipo de Pacote</strong>: escolhe o pacote e quantas pessoas de cada faixa (Cortesia aparece como "Cortesia (sem custo)").</li>
                 <li><strong>Data e Hora</strong>: calendário com dias fechados riscados. Escolhe a data; se houver mais de um horário, escolhe o horário. O total à direita já mostra o preço do dia.</li>
                 <li><strong>Hotel (opcional)</strong>: digita o hotel e escolhe da lista (vê o horário de busca), ou clica em "Meu hotel não está na lista" e digita.</li>
@@ -686,6 +702,10 @@ $sections = [
                 <thead><tr><th style="width:35%">O que acontece</th><th>Por quê / o que fazer</th></tr></thead>
                 <tbody>
                     <tr><td>Mudei e o site não mostra</td><td>1) Viu a faixa verde ao salvar? 2) Aperte F5 no site. 3) No celular, feche e abra a página.</td></tr>
+                    <tr><td>Criança/Infantil aparecem num passeio só de adultos</td><td>Passeios → Editar → card Pacotes → em cada pacote desmarque Criança e Infantil → Salvar. O pop-up mostra só o que está marcado.</td></tr>
+                    <tr><td>Listagem mostra um preço e a página outro</td><td>Os dois mostram o menor preço da semana. Se ainda diferem, confira em Preços se o preço normal da faixa Adulto está preenchido e salve de novo.</td></tr>
+                    <tr><td>Preço de sexta/sábado aparece antes de escolher a data</td><td>O "preço normal" está com o valor de sexta/sábado. Coloque no preço normal o valor mais barato e crie a regra "Dia(s) da semana" para Sex e Sáb com o valor mais caro.</td></tr>
+                    <tr><td>Passeio sem hotéis não sugere nenhum hotel</td><td>A lista geral está vazia. Cadastre hotéis em algum passeio ou em Transfers → Gerenciar Locais (Tipo Hotel/Resort).</td></tr>
                     <tr><td>Bebê/criança não aparece para escolher</td><td>Faixa não marcada no pacote: Editar → Pacotes → marque → Salvar → confira em Preços.</td></tr>
                     <tr><td>Bebê aparece com preço em vez de Cortesia</td><td>Preços → preço normal do Infantil = 0. Confira também se não há regra por dia com valor.</td></tr>
                     <tr><td>Hotel não aparece na busca</td><td>Hotel não cadastrado nesse passeio, ou "Hotel Ativo" desmarcado, ou hotel sem nenhum horário (hotel sem horário não aparece).</td></tr>
